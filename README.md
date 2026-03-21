@@ -19,6 +19,8 @@ tests/            — Playwright e2e tests
 
 ## Running tests locally
 
+> Note: quick README update commit to verify deploy-key push access from OpenClaw.
+
 ```bash
 npm ci
 npx playwright install --with-deps chromium
