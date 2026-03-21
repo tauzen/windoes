@@ -11,10 +11,10 @@
  * - Windows with and without chrome behave consistently
  */
 
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('playwright');
 const path = require('path');
 
-const FILE_URL = 'file://' + path.resolve(__dirname, 'index.html');
+const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const BOOT_TIMEOUT = 10000;
 
 let passed = 0;

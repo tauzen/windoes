@@ -1,0 +1,10 @@
+{
+  "name": "windoes",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-window-manager.js && node tests/test-duplicate-windows.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}
