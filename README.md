@@ -21,6 +21,16 @@ tests/            — Playwright e2e tests
 
 > Note: quick README update commit to verify deploy-key push access from OpenClaw.
 
+## Contribution guidelines
+
+When Kermit implements work in this repo:
+
+- Always create a new branch (never commit feature work directly on `main`)
+- Push that branch to GitHub when the change is ready
+- Share a PR creation link (`compare` URL) so Tauzen can open the PR manually
+
+Reason: deploy-key based access can push branches, but cannot open PRs directly.
+
 ```bash
 npm ci
 npx playwright install --with-deps chromium
