@@ -6,7 +6,7 @@
  * AND the dedicated winampWindow/minesweeperWindow simultaneously.
  */
 
-const { chromium } = require('playwright');
+const { chromium, firefox, webkit } = require('playwright');
 const path = require('path');
 
 const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'windoes', 'index.html');
@@ -47,8 +47,31 @@ async function waitForBoot(page) {
     await page.waitForTimeout(200);
 }
 
+async function launchBrowser() {
+    const attempts = [
+        { label: 'bundled chromium', launcher: chromium, options: { headless: true } },
+        { label: 'system chrome channel', launcher: chromium, options: { headless: true, channel: 'chrome' } },
+        { label: 'system msedge channel', launcher: chromium, options: { headless: true, channel: 'msedge' } },
+        { label: 'bundled firefox', launcher: firefox, options: { headless: true } },
+        { label: 'bundled webkit', launcher: webkit, options: { headless: true } },
+    ];
+
+    const errors = [];
+    for (const attempt of attempts) {
+        try {
+            const browser = await attempt.launcher.launch(attempt.options);
+            console.log(`Using browser: ${attempt.label}`);
+            return browser;
+        } catch (err) {
+            errors.push(`${attempt.label}: ${err.message}`);
+        }
+    }
+
+    throw new Error(`Could not launch any Chromium target. Attempts:\n- ${errors.join('\n- ')}`);
+}
+
 async function runTests() {
-    const browser = await chromium.launch({ headless: true });
+    const browser = await launchBrowser();
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
 
