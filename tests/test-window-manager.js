@@ -11,8 +11,8 @@
  * - Windows with and without chrome behave consistently
  */
 
-const { chromium } = require('playwright');
 const path = require('path');
+const { launchBrowser } = require('./launch-browser');
 
 const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'windoes', 'index.html');
 const BOOT_TIMEOUT = 10000;
@@ -51,7 +51,7 @@ async function getVisibleWindows(page) {
 }
 
 async function runTests() {
-    const browser = await chromium.launch({ headless: true });
+    const browser = await launchBrowser();
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
 
