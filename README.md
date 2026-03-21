@@ -1,8 +1,8 @@
 # Windoes
 
-A Windows ME desktop simulator built with vanilla HTML, CSS, and JavaScript.
+A Windows 98 inspired desktop experiment built with vanilla HTML, CSS, and JavaScript.
 
-Features a working desktop with draggable windows, taskbar, Start menu, and embedded apps including Winamp player, Minesweeper, and ASCII Runner. Authentic boot sequence, BSOD, and random error popups included.
+Features a working desktop with draggable windows, taskbar, Start menu, and embedded apps including Winamp player, Minesweeper, and ASCII Runner. Complete with boot sequence, BSOD, and random error popups.
 
 ## Live demo
 
