@@ -6,8 +6,7 @@ const ieWindow = document.getElementById('ieWindow');
 const addressInput = document.getElementById('addressInput');
 const statusText = document.getElementById('statusText');
 const windowTitle = document.getElementById('windowTitle');
-const startButton = document.getElementById('startButton');
-const startMenu = document.getElementById('startMenu');
+// startButton and startMenu are declared in boot.js (shared DOM refs)
 const clock = document.getElementById('clock');
 const internetExplorerIcon = document.getElementById('internetExplorerIcon');
 const closeWindowBtn = document.getElementById('closeWindowBtn');

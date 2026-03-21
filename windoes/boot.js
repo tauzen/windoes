@@ -14,6 +14,10 @@ const biosStatus = document.getElementById('biosStatus');
 const theDesktop = document.getElementById('theDesktop');
 const theTaskbar = document.getElementById('theTaskbar');
 
+// Shared UI elements used across multiple modules
+const startButton = document.getElementById('startButton');
+const startMenu = document.getElementById('startMenu');
+
 // Hide desktop & taskbar during boot
 theDesktop.style.display = 'none';
 theTaskbar.style.display = 'none';
@@ -90,5 +94,4 @@ function finishBoot() {
     scheduleRandomError();
 }
 
-// Start boot on load
-setTimeout(runBootSequence, 300);
+// Boot is triggered by main.js (the orchestrator entry point)
