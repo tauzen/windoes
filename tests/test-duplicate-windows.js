@@ -9,7 +9,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 
-const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
+const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'windoes', 'index.html');
 const BOOT_TIMEOUT = 10000;
 
 let passed = 0;
