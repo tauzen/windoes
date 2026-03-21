@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windoes XD</title>
+    <link rel="stylesheet" href="./styles.css">
+
+</head>
+<body>
+
+    <!-- Boot BIOS screen -->
+    <div class="boot-bios" id="bootBios">
+Award Modular BIOS v6.00PG, An Energy Star Ally
+Copyright (C) 1984-2000, Award Software, Inc.
+
+Intel Pentium III 800MHz Processor
+Memory Test: <span id="biosMemory">0</span>K OK
+
+Detecting Primary Master... WDC AC310200R
+Detecting Primary Slave... GENERIC CD-ROM
+Detecting Secondary Master... None
+Detecting Secondary Slave... None
+
+<span id="biosStatus">Initializing Plug and Play Cards...</span>
+    </div>
+
+    <!-- Boot splash screen -->
+    <div class="boot-screen hidden" id="bootScreen">
+        <div class="boot-logo">
+            <div class="boot-clouds"></div>
+            <div class="boot-title"><span>Windoes XD</span></div>
+            <div class="boot-progress-container">
+                <div class="boot-progress-bar" id="bootProgress"></div>
+            </div>
+            <div class="boot-status" id="bootStatus">Loading Windows...</div>
+        </div>
+    </div>
+
+    <!-- BSOD -->
+    <div class="bsod" id="bsod">
+        <span class="bsod-header"> Windows </span>
+<pre id="bsodText">
+An exception 0E has occurred at 0028:C0011E36 in VxD VMM(01) +
+00010E36. This was called from 0028:C001747B in VxD VMM(01) +
+0001647B. It may be possible to continue normally.
+
+* Press any key to attempt to continue.
+* Press CTRL+ALT+DEL to restart your computer. You will
+  lose any unsaved information in all applications.
+
+Press any key to continue _</pre>
+    </div>
+
+    <!-- Clock tooltip -->
+    <div class="clock-tooltip" id="clockTooltip"></div>
+
+    <!-- Right-click context menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" data-action="arrange">Arrange Icons</div>
+        <div class="context-menu-item" data-action="lineup">Line Up Icons</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="refresh">Refresh</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item disabled" data-action="paste">Paste</div>
+        <div class="context-menu-item disabled" data-action="paste-shortcut">Paste Shortcut</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="new">New &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#9654;</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="properties">Properties</div>
+    </div>
+
+    <div class="desktop" id="theDesktop">
+        <div class="desktop-icons">
+            <div class="icon icon-my-computer" id="iconMyComputer"><div class="icon-graphic"></div><span class="icon-label">My Computer</span></div>
+            <div class="icon icon-ie" id="internetExplorerIcon"><div class="icon-graphic"></div><span class="icon-label">Internet Explorer</span></div>
+            <div class="icon icon-recycle" id="iconRecycleBin"><div class="icon-graphic"></div><span class="icon-label">Recycle Bin</span></div>
+            <div class="icon icon-ascii-runner" id="iconAsciiRunner"><div class="icon-graphic"></div><span class="icon-label">ASCII Runner</span></div>
+            <div class="icon icon-winamp" id="iconWinamp"><div class="icon-graphic"></div><span class="icon-label">Winamp</span></div>
+            <div class="icon icon-minesweeper" id="iconMinesweeper"><div class="icon-graphic"></div><span class="icon-label">Minesweeper</span></div>
+        </div>
+
+        <!-- IE Window -->
+        <section class="window hidden" id="ieWindow" aria-label="Internet Explorer window">
+            <div class="titlebar" id="titlebar">
+                <div class="title-left">
+                    <span class="title-logo" aria-hidden="true"></span>
+                    <span id="windowTitle">about:blank - Microsoft Internet Explorer</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="minimizeBtn">_</div>
+                    <div class="ctrl-btn" id="maximizeIeBtn">&square;</div>
+                    <button class="ctrl-btn" id="closeWindowBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+
+            <div class="menubar">
+                <span>File</span><span>Edit</span><span>View</span><span>Favorites</span><span>Tools</span><span>Help</span>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-grip"></div>
+                <button class="tb-btn" id="backBtn"><span class="tb-icon tb-icon-back"></span>Back</button>
+                <button class="tb-btn" id="forwardBtn"><span class="tb-icon tb-icon-forward"></span>Forward</button>
+                <button class="tb-btn" id="stopBtn"><span class="tb-icon tb-icon-stop"></span>Stop</button>
+                <button class="tb-btn" id="refreshBtn"><span class="tb-icon tb-icon-refresh"></span>Refresh</button>
+                <button class="tb-btn" id="homeBtn"><span class="tb-icon tb-icon-home"></span>Home</button>
+                <div class="tb-sep"></div>
+                <button class="tb-btn" id="searchBtn"><span class="tb-icon tb-icon-search"></span>Search</button>
+                <button class="tb-btn" id="favoritesBtn"><span class="tb-icon tb-icon-favorites"></span>Favorites</button>
+                <button class="tb-btn" id="historyBtn"><span class="tb-icon tb-icon-history"></span>History</button>
+            </div>
+
+            <div class="address-row">
+                <div class="toolbar-grip"></div>
+                <label for="addressInput">Address</label>
+                <div class="address-input-wrap">
+                    <span class="address-icon" aria-hidden="true"></span>
+                    <input id="addressInput" value="about:blank" aria-label="Address bar" />
+                </div>
+                <button class="go-btn" id="goBtn">Go</button>
+            </div>
+
+            <div class="view">
+                <iframe id="browserFrame" title="Internet Explorer content" referrerpolicy="no-referrer"></iframe>
+            </div>
+
+            <div class="status">
+                <span class="status-left" id="statusText">Done</span>
+                <span class="status-right"><span class="status-icon"></span>Internet</span>
+            </div>
+        </section>
+
+        <!-- Winamp Window -->
+        <section class="window hidden" id="winampWindow" aria-label="Winamp" style="left: 200px; top: 50px; width: 289px; height: 330px; min-width: unset; min-height: unset;">
+            <div class="titlebar" id="winampTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-winamp" aria-hidden="true"></span>
+                    <span>Winamp</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="winampMinBtn">_</div>
+                    <button class="ctrl-btn" id="winampCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+            <div class="view">
+                <iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>
+            </div>
+        </section>
+
+        <!-- Minesweeper Window -->
+        <section class="window hidden" id="minesweeperWindow" aria-label="Minesweeper" style="left: 250px; top: 80px; width: 260px; height: 280px; min-width: unset; min-height: unset;">
+            <div class="titlebar" id="minesweeperTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-minesweeper" aria-hidden="true"></span>
+                    <span>Minesweeper</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="minesweeperMinBtn">_</div>
+                    <button class="ctrl-btn" id="minesweeperCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+            <div class="view">
+                <iframe id="minesweeperFrame" title="Minesweeper" referrerpolicy="no-referrer"></iframe>
+            </div>
+        </section>
+
+        <!-- App Window (for experiment apps) -->
+        <section class="window app-window hidden" id="appWindow" aria-label="Application window" style="left: clamp(110px, 15vw, 190px); top: 28px;">
+            <div class="titlebar" id="appTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-app" aria-hidden="true"></span>
+                    <span id="appWindowTitle">Application</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="appMinimizeBtn">_</div>
+                    <div class="ctrl-btn">&square;</div>
+                    <button class="ctrl-btn" id="appCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+
+            <div class="menubar">
+                <span>File</span><span>View</span><span>Help</span>
+            </div>
+
+            <div class="view">
+                <iframe id="appFrame" title="Application content" referrerpolicy="no-referrer" allow="autoplay"></iframe>
+            </div>
+
+            <div class="status">
+                <span class="status-left" id="appStatusText">Done</span>
+            </div>
+        </section>
+
+        <!-- My Computer Window -->
+        <section class="window hidden" id="myComputerWindow" aria-label="My Computer" style="left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));">
+            <div class="titlebar" id="myComputerTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-mycomputer" aria-hidden="true"></span>
+                    <span>My Computer</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="myComputerMinBtn">_</div>
+                    <div class="ctrl-btn">&square;</div>
+                    <button class="ctrl-btn" id="myComputerCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+            <div class="menubar"><span>File</span><span>Edit</span><span>View</span><span>Favorites</span><span>Tools</span><span>Help</span></div>
+            <div class="view" style="overflow-y:auto;">
+                <div class="folder-view">
+                    <div class="folder-item" id="driveA">
+                        <div class="folder-item-icon drive-icon-floppy"></div>
+                        <div>3&frac12; Floppy (A:)</div>
+                    </div>
+                    <div class="folder-item" id="driveC">
+                        <div class="folder-item-icon drive-icon-hdd"></div>
+                        <div>Local Disk (C:)</div>
+                    </div>
+                    <div class="folder-item" id="driveD">
+                        <div class="folder-item-icon drive-icon-cdrom"></div>
+                        <div>CD-ROM (D:)</div>
+                    </div>
+                    <div class="folder-item">
+                        <div class="folder-item-icon folder-icon-cp"></div>
+                        <div>Control Panel</div>
+                    </div>
+                    <div class="folder-item">
+                        <div class="folder-item-icon folder-icon-folder"></div>
+                        <div>My Documents</div>
+                    </div>
+                    <div class="folder-item">
+                        <div class="folder-item-icon folder-icon-folder"></div>
+                        <div>Shared Documents</div>
+                    </div>
+                </div>
+            </div>
+            <div class="status">
+                <span class="status-left">6 object(s)</span>
+                <span class="status-right">My Computer</span>
+            </div>
+        </section>
+
+        <!-- Notepad Window -->
+        <section class="window notepad-window hidden" id="notepadWindow" aria-label="Notepad" style="left: clamp(120px, 14vw, 200px); top: 30px; width: min(640px, calc(100vw - 100px)); height: min(440px, calc(100vh - 60px));">
+            <div class="titlebar" id="notepadTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-notepad" aria-hidden="true"></span>
+                    <span id="notepadTitle">Untitled - Notepad</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="notepadMinBtn">_</div>
+                    <div class="ctrl-btn">&square;</div>
+                    <button class="ctrl-btn" id="notepadCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+            <div class="menubar">
+                <span id="notepadFileMenu">File</span><span>Edit</span><span>Search</span><span>Help</span>
+            </div>
+            <div class="view">
+                <textarea class="notepad-textarea" id="notepadText" spellcheck="false"></textarea>
+            </div>
+        </section>
+
+        <!-- Recycle Bin Window -->
+        <section class="window hidden" id="recycleBinWindow" aria-label="Recycle Bin" style="left: clamp(100px, 12vw, 180px); top: 24px; width: min(550px, calc(100vw - 100px)); height: min(380px, calc(100vh - 60px));">
+            <div class="titlebar" id="recycleBinTitlebar">
+                <div class="title-left">
+                    <span class="app-title-logo titlelogo-recyclebin" aria-hidden="true"></span>
+                    <span>Recycle Bin</span>
+                </div>
+                <div class="window-controls">
+                    <div class="ctrl-btn" id="recycleBinMinBtn">_</div>
+                    <div class="ctrl-btn">&square;</div>
+                    <button class="ctrl-btn" id="recycleBinCloseBtn" aria-label="Close">&times;</button>
+                </div>
+            </div>
+            <div class="menubar"><span>File</span><span>Edit</span><span>View</span><span>Help</span></div>
+            <div class="view" style="overflow-y:auto;">
+                <div class="folder-view" style="align-items:center;justify-content:center;color:#808080;font-size:11px;">
+                    <div style="text-align:center;padding:40px;">
+                        <div style="font-size:14px;margin-bottom:8px;">Recycle Bin is empty.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="status">
+                <span class="status-left">0 object(s)</span>
+            </div>
+        </section>
+
+        <p class="quick-note">Double-click (or tap) Internet Explorer to browse. Some modern sites block iframes.</p>
+    </div>
+
+    <!-- Run Dialog -->
+    <div class="dialog-overlay run-dialog" id="runDialog">
+        <div class="dialog-box" style="min-width:380px;">
+            <div class="dialog-titlebar">
+                <span>Run</span>
+                <button class="ctrl-btn" id="runCloseBtn" aria-label="Close">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div class="run-icon-area">
+                    <div class="dialog-icon" style="background:#C0C0C0;border:2px solid #808080;border-radius:2px;">
+                        <div style="position:absolute;top:4px;left:4px;right:4px;height:10px;background:#000080;"></div>
+                        <div style="position:absolute;bottom:4px;left:4px;width:12px;height:8px;background:#fff;border:1px solid #808080;"></div>
+                    </div>
+                    <div class="dialog-text">Type the name of a program, folder, document, or Internet resource, and Windows will open it for you.</div>
+                </div>
+                <div class="run-row">
+                    <label>Open:</label>
+                    <input type="text" id="runInput" />
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn" id="runOkBtn">OK</button>
+                <button class="dialog-btn" id="runCancelBtn">Cancel</button>
+                <button class="dialog-btn">Browse...</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error / Info Dialog -->
+    <div class="dialog-overlay" id="errorDialog">
+        <div class="dialog-box">
+            <div class="dialog-titlebar">
+                <span id="errorDialogTitle">Windows</span>
+                <button class="ctrl-btn" id="errorCloseBtn" aria-label="Close">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div class="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
+                <div class="dialog-text" id="errorDialogText">An error has occurred.</div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn" id="errorOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="startMenu" aria-label="Start menu">
+        <div class="start-rail"><strong>Windoes XD</strong></div>
+        <div class="menu-list">
+            <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
+            <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-docs"></span>Documents</div>
+            <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-settings"></span>Settings</div>
+            <div class="menu-item"><span class="menu-icon menu-icon-find"></span>Search</div>
+            <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
+            <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
+            <div class="menu-separator"></div>
+            <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon"></span>Shut Down...</div>
+        </div>
+    </div>
+
+    <!-- Programs Submenu -->
+    <div class="programs-submenu" id="programsSubmenu">
+        <div class="submenu-item" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories &nbsp; &nbsp; &#9654;</div>
+        <div class="submenu-item" id="subGames"><span class="submenu-icon submenu-icon-folder"></span>Games &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#9654;</div>
+        <div class="submenu-item" id="subStartup"><span class="submenu-icon submenu-icon-folder"></span>StartUp</div>
+        <div class="context-menu-sep"></div>
+        <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
+        <div class="submenu-item" id="subNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
+        <div class="submenu-item" id="subWinamp"><span class="submenu-icon submenu-icon-winamp"></span>Winamp</div>
+        <div class="submenu-item" id="subMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
+        <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar" id="theTaskbar">
+        <button class="start-btn" id="startButton">
+            <span class="start-flag"><span class="f1"></span><span class="f2"></span><span class="f3"></span><span class="f4"></span></span>
+            Start
+        </button>
+        <div class="quick-launch">
+            <span class="ql-btn ql-ie" id="qlIE" title="Launch Internet Explorer"></span>
+            <span class="ql-btn ql-desktop" title="Show Desktop"></span>
+        </div>
+        <div class="task-divider"></div>
+        <div class="task-area" id="taskArea">
+            <button class="task-button" id="taskButton" style="display:none;">
+                <span class="task-icon task-icon-ie"></span>
+                <span>about:blank - Microsoft Int...</span>
+            </button>
+            <button class="task-button" id="winampTaskBtn" style="display:none;">
+                <span class="task-icon task-icon-winamp"></span>
+                <span>Winamp</span>
+            </button>
+            <button class="task-button" id="minesweeperTaskBtn" style="display:none;">
+                <span class="task-icon task-icon-minesweeper"></span>
+                <span>Minesweeper</span>
+            </button>
+            <button class="task-button" id="appTaskButton" style="display:none;">
+                <span class="task-icon task-icon-app"></span>
+                <span id="appTaskLabel">Application</span>
+            </button>
+            <button class="task-button" id="myComputerTaskBtn" style="display:none;">
+                <span class="task-icon task-icon-mycomputer"></span>
+                <span>My Computer</span>
+            </button>
+            <button class="task-button" id="notepadTaskBtn" style="display:none;">
+                <span class="task-icon task-icon-notepad"></span>
+                <span>Notepad</span>
+            </button>
+            <button class="task-button" id="recycleBinTaskBtn" style="display:none;">
+                <span class="task-icon task-icon-recyclebin"></span>
+                <span>Recycle Bin</span>
+            </button>
+        </div>
+        <div class="tray">
+            <span class="tray-volume" aria-label="Volume" id="trayVolume"></span>
+            <span id="clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <script src="./simulator.config.js"></script>
+    <script src="./simulator.js"></script>
+
+</body>
+</html>

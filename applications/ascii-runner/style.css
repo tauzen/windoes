@@ -1,0 +1,470 @@
+/* ASCII Runner Color Palette */
+:root {
+    /* Background colors */
+    --color-bg-darkest: #0f0f1a;
+    --color-bg-dark: #1a1a2e;
+    --color-bg-mid: #16213e;
+    --color-bg-light: #1f4068;
+
+    /* Accent colors */
+    --color-accent-primary: #e94560;
+    --color-accent-secondary: #ff6b9d;
+    --color-accent-tertiary: #c34a7b;
+
+    /* Neon colors for ASCII art */
+    --color-neon-cyan: #00fff5;
+    --color-neon-pink: #ff00ff;
+    --color-neon-green: #39ff14;
+    --color-neon-yellow: #ffff00;
+    --color-neon-orange: #ff6600;
+
+    /* Text colors */
+    --color-text-primary: #eaeaea;
+    --color-text-secondary: #a0a0b0;
+    --color-text-muted: #606080;
+
+    /* Game elements */
+    --color-player: #e94560;
+    --color-player-outline: #c34a7b;
+    --color-ground: #2a2a4e;
+    --color-ground-top: #4a4a7e;
+    --color-ground-dark: #1a1a3e;
+    --color-platform: #3a3a6e;
+    --color-platform-top: #6a6aae;
+
+    /* UI elements */
+    --color-border: #e94560;
+    --color-shadow: rgba(233, 69, 96, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+@font-face {
+    font-family: 'PixelFont';
+    src: local('Courier New');
+}
+
+body {
+    background-color: var(--color-bg-darkest);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    min-height: 100dvh;
+    height: 100%;
+    height: 100dvh;
+    width: 100%;
+    width: 100dvw;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#game-container {
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#game {
+    display: block;
+    border: 4px solid var(--color-border);
+    box-shadow:
+        0 0 20px var(--color-shadow),
+        inset 0 0 20px #00000044;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#score {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    color: var(--color-accent-primary);
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 0 #000;
+    z-index: 10;
+    letter-spacing: 2px;
+}
+
+#start-screen,
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(15, 15, 26, 0.9);
+    z-index: 20;
+}
+
+#start-screen h1,
+#game-over h1 {
+    color: var(--color-accent-primary);
+    font-size: 48px;
+    margin-bottom: 32px;
+    text-shadow:
+        4px 4px 0 var(--color-bg-dark),
+        -2px -2px 0 var(--color-accent-secondary);
+    letter-spacing: 4px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+#start-screen p,
+#game-over p {
+    color: var(--color-text-secondary);
+    font-size: 18px;
+    margin: 8px 0;
+    letter-spacing: 2px;
+}
+
+#start-screen .controls {
+    margin-top: 24px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+#start-screen .fullscreen-hint {
+    margin-top: 16px;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Scanline effect */
+#game-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0px,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 30;
+}
+
+#version {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 10px;
+    margin-top: 8px;
+    letter-spacing: 1px;
+}
+
+/* Mobile Controls */
+#mobile-controls {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 15px 10px;
+    gap: 20px;
+}
+
+#jump-btn {
+    width: 100%;
+    max-width: 300px;
+    height: 70px;
+    background: linear-gradient(180deg, var(--color-accent-primary) 0%, var(--color-accent-tertiary) 100%);
+    border: 3px solid var(--color-accent-secondary);
+    border-radius: 12px;
+    color: var(--color-text-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #000;
+    box-shadow:
+        0 4px 0 var(--color-bg-dark),
+        0 0 20px var(--color-shadow),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#jump-btn:active,
+#jump-btn.active {
+    transform: translateY(4px);
+    box-shadow:
+        0 0 0 var(--color-bg-dark),
+        0 0 30px var(--color-shadow),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, var(--color-accent-secondary) 0%, var(--color-accent-primary) 100%);
+}
+
+/* Orientation overlay for portrait mode */
+#orientation-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 15, 26, 0.95);
+    z-index: 1000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-accent-primary);
+    text-align: center;
+    padding: 20px;
+}
+
+#orientation-overlay .rotate-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: rotate-hint 2s ease-in-out infinite;
+    font-family: 'Courier New', monospace;
+}
+
+#orientation-overlay h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+#orientation-overlay p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    letter-spacing: 1px;
+}
+
+@keyframes rotate-hint {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-20deg);
+    }
+    75% {
+        transform: rotate(20deg);
+    }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 850px) {
+    body {
+        padding: 10px;
+        justify-content: flex-start;
+        padding-top: 20px;
+    }
+
+    #game-container {
+        max-width: 100%;
+    }
+
+    #game {
+        border-width: 2px;
+    }
+
+    #score {
+        font-size: 18px;
+        top: 10px;
+        left: 10px;
+    }
+
+    #start-screen h1,
+    #game-over h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    #start-screen p,
+    #game-over p {
+        font-size: 14px;
+        margin: 6px 0;
+    }
+
+    #start-screen .controls {
+        font-size: 12px;
+    }
+
+    #version {
+        font-size: 8px;
+        margin-top: 5px;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    #start-screen h1,
+    #game-over h1 {
+        font-size: 22px;
+    }
+
+    #start-screen p,
+    #game-over p {
+        font-size: 12px;
+    }
+
+    #jump-btn {
+        height: 60px;
+        font-size: 18px;
+    }
+}
+
+/* Landscape mobile - fullscreen mode */
+@media (orientation: landscape) and (max-height: 600px),
+       (orientation: landscape) and (pointer: coarse),
+       (orientation: landscape) and (hover: none) {
+    body {
+        padding: 0;
+        margin: 0;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        height: 100dvh;
+        height: 100svh;
+        width: 100vw;
+        width: 100dvw;
+        overflow: hidden;
+    }
+
+    #game-container {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #game {
+        border-width: 0;
+        box-shadow: none;
+    }
+
+    #mobile-controls {
+        display: none !important;
+    }
+
+    #version {
+        display: none;
+    }
+
+    #score {
+        font-size: 14px;
+        top: 6px;
+        left: 6px;
+    }
+
+    #start-screen h1,
+    #game-over h1 {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    #start-screen p,
+    #game-over p {
+        font-size: 12px;
+        margin: 4px 0;
+    }
+
+    #start-screen .controls {
+        font-size: 10px;
+        margin-top: 12px;
+    }
+}
+
+/* Touch feedback for whole game area */
+#game-container.touch-active #game {
+    box-shadow:
+        0 0 30px var(--color-shadow),
+        inset 0 0 20px #00000044;
+}
+
+/* Fullscreen mode */
+:fullscreen {
+    background-color: var(--color-bg-darkest);
+}
+
+:fullscreen body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+:fullscreen #game-container {
+    margin: 0;
+    padding: 0;
+}
+
+:fullscreen #game {
+    border-width: 0;
+    box-shadow: none;
+}
+
+:fullscreen #mobile-controls,
+:fullscreen #version,
+:fullscreen #orientation-overlay {
+    display: none !important;
+}
+
+/* Webkit fullscreen (Safari) */
+:-webkit-full-screen {
+    background-color: var(--color-bg-darkest);
+}
+
+:-webkit-full-screen body {
+    padding: 0;
+    margin: 0;
+}
+
+:-webkit-full-screen #game {
+    border-width: 0;
+    box-shadow: none;
+}
+
+:-webkit-full-screen #mobile-controls,
+:-webkit-full-screen #version,
+:-webkit-full-screen #orientation-overlay {
+    display: none !important;
+}
