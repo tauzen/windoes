@@ -4,7 +4,7 @@
 const bsod = document.getElementById('bsod');
 const bsodText = document.getElementById('bsodText');
 
-const bsodMessages = simulatorConfig.bsodMessages || [
+const bsodMessages = WindoesApp.config.bsodMessages || [
     'An exception 0E has occurred at 0028:C0011E36 in VxD VMM(01) +\n00010E36. This was called from 0028:C001747B in VxD VMM(01) +\n0001647B. It may be possible to continue normally.\n\n* Press any key to attempt to continue.\n* Press CTRL+ALT+DEL to restart your computer. You will\n  lose any unsaved information in all applications.\n\nPress any key to continue _',
     'A fatal exception 0D has occurred at 0028:C0034B80 in VxD VWIN32(05) +\n00002E80. The current application will be terminated.\n\n* Press any key to terminate the current application.\n* Press CTRL+ALT+DEL to restart your computer. You will\n  lose any unsaved information in all applications.\n\nPress any key to continue _',
     'EXPLORER caused an invalid page fault in\nmodule KERNEL32.DLL at 0177:BFF9DB61.\n\nRegisters:\nEAX=C0045200 CS=0177 EIP=BFF9DB61 EFLGS=00010216\nEBX=007D4E38 SS=017F ESP=006DF3FC EBP=006DF42C\nECX=006DF4B0 DS=017F ESI=816BD210 FS=455F\nEDX=006DF440 ES=017F EDI=006DF4B0 GS=0000\n\nPress any key to continue _',
@@ -18,7 +18,7 @@ function triggerBSOD() {
     bsodActive = true;
     bsodText.textContent = bsodMessages[Math.floor(Math.random() * bsodMessages.length)];
     bsod.classList.add('active');
-    playBeep(200, 0.5, 'sawtooth');
+    WindoesApp.sound.playBeep(200, 0.5, 'sawtooth');
 }
 
 function dismissBSOD() {
@@ -36,7 +36,7 @@ function scheduleRandomBSOD() {
     // Random BSOD every 2-6 minutes
     const delay = (120 + Math.random() * 240) * 1000;
     setTimeout(() => {
-        if (bootDone && !bsodActive) triggerBSOD();
+        if (WindoesApp.bootDone && !bsodActive) triggerBSOD();
     }, delay);
 }
 
@@ -65,7 +65,7 @@ const errorDialogTitle = document.getElementById('errorDialogTitle');
 const errorDialogText = document.getElementById('errorDialogText');
 const errorDialogIcon = document.getElementById('errorDialogIcon');
 
-const randomErrors = simulatorConfig.randomErrors || [
+const randomErrors = WindoesApp.config.randomErrors || [
     { title: 'Explorer', text: 'This program has performed an illegal operation and will be shut down. If the problem persists, contact the program vendor.', icon: 'error' },
     { title: 'Windows', text: 'Not enough memory to complete this operation. Close some programs and try again.', icon: 'warning' },
     { title: 'RUNDLL32', text: 'Error in MMSYSTEM.DLL. Missing entry: SndPlaySoundA', icon: 'error' },
@@ -81,7 +81,7 @@ function showErrorDialog(err) {
     errorDialogText.textContent = err.text;
     errorDialogIcon.className = 'dialog-icon dialog-icon-' + err.icon;
     errorDialog.classList.add('active');
-    playErrorSound();
+    WindoesApp.sound.playErrorSound();
 }
 
 function closeErrorDialog() {
@@ -94,7 +94,7 @@ document.getElementById('errorCloseBtn').addEventListener('click', closeErrorDia
 function scheduleRandomError() {
     const delay = (60 + Math.random() * 180) * 1000;
     setTimeout(() => {
-        if (bootDone && !bsodActive && !errorDialog.classList.contains('active')) {
+        if (WindoesApp.bootDone && !bsodActive && !errorDialog.classList.contains('active')) {
             const err = randomErrors[Math.floor(Math.random() * randomErrors.length)];
             showErrorDialog(err);
         }

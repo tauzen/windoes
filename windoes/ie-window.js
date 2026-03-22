@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 
 // Register IE with template-based DOM generation
-const ieConfig = WindowManager.register('ie', {
+const ieConfig = WindoesApp.WindowManager.register('ie', {
     template: {
         id: 'ieWindow',
         ariaLabel: 'Internet Explorer window',
@@ -105,10 +105,10 @@ function body_loading(on) {
 }
 
 function openInternetExplorer() {
-    WindowManager.open('ie');
+    WindoesApp.WindowManager.open('ie');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    playClickSound();
+    WindoesApp.sound.playClickSound();
 
     if (!frame.src || frame.src === 'about:blank' || frame.src === '') {
         if (historyStack.length === 0) {
@@ -118,7 +118,7 @@ function openInternetExplorer() {
 }
 
 function closeInternetExplorer() {
-    WindowManager.close('ie');
+    WindoesApp.WindowManager.close('ie');
 }
 
 function updateClock() {

@@ -40,7 +40,7 @@ document.getElementById('menuRun').addEventListener('click', () => {
     runDialog.classList.add('active');
     runInput.value = '';
     runInput.focus();
-    playClickSound();
+    WindoesApp.sound.playClickSound();
 });
 
 document.getElementById('runCancelBtn').addEventListener('click', () => {
@@ -51,11 +51,11 @@ document.getElementById('runCloseBtn').addEventListener('click', () => {
 });
 
 const runActionHandlers = {
-    openNotepad,
-    openMyComputer,
-    openInternetExplorer,
-    openWinamp,
-    openMinesweeper
+    openNotepad:            WindoesApp.open.notepad,
+    openMyComputer:         WindoesApp.open.myComputer,
+    openInternetExplorer:   WindoesApp.open.internetExplorer,
+    openWinamp:             WindoesApp.open.winamp,
+    openMinesweeper:        WindoesApp.open.minesweeper,
 };
 
 document.getElementById('runOkBtn').addEventListener('click', () => {
@@ -65,16 +65,16 @@ document.getElementById('runOkBtn').addEventListener('click', () => {
 
     if (!cmd) return;
 
-    const actionName = (simulatorConfig.runActions || {})[cmd];
+    const actionName = (WindoesApp.config.runActions || {})[cmd];
     if (actionName && runActionHandlers[actionName]) {
         runActionHandlers[actionName]();
     } else if (cmd === 'calc' || cmd === 'calc.exe') {
-        showErrorDialog({ title: 'Calculator', text: 'Windows cannot find \'calc.exe\'. Make sure you typed the name correctly, and then try again.', icon: 'error' });
+        WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Windows cannot find \'calc.exe\'. Make sure you typed the name correctly, and then try again.', icon: 'error' });
     } else if (cmd.startsWith('http://') || cmd.startsWith('https://') || cmd.startsWith('www.')) {
-        openInternetExplorer();
-        navigate(cmd);
+        WindoesApp.open.internetExplorer();
+        WindoesApp.ie.navigate(cmd);
     } else {
-        showErrorDialog({ title: 'Run', text: 'Windows cannot find \'' + rawCommand + '\'. Make sure you typed the name correctly, and then try again. To search for a file, click the Start button, and then click Search.', icon: 'error' });
+        WindoesApp.bsod.showErrorDialog({ title: 'Run', text: 'Windows cannot find \'' + rawCommand + '\'. Make sure you typed the name correctly, and then try again. To search for a file, click the Start button, and then click Search.', icon: 'error' });
     }
 });
 runInput.addEventListener('keydown', (e) => {

@@ -35,17 +35,17 @@ contextMenu.addEventListener('click', (e) => {
     const action = e.target.dataset.action;
     contextMenu.classList.remove('open');
     if (action === 'refresh') {
-        body_loading(true);
+        WindoesApp.helpers.body_loading(true);
     } else if (action === 'properties') {
-        showErrorDialog({
+        WindoesApp.bsod.showErrorDialog({
             title: 'Display Properties',
             text: 'Windows Me\nMillennium Edition\n\nVersion 4.90.3000\n\nCopyright \u00A9 Microsoft Corp. 1981-2000\n\nRegistered to: User\nProduct ID: 55274-OEM-0011903-00102',
             icon: 'info'
         });
     } else if (action === 'new') {
-        openNotepad();
+        WindoesApp.open.notepad();
     } else if (action === 'arrange') {
-        playClickSound();
+        WindoesApp.sound.playClickSound();
     }
 });
 
@@ -53,7 +53,7 @@ contextMenu.addEventListener('click', (e) => {
 // Show Desktop quick launch
 // ══════════════════════════════════════════════
 document.querySelector('.ql-desktop').addEventListener('click', () => {
-    WindowManager.minimizeAll();
+    WindoesApp.WindowManager.minimizeAll();
 });
 
 // ══════════════════════════════════════════════
@@ -81,5 +81,5 @@ clockEl.addEventListener('mouseleave', () => {
 
 // Volume icon click
 document.getElementById('trayVolume').addEventListener('click', () => {
-    showErrorDialog({ title: 'Volume Control', text: 'There are no active mixer devices available. To install mixer devices, go to Control Panel, click Printers and Other Hardware, and then click Add Hardware.\n\nThis program will now close.', icon: 'error' });
+    WindoesApp.bsod.showErrorDialog({ title: 'Volume Control', text: 'There are no active mixer devices available. To install mixer devices, go to Control Panel, click Printers and Other Hardware, and then click Add Hardware.\n\nThis program will now close.', icon: 'error' });
 });

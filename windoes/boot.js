@@ -2,33 +2,21 @@
 // Boot Sequence
 // ══════════════════════════════════════════════
 
-// Shared config — aliased from namespace for backward compat with later modules
-var simulatorConfig = WindoesApp.config;
-
 const bootBios = document.getElementById('bootBios');
 const bootScreen = document.getElementById('bootScreen');
 const bootProgress = document.getElementById('bootProgress');
 const bootStatus = document.getElementById('bootStatus');
 const biosMemory = document.getElementById('biosMemory');
 const biosStatus = document.getElementById('biosStatus');
-const theDesktop = document.getElementById('theDesktop');
-const theTaskbar = document.getElementById('theTaskbar');
-
-// Shared UI elements used across multiple modules
-const startButton = document.getElementById('startButton');
-// startMenu is created by start-menu.js — declared as var so it can be assigned later
-var startMenu = null;
 
 // Populate shared DOM refs in namespace
-WindoesApp.dom.startButton = startButton;
-WindoesApp.dom.theDesktop = theDesktop;
-WindoesApp.dom.theTaskbar = theTaskbar;
+WindoesApp.dom.startButton = document.getElementById('startButton');
+WindoesApp.dom.theDesktop = document.getElementById('theDesktop');
+WindoesApp.dom.theTaskbar = document.getElementById('theTaskbar');
 
 // Hide desktop & taskbar during boot
-theDesktop.style.display = 'none';
-theTaskbar.style.display = 'none';
-
-let bootDone = false;
+WindoesApp.dom.theDesktop.style.display = 'none';
+WindoesApp.dom.theTaskbar.style.display = 'none';
 
 function runBootSequence() {
     // Phase 1: BIOS POST
@@ -55,7 +43,7 @@ function showSplashScreen() {
     bootBios.classList.add('hidden');
     bootScreen.classList.remove('hidden');
 
-    const bootMessages = simulatorConfig.bootMessages || [
+    const bootMessages = WindoesApp.config.bootMessages || [
         'Loading Windows...',
         'Loading system files...',
         'Initializing device drivers...',
@@ -86,18 +74,17 @@ function showSplashScreen() {
 
 function finishBoot() {
     bootScreen.classList.add('hidden');
-    theDesktop.style.display = '';
-    theTaskbar.style.display = '';
-    if (startMenu) startMenu.style.display = '';
-    bootDone = true;
+    WindoesApp.dom.theDesktop.style.display = '';
+    WindoesApp.dom.theTaskbar.style.display = '';
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.style.display = '';
     WindoesApp.bootDone = true;
 
     // Trigger startup sound after user interaction enables audio
-    playStartupSound();
+    WindoesApp.sound.playStartupSound();
 
     // Schedule random events
-    scheduleRandomBSOD();
-    scheduleRandomError();
+    WindoesApp.bsod.scheduleRandomBSOD();
+    WindoesApp.bsod.scheduleRandomError();
 }
 
 // Register on shared namespace
