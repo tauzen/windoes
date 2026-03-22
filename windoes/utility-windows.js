@@ -50,8 +50,8 @@ const myComputerConfig = WindowManager.register('myComputer', {
 
 function openMyComputer() {
     WindowManager.open('myComputer');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
     playClickSound();
 }
 
@@ -98,9 +98,9 @@ const notepadConfig = WindowManager.register('notepad', {
 
 function openNotepad() {
     WindowManager.open('notepad');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
     playClickSound();
 }
 
@@ -139,10 +139,15 @@ WindowManager.register('recycleBin', {
 
 function openRecycleBin() {
     WindowManager.open('recycleBin');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
     playClickSound();
 }
+
+// Register on shared namespace
+WindoesApp.open.myComputer = openMyComputer;
+WindoesApp.open.notepad = openNotepad;
+WindoesApp.open.recycleBin = openRecycleBin;
 
 function closeRecycleBin() {
     WindowManager.close('recycleBin');

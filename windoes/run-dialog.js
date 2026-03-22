@@ -35,8 +35,8 @@ document.body.appendChild(runDialog);
 const runInput = document.getElementById('runInput');
 
 document.getElementById('menuRun').addEventListener('click', () => {
-    startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
+    WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
     runDialog.classList.add('active');
     runInput.value = '';
     runInput.focus();

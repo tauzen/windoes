@@ -101,3 +101,6 @@ function scheduleRandomError() {
         scheduleRandomError();
     }, delay);
 }
+
+// Register on shared namespace
+WindoesApp.bsod = { showErrorDialog, closeErrorDialog, scheduleRandomBSOD, scheduleRandomError, triggerBSOD };

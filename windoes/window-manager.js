@@ -352,6 +352,9 @@ const WindowManager = {
     }
 };
 
+// Register on shared namespace
+WindoesApp.WindowManager = WindowManager;
+
 // Legacy helper for any code still calling bringToFront(el)
 function bringToFront(windowEl) {
     const entry = Object.values(WindowManager._windows).find(w => w.el === windowEl);

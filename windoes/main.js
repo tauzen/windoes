@@ -18,4 +18,4 @@
 //   main.js              ← you are here
 // ══════════════════════════════════════════════
 
-setTimeout(runBootSequence, 300);
+setTimeout(WindoesApp.boot.runBootSequence, 300);

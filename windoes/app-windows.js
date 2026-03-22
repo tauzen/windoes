@@ -37,9 +37,9 @@ function openApp(title, url) {
     WindowManager.get('app').iframeSrc = url;
     appFrame.src = url;
     WindowManager.open('app');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
     body_loading(true);
     playClickSound();
 }
@@ -76,9 +76,9 @@ const winampConfig = WindowManager.register('winamp', {
 
 function openWinamp() {
     WindowManager.open('winamp');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
     playClickSound();
 }
 
@@ -109,15 +109,20 @@ const minesweeperConfig = WindowManager.register('minesweeper', {
 
 function openMinesweeper() {
     WindowManager.open('minesweeper');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
     playClickSound();
 }
 
 function closeMinesweeper() {
     WindowManager.close('minesweeper');
 }
+
+// Register on shared namespace
+WindoesApp.open.app = openApp;
+WindoesApp.open.winamp = openWinamp;
+WindoesApp.open.minesweeper = openMinesweeper;
 
 // Listen for minesweeper resize messages
 window.addEventListener('message', (e) => {

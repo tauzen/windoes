@@ -106,8 +106,8 @@ function body_loading(on) {
 
 function openInternetExplorer() {
     WindowManager.open('ie');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
     playClickSound();
 
     if (!frame.src || frame.src === 'about:blank' || frame.src === '') {
@@ -179,3 +179,8 @@ frame.addEventListener('load', () => {
 
 setInterval(updateClock, 1000);
 updateClock();
+
+// Register on shared namespace
+WindoesApp.open.internetExplorer = openInternetExplorer;
+WindoesApp.ie = { navigate };
+WindoesApp.helpers.body_loading = body_loading;

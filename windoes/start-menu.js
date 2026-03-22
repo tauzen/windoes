@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════
 
 // Create Start Menu DOM
+// Create and register on shared namespace
 startMenu = document.createElement('div');
 startMenu.className = 'start-menu';
 startMenu.id = 'startMenu';
@@ -21,6 +22,7 @@ startMenu.innerHTML = `<div class="start-rail"><strong>Windoes XD</strong></div>
 // Hidden during boot — finishBoot() will show it
 startMenu.style.display = 'none';
 document.body.appendChild(startMenu);
+WindoesApp.dom.startMenu = startMenu;
 
 // Create Programs Submenu DOM
 const programsSubmenu = document.createElement('div');
@@ -67,6 +69,9 @@ menuPrograms.addEventListener('mouseenter', () => {
 function closeProgramsSubmenu() {
     programsSubmenu.classList.remove('open');
 }
+
+// Register on shared namespace
+WindoesApp.menu.closeProgramsSubmenu = closeProgramsSubmenu;
 
 // Close submenu when leaving the Programs area
 startMenu.addEventListener('mouseleave', (e) => {

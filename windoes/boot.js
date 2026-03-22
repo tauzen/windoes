@@ -2,8 +2,8 @@
 // Boot Sequence
 // ══════════════════════════════════════════════
 
-// Shared config — declared as var so it's accessible to all subsequent modules
-var simulatorConfig = window.WIN_ME_SIMULATOR_CONFIG || {};
+// Shared config — aliased from namespace for backward compat with later modules
+var simulatorConfig = WindoesApp.config;
 
 const bootBios = document.getElementById('bootBios');
 const bootScreen = document.getElementById('bootScreen');
@@ -18,6 +18,11 @@ const theTaskbar = document.getElementById('theTaskbar');
 const startButton = document.getElementById('startButton');
 // startMenu is created by start-menu.js — declared as var so it can be assigned later
 var startMenu = null;
+
+// Populate shared DOM refs in namespace
+WindoesApp.dom.startButton = startButton;
+WindoesApp.dom.theDesktop = theDesktop;
+WindoesApp.dom.theTaskbar = theTaskbar;
 
 // Hide desktop & taskbar during boot
 theDesktop.style.display = 'none';
@@ -85,6 +90,7 @@ function finishBoot() {
     theTaskbar.style.display = '';
     if (startMenu) startMenu.style.display = '';
     bootDone = true;
+    WindoesApp.bootDone = true;
 
     // Trigger startup sound after user interaction enables audio
     playStartupSound();
@@ -93,5 +99,8 @@ function finishBoot() {
     scheduleRandomBSOD();
     scheduleRandomError();
 }
+
+// Register on shared namespace
+WindoesApp.boot = { runBootSequence };
 
 // Boot is triggered by main.js (the orchestrator entry point)
