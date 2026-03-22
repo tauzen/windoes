@@ -25,7 +25,7 @@ contextMenu.addEventListener('click', (e) => {
     } else if (action === 'properties') {
         showErrorDialog({
             title: 'Display Properties',
-            text: 'Windows Me\nMillennium Edition\n\nVersion 4.90.3000\n\nCopyright \u00A9 Microsoft Corp. 1981-2000\n\nRegistered to: User\nProduct ID: 55274-OEM-0011903-00102',
+            text: 'Windows XD\nMillennium Edition\n\nVersion 4.90.3000\n\nCopyright \u00A9 Microsoft Corp. 1981-2000\n\nRegistered to: User\nProduct ID: 55274-OEM-0011903-00102',
             icon: 'info'
         });
     } else if (action === 'new') {
