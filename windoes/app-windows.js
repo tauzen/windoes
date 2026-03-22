@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
-const appConfig = WindowManager.register('app', {
+const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
         id: 'appWindow',
         className: 'app-window',
@@ -34,29 +34,29 @@ function openApp(title, url) {
     appStatusText.textContent = 'Opening...';
     appTaskLabel.textContent = title.length > 22 ? title.substring(0, 20) + '...' : title;
     // Set dynamic iframe src before opening
-    WindowManager.get('app').iframeSrc = url;
+    WindoesApp.WindowManager.get('app').iframeSrc = url;
     appFrame.src = url;
-    WindowManager.open('app');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
-    body_loading(true);
-    playClickSound();
+    WindoesApp.WindowManager.open('app');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.helpers.body_loading(true);
+    WindoesApp.sound.playClickSound();
 }
 
 function closeApp() {
-    WindowManager.close('app');
+    WindoesApp.WindowManager.close('app');
 }
 
 appFrame.addEventListener('load', () => {
     appStatusText.textContent = 'Done';
-    body_loading(false);
+    WindoesApp.helpers.body_loading(false);
 });
 
 // ══════════════════════════════════════════════
 // Winamp Window
 // ══════════════════════════════════════════════
-const winampConfig = WindowManager.register('winamp', {
+const winampConfig = WindoesApp.WindowManager.register('winamp', {
     template: {
         id: 'winampWindow',
         ariaLabel: 'Winamp',
@@ -75,21 +75,21 @@ const winampConfig = WindowManager.register('winamp', {
 });
 
 function openWinamp() {
-    WindowManager.open('winamp');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
-    playClickSound();
+    WindoesApp.WindowManager.open('winamp');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.sound.playClickSound();
 }
 
 function closeWinamp() {
-    WindowManager.close('winamp');
+    WindoesApp.WindowManager.close('winamp');
 }
 
 // ══════════════════════════════════════════════
 // Minesweeper Window
 // ══════════════════════════════════════════════
-const minesweeperConfig = WindowManager.register('minesweeper', {
+const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
     template: {
         id: 'minesweeperWindow',
         ariaLabel: 'Minesweeper',
@@ -108,16 +108,21 @@ const minesweeperConfig = WindowManager.register('minesweeper', {
 });
 
 function openMinesweeper() {
-    WindowManager.open('minesweeper');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
-    playClickSound();
+    WindoesApp.WindowManager.open('minesweeper');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.sound.playClickSound();
 }
 
 function closeMinesweeper() {
-    WindowManager.close('minesweeper');
+    WindoesApp.WindowManager.close('minesweeper');
 }
+
+// Register on shared namespace
+WindoesApp.open.app = openApp;
+WindoesApp.open.winamp = openWinamp;
+WindoesApp.open.minesweeper = openMinesweeper;
 
 // Listen for minesweeper resize messages
 window.addEventListener('message', (e) => {

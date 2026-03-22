@@ -25,11 +25,11 @@ desktopIconDefs.forEach(def => {
 
 // Dedicated icon handlers (these must use their own window, not openApp)
 const dedicatedHandlers = {
-    iconMyComputer: openMyComputer,
-    internetExplorerIcon: openInternetExplorer,
-    iconRecycleBin: openRecycleBin,
-    iconWinamp: openWinamp,
-    iconMinesweeper: openMinesweeper,
+    iconMyComputer: WindoesApp.open.myComputer,
+    internetExplorerIcon: WindoesApp.open.internetExplorer,
+    iconRecycleBin: WindoesApp.open.recycleBin,
+    iconWinamp: WindoesApp.open.winamp,
+    iconMinesweeper: WindoesApp.open.minesweeper,
 };
 
 // Wire up dedicated icon handlers
@@ -41,10 +41,10 @@ Object.entries(dedicatedHandlers).forEach(([id, handler]) => {
 });
 
 // Quick launch IE
-document.getElementById('qlIE').addEventListener('click', openInternetExplorer);
+document.getElementById('qlIE').addEventListener('click', WindoesApp.open.internetExplorer);
 
 // Experiment app icons — only wire openApp for non-dedicated icons
-const experimentApps = simulatorConfig.experimentApps || [
+const experimentApps = WindoesApp.config.experimentApps || [
     { id: 'iconAsciiRunner', title: 'ASCII Runner', url: './applications/ascii-runner/index.html' },
 ];
 
@@ -52,7 +52,7 @@ experimentApps.forEach(({ id, title, url }) => {
     // Skip icons that have dedicated handlers (prevents duplicate windows)
     if (dedicatedHandlers[id]) return;
     const el = document.getElementById(id);
-    if (el) el.addEventListener(appEventType, () => openApp(title, url));
+    if (el) el.addEventListener(appEventType, () => WindoesApp.open.app(title, url));
 });
 
 // Desktop icon selection

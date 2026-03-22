@@ -70,5 +70,8 @@ function makeDraggable(titlebarEl, windowEl) {
     document.addEventListener('touchcancel', pointerUp);
 }
 
+// Register on shared namespace
+WindoesApp.helpers.makeDraggable = makeDraggable;
+
 // Note: makeDraggable calls are now handled by WindowManager.register()
 // via the draggable config option (default: true).

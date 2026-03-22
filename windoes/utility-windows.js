@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 // My Computer Window
 // ══════════════════════════════════════════════
-const myComputerConfig = WindowManager.register('myComputer', {
+const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
         id: 'myComputerWindow',
         ariaLabel: 'My Computer',
@@ -49,31 +49,31 @@ const myComputerConfig = WindowManager.register('myComputer', {
 });
 
 function openMyComputer() {
-    WindowManager.open('myComputer');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    playClickSound();
+    WindoesApp.WindowManager.open('myComputer');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    WindoesApp.sound.playClickSound();
 }
 
 function closeMyComputer() {
-    WindowManager.close('myComputer');
+    WindoesApp.WindowManager.close('myComputer');
 }
 
 // Drive click actions
 myComputerConfig.el.querySelector('#driveA').addEventListener('dblclick', () => {
-    showErrorDialog({ title: 'A:\\', text: 'A:\\ is not accessible.\n\nThe device is not ready.', icon: 'error' });
+    WindoesApp.bsod.showErrorDialog({ title: 'A:\\', text: 'A:\\ is not accessible.\n\nThe device is not ready.', icon: 'error' });
 });
 myComputerConfig.el.querySelector('#driveC').addEventListener('dblclick', () => {
-    showErrorDialog({ title: 'Local Disk (C:)', text: 'Access to C:\\ is restricted by system policy.\n\nContact your system administrator.', icon: 'warning' });
+    WindoesApp.bsod.showErrorDialog({ title: 'Local Disk (C:)', text: 'Access to C:\\ is restricted by system policy.\n\nContact your system administrator.', icon: 'warning' });
 });
 myComputerConfig.el.querySelector('#driveD').addEventListener('dblclick', () => {
-    showErrorDialog({ title: 'D:\\', text: 'D:\\ is not accessible.\n\nPlease insert a disc into drive D:.', icon: 'error' });
+    WindoesApp.bsod.showErrorDialog({ title: 'D:\\', text: 'D:\\ is not accessible.\n\nPlease insert a disc into drive D:.', icon: 'error' });
 });
 
 // ══════════════════════════════════════════════
 // Notepad
 // ══════════════════════════════════════════════
-const notepadConfig = WindowManager.register('notepad', {
+const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     template: {
         id: 'notepadWindow',
         className: 'notepad-window',
@@ -97,21 +97,21 @@ const notepadConfig = WindowManager.register('notepad', {
 });
 
 function openNotepad() {
-    WindowManager.open('notepad');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
-    playClickSound();
+    WindoesApp.WindowManager.open('notepad');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.sound.playClickSound();
 }
 
 function closeNotepad() {
-    WindowManager.close('notepad');
+    WindoesApp.WindowManager.close('notepad');
 }
 
 // ══════════════════════════════════════════════
 // Recycle Bin
 // ══════════════════════════════════════════════
-WindowManager.register('recycleBin', {
+WindoesApp.WindowManager.register('recycleBin', {
     template: {
         id: 'recycleBinWindow',
         ariaLabel: 'Recycle Bin',
@@ -138,12 +138,17 @@ WindowManager.register('recycleBin', {
 });
 
 function openRecycleBin() {
-    WindowManager.open('recycleBin');
-    if (startMenu) startMenu.classList.remove('open');
-    startButton.classList.remove('pressed');
-    playClickSound();
+    WindoesApp.WindowManager.open('recycleBin');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    WindoesApp.sound.playClickSound();
 }
 
 function closeRecycleBin() {
-    WindowManager.close('recycleBin');
+    WindoesApp.WindowManager.close('recycleBin');
 }
+
+// Register on shared namespace
+WindoesApp.open.myComputer = openMyComputer;
+WindoesApp.open.notepad = openNotepad;
+WindoesApp.open.recycleBin = openRecycleBin;

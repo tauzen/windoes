@@ -52,3 +52,6 @@ function playErrorSound() {
 function playClickSound() {
     playBeep(800, 0.03, 'square');
 }
+
+// Register on shared namespace
+WindoesApp.sound = { playBeep, playStartupSound, playErrorSound, playClickSound };
