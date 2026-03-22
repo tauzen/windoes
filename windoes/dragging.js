@@ -70,10 +70,5 @@ function makeDraggable(titlebarEl, windowEl) {
     document.addEventListener('touchcancel', pointerUp);
 }
 
-// Make the main windows draggable
-// (Winamp and Minesweeper are registered in app-windows.js)
-makeDraggable(document.getElementById('titlebar'), document.getElementById('ieWindow'));
-makeDraggable(document.getElementById('appTitlebar'), document.getElementById('appWindow'));
-makeDraggable(document.getElementById('myComputerTitlebar'), document.getElementById('myComputerWindow'));
-makeDraggable(document.getElementById('notepadTitlebar'), document.getElementById('notepadWindow'));
-makeDraggable(document.getElementById('recycleBinTitlebar'), document.getElementById('recycleBinWindow'));
+// Note: makeDraggable calls are now handled by WindowManager.register()
+// via the draggable config option (default: true).

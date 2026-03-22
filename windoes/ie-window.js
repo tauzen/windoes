@@ -1,27 +1,57 @@
 // ══════════════════════════════════════════════
 // IE Window
 // ══════════════════════════════════════════════
-const frame = document.getElementById('browserFrame');
-const ieWindow = document.getElementById('ieWindow');
-const addressInput = document.getElementById('addressInput');
-const statusText = document.getElementById('statusText');
-const windowTitle = document.getElementById('windowTitle');
-// startButton and startMenu are declared in boot.js (shared DOM refs)
-const clock = document.getElementById('clock');
-const internetExplorerIcon = document.getElementById('internetExplorerIcon');
-const closeWindowBtn = document.getElementById('closeWindowBtn');
-const minimizeBtn = document.getElementById('minimizeBtn');
-const taskButton = document.getElementById('taskButton');
-const taskButtonLabel = taskButton.querySelector('span:last-child');
 
-// Register IE with WindowManager (iframe managed manually — IE keeps its own nav state)
-WindowManager.register('ie', {
-    el: ieWindow,
-    taskBtn: taskButton,
+// Register IE with template-based DOM generation
+const ieConfig = WindowManager.register('ie', {
+    template: {
+        id: 'ieWindow',
+        ariaLabel: 'Internet Explorer window',
+        title: 'about:blank - Microsoft Internet Explorer',
+        titleLogoClass: 'title-logo',
+        titleSpanId: 'windowTitle',
+        titlebarId: 'titlebar',
+        minimizeBtnId: 'minimizeBtn',
+        maximizeBtnId: 'maximizeIeBtn',
+        closeBtnId: 'closeWindowBtn',
+        menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
+        toolbar: `<div class="toolbar">
+                <div class="toolbar-grip"></div>
+                <button class="tb-btn" id="backBtn"><span class="tb-icon tb-icon-back"></span>Back</button>
+                <button class="tb-btn" id="forwardBtn"><span class="tb-icon tb-icon-forward"></span>Forward</button>
+                <button class="tb-btn" id="stopBtn"><span class="tb-icon tb-icon-stop"></span>Stop</button>
+                <button class="tb-btn" id="refreshBtn"><span class="tb-icon tb-icon-refresh"></span>Refresh</button>
+                <button class="tb-btn" id="homeBtn"><span class="tb-icon tb-icon-home"></span>Home</button>
+                <div class="tb-sep"></div>
+                <button class="tb-btn" id="searchBtn"><span class="tb-icon tb-icon-search"></span>Search</button>
+                <button class="tb-btn" id="favoritesBtn"><span class="tb-icon tb-icon-favorites"></span>Favorites</button>
+                <button class="tb-btn" id="historyBtn"><span class="tb-icon tb-icon-history"></span>History</button>
+            </div>
+            <div class="address-row">
+                <div class="toolbar-grip"></div>
+                <label for="addressInput">Address</label>
+                <div class="address-input-wrap">
+                    <span class="address-icon" aria-hidden="true"></span>
+                    <input id="addressInput" value="about:blank" aria-label="Address bar" />
+                </div>
+                <button class="go-btn" id="goBtn">Go</button>
+            </div>`,
+        view: '<iframe id="browserFrame" title="Internet Explorer content" referrerpolicy="no-referrer"></iframe>',
+        statusBar: '<span class="status-left" id="statusText">Done</span><span class="status-right"><span class="status-icon"></span>Internet</span>',
+    },
+    taskButton: { id: 'taskButton', icon: 'task-icon-ie', label: 'about:blank - Microsoft Int...' },
     iframe: null,       // IE manages its own iframe/navigation
     iframeSrc: null,
     hasChrome: true,
 });
+
+// Get references to elements within the generated window
+const frame = ieConfig.el.querySelector('#browserFrame');
+const addressInput = ieConfig.el.querySelector('#addressInput');
+const statusText = ieConfig.el.querySelector('#statusText');
+const windowTitle = ieConfig.el.querySelector('#windowTitle');
+const clock = document.getElementById('clock');
+const taskButtonLabel = ieConfig.taskBtn.querySelector('span:last-child');
 
 const historyStack = [];
 let historyIndex = -1;
@@ -76,7 +106,7 @@ function body_loading(on) {
 
 function openInternetExplorer() {
     WindowManager.open('ie');
-    startMenu.classList.remove('open');
+    if (startMenu) startMenu.classList.remove('open');
     startButton.classList.remove('pressed');
     playClickSound();
 
@@ -96,31 +126,31 @@ function updateClock() {
     clock.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-// Navigation buttons
-document.getElementById('goBtn').addEventListener('click', () => navigate(addressInput.value));
+// Navigation buttons — query within the generated window element
+ieConfig.el.querySelector('#goBtn').addEventListener('click', () => navigate(addressInput.value));
 addressInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(addressInput.value); });
 
-document.getElementById('homeBtn').addEventListener('click', () => navigate(homePage));
-document.getElementById('refreshBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#homeBtn').addEventListener('click', () => navigate(homePage));
+ieConfig.el.querySelector('#refreshBtn').addEventListener('click', () => {
     statusText.textContent = 'Refreshing...';
     if (addressInput.value && addressInput.value !== 'about:blank') {
         frame.src = addressInput.value;
     }
 });
-document.getElementById('stopBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#stopBtn').addEventListener('click', () => {
     window.stop();
     statusText.textContent = 'Stopped';
 });
 
-document.getElementById('searchBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#searchBtn').addEventListener('click', () => {
     navigate('https://www.google.com');
 });
 
-document.getElementById('favoritesBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#favoritesBtn').addEventListener('click', () => {
     alert('Favorites\n\n\u2022 https://example.com\n\u2022 https://archive.org\n\u2022 https://wikipedia.org');
 });
 
-document.getElementById('historyBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#historyBtn').addEventListener('click', () => {
     if (historyStack.length === 0) {
         alert('History is empty.');
     } else {
@@ -128,14 +158,14 @@ document.getElementById('historyBtn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('backBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#backBtn').addEventListener('click', () => {
     if (historyIndex > 0) {
         historyIndex -= 1;
         navigate(historyStack[historyIndex], false);
     }
 });
 
-document.getElementById('forwardBtn').addEventListener('click', () => {
+ieConfig.el.querySelector('#forwardBtn').addEventListener('click', () => {
     if (historyIndex < historyStack.length - 1) {
         historyIndex += 1;
         navigate(historyStack[historyIndex], false);

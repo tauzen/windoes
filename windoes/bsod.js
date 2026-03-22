@@ -41,9 +41,26 @@ function scheduleRandomBSOD() {
 }
 
 // ══════════════════════════════════════════════
-// Random Error Dialogs
+// Error / Info Dialog (created on demand)
 // ══════════════════════════════════════════════
-const errorDialog = document.getElementById('errorDialog');
+const errorDialog = document.createElement('div');
+errorDialog.className = 'dialog-overlay';
+errorDialog.id = 'errorDialog';
+errorDialog.innerHTML = `<div class="dialog-box">
+    <div class="dialog-titlebar">
+        <span id="errorDialogTitle">Windows</span>
+        <button class="ctrl-btn" id="errorCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="dialog-body">
+        <div class="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
+        <div class="dialog-text" id="errorDialogText">An error has occurred.</div>
+    </div>
+    <div class="dialog-buttons">
+        <button class="dialog-btn" id="errorOkBtn">OK</button>
+    </div>
+</div>`;
+document.body.appendChild(errorDialog);
+
 const errorDialogTitle = document.getElementById('errorDialogTitle');
 const errorDialogText = document.getElementById('errorDialogText');
 const errorDialogIcon = document.getElementById('errorDialogIcon');
