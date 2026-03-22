@@ -16,12 +16,12 @@ const theTaskbar = document.getElementById('theTaskbar');
 
 // Shared UI elements used across multiple modules
 const startButton = document.getElementById('startButton');
-const startMenu = document.getElementById('startMenu');
+// startMenu is created by start-menu.js — declared as var so it can be assigned later
+var startMenu = null;
 
 // Hide desktop & taskbar during boot
 theDesktop.style.display = 'none';
 theTaskbar.style.display = 'none';
-document.getElementById('startMenu').style.display = 'none';
 
 let bootDone = false;
 
@@ -83,7 +83,7 @@ function finishBoot() {
     bootScreen.classList.add('hidden');
     theDesktop.style.display = '';
     theTaskbar.style.display = '';
-    document.getElementById('startMenu').style.display = '';
+    if (startMenu) startMenu.style.display = '';
     bootDone = true;
 
     // Trigger startup sound after user interaction enables audio

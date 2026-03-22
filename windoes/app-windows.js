@@ -1,23 +1,33 @@
 // ══════════════════════════════════════════════
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
-const appWindow = document.getElementById('appWindow');
-const appFrame = document.getElementById('appFrame');
-const appWindowTitle = document.getElementById('appWindowTitle');
-const appStatusText = document.getElementById('appStatusText');
-const appMinimizeBtn = document.getElementById('appMinimizeBtn');
-const appCloseBtn = document.getElementById('appCloseBtn');
-const appTaskButton = document.getElementById('appTaskButton');
-const appTaskLabel = document.getElementById('appTaskLabel');
-
-// App window: iframe src is dynamic, managed manually in openApp
-WindowManager.register('app', {
-    el: appWindow,
-    taskBtn: appTaskButton,
-    iframe: appFrame,
+const appConfig = WindowManager.register('app', {
+    template: {
+        id: 'appWindow',
+        className: 'app-window',
+        ariaLabel: 'Application window',
+        title: 'Application',
+        titleIcon: 'titlelogo-app',
+        titleSpanId: 'appWindowTitle',
+        titlebarId: 'appTitlebar',
+        minimizeBtnId: 'appMinimizeBtn',
+        maximizeBtn: true,
+        closeBtnId: 'appCloseBtn',
+        style: 'left: clamp(110px, 15vw, 190px); top: 28px;',
+        menubar: ['File', 'View', 'Help'],
+        view: '<iframe id="appFrame" title="Application content" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+        statusBar: '<span class="status-left" id="appStatusText">Done</span>',
+    },
+    taskButton: { id: 'appTaskButton', icon: 'task-icon-app', label: 'Application', labelId: 'appTaskLabel' },
+    iframeId: 'appFrame',
     iframeSrc: null,  // set dynamically per openApp call
     hasChrome: true,
 });
+
+const appFrame = appConfig.el.querySelector('#appFrame');
+const appWindowTitle = appConfig.el.querySelector('#appWindowTitle');
+const appStatusText = appConfig.el.querySelector('#appStatusText');
+const appTaskLabel = appConfig.taskBtn.querySelector('#appTaskLabel');
 
 function openApp(title, url) {
     appWindowTitle.textContent = title;
@@ -27,9 +37,9 @@ function openApp(title, url) {
     WindowManager.get('app').iframeSrc = url;
     appFrame.src = url;
     WindowManager.open('app');
-    startMenu.classList.remove('open');
+    if (startMenu) startMenu.classList.remove('open');
     startButton.classList.remove('pressed');
-    closeProgramsSubmenu();
+    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
     body_loading(true);
     playClickSound();
 }
@@ -43,30 +53,32 @@ appFrame.addEventListener('load', () => {
     body_loading(false);
 });
 
-appMinimizeBtn.addEventListener('click', () => WindowManager.minimize('app'));
-appCloseBtn.addEventListener('click', closeApp);
-appTaskButton.addEventListener('click', () => WindowManager.toggleFromTaskbar('app'));
-
 // ══════════════════════════════════════════════
 // Winamp Window
 // ══════════════════════════════════════════════
-const winampWindow = document.getElementById('winampWindow');
-const winampFrame = document.getElementById('winampFrame');
-const winampTaskBtn = document.getElementById('winampTaskBtn');
-
-WindowManager.register('winamp', {
-    el: winampWindow,
-    taskBtn: winampTaskBtn,
-    iframe: winampFrame,
+const winampConfig = WindowManager.register('winamp', {
+    template: {
+        id: 'winampWindow',
+        ariaLabel: 'Winamp',
+        title: 'Winamp',
+        titleIcon: 'titlelogo-winamp',
+        titlebarId: 'winampTitlebar',
+        minimizeBtnId: 'winampMinBtn',
+        closeBtnId: 'winampCloseBtn',
+        style: 'left: 200px; top: 50px; width: 289px; height: 330px; min-width: unset; min-height: unset;',
+        view: '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+    },
+    taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
+    iframeId: 'winampFrame',
     iframeSrc: './applications/winamp-player/index.html',
     hasChrome: false,
 });
 
 function openWinamp() {
     WindowManager.open('winamp');
-    startMenu.classList.remove('open');
+    if (startMenu) startMenu.classList.remove('open');
     startButton.classList.remove('pressed');
-    closeProgramsSubmenu();
+    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
     playClickSound();
 }
 
@@ -74,31 +86,32 @@ function closeWinamp() {
     WindowManager.close('winamp');
 }
 
-document.getElementById('winampMinBtn').addEventListener('click', () => WindowManager.minimize('winamp'));
-document.getElementById('winampCloseBtn').addEventListener('click', closeWinamp);
-winampTaskBtn.addEventListener('click', () => WindowManager.toggleFromTaskbar('winamp'));
-makeDraggable(document.getElementById('winampTitlebar'), winampWindow);
-
 // ══════════════════════════════════════════════
 // Minesweeper Window
 // ══════════════════════════════════════════════
-const minesweeperWindow = document.getElementById('minesweeperWindow');
-const minesweeperFrame = document.getElementById('minesweeperFrame');
-const minesweeperTaskBtn = document.getElementById('minesweeperTaskBtn');
-
-WindowManager.register('minesweeper', {
-    el: minesweeperWindow,
-    taskBtn: minesweeperTaskBtn,
-    iframe: minesweeperFrame,
+const minesweeperConfig = WindowManager.register('minesweeper', {
+    template: {
+        id: 'minesweeperWindow',
+        ariaLabel: 'Minesweeper',
+        title: 'Minesweeper',
+        titleIcon: 'titlelogo-minesweeper',
+        titlebarId: 'minesweeperTitlebar',
+        minimizeBtnId: 'minesweeperMinBtn',
+        closeBtnId: 'minesweeperCloseBtn',
+        style: 'left: 250px; top: 80px; width: 260px; height: 280px; min-width: unset; min-height: unset;',
+        view: '<iframe id="minesweeperFrame" title="Minesweeper" referrerpolicy="no-referrer"></iframe>',
+    },
+    taskButton: { id: 'minesweeperTaskBtn', icon: 'task-icon-minesweeper', label: 'Minesweeper' },
+    iframeId: 'minesweeperFrame',
     iframeSrc: './applications/minesweeper/index.html',
     hasChrome: false,
 });
 
 function openMinesweeper() {
     WindowManager.open('minesweeper');
-    startMenu.classList.remove('open');
+    if (startMenu) startMenu.classList.remove('open');
     startButton.classList.remove('pressed');
-    closeProgramsSubmenu();
+    if (typeof closeProgramsSubmenu === 'function') closeProgramsSubmenu();
     playClickSound();
 }
 
@@ -106,15 +119,11 @@ function closeMinesweeper() {
     WindowManager.close('minesweeper');
 }
 
-document.getElementById('minesweeperMinBtn').addEventListener('click', () => WindowManager.minimize('minesweeper'));
-document.getElementById('minesweeperCloseBtn').addEventListener('click', closeMinesweeper);
-minesweeperTaskBtn.addEventListener('click', () => WindowManager.toggleFromTaskbar('minesweeper'));
-makeDraggable(document.getElementById('minesweeperTitlebar'), minesweeperWindow);
-
 // Listen for minesweeper resize messages
 window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'minesweeper-resize') {
-        const titlebarHeight = document.getElementById('minesweeperTitlebar').offsetHeight;
+        const minesweeperWindow = minesweeperConfig.el;
+        const titlebarHeight = minesweeperConfig.el.querySelector('.titlebar').offsetHeight;
         const viewBorder = 4; // 2px inset border on .view
         minesweeperWindow.style.width = (e.data.width + viewBorder) + 'px';
         minesweeperWindow.style.height = (e.data.height + titlebarHeight + viewBorder) + 'px';

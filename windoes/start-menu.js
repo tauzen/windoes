@@ -1,8 +1,43 @@
 // ══════════════════════════════════════════════
-// Start Menu & Submenus
+// Start Menu & Submenus (generated from JS)
 // ══════════════════════════════════════════════
-const programsSubmenu = document.getElementById('programsSubmenu');
 
+// Create Start Menu DOM
+startMenu = document.createElement('div');
+startMenu.className = 'start-menu';
+startMenu.id = 'startMenu';
+startMenu.setAttribute('aria-label', 'Start menu');
+startMenu.innerHTML = `<div class="start-rail"><strong>Windoes XD</strong></div>
+    <div class="menu-list">
+        <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
+        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-docs"></span>Documents</div>
+        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-settings"></span>Settings</div>
+        <div class="menu-item"><span class="menu-icon menu-icon-find"></span>Search</div>
+        <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
+        <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
+        <div class="menu-separator"></div>
+        <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon"></span>Shut Down...</div>
+    </div>`;
+// Hidden during boot — finishBoot() will show it
+startMenu.style.display = 'none';
+document.body.appendChild(startMenu);
+
+// Create Programs Submenu DOM
+const programsSubmenu = document.createElement('div');
+programsSubmenu.className = 'programs-submenu';
+programsSubmenu.id = 'programsSubmenu';
+programsSubmenu.innerHTML = `<div class="submenu-item" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories &nbsp; &nbsp; &#9654;</div>
+    <div class="submenu-item" id="subGames"><span class="submenu-icon submenu-icon-folder"></span>Games &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#9654;</div>
+    <div class="submenu-item" id="subStartup"><span class="submenu-icon submenu-icon-folder"></span>StartUp</div>
+    <div class="context-menu-sep"></div>
+    <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
+    <div class="submenu-item" id="subNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
+    <div class="submenu-item" id="subWinamp"><span class="submenu-icon submenu-icon-winamp"></span>Winamp</div>
+    <div class="submenu-item" id="subMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
+    <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>`;
+document.body.appendChild(programsSubmenu);
+
+// Start button toggle
 startButton.addEventListener('click', (e) => {
     e.stopPropagation();
     startMenu.classList.toggle('open');

@@ -1,47 +1,59 @@
 // ══════════════════════════════════════════════
-// Desktop Icons - open on double-click (or tap)
+// Desktop Icons — generated from config, open on double-click (or tap)
 // ══════════════════════════════════════════════
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const appEventType = isTouchDevice ? 'click' : 'dblclick';
 
-if (isTouchDevice) {
-    internetExplorerIcon.addEventListener('click', openInternetExplorer);
-} else {
-    internetExplorerIcon.addEventListener('dblclick', openInternetExplorer);
-}
+// Build desktop icons
+const desktopIconDefs = [
+    { id: 'iconMyComputer', className: 'icon-my-computer', label: 'My Computer' },
+    { id: 'internetExplorerIcon', className: 'icon-ie', label: 'Internet Explorer' },
+    { id: 'iconRecycleBin', className: 'icon-recycle', label: 'Recycle Bin' },
+    { id: 'iconAsciiRunner', className: 'icon-ascii-runner', label: 'ASCII Runner' },
+    { id: 'iconWinamp', className: 'icon-winamp', label: 'Winamp' },
+    { id: 'iconMinesweeper', className: 'icon-minesweeper', label: 'Minesweeper' },
+];
 
-document.getElementById('iconMyComputer').addEventListener(appEventType, openMyComputer);
-document.getElementById('iconRecycleBin').addEventListener(appEventType, openRecycleBin);
+const desktopIcons = document.getElementById('desktopIcons');
+desktopIconDefs.forEach(def => {
+    const el = document.createElement('div');
+    el.className = 'icon ' + def.className;
+    el.id = def.id;
+    el.innerHTML = '<div class="icon-graphic"></div><span class="icon-label">' + def.label + '</span>';
+    desktopIcons.appendChild(el);
+});
+
+// Dedicated icon handlers (these must use their own window, not openApp)
+const dedicatedHandlers = {
+    iconMyComputer: openMyComputer,
+    internetExplorerIcon: openInternetExplorer,
+    iconRecycleBin: openRecycleBin,
+    iconWinamp: openWinamp,
+    iconMinesweeper: openMinesweeper,
+};
+
+// Wire up dedicated icon handlers
+Object.entries(dedicatedHandlers).forEach(([id, handler]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // IE uses click on touch devices, dblclick on desktop (same as appEventType)
+    el.addEventListener(appEventType, handler);
+});
+
+// Quick launch IE
 document.getElementById('qlIE').addEventListener('click', openInternetExplorer);
 
-// Experiment app icons
+// Experiment app icons — only wire openApp for non-dedicated icons
 const experimentApps = simulatorConfig.experimentApps || [
     { id: 'iconAsciiRunner', title: 'ASCII Runner', url: './applications/ascii-runner/index.html' },
 ];
 
 experimentApps.forEach(({ id, title, url }) => {
+    // Skip icons that have dedicated handlers (prevents duplicate windows)
+    if (dedicatedHandlers[id]) return;
     const el = document.getElementById(id);
     if (el) el.addEventListener(appEventType, () => openApp(title, url));
 });
-
-// Dedicated icon handlers for Winamp and Minesweeper.
-// These icons have their own windows and must never go through openApp(),
-// so register them after the experimentApps loop and guard against duplicates.
-const dedicatedIcons = { iconWinamp: openWinamp, iconMinesweeper: openMinesweeper };
-Object.entries(dedicatedIcons).forEach(([id, handler]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    // Remove any openApp listener that the experimentApps loop may have added
-    // (defensive: in case config accidentally includes these ids)
-    const clone = el.cloneNode(true);
-    el.parentNode.replaceChild(clone, el);
-    clone.addEventListener(appEventType, handler);
-});
-
-// Minimize / close IE
-minimizeBtn.addEventListener('click', () => WindowManager.minimize('ie'));
-taskButton.addEventListener('click', () => WindowManager.toggleFromTaskbar('ie'));
-closeWindowBtn.addEventListener('click', closeInternetExplorer);
 
 // Desktop icon selection
 document.querySelectorAll('.icon').forEach(icon => {
