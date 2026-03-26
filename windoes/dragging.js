@@ -14,6 +14,8 @@ function makeDraggable(titlebarEl, windowEl) {
     function pointerDown(e) {
         // Ignore control-button clicks
         if (e.target.classList.contains('ctrl-btn')) return;
+        // Don't drag maximized windows
+        if (windowEl.classList.contains('maximized')) return;
 
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;

@@ -398,6 +398,16 @@
 
         .window.hidden { display: none; }
 
+        .window.maximized {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 36px) !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+        }
+
         /* Title bar - blue gradient like Win ME */
         .titlebar {
             height: 22px;
