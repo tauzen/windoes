@@ -25,7 +25,7 @@ const WindowManager = {
         const hasMaxBtn = tmpl.maximizeBtn || tmpl.maximizeBtnId;
         const controlsHtml = [
             tmpl.minimizeBtnId ? `<div class="ctrl-btn" id="${tmpl.minimizeBtnId}">_</div>` : '',
-            hasMaxBtn ? `<div class="ctrl-btn"${tmpl.maximizeBtnId ? ` id="${tmpl.maximizeBtnId}"` : ''}>&square;</div>` : '',
+            hasMaxBtn ? `<div class="ctrl-btn ctrl-max"${tmpl.maximizeBtnId ? ` id="${tmpl.maximizeBtnId}"` : ''}>&square;</div>` : '',
             tmpl.closeBtnId ? `<button class="ctrl-btn" id="${tmpl.closeBtnId}" aria-label="Close">&times;</button>` : '',
         ].join('');
 
@@ -150,6 +150,12 @@ const WindowManager = {
             if (minBtn) minBtn.addEventListener('click', () => this.minimize(id));
         }
 
+        // Auto-wire maximize button
+        if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
+            const maxBtn = config.el.querySelector('.ctrl-max');
+            if (maxBtn) maxBtn.addEventListener('click', () => this.toggleMaximize(id));
+        }
+
         // Auto-wire taskbar toggle
         if (config.taskBtn) {
             config.taskBtn.addEventListener('click', () => this.toggleFromTaskbar(id));
@@ -160,7 +166,15 @@ const WindowManager = {
             const titlebar = config.template && config.template.titlebarId
                 ? config.el.querySelector('#' + config.template.titlebarId)
                 : config.el.querySelector('.titlebar');
-            if (titlebar) makeDraggable(titlebar, config.el);
+            if (titlebar) {
+                makeDraggable(titlebar, config.el);
+                // Double-click titlebar to toggle maximize (if window has a maximize button)
+                if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
+                    titlebar.addEventListener('dblclick', (e) => {
+                        if (!e.target.classList.contains('ctrl-btn')) this.toggleMaximize(id);
+                    });
+                }
+            }
         }
 
         // Run setup callback for custom wiring
@@ -265,6 +279,12 @@ const WindowManager = {
         const win = this._windows[id];
         if (!win) return;
 
+        if (win.isMaximized) {
+            win.isMaximized = false;
+            win.el.classList.remove('maximized');
+            this._updateMaxBtn(win);
+        }
+
         win.el.classList.add('hidden');
         win.isOpen = false;
 
@@ -335,6 +355,54 @@ const WindowManager = {
         // Copy stack since minimize mutates it
         const openIds = this._stack.slice();
         openIds.forEach(id => this.minimize(id));
+    },
+
+    /**
+     * Maximize a window to fill the desktop area (minus taskbar).
+     */
+    maximize(id) {
+        const win = this._windows[id];
+        if (!win || win.isMaximized) return;
+        const el = win.el;
+        win._savedStyle = { left: el.style.left, top: el.style.top, width: el.style.width, height: el.style.height };
+        win.isMaximized = true;
+        el.classList.add('maximized');
+        this._updateMaxBtn(win);
+        this.bringToFront(id);
+    },
+
+    /**
+     * Restore a maximized window to its previous size and position.
+     */
+    unmaximize(id) {
+        const win = this._windows[id];
+        if (!win || !win.isMaximized) return;
+        const el = win.el;
+        win.isMaximized = false;
+        el.classList.remove('maximized');
+        if (win._savedStyle) {
+            el.style.left = win._savedStyle.left;
+            el.style.top = win._savedStyle.top;
+            el.style.width = win._savedStyle.width;
+            el.style.height = win._savedStyle.height;
+        }
+        this._updateMaxBtn(win);
+        this.bringToFront(id);
+    },
+
+    /**
+     * Toggle between maximized and restored states.
+     */
+    toggleMaximize(id) {
+        const win = this._windows[id];
+        if (!win) return;
+        win.isMaximized ? this.unmaximize(id) : this.maximize(id);
+    },
+
+    /** Sync the maximize button icon to the current window state */
+    _updateMaxBtn(win) {
+        const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
+        if (btn) btn.innerHTML = win.isMaximized ? '&#10697;' : '&square;';
     },
 
     /** Update titlebar active/inactive classes */
