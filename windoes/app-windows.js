@@ -152,13 +152,47 @@ function closeSkifree() {
     WindoesApp.WindowManager.close('skifree');
 }
 
+// ══════════════════════════════════════════════
+// Solitaire Window
+// ══════════════════════════════════════════════
+const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
+    template: {
+        id: 'solitaireWindow',
+        ariaLabel: 'Solitaire',
+        title: 'Solitaire',
+        titleIcon: 'titlelogo-solitaire',
+        titlebarId: 'solitaireTitlebar',
+        minimizeBtnId: 'solitaireMinBtn',
+        closeBtnId: 'solitaireCloseBtn',
+        style: 'left: 180px; top: 40px; width: 700px; height: 540px; min-width: unset; min-height: unset;',
+        view: '<iframe id="solitaireFrame" title="Solitaire" referrerpolicy="no-referrer"></iframe>',
+    },
+    taskButton: { id: 'solitaireTaskBtn', icon: 'task-icon-solitaire', label: 'Solitaire' },
+    iframeId: 'solitaireFrame',
+    iframeSrc: './applications/solitaire/index.html',
+    hasChrome: false,
+});
+
+function openSolitaire() {
+    WindoesApp.WindowManager.open('solitaire');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.sound.playClickSound();
+}
+
+function closeSolitaire() {
+    WindoesApp.WindowManager.close('solitaire');
+}
+
 // Register on shared namespace
 WindoesApp.open.app = openApp;
 WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.skifree = openSkifree;
+WindoesApp.open.solitaire = openSolitaire;
 
-// Listen for minesweeper resize messages
+// Listen for app resize messages
 window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'minesweeper-resize') {
         const minesweeperWindow = minesweeperConfig.el;
@@ -166,5 +200,12 @@ window.addEventListener('message', (e) => {
         const viewBorder = 4; // 2px inset border on .view
         minesweeperWindow.style.width = (e.data.width + viewBorder) + 'px';
         minesweeperWindow.style.height = (e.data.height + titlebarHeight + viewBorder) + 'px';
+    }
+    if (e.data && e.data.type === 'solitaire-resize') {
+        const solitaireWindow = solitaireConfig.el;
+        const titlebarHeight = solitaireConfig.el.querySelector('.titlebar').offsetHeight;
+        const viewBorder = 4;
+        solitaireWindow.style.width = (e.data.width + viewBorder) + 'px';
+        solitaireWindow.style.height = (e.data.height + titlebarHeight + viewBorder) + 'px';
     }
 });

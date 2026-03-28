@@ -35,6 +35,7 @@ programsSubmenu.innerHTML = `<div class="submenu-item" id="subAccessories"><span
     <div class="submenu-item" id="subNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
     <div class="submenu-item" id="subWinamp"><span class="submenu-icon submenu-icon-winamp"></span>Winamp</div>
     <div class="submenu-item" id="subMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
+    <div class="submenu-item" id="subSolitaire"><span class="submenu-icon submenu-icon-solitaire"></span>Solitaire</div>
     <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>
     <div class="submenu-item" id="subSkifree"><span class="submenu-icon submenu-icon-skifree"></span>SkiFree</div>`;
 document.body.appendChild(programsSubmenu);
@@ -117,12 +118,17 @@ document.getElementById('subSkifree').addEventListener('click', () => {
     closeProgramsSubmenu();
 });
 
+document.getElementById('subSolitaire').addEventListener('click', () => {
+    WindoesApp.open.solitaire();
+    closeProgramsSubmenu();
+});
+
 document.getElementById('subAccessories').addEventListener('click', () => {
     WindoesApp.open.notepad();
 });
 
 document.getElementById('subGames').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Games', text: 'Solitaire has encountered an error and needs to close.\n\nWould you like to send an error report?', icon: 'error' });
+    WindoesApp.open.solitaire();
     closeProgramsSubmenu();
     startMenuEl.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');

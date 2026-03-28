@@ -13,6 +13,7 @@ const desktopIconDefs = [
     { id: 'iconWinamp', className: 'icon-winamp', label: 'Winamp' },
     { id: 'iconMinesweeper', className: 'icon-minesweeper', label: 'Minesweeper' },
     { id: 'iconSkifree', className: 'icon-skifree', label: 'SkiFree' },
+    { id: 'iconSolitaire', className: 'icon-solitaire', label: 'Solitaire' },
 ];
 
 const desktopIcons = document.getElementById('desktopIcons');
@@ -32,6 +33,7 @@ const dedicatedHandlers = {
     iconWinamp: WindoesApp.open.winamp,
     iconMinesweeper: WindoesApp.open.minesweeper,
     iconSkifree: WindoesApp.open.skifree,
+    iconSolitaire: WindoesApp.open.solitaire,
 };
 
 // Wire up dedicated icon handlers
