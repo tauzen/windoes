@@ -40,8 +40,6 @@ window.WIN_ME_SIMULATOR_CONFIG = {
         minesweeper: 'openMinesweeper',
         mine: 'openMinesweeper',
         'winmine.exe': 'openMinesweeper',
-        skifree: 'openSkifree',
-        'skifree.exe': 'openSkifree',
         solitaire: 'openSolitaire',
         sol: 'openSolitaire',
         'sol.exe': 'openSolitaire'
