@@ -119,10 +119,44 @@ function closeMinesweeper() {
     WindoesApp.WindowManager.close('minesweeper');
 }
 
+// ══════════════════════════════════════════════
+// SkiFree Window
+// ══════════════════════════════════════════════
+const skifreeConfig = WindoesApp.WindowManager.register('skifree', {
+    template: {
+        id: 'skifreeWindow',
+        ariaLabel: 'SkiFree',
+        title: 'SkiFree',
+        titleIcon: 'titlelogo-skifree',
+        titlebarId: 'skifreeTitlebar',
+        minimizeBtnId: 'skifreeMinBtn',
+        closeBtnId: 'skifreeCloseBtn',
+        style: 'left: 180px; top: 40px; width: 480px; height: 400px; min-width: 300px; min-height: 250px;',
+        view: '<iframe id="skifreeFrame" title="SkiFree" referrerpolicy="no-referrer"></iframe>',
+    },
+    taskButton: { id: 'skifreeTaskBtn', icon: 'task-icon-skifree', label: 'SkiFree' },
+    iframeId: 'skifreeFrame',
+    iframeSrc: './applications/skifree/index.html',
+    hasChrome: false,
+});
+
+function openSkifree() {
+    WindoesApp.WindowManager.open('skifree');
+    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    WindoesApp.sound.playClickSound();
+}
+
+function closeSkifree() {
+    WindoesApp.WindowManager.close('skifree');
+}
+
 // Register on shared namespace
 WindoesApp.open.app = openApp;
 WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
+WindoesApp.open.skifree = openSkifree;
 
 // Listen for minesweeper resize messages
 window.addEventListener('message', (e) => {

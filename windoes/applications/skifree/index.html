@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkiFree</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #fff;
+    overflow: hidden;
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Geneva, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+#startScreen, #gameOverScreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    z-index: 10;
+}
+#startScreen h1 {
+    font-size: 28px;
+    color: #000080;
+    margin-bottom: 8px;
+    font-family: "MS Sans Serif", sans-serif;
+}
+#startScreen p, #gameOverScreen p {
+    font-size: 13px;
+    color: #000;
+    margin-bottom: 6px;
+    text-align: center;
+    line-height: 1.4;
+}
+#gameOverScreen h2 {
+    font-size: 22px;
+    color: #cc0000;
+    margin-bottom: 8px;
+}
+.score-display {
+    font-size: 14px;
+    color: #000080;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+button.win-btn {
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    padding: 4px 20px;
+    font-size: 13px;
+    font-family: "MS Sans Serif", sans-serif;
+    cursor: pointer;
+    min-width: 80px;
+    margin-top: 8px;
+}
+button.win-btn:active {
+    border-style: inset;
+}
+#hud {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 12px;
+    color: #000;
+    z-index: 5;
+    background: rgba(255,255,255,0.7);
+    padding: 2px 6px;
+}
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="startScreen">
+    <h1>SkiFree</h1>
+    <p>Ski downhill and avoid obstacles!</p>
+    <p>Use <b>Arrow Keys</b> or <b>A/D</b> to steer<br>
+       Press <b>F</b> to go faster<br>
+       Watch out for the Yeti!</p>
+    <button class="win-btn" id="startBtn">Start Game</button>
+</div>
+
+<div id="gameOverScreen" class="hidden">
+    <h2>Game Over!</h2>
+    <p class="score-display" id="finalScore">Distance: 0m</p>
+    <p id="deathReason"></p>
+    <button class="win-btn" id="restartBtn">Play Again</button>
+</div>
+
+<div id="hud" class="hidden">
+    <span id="distanceDisplay">Distance: 0m</span>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Screens
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const hud = document.getElementById('hud');
+const distanceDisplay = document.getElementById('distanceDisplay');
+const finalScore = document.getElementById('finalScore');
+const deathReason = document.getElementById('deathReason');
+
+// Game constants
+const SKIER_WIDTH = 12;
+const SKIER_HEIGHT = 18;
+const TREE_WIDTH = 20;
+const TREE_HEIGHT = 28;
+const ROCK_WIDTH = 16;
+const ROCK_HEIGHT = 10;
+const YETI_WIDTH = 24;
+const YETI_HEIGHT = 28;
+const JUMP_RAMP_WIDTH = 20;
+const JUMP_RAMP_HEIGHT = 10;
+
+// Game state
+let gameRunning = false;
+let gameOver = false;
+let distance = 0;
+let speed = 3;
+let baseSpeed = 3;
+let boosting = false;
+let skierX = 0;
+let skierY = 0;
+let skierDirection = 0; // -2, -1, 0, 1, 2 (left to right)
+let skierCrashed = false;
+let crashTimer = 0;
+let obstacles = [];
+let cameraY = 0;
+let yetiActive = false;
+let yetiX = 0;
+let yetiY = 0;
+let yetiSpeed = 2.5;
+let yetiCaught = false;
+let jumping = false;
+let jumpTimer = 0;
+let jumpHeight = 0;
+let keys = {};
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Obstacle types
+const OBS_TREE = 0;
+const OBS_ROCK = 1;
+const OBS_JUMP = 2;
+
+function spawnObstacle(minY, maxY) {
+    const type = Math.random() < 0.08 ? OBS_JUMP : (Math.random() < 0.7 ? OBS_TREE : OBS_ROCK);
+    return {
+        x: (Math.random() - 0.5) * canvas.width * 3,
+        y: minY + Math.random() * (maxY - minY),
+        type: type,
+    };
+}
+
+function initGame() {
+    distance = 0;
+    speed = baseSpeed;
+    skierX = canvas.width / 2;
+    skierY = canvas.height * 0.3;
+    skierDirection = 0;
+    skierCrashed = false;
+    crashTimer = 0;
+    cameraY = 0;
+    yetiActive = false;
+    yetiCaught = false;
+    jumping = false;
+    jumpTimer = 0;
+    jumpHeight = 0;
+    obstacles = [];
+
+    // Generate initial obstacles
+    for (let i = 0; i < 60; i++) {
+        obstacles.push(spawnObstacle(cameraY + canvas.height * 0.5, cameraY + canvas.height * 4));
+    }
+}
+
+function startGame() {
+    startScreen.classList.add('hidden');
+    gameOverScreen.classList.add('hidden');
+    hud.classList.remove('hidden');
+    gameOver = false;
+    gameRunning = true;
+    initGame();
+    requestAnimationFrame(gameLoop);
+}
+
+function endGame(reason) {
+    gameRunning = false;
+    gameOver = true;
+    hud.classList.add('hidden');
+    finalScore.textContent = 'Distance: ' + Math.floor(distance) + 'm';
+    deathReason.textContent = reason;
+    gameOverScreen.classList.remove('hidden');
+}
+
+// Input
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+    }
+});
+window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', startGame);
+
+// Drawing functions
+function drawSkier(x, y) {
+    if (skierCrashed) {
+        // Crashed skier - X shape
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y + 6);
+        ctx.moveTo(x + 6, y - 6); ctx.lineTo(x - 6, y + 6);
+        ctx.stroke();
+        // Skis scattered
+        ctx.strokeStyle = '#0000aa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y + 2); ctx.lineTo(x - 2, y + 8);
+        ctx.moveTo(x + 3, y + 4); ctx.lineTo(x + 11, y + 10);
+        ctx.stroke();
+        return;
+    }
+
+    const jy = jumping ? -jumpHeight : 0;
+
+    // Shadow when jumping
+    if (jumping) {
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath();
+        ctx.ellipse(x, y + 8, 8, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Body
+    ctx.fillStyle = '#cc0000';
+    ctx.fillRect(x - 3, y - 10 + jy, 6, 10);
+
+    // Head
+    ctx.fillStyle = '#ffcc88';
+    ctx.beginPath();
+    ctx.arc(x, y - 13 + jy, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hat
+    ctx.fillStyle = '#0000cc';
+    ctx.fillRect(x - 4, y - 17 + jy, 8, 4);
+
+    // Skis based on direction
+    ctx.strokeStyle = '#0000aa';
+    ctx.lineWidth = 2;
+    if (skierDirection === 0) {
+        // Straight down
+        ctx.beginPath();
+        ctx.moveTo(x - 4, y + jy); ctx.lineTo(x - 4, y + 8 + jy);
+        ctx.moveTo(x + 4, y + jy); ctx.lineTo(x + 4, y + 8 + jy);
+        ctx.stroke();
+    } else if (skierDirection === -1 || skierDirection === 1) {
+        // Diagonal
+        const dir = skierDirection;
+        ctx.beginPath();
+        ctx.moveTo(x - 2, y + jy); ctx.lineTo(x + dir * 8, y + 6 + jy);
+        ctx.moveTo(x + 2, y + jy); ctx.lineTo(x + dir * 10, y + 4 + jy);
+        ctx.stroke();
+    } else {
+        // Full sideways
+        const dir = skierDirection > 0 ? 1 : -1;
+        ctx.beginPath();
+        ctx.moveTo(x, y + jy); ctx.lineTo(x + dir * 12, y + 2 + jy);
+        ctx.moveTo(x, y + 3 + jy); ctx.lineTo(x + dir * 12, y + 5 + jy);
+        ctx.stroke();
+    }
+
+    // Poles
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const poleAngle = skierDirection * 0.3;
+    ctx.moveTo(x - 5, y - 6 + jy); ctx.lineTo(x - 8 - poleAngle * 5, y + 4 + jy);
+    ctx.moveTo(x + 5, y - 6 + jy); ctx.lineTo(x + 8 - poleAngle * 5, y + 4 + jy);
+    ctx.stroke();
+}
+
+function drawTree(x, y) {
+    // Trunk
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(x - 2, y + 8, 4, 10);
+
+    // Snow-covered tree layers
+    ctx.fillStyle = '#006400';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 12); ctx.lineTo(x - 8, y); ctx.lineTo(x + 8, y);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y - 6); ctx.lineTo(x - 10, y + 6); ctx.lineTo(x + 10, y + 6);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x - 12, y + 12); ctx.lineTo(x + 12, y + 12);
+    ctx.fill();
+
+    // Snow on top
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 12); ctx.lineTo(x - 4, y - 6); ctx.lineTo(x + 4, y - 6);
+    ctx.fill();
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.beginPath();
+    ctx.ellipse(x + 4, y + 18, 8, 3, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawRock(x, y) {
+    ctx.fillStyle = '#808080';
+    ctx.beginPath();
+    ctx.ellipse(x, y, 8, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#a0a0a0';
+    ctx.beginPath();
+    ctx.ellipse(x - 2, y - 1, 4, 3, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.beginPath();
+    ctx.ellipse(x + 3, y + 6, 7, 2, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawJumpRamp(x, y) {
+    ctx.fillStyle = '#d0e8ff';
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y + 5);
+    ctx.lineTo(x + 10, y + 5);
+    ctx.lineTo(x + 8, y - 3);
+    ctx.lineTo(x - 8, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#90b0d0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
+function drawYeti(x, y) {
+    // Body
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x - 10, y - 10, 20, 22);
+
+    // Fur texture
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillRect(x - 8, y - 8, 16, 18);
+
+    // Head
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x, y - 14, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes - angry
+    ctx.fillStyle = '#cc0000';
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 16, 2, 0, Math.PI * 2);
+    ctx.arc(x + 3, y - 16, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mouth
+    ctx.strokeStyle = '#cc0000';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x, y - 10, 4, 0, Math.PI);
+    ctx.stroke();
+
+    // Arms reaching
+    ctx.strokeStyle = '#e8e8e8';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y - 4); ctx.lineTo(x - 18, y - 10);
+    ctx.moveTo(x + 10, y - 4); ctx.lineTo(x + 18, y - 10);
+    ctx.stroke();
+
+    // Feet
+    ctx.fillStyle = '#d0d0d0';
+    ctx.fillRect(x - 10, y + 10, 8, 4);
+    ctx.fillRect(x + 2, y + 10, 8, 4);
+}
+
+function drawSnowflakes() {
+    ctx.fillStyle = 'rgba(200,220,240,0.3)';
+    const time = Date.now() * 0.001;
+    for (let i = 0; i < 30; i++) {
+        const sx = ((i * 137 + time * 20 * (1 + i % 3)) % canvas.width);
+        const sy = ((i * 211 + time * 40 * (1 + i % 2) + cameraY * 0.5) % canvas.height);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1 + (i % 2), 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function update() {
+    if (!gameRunning) return;
+
+    // Handle crash recovery
+    if (skierCrashed) {
+        crashTimer--;
+        if (crashTimer <= 0) {
+            skierCrashed = false;
+            skierDirection = 0;
+        }
+        return;
+    }
+
+    // Input
+    const left = keys['ArrowLeft'] || keys['a'] || keys['A'];
+    const right = keys['ArrowRight'] || keys['d'] || keys['D'];
+    boosting = keys['f'] || keys['F'];
+
+    if (left) {
+        skierDirection = Math.max(skierDirection - 1, -2);
+    } else if (right) {
+        skierDirection = Math.min(skierDirection + 1, 2);
+    } else {
+        // Gradually return to center
+        if (skierDirection > 0) skierDirection--;
+        else if (skierDirection < 0) skierDirection++;
+    }
+
+    // Speed
+    const targetSpeed = boosting ? baseSpeed * 2 : baseSpeed;
+    speed += (targetSpeed - speed) * 0.1;
+
+    // Increase difficulty over time
+    baseSpeed = 3 + distance * 0.002;
+    if (baseSpeed > 8) baseSpeed = 8;
+
+    // Movement
+    let moveX = 0;
+    let moveY = speed;
+
+    if (Math.abs(skierDirection) === 2) {
+        moveX = skierDirection > 0 ? speed * 1.2 : -speed * 1.2;
+        moveY = speed * 0.2;
+    } else if (Math.abs(skierDirection) === 1) {
+        moveX = skierDirection * speed * 0.7;
+        moveY = speed * 0.7;
+    }
+
+    skierX += moveX;
+    cameraY += moveY;
+    distance += moveY * 0.5;
+
+    // Keep skier horizontally on screen
+    if (skierX < 30) skierX = 30;
+    if (skierX > canvas.width - 30) skierX = canvas.width - 30;
+
+    // Jumping
+    if (jumping) {
+        jumpTimer--;
+        jumpHeight = Math.sin((1 - jumpTimer / 30) * Math.PI) * 30;
+        if (jumpTimer <= 0) {
+            jumping = false;
+            jumpHeight = 0;
+        }
+    }
+
+    // Collision detection
+    if (!jumping) {
+        for (const obs of obstacles) {
+            const screenY = obs.y - cameraY;
+            const dx = Math.abs(skierX - obs.x);
+            const dy = Math.abs(skierY - screenY);
+
+            if (obs.type === OBS_JUMP) {
+                if (dx < 10 && dy < 8) {
+                    jumping = true;
+                    jumpTimer = 30;
+                }
+            } else if (obs.type === OBS_TREE) {
+                if (dx < 8 && dy < 12) {
+                    skierCrashed = true;
+                    crashTimer = 40;
+                    speed = 0;
+                }
+            } else if (obs.type === OBS_ROCK) {
+                if (dx < 8 && dy < 6) {
+                    skierCrashed = true;
+                    crashTimer = 40;
+                    speed = 0;
+                }
+            }
+        }
+    }
+
+    // Spawn new obstacles ahead, remove behind
+    const aheadY = cameraY + canvas.height * 3;
+    let maxObsY = 0;
+    for (const obs of obstacles) maxObsY = Math.max(maxObsY, obs.y);
+    if (aheadY > maxObsY - canvas.height) {
+        for (let i = 0; i < 15; i++) {
+            obstacles.push(spawnObstacle(maxObsY, maxObsY + canvas.height * 2));
+        }
+    }
+    obstacles = obstacles.filter(o => o.y > cameraY - canvas.height);
+
+    // Yeti activation after 2000m
+    if (distance > 2000 && !yetiActive && !yetiCaught) {
+        yetiActive = true;
+        yetiX = skierX + (Math.random() > 0.5 ? 200 : -200);
+        yetiY = cameraY - 100;
+    }
+
+    // Yeti movement
+    if (yetiActive) {
+        const dxY = skierX - yetiX;
+        const dyY = (cameraY + skierY) - yetiY;
+        const dist = Math.sqrt(dxY * dxY + dyY * dyY);
+        if (dist > 0) {
+            yetiX += (dxY / dist) * yetiSpeed;
+            yetiY += (dyY / dist) * yetiSpeed;
+        }
+        yetiSpeed += 0.003;
+
+        // Yeti catches skier
+        const screenYetiY = yetiY - cameraY;
+        if (Math.abs(skierX - yetiX) < 14 && Math.abs(skierY - screenYetiY) < 14 && !jumping) {
+            yetiCaught = true;
+            endGame('The Abominable Snow Monster caught you!');
+            return;
+        }
+    }
+
+    // Update HUD
+    distanceDisplay.textContent = 'Distance: ' + Math.floor(distance) + 'm';
+}
+
+function draw() {
+    // Snow background
+    ctx.fillStyle = '#f0f4f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Ski tracks (subtle)
+    ctx.strokeStyle = 'rgba(200,210,220,0.4)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 8; i++) {
+        const tx = ((i * 97 + 50) % canvas.width);
+        ctx.beginPath();
+        ctx.moveTo(tx, 0);
+        ctx.lineTo(tx + 10, canvas.height);
+        ctx.stroke();
+    }
+
+    // Draw obstacles
+    for (const obs of obstacles) {
+        const screenY = obs.y - cameraY;
+        if (screenY < -40 || screenY > canvas.height + 40) continue;
+
+        if (obs.type === OBS_TREE) {
+            drawTree(obs.x, screenY);
+        } else if (obs.type === OBS_ROCK) {
+            drawRock(obs.x, screenY);
+        } else if (obs.type === OBS_JUMP) {
+            drawJumpRamp(obs.x, screenY);
+        }
+    }
+
+    // Draw yeti
+    if (yetiActive) {
+        const screenYetiY = yetiY - cameraY;
+        if (screenYetiY > -40 && screenYetiY < canvas.height + 40) {
+            drawYeti(yetiX, screenYetiY);
+        }
+    }
+
+    // Draw skier
+    drawSkier(skierX, skierY);
+
+    // Snowflakes overlay
+    drawSnowflakes();
+
+    // Speed indicator when boosting
+    if (boosting && !skierCrashed) {
+        ctx.fillStyle = 'rgba(0,0,128,0.6)';
+        ctx.font = '11px "MS Sans Serif", sans-serif';
+        ctx.fillText('FAST!', skierX - 12, skierY - 22);
+    }
+
+    // Yeti warning
+    if (yetiActive && !yetiCaught) {
+        const screenYetiY = yetiY - cameraY;
+        if (screenYetiY < -20) {
+            ctx.fillStyle = '#cc0000';
+            ctx.font = 'bold 13px "MS Sans Serif", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('!! YETI APPROACHING !!', canvas.width / 2, 20);
+            ctx.textAlign = 'left';
+        }
+    }
+}
+
+function gameLoop() {
+    update();
+    draw();
+    if (gameRunning) {
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+// Handle key repeat for direction changes
+let directionInterval = null;
+window.addEventListener('keydown', (e) => {
+    if (!gameRunning || skierCrashed) return;
+    // Immediate direction response on key press
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        skierDirection = Math.max(skierDirection - 1, -2);
+    }
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        skierDirection = Math.min(skierDirection + 1, 2);
+    }
+});
+
+// Touch controls for mobile
+let touchStartX = 0;
+canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    e.preventDefault();
+});
+canvas.addEventListener('touchmove', (e) => {
+    const dx = e.touches[0].clientX - touchStartX;
+    if (dx < -30) skierDirection = -2;
+    else if (dx < -10) skierDirection = -1;
+    else if (dx > 30) skierDirection = 2;
+    else if (dx > 10) skierDirection = 1;
+    else skierDirection = 0;
+    e.preventDefault();
+});
+canvas.addEventListener('touchend', () => {
+    skierDirection = 0;
+});
+
+// Start on Enter key
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        if (!gameRunning) startGame();
+    }
+});
+</script>
+</body>
+</html>

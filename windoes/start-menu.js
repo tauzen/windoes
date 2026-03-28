@@ -35,7 +35,8 @@ programsSubmenu.innerHTML = `<div class="submenu-item" id="subAccessories"><span
     <div class="submenu-item" id="subNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
     <div class="submenu-item" id="subWinamp"><span class="submenu-icon submenu-icon-winamp"></span>Winamp</div>
     <div class="submenu-item" id="subMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
-    <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>`;
+    <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>
+    <div class="submenu-item" id="subSkifree"><span class="submenu-icon submenu-icon-skifree"></span>SkiFree</div>`;
 document.body.appendChild(programsSubmenu);
 
 // Start button toggle
@@ -108,6 +109,11 @@ document.getElementById('subWinamp').addEventListener('click', () => {
 
 document.getElementById('subMinesweeper').addEventListener('click', () => {
     WindoesApp.open.minesweeper();
+    closeProgramsSubmenu();
+});
+
+document.getElementById('subSkifree').addEventListener('click', () => {
+    WindoesApp.open.skifree();
     closeProgramsSubmenu();
 });
 
