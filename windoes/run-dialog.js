@@ -56,7 +56,6 @@ const runActionHandlers = {
     openInternetExplorer:   WindoesApp.open.internetExplorer,
     openWinamp:             WindoesApp.open.winamp,
     openMinesweeper:        WindoesApp.open.minesweeper,
-    openSkifree:            WindoesApp.open.skifree,
     openSolitaire:          WindoesApp.open.solitaire,
 };
 
