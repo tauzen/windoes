@@ -57,6 +57,7 @@ const runActionHandlers = {
     openWinamp:             WindoesApp.open.winamp,
     openMinesweeper:        WindoesApp.open.minesweeper,
     openSkifree:            WindoesApp.open.skifree,
+    openSolitaire:          WindoesApp.open.solitaire,
 };
 
 document.getElementById('runOkBtn').addEventListener('click', () => {
