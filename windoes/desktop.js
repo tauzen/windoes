@@ -12,6 +12,7 @@ const desktopIconDefs = [
     { id: 'iconAsciiRunner', className: 'icon-ascii-runner', label: 'ASCII Runner' },
     { id: 'iconWinamp', className: 'icon-winamp', label: 'Winamp' },
     { id: 'iconMinesweeper', className: 'icon-minesweeper', label: 'Minesweeper' },
+    { id: 'iconSkifree', className: 'icon-skifree', label: 'SkiFree' },
 ];
 
 const desktopIcons = document.getElementById('desktopIcons');
@@ -30,6 +31,7 @@ const dedicatedHandlers = {
     iconRecycleBin: WindoesApp.open.recycleBin,
     iconWinamp: WindoesApp.open.winamp,
     iconMinesweeper: WindoesApp.open.minesweeper,
+    iconSkifree: WindoesApp.open.skifree,
 };
 
 // Wire up dedicated icon handlers

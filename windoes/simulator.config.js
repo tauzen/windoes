@@ -39,6 +39,8 @@ window.WIN_ME_SIMULATOR_CONFIG = {
         'winamp.exe': 'openWinamp',
         minesweeper: 'openMinesweeper',
         mine: 'openMinesweeper',
-        'winmine.exe': 'openMinesweeper'
+        'winmine.exe': 'openMinesweeper',
+        skifree: 'openSkifree',
+        'skifree.exe': 'openSkifree'
     }
 };
