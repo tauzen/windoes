@@ -885,7 +885,6 @@
         // ===== DRAG AND DROP =====
         function onCardPointerDown(e, card) {
             if (gameWon) return;
-            if (!card.faceUp) return;
 
             const isTouch = e.type === 'touchstart';
 
@@ -895,6 +894,8 @@
                 if (isTouch) onCardClick(e, card);
                 return;
             }
+
+            if (!card.faceUp) return;
 
             // Only top of waste/foundation, any face-up in tableau
             if (loc.zone === 'waste' && loc.index !== waste.length - 1) return;
