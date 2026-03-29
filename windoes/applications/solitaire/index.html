@@ -238,7 +238,7 @@
         }
 
         .stock-placeholder::after {
-            content: "\\21BB";
+            content: "\21BB";
             position: absolute;
             top: 50%;
             left: 50%;
@@ -451,14 +451,14 @@
             stock.forEach((c, i) => {
                 c.el.style.left = STOCK_X + 'px';
                 c.el.style.top = STOCK_Y + 'px';
-                c.el.style.zIndex = i;
+                c.el.style.zIndex = i + 1;
             });
 
             // Waste
             waste.forEach((c, i) => {
                 c.el.style.left = WASTE_X + 'px';
                 c.el.style.top = WASTE_Y + 'px';
-                c.el.style.zIndex = i;
+                c.el.style.zIndex = i + 1;
             });
 
             // Foundations
