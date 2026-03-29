@@ -2,7 +2,14 @@
   "name": "windoes",
   "private": true,
   "scripts": {
-    "test": "node tests/test-window-manager.js && node tests/test-duplicate-windows.js"
+    "test": "node tests/test-window-manager.js && node tests/test-duplicate-windows.js",
+    "test:ascii-runner": "cd windoes/applications/ascii-runner && node tests/test-ascii-runner.js",
+    "test:minesweeper": "cd windoes/applications/minesweeper && node tests/test-minesweeper.js",
+    "test:solitaire": "cd windoes/applications/solitaire && node tests/test-solitaire.js",
+    "test:winamp-player": "cd windoes/applications/winamp-player && node tests/test-winamp-player.js",
+    "test:apps": "npm run test:ascii-runner && npm run test:minesweeper && npm run test:solitaire && npm run test:winamp-player",
+    "test:all": "npm test && npm run test:apps",
+    "install:apps": "cd windoes/applications/ascii-runner && npm install && cd ../minesweeper && npm install && cd ../solitaire && npm install && cd ../winamp-player && npm install"
   },
   "devDependencies": {
     "playwright": "^1.52.0"

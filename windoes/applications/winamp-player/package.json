@@ -1,0 +1,10 @@
+{
+  "name": "winamp-player",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-winamp-player.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}
