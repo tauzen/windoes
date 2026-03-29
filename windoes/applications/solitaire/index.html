@@ -115,6 +115,7 @@
             position: absolute;
             cursor: pointer;
             font-family: 'Georgia', 'Times New Roman', serif;
+            touch-action: none;
         }
 
         .card-face {
@@ -492,6 +493,7 @@
             sp.style.left = STOCK_X + 'px';
             sp.style.top = STOCK_Y + 'px';
             sp.addEventListener('click', onStockClick);
+            sp.addEventListener('touchend', (e) => { e.preventDefault(); onStockClick(); });
             gameArea.appendChild(sp);
 
             // Waste placeholder
@@ -881,13 +883,18 @@
         }
 
         // ===== DRAG AND DROP =====
-        function onCardMouseDown(e, card) {
+        function onCardPointerDown(e, card) {
             if (gameWon) return;
             if (!card.faceUp) return;
 
+            const isTouch = e.type === 'touchstart';
+
             let loc = findCard(card);
             if (!loc) return;
-            if (loc.zone === 'stock') return;
+            if (loc.zone === 'stock') {
+                if (isTouch) onCardClick(e, card);
+                return;
+            }
 
             // Only top of waste/foundation, any face-up in tableau
             if (loc.zone === 'waste' && loc.index !== waste.length - 1) return;
@@ -898,8 +905,9 @@
                 cardsToMove = tableau[loc.pile].slice(loc.index);
             }
 
-            let startX = e.clientX;
-            let startY = e.clientY;
+            const touch0 = isTouch ? e.touches[0] : e;
+            let startX = touch0.clientX;
+            let startY = touch0.clientY;
             let hasMoved = false;
 
             // Store original positions
@@ -909,9 +917,14 @@
                 zIndex: c.el.style.zIndex
             }));
 
-            function onMouseMove(ev) {
-                let dx = ev.clientX - startX;
-                let dy = ev.clientY - startY;
+            function getCoords(ev) {
+                return ev.touches ? ev.touches[0] : ev;
+            }
+
+            function onPointerMove(ev) {
+                const pt = getCoords(ev);
+                let dx = pt.clientX - startX;
+                let dy = pt.clientY - startY;
 
                 if (!hasMoved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
                     hasMoved = true;
@@ -920,6 +933,7 @@
                 }
 
                 if (hasMoved) {
+                    if (ev.cancelable) ev.preventDefault();
                     cardsToMove.forEach((c, i) => {
                         c.el.style.left = (origPositions[i].left + dx) + 'px';
                         c.el.style.top = (origPositions[i].top + dy) + 'px';
@@ -928,13 +942,18 @@
                 }
             }
 
-            function onMouseUp(ev) {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
+            function onPointerUp(ev) {
+                document.removeEventListener('mousemove', onPointerMove);
+                document.removeEventListener('mouseup', onPointerUp);
+                document.removeEventListener('touchmove', onPointerMove);
+                document.removeEventListener('touchend', onPointerUp);
 
                 cardsToMove.forEach(c => c.el.classList.remove('dragging'));
 
-                if (!hasMoved) return;
+                if (!hasMoved) {
+                    if (isTouch) onCardClick(ev, card);
+                    return;
+                }
 
                 // Find drop target
                 let dropCard = cardsToMove[0];
@@ -990,9 +1009,14 @@
                 }
             }
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('mousemove', onPointerMove);
+            document.addEventListener('mouseup', onPointerUp);
+            document.addEventListener('touchmove', onPointerMove, { passive: false });
+            document.addEventListener('touchend', onPointerUp);
         }
+
+        // Keep old name as alias for backwards compat
+        function onCardMouseDown(e, card) { onCardPointerDown(e, card); }
 
         // ===== ATTACH EVENTS =====
         function attachCardEvents() {
@@ -1006,8 +1030,12 @@
 
                 newEl.addEventListener('mousedown', (e) => {
                     e.preventDefault();
-                    onCardMouseDown(e, card);
+                    onCardPointerDown(e, card);
                 });
+                newEl.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    onCardPointerDown(e, card);
+                }, { passive: false });
                 newEl.addEventListener('click', (e) => {
                     e.preventDefault();
                     onCardClick(e, card);
