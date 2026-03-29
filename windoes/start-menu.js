@@ -7,16 +7,20 @@ const startMenuEl = document.createElement('div');
 startMenuEl.className = 'start-menu';
 startMenuEl.id = 'startMenu';
 startMenuEl.setAttribute('aria-label', 'Start menu');
-startMenuEl.innerHTML = `<div class="start-rail"><strong>Windoes XD</strong></div>
+startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windows">Windoes</span><strong>XD</strong></div>
     <div class="menu-list">
+        <div class="menu-item" id="menuWindowsUpdate"><span class="menu-icon menu-icon-winupdate"></span>Windows Update</div>
+        <div class="menu-separator"></div>
         <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
+        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-favorites"></span>Favorites</div>
         <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-docs"></span>Documents</div>
         <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-settings"></span>Settings</div>
-        <div class="menu-item"><span class="menu-icon menu-icon-find"></span>Search</div>
+        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-find"></span>Find</div>
         <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
         <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
         <div class="menu-separator"></div>
-        <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon"></span>Shut Down...</div>
+        <div class="menu-item" id="menuLogOff"><span class="menu-icon menu-icon-logoff"></span>Log Off Brad...</div>
+        <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon menu-icon-shutdown"></span>Shut Down...</div>
     </div>`;
 // Hidden during boot — finishBoot() will show it
 startMenuEl.style.display = 'none';
@@ -27,17 +31,56 @@ WindoesApp.dom.startMenu = startMenuEl;
 const programsSubmenu = document.createElement('div');
 programsSubmenu.className = 'programs-submenu';
 programsSubmenu.id = 'programsSubmenu';
-programsSubmenu.innerHTML = `<div class="submenu-item" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories &nbsp; &nbsp; &#9654;</div>
-    <div class="submenu-item" id="subGames"><span class="submenu-icon submenu-icon-folder"></span>Games &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#9654;</div>
+programsSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories</div>
     <div class="submenu-item" id="subStartup"><span class="submenu-icon submenu-icon-folder"></span>StartUp</div>
     <div class="context-menu-sep"></div>
     <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
-    <div class="submenu-item" id="subNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
-    <div class="submenu-item" id="subWinamp"><span class="submenu-icon submenu-icon-winamp"></span>Winamp</div>
-    <div class="submenu-item" id="subMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
-    <div class="submenu-item" id="subSolitaire"><span class="submenu-icon submenu-icon-solitaire"></span>Solitaire</div>
-    <div class="submenu-item" id="subAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>`;
+    <div class="submenu-item" id="subMSDOS"><span class="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
+    <div class="submenu-item" id="subOutlook"><span class="submenu-icon submenu-icon-outlook"></span>Outlook Express</div>
+    <div class="submenu-item" id="subExplorer"><span class="submenu-icon submenu-icon-explorer"></span>Windows Explorer</div>`;
 document.body.appendChild(programsSubmenu);
+
+// Create Accessories Submenu DOM
+const accessoriesSubmenu = document.createElement('div');
+accessoriesSubmenu.className = 'programs-submenu accessories-submenu';
+accessoriesSubmenu.id = 'accessoriesSubmenu';
+accessoriesSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="subAccGames"><span class="submenu-icon submenu-icon-folder"></span>Games</div>
+    <div class="context-menu-sep"></div>
+    <div class="submenu-item" id="subAccCalculator"><span class="submenu-icon submenu-icon-calculator"></span>Calculator</div>
+    <div class="submenu-item" id="subAccImaging"><span class="submenu-icon submenu-icon-imaging"></span>Imaging</div>
+    <div class="submenu-item" id="subAccNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
+    <div class="submenu-item" id="subAccPaint"><span class="submenu-icon submenu-icon-paint"></span>Paint</div>
+    <div class="submenu-item" id="subAccWordPad"><span class="submenu-icon submenu-icon-wordpad"></span>WordPad</div>`;
+document.body.appendChild(accessoriesSubmenu);
+
+// Create Games Submenu DOM
+const gamesSubmenu = document.createElement('div');
+gamesSubmenu.className = 'programs-submenu games-submenu';
+gamesSubmenu.id = 'gamesSubmenu';
+gamesSubmenu.innerHTML = `<div class="submenu-item" id="subGameAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>
+    <div class="submenu-item" id="subGameMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
+    <div class="submenu-item" id="subGameSolitaire"><span class="submenu-icon submenu-icon-solitaire"></span>Solitaire</div>`;
+document.body.appendChild(gamesSubmenu);
+
+// Helper to close all menus and depress start button
+function closeAllMenus() {
+    startMenuEl.classList.remove('open');
+    WindoesApp.dom.startButton.classList.remove('pressed');
+    closeSubmenus();
+}
+
+function closeSubmenus() {
+    programsSubmenu.classList.remove('open');
+    accessoriesSubmenu.classList.remove('open');
+    gamesSubmenu.classList.remove('open');
+}
+
+function closeProgramsSubmenu() {
+    closeSubmenus();
+}
+
+// Register on shared namespace
+WindoesApp.menu.closeProgramsSubmenu = closeProgramsSubmenu;
 
 // Start button toggle
 WindoesApp.dom.startButton.addEventListener('click', (e) => {
@@ -45,102 +88,215 @@ WindoesApp.dom.startButton.addEventListener('click', (e) => {
     startMenuEl.classList.toggle('open');
     WindoesApp.dom.startButton.classList.toggle('pressed', startMenuEl.classList.contains('open'));
     if (!startMenuEl.classList.contains('open')) {
-        closeProgramsSubmenu();
+        closeSubmenus();
     }
     WindoesApp.sound.playClickSound();
 });
 
 document.addEventListener('click', (e) => {
-    if (!WindoesApp.dom.startButton.contains(e.target) && !startMenuEl.contains(e.target) && !programsSubmenu.contains(e.target)) {
-        startMenuEl.classList.remove('open');
-        WindoesApp.dom.startButton.classList.remove('pressed');
-        closeProgramsSubmenu();
+    if (!WindoesApp.dom.startButton.contains(e.target) &&
+        !startMenuEl.contains(e.target) &&
+        !programsSubmenu.contains(e.target) &&
+        !accessoriesSubmenu.contains(e.target) &&
+        !gamesSubmenu.contains(e.target)) {
+        closeAllMenus();
     }
 });
 
-// Programs submenu
-const menuPrograms = document.getElementById('menuPrograms');
-menuPrograms.addEventListener('mouseenter', () => {
-    const rect = menuPrograms.getBoundingClientRect();
-    programsSubmenu.style.bottom = (window.innerHeight - rect.top - rect.height) + 'px';
-    programsSubmenu.classList.add('open');
-});
+// Position a submenu next to its parent, clamped to viewport
+function positionSubmenu(submenu, triggerEl, parentSubmenu) {
+    const rect = triggerEl.getBoundingClientRect();
+    const taskbarHeight = 30;
 
-function closeProgramsSubmenu() {
-    programsSubmenu.classList.remove('open');
+    // Show temporarily to measure
+    submenu.style.visibility = 'hidden';
+    submenu.style.display = 'block';
+
+    if (parentSubmenu) {
+        const parentRect = parentSubmenu.getBoundingClientRect();
+        let left = parentRect.right;
+        // If it would go off-screen right, flip to the left
+        if (left + submenu.offsetWidth > window.innerWidth) {
+            left = parentRect.left - submenu.offsetWidth;
+        }
+        submenu.style.left = left + 'px';
+    }
+
+    // Calculate bottom, ensuring submenu stays within viewport
+    let bottom = window.innerHeight - rect.top - rect.height;
+    const minBottom = taskbarHeight;
+    const maxBottom = window.innerHeight - submenu.offsetHeight;
+    bottom = Math.max(minBottom, Math.min(bottom, maxBottom));
+    submenu.style.bottom = bottom + 'px';
+
+    submenu.style.visibility = '';
+    submenu.style.display = '';
+    submenu.classList.add('open');
 }
 
-// Register on shared namespace
-WindoesApp.menu.closeProgramsSubmenu = closeProgramsSubmenu;
+// ── Programs submenu hover ──
+const menuPrograms = document.getElementById('menuPrograms');
+menuPrograms.addEventListener('mouseenter', () => {
+    positionSubmenu(programsSubmenu, menuPrograms, null);
+    // Close deeper submenus when re-entering Programs
+    accessoriesSubmenu.classList.remove('open');
+    gamesSubmenu.classList.remove('open');
+});
 
-// Close submenu when leaving the Programs area
+// Close programs submenu when hovering other main menu items
+startMenuEl.querySelectorAll('.menu-item').forEach(item => {
+    if (item !== menuPrograms) {
+        item.addEventListener('mouseenter', () => { closeSubmenus(); });
+    }
+});
+
+// ── Accessories submenu hover ──
+const subAccessories = document.getElementById('subAccessories');
+subAccessories.addEventListener('mouseenter', () => {
+    positionSubmenu(accessoriesSubmenu, subAccessories, programsSubmenu);
+    gamesSubmenu.classList.remove('open');
+});
+
+// Close accessories when hovering other programs submenu items
+programsSubmenu.querySelectorAll('.submenu-item').forEach(item => {
+    if (item !== subAccessories) {
+        item.addEventListener('mouseenter', () => {
+            accessoriesSubmenu.classList.remove('open');
+            gamesSubmenu.classList.remove('open');
+        });
+    }
+});
+
+// ── Games submenu hover ──
+const subAccGames = document.getElementById('subAccGames');
+subAccGames.addEventListener('mouseenter', () => {
+    positionSubmenu(gamesSubmenu, subAccGames, accessoriesSubmenu);
+});
+
+// Close games when hovering other accessories submenu items
+accessoriesSubmenu.querySelectorAll('.submenu-item').forEach(item => {
+    if (item !== subAccGames) {
+        item.addEventListener('mouseenter', () => {
+            gamesSubmenu.classList.remove('open');
+        });
+    }
+});
+
+// ── Mouse leave handling for cascading menus ──
 startMenuEl.addEventListener('mouseleave', (e) => {
     if (!programsSubmenu.contains(e.relatedTarget)) {
-        closeProgramsSubmenu();
+        closeSubmenus();
     }
 });
 
 programsSubmenu.addEventListener('mouseleave', (e) => {
-    if (!startMenuEl.contains(e.relatedTarget)) {
-        closeProgramsSubmenu();
+    if (!startMenuEl.contains(e.relatedTarget) && !accessoriesSubmenu.contains(e.relatedTarget)) {
+        programsSubmenu.classList.remove('open');
+        accessoriesSubmenu.classList.remove('open');
+        gamesSubmenu.classList.remove('open');
     }
 });
 
-// Submenu items
+accessoriesSubmenu.addEventListener('mouseleave', (e) => {
+    if (!programsSubmenu.contains(e.relatedTarget) && !gamesSubmenu.contains(e.relatedTarget)) {
+        accessoriesSubmenu.classList.remove('open');
+        gamesSubmenu.classList.remove('open');
+    }
+});
+
+gamesSubmenu.addEventListener('mouseleave', (e) => {
+    if (!accessoriesSubmenu.contains(e.relatedTarget)) {
+        gamesSubmenu.classList.remove('open');
+    }
+});
+
+// ── Programs submenu items ──
 document.getElementById('subIE').addEventListener('click', () => {
     WindoesApp.open.internetExplorer();
-    closeProgramsSubmenu();
+    closeAllMenus();
 });
 
-document.getElementById('subNotepad').addEventListener('click', () => {
+document.getElementById('subExplorer').addEventListener('click', () => {
+    WindoesApp.open.myComputer();
+    closeAllMenus();
+});
+
+document.getElementById('subMSDOS').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'MS-DOS Prompt', text: 'This program cannot be run in Windows mode.', icon: 'error' });
+    closeAllMenus();
+});
+
+document.getElementById('subOutlook').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'Outlook Express', text: 'No Internet mail server is configured.\n\nPlease check your mail settings in Internet Accounts.', icon: 'info' });
+    closeAllMenus();
+});
+
+// ── Accessories submenu items ──
+document.getElementById('subAccNotepad').addEventListener('click', () => {
     WindoesApp.open.notepad();
-    closeProgramsSubmenu();
+    closeAllMenus();
 });
 
-document.getElementById('subAsciiRunner').addEventListener('click', () => {
-    WindoesApp.open.app('ASCII Runner', './applications/ascii-runner/index.html');
-    closeProgramsSubmenu();
+document.getElementById('subAccPaint').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'Paint', text: 'Not enough memory to open Paint.\n\nClose some programs and try again.', icon: 'error' });
+    closeAllMenus();
 });
 
-document.getElementById('subWinamp').addEventListener('click', () => {
-    WindoesApp.open.winamp();
-    closeProgramsSubmenu();
+document.getElementById('subAccCalculator').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Calculator is not available in this version of Windows.', icon: 'info' });
+    closeAllMenus();
 });
 
-document.getElementById('subMinesweeper').addEventListener('click', () => {
+document.getElementById('subAccWordPad').addEventListener('click', () => {
+    WindoesApp.open.notepad();
+    closeAllMenus();
+});
+
+// Non-functional accessories items
+['subAccImaging'].forEach(id => {
+    document.getElementById(id).addEventListener('click', () => {
+        WindoesApp.bsod.showErrorDialog({ title: 'Windows', text: 'This feature is not available in this version of Windows.', icon: 'info' });
+        closeAllMenus();
+    });
+});
+
+// ── Games submenu items ──
+document.getElementById('subGameMinesweeper').addEventListener('click', () => {
     WindoesApp.open.minesweeper();
-    closeProgramsSubmenu();
+    closeAllMenus();
 });
 
-document.getElementById('subSolitaire').addEventListener('click', () => {
+document.getElementById('subGameSolitaire').addEventListener('click', () => {
     WindoesApp.open.solitaire();
-    closeProgramsSubmenu();
+    closeAllMenus();
 });
 
-document.getElementById('subAccessories').addEventListener('click', () => {
-    WindoesApp.open.notepad();
+document.getElementById('subGameAsciiRunner').addEventListener('click', () => {
+    WindoesApp.open.app('ASCII Runner', './applications/ascii-runner/index.html');
+    closeAllMenus();
 });
 
-document.getElementById('subGames').addEventListener('click', () => {
-    WindoesApp.open.solitaire();
-    closeProgramsSubmenu();
-    startMenuEl.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
+// ── Main menu items ──
+document.getElementById('menuWindowsUpdate').addEventListener('click', () => {
+    WindoesApp.open.internetExplorer();
+    closeAllMenus();
 });
 
-// Help menu item
 document.getElementById('menuHelp').addEventListener('click', () => {
     WindoesApp.bsod.showErrorDialog({ title: 'Windows Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' });
-    startMenuEl.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
+    closeAllMenus();
+});
+
+document.getElementById('menuLogOff').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'Log Off Windows', text: 'Are you sure you want to log off?\n\nAll unsaved data will be lost.', icon: 'warning' });
+    closeAllMenus();
 });
 
 // ══════════════════════════════════════════════
 // Shutdown
 // ══════════════════════════════════════════════
 document.getElementById('menuShutdown').addEventListener('click', () => {
-    startMenuEl.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
+    closeAllMenus();
     document.body.style.background = '#000';
     WindoesApp.dom.theDesktop.style.display = 'none';
     WindoesApp.dom.theTaskbar.style.display = 'none';

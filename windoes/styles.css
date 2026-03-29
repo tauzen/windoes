@@ -1071,7 +1071,7 @@
         .start-rail {
             width: 22px;
             background: linear-gradient(to top, #0A246A, #3A6EA5);
-            color: #C0C0C0;
+            color: #fff;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -1084,6 +1084,7 @@
             letter-spacing: 1px;
         }
 
+        .start-rail .rail-windows { color: #C0C0C0; }
         .start-rail strong { color: #fff; }
 
         .menu-list {
@@ -1115,10 +1116,14 @@
             background-position: center;
         }
 
+        .menu-icon-winupdate { background-image: url("icons/ie.png"); }
+
         .menu-icon-programs { background-image: url("icons/folder.png"); }
         .menu-icon-programs::before { content: none; }
 
-        .menu-icon-docs { background-image: url("icons/floppy.png"); }
+        .menu-icon-favorites { background-image: url("icons/folder.png"); }
+
+        .menu-icon-docs { background-image: url("icons/folder.png"); }
 
         .menu-icon-settings { background-image: url("icons/printer.png"); }
         .menu-icon-settings::before { content: none; }
@@ -1129,6 +1134,14 @@
         .menu-icon-help { background-image: url("icons/help.png"); }
 
         .menu-icon-run { background-image: url("icons/display.png"); }
+
+        .menu-icon-logoff {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 2h10v12H3V2zm1 1v10h8V3H4z' fill='%23808080'/%3E%3Cpath d='M6 7h6v2H6z' fill='%23000'/%3E%3Cpath d='M5 6l-3 2 3 2V6z' fill='%23000'/%3E%3C/svg%3E");
+        }
+
+        .menu-icon-shutdown {
+            background-image: url("icons/display.png");
+        }
 
         .menu-separator {
             border-top: 1px solid #808080;
@@ -1164,6 +1177,9 @@
         }
         .programs-submenu.open { display: block; }
 
+        .accessories-submenu { z-index: 27; }
+        .games-submenu { z-index: 28; }
+
         .submenu-item {
             display: flex;
             align-items: center;
@@ -1187,14 +1203,17 @@
             background-position: center;
         }
 
+        .submenu-item-arrow::after {
+            content: "\25b6";
+            font-size: 8px;
+            margin-left: auto;
+        }
+
         .submenu-icon-ie {
             background-image: url("icons/ie.png");
         }
         .submenu-icon-notepad {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='1' width='12' height='14' rx='1' fill='%23fff' stroke='%23808080'/%3E%3Cline x1='4' y1='4' x2='12' y2='4' stroke='%23ccc' stroke-width='.7'/%3E%3Cline x1='4' y1='6.5' x2='12' y2='6.5' stroke='%23ccc' stroke-width='.7'/%3E%3Cline x1='4' y1='9' x2='12' y2='9' stroke='%23ccc' stroke-width='.7'/%3E%3Cline x1='4' y1='11.5' x2='9' y2='11.5' stroke='%23ccc' stroke-width='.7'/%3E%3C/svg%3E");
-        }
-        .submenu-icon-winamp {
-            background-image: url("icons/cd-disc.png");
         }
         .submenu-icon-minesweeper {
             background-image: url("icons/controller.png");
@@ -1207,6 +1226,36 @@
         }
         .submenu-icon-folder {
             background-image: url("icons/folder.png");
+        }
+        .submenu-icon-msdos {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='2' width='14' height='12' rx='1' fill='%23000'/%3E%3Ctext x='3' y='10' font-size='6' fill='%23C0C0C0' font-family='monospace'%3EC:%5C%3E%3C/text%3E%3C/svg%3E");
+        }
+        .submenu-icon-outlook {
+            background-image: url("icons/email.png");
+        }
+        .submenu-icon-explorer {
+            background-image: url("icons/folder.png");
+        }
+        .submenu-icon-addressbook {
+            background-image: url("icons/network.png");
+        }
+        .submenu-icon-calculator {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='1' width='10' height='14' rx='1' fill='%23C0C0C0' stroke='%23808080'/%3E%3Crect x='4' y='2' width='8' height='4' fill='%2300807F'/%3E%3Crect x='4' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='7' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='10' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='4' y='10' width='2' height='2' fill='%23808080'/%3E%3Crect x='7' y='10' width='2' height='2' fill='%23808080'/%3E%3Crect x='10' y='10' width='2' height='2' fill='%23808080'/%3E%3C/svg%3E");
+        }
+        .submenu-icon-imaging {
+            background-image: url("icons/camera.png");
+        }
+        .submenu-icon-paint {
+            background-image: url("icons/paint.png");
+        }
+        .submenu-icon-wordpad {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='1' width='12' height='14' rx='1' fill='%23fff' stroke='%230000AA'/%3E%3Cline x1='4' y1='4' x2='12' y2='4' stroke='%230000AA' stroke-width='.7'/%3E%3Cline x1='4' y1='6.5' x2='12' y2='6.5' stroke='%230000AA' stroke-width='.7'/%3E%3Cline x1='4' y1='9' x2='10' y2='9' stroke='%230000AA' stroke-width='.7'/%3E%3C/svg%3E");
+        }
+        .submenu-icon-freecell {
+            background-image: url("icons/controller.png");
+        }
+        .submenu-icon-hearts {
+            background-image: url("icons/controller.png");
         }
 
         /* ── Right-click context menu ── */
@@ -1666,6 +1715,11 @@
             }
 
             .programs-submenu {
+                left: 0 !important;
+                width: calc(100vw - 4px);
+            }
+            .accessories-submenu,
+            .games-submenu {
                 left: 0 !important;
                 width: calc(100vw - 4px);
             }
