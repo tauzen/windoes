@@ -30,7 +30,7 @@ function runBootSequence() {
             biosMemory.textContent = memCount.toLocaleString();
             biosStatus.textContent = 'Press DEL to enter SETUP, ESC to skip memory test';
             setTimeout(() => {
-                biosStatus.textContent = 'Starting Windoes Me...';
+                biosStatus.textContent = 'Starting Windoes XD...';
                 setTimeout(showSplashScreen, 600);
             }, 500);
         } else {
