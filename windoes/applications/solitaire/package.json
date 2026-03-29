@@ -1,0 +1,10 @@
+{
+  "name": "solitaire",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-solitaire.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}

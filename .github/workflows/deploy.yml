@@ -22,8 +22,9 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      - run: npm run install:apps
       - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - run: npm run test:all
 
   deploy:
     needs: test

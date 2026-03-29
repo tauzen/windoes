@@ -1,0 +1,10 @@
+{
+  "name": "minesweeper",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-minesweeper.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}

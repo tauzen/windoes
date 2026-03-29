@@ -1,0 +1,10 @@
+{
+  "name": "ascii-runner",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-ascii-runner.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}
