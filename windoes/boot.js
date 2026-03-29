@@ -30,7 +30,7 @@ function runBootSequence() {
             biosMemory.textContent = memCount.toLocaleString();
             biosStatus.textContent = 'Press DEL to enter SETUP, ESC to skip memory test';
             setTimeout(() => {
-                biosStatus.textContent = 'Starting Windows Me...';
+                biosStatus.textContent = 'Starting Windoes XD...';
                 setTimeout(showSplashScreen, 600);
             }, 500);
         } else {
@@ -44,7 +44,7 @@ function showSplashScreen() {
     bootScreen.classList.remove('hidden');
 
     const bootMessages = WindoesApp.config.bootMessages || [
-        'Loading Windows...',
+        'Loading Windoes...',
         'Loading system files...',
         'Initializing device drivers...',
         'Loading Registry...',

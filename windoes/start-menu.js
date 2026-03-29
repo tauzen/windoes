@@ -7,9 +7,9 @@ const startMenuEl = document.createElement('div');
 startMenuEl.className = 'start-menu';
 startMenuEl.id = 'startMenu';
 startMenuEl.setAttribute('aria-label', 'Start menu');
-startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windows">Windoes</span><strong>XD</strong></div>
+startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windoes">Windoes</span><strong>XD</strong></div>
     <div class="menu-list">
-        <div class="menu-item" id="menuWindowsUpdate"><span class="menu-icon menu-icon-winupdate"></span>Windows Update</div>
+        <div class="menu-item" id="menuWindoesUpdate"><span class="menu-icon menu-icon-winupdate"></span>Windoes Update</div>
         <div class="menu-separator"></div>
         <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
         <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-favorites"></span>Favorites</div>
@@ -37,7 +37,7 @@ programsSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="su
     <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
     <div class="submenu-item" id="subMSDOS"><span class="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
     <div class="submenu-item" id="subOutlook"><span class="submenu-icon submenu-icon-outlook"></span>Outlook Express</div>
-    <div class="submenu-item" id="subExplorer"><span class="submenu-icon submenu-icon-explorer"></span>Windows Explorer</div>`;
+    <div class="submenu-item" id="subExplorer"><span class="submenu-icon submenu-icon-explorer"></span>Windoes Explorer</div>`;
 document.body.appendChild(programsSubmenu);
 
 // Create Accessories Submenu DOM
@@ -222,7 +222,7 @@ document.getElementById('subExplorer').addEventListener('click', () => {
 });
 
 document.getElementById('subMSDOS').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'MS-DOS Prompt', text: 'This program cannot be run in Windows mode.', icon: 'error' });
+    WindoesApp.bsod.showErrorDialog({ title: 'MS-DOS Prompt', text: 'This program cannot be run in Windoes mode.', icon: 'error' });
     closeAllMenus();
 });
 
@@ -243,7 +243,7 @@ document.getElementById('subAccPaint').addEventListener('click', () => {
 });
 
 document.getElementById('subAccCalculator').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Calculator is not available in this version of Windows.', icon: 'info' });
+    WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Calculator is not available in this version of Windoes.', icon: 'info' });
     closeAllMenus();
 });
 
@@ -255,7 +255,7 @@ document.getElementById('subAccWordPad').addEventListener('click', () => {
 // Non-functional accessories items
 ['subAccImaging'].forEach(id => {
     document.getElementById(id).addEventListener('click', () => {
-        WindoesApp.bsod.showErrorDialog({ title: 'Windows', text: 'This feature is not available in this version of Windows.', icon: 'info' });
+        WindoesApp.bsod.showErrorDialog({ title: 'Windoes', text: 'This feature is not available in this version of Windoes.', icon: 'info' });
         closeAllMenus();
     });
 });
@@ -277,18 +277,18 @@ document.getElementById('subGameAsciiRunner').addEventListener('click', () => {
 });
 
 // ── Main menu items ──
-document.getElementById('menuWindowsUpdate').addEventListener('click', () => {
+document.getElementById('menuWindoesUpdate').addEventListener('click', () => {
     WindoesApp.open.internetExplorer();
     closeAllMenus();
 });
 
 document.getElementById('menuHelp').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Windows Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' });
+    WindoesApp.bsod.showErrorDialog({ title: 'Windoes Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' });
     closeAllMenus();
 });
 
 document.getElementById('menuLogOff').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Log Off Windows', text: 'Are you sure you want to log off?\n\nAll unsaved data will be lost.', icon: 'warning' });
+    WindoesApp.bsod.showErrorDialog({ title: 'Log Off Windoes', text: 'Are you sure you want to log off?\n\nAll unsaved data will be lost.', icon: 'warning' });
     closeAllMenus();
 });
 
