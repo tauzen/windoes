@@ -1135,10 +1135,6 @@
 
         .menu-icon-run { background-image: url("icons/display.png"); }
 
-        .menu-icon-logoff {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 2h10v12H3V2zm1 1v10h8V3H4z' fill='%23808080'/%3E%3Cpath d='M6 7h6v2H6z' fill='%23000'/%3E%3Cpath d='M5 6l-3 2 3 2V6z' fill='%23000'/%3E%3C/svg%3E");
-        }
-
         .menu-icon-shutdown {
             background-image: url("icons/display.png");
         }
