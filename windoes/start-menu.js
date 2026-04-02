@@ -287,10 +287,41 @@ document.getElementById('menuHelp').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════
-// Shutdown
+// Shutdown Dialog
 // ══════════════════════════════════════════════
-document.getElementById('menuShutdown').addEventListener('click', () => {
-    closeAllMenus();
+const shutdownDialog = document.createElement('div');
+shutdownDialog.className = 'dialog-overlay shutdown-dialog';
+shutdownDialog.id = 'shutdownDialog';
+shutdownDialog.innerHTML = `<div class="dialog-box">
+    <div class="dialog-titlebar">
+        <span>Shut Down Windows</span>
+        <button class="ctrl-btn" id="shutdownCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="dialog-body">
+        <div class="shutdown-question">
+            <div class="shutdown-computer-icon"></div>
+            <div class="dialog-text">What do you want the computer to do?</div>
+        </div>
+        <div class="shutdown-options">
+            <label><input type="radio" name="shutdownOption" value="shutdown" checked> Shut down</label>
+            <label><input type="radio" name="shutdownOption" value="restart"> Restart</label>
+            <label><input type="radio" name="shutdownOption" value="msdos"> Restart in MS-DOS mode</label>
+        </div>
+    </div>
+    <div class="dialog-buttons">
+        <button class="dialog-btn" id="shutdownOkBtn">OK</button>
+        <button class="dialog-btn" id="shutdownCancelBtn">Cancel</button>
+        <button class="dialog-btn" id="shutdownHelpBtn">Help</button>
+    </div>
+</div>`;
+document.body.appendChild(shutdownDialog);
+
+function closeShutdownDialog() {
+    shutdownDialog.classList.remove('active');
+}
+
+function performShutdown() {
+    closeShutdownDialog();
     document.body.style.background = '#000';
     WindoesApp.dom.theDesktop.style.display = 'none';
     WindoesApp.dom.theTaskbar.style.display = 'none';
@@ -301,4 +332,33 @@ document.getElementById('menuShutdown').addEventListener('click', () => {
     shutdownMsg.innerHTML = 'It\'s now safe to turn off<br>your computer.';
     shutdownMsg.style.textAlign = 'center';
     document.body.appendChild(shutdownMsg);
+}
+
+function performRestart() {
+    closeShutdownDialog();
+    location.reload();
+}
+
+document.getElementById('menuShutdown').addEventListener('click', () => {
+    closeAllMenus();
+    shutdownDialog.classList.add('active');
+    shutdownDialog.querySelector('input[value="shutdown"]').checked = true;
+    WindoesApp.sound.playClickSound();
+});
+
+document.getElementById('shutdownOkBtn').addEventListener('click', () => {
+    const selected = shutdownDialog.querySelector('input[name="shutdownOption"]:checked').value;
+    if (selected === 'shutdown') {
+        performShutdown();
+    } else if (selected === 'restart') {
+        performRestart();
+    } else if (selected === 'msdos') {
+        performRestart();
+    }
+});
+
+document.getElementById('shutdownCancelBtn').addEventListener('click', closeShutdownDialog);
+document.getElementById('shutdownCloseBtn').addEventListener('click', closeShutdownDialog);
+document.getElementById('shutdownHelpBtn').addEventListener('click', () => {
+    WindoesApp.bsod.showErrorDialog({ title: 'Windoes Help', text: 'Help is not available for Shut Down.\n\nFor more information, click Start, and then click Help.', icon: 'info' });
 });
