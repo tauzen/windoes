@@ -226,13 +226,7 @@ const WindowManager = {
         if (win._attached) return;
         const desktop = this._getDesktop();
         if (desktop && win.el) {
-            // Insert before the quick-note paragraph if present, to keep it at the end
-            const quickNote = desktop.querySelector('.quick-note');
-            if (quickNote) {
-                desktop.insertBefore(win.el, quickNote);
-            } else {
-                desktop.appendChild(win.el);
-            }
+            desktop.appendChild(win.el);
         }
         if (win.taskBtn) {
             const taskArea = this._getTaskArea();
