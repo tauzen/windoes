@@ -42,36 +42,10 @@
             gap: 16px;
         }
 
-        .boot-clouds {
+        .boot-image {
             width: 400px;
-            height: 200px;
-            background: linear-gradient(180deg, #000033 0%, #000066 20%, #003399 40%, #0066CC 55%, #3399FF 70%, #66CCFF 85%, #99DDFF 100%);
+            height: auto;
             border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-        .boot-clouds::before {
-            content: "";
-            position: absolute;
-            bottom: 30px;
-            left: 20px;
-            width: 100px;
-            height: 40px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 20px;
-            box-shadow: 150px -20px 0 10px rgba(255,255,255,0.2), 80px 10px 0 5px rgba(255,255,255,0.25);
-        }
-
-        .boot-title {
-            color: #fff;
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        .boot-title span {
-            color: #FFD700;
-            font-style: italic;
         }
 
         .boot-subtitle {
