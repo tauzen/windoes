@@ -19,7 +19,6 @@ startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windoes">Wind
         <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
         <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
         <div class="menu-separator"></div>
-        <div class="menu-item" id="menuLogOff"><span class="menu-icon menu-icon-logoff"></span>Log Off Brad...</div>
         <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon menu-icon-shutdown"></span>Shut Down...</div>
     </div>`;
 // Hidden during boot — finishBoot() will show it
@@ -284,11 +283,6 @@ document.getElementById('menuWindoesUpdate').addEventListener('click', () => {
 
 document.getElementById('menuHelp').addEventListener('click', () => {
     WindoesApp.bsod.showErrorDialog({ title: 'Windoes Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' });
-    closeAllMenus();
-});
-
-document.getElementById('menuLogOff').addEventListener('click', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Log Off Windoes', text: 'Are you sure you want to log off?\n\nAll unsaved data will be lost.', icon: 'warning' });
     closeAllMenus();
 });
 
