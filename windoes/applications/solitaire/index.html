@@ -260,6 +260,87 @@
             outline-offset: -1px;
         }
 
+        /* About dialog */
+        .about-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .about-overlay.show {
+            display: flex;
+        }
+
+        .about-window {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #404040 #404040 #dfdfdf;
+            box-shadow: 2px 2px 0 #000;
+            min-width: 260px;
+        }
+
+        .about-titlebar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 3px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .about-close-btn {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #404040 #404040 #dfdfdf;
+            width: 16px;
+            height: 14px;
+            font-size: 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+            font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .about-close-btn:active {
+            border-color: #404040 #dfdfdf #dfdfdf #404040;
+        }
+
+        .about-body {
+            padding: 16px 20px 12px;
+            text-align: center;
+        }
+
+        .about-body h2 {
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .about-body p {
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #000;
+        }
+
+        .about-separator {
+            border: none;
+            border-top: 1px solid #808080;
+            border-bottom: 1px solid #dfdfdf;
+            margin: 10px 0;
+        }
+
+        .about-footer {
+            padding: 0 20px 12px;
+            text-align: center;
+        }
+
         /* Win overlay */
         .win-overlay {
             display: none;
@@ -325,6 +406,24 @@
                 <span>Help</span>
                 <div class="menu-dropdown" id="dropdown-help">
                     <div class="menu-dropdown-item" id="menu-about">About Solitaire</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-overlay" id="aboutOverlay">
+            <div class="about-window">
+                <div class="about-titlebar">
+                    <span>About Solitaire</span>
+                    <button class="about-close-btn" id="aboutCloseBtn">x</button>
+                </div>
+                <div class="about-body">
+                    <h2>Solitaire</h2>
+                    <p>Windoes XD Edition</p>
+                    <hr class="about-separator">
+                    <p>Classic Klondike Solitaire</p>
+                </div>
+                <div class="about-footer">
+                    <button class="win-btn" id="aboutOkBtn">OK</button>
                 </div>
             </div>
         </div>
@@ -1110,7 +1209,15 @@
         document.getElementById('menu-about').addEventListener('click', (e) => {
             e.stopPropagation();
             if (openMenu) { openMenu.classList.remove('open'); openMenu = null; }
-            alert('Solitaire\nWindoes XD Edition\n\nClassic Klondike Solitaire');
+            document.getElementById('aboutOverlay').classList.add('show');
+        });
+
+        document.getElementById('aboutOkBtn').addEventListener('click', () => {
+            document.getElementById('aboutOverlay').classList.remove('show');
+        });
+
+        document.getElementById('aboutCloseBtn').addEventListener('click', () => {
+            document.getElementById('aboutOverlay').classList.remove('show');
         });
 
         // F2 shortcut
