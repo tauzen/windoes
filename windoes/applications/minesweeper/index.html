@@ -106,6 +106,7 @@
             top: 100%;
             left: 0;
             background: #c0c0c0;
+            color: black;
             border: 1px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
             box-shadow: 2px 2px 0 #404040;
@@ -119,7 +120,7 @@
         }
 
         .menu-opt {
-            padding: 3px 20px 3px 24px;
+            padding: 2px 12px 2px 20px;
             cursor: default;
             position: relative;
             white-space: nowrap;
@@ -133,7 +134,7 @@
         .menu-opt.checked::before {
             content: '✓';
             position: absolute;
-            left: 8px;
+            left: 6px;
         }
 
         .menu-opt.checked:hover::before {
@@ -144,7 +145,7 @@
             border: none;
             border-top: 1px solid #808080;
             border-bottom: 1px solid #ffffff;
-            margin: 3px 2px;
+            margin: 2px 2px;
         }
 
         /* ===== GAME PANEL ===== */
@@ -377,7 +378,7 @@
         <div class="menu-item" id="gameMenu">
             Game
             <div class="menu-dropdown">
-                <div class="menu-opt" id="menuNew">New        F2</div>
+                <div class="menu-opt" id="menuNew">New    F2</div>
                 <div class="menu-sep"></div>
                 <div class="menu-opt" id="menuBeginner">Beginner</div>
                 <div class="menu-opt" id="menuIntermediate">Intermediate</div>
