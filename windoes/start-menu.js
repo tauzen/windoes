@@ -299,7 +299,7 @@ shutdownDialog.innerHTML = `<div class="dialog-box">
     </div>
     <div class="dialog-body">
         <div class="shutdown-question">
-            <div class="shutdown-computer-icon"></div>
+            <img src="icons/my-computer.png" class="shutdown-computer-icon" alt="My Computer" draggable="false">
             <div class="dialog-text">What do you want the computer to do?</div>
         </div>
         <div class="shutdown-options">
