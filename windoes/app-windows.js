@@ -59,6 +59,7 @@ appFrame.addEventListener('load', () => {
 const winampConfig = WindoesApp.WindowManager.register('winamp', {
     template: {
         id: 'winampWindow',
+        className: 'winamp-shell',
         ariaLabel: 'Winamp',
         title: 'Winamp',
         titleIcon: 'titlelogo-winamp',
@@ -66,12 +67,23 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         minimizeBtnId: 'winampMinBtn',
         closeBtnId: 'winampCloseBtn',
         style: 'left: 200px; top: 50px; width: 289px; height: 330px; min-width: unset; min-height: unset;',
-        view: '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+        view: `
+            <div class="winamp-frame-wrap">
+                <button id="winampQuickClose" class="winamp-quick-close" aria-label="Close Winamp">&times;</button>
+                <iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>
+            </div>
+        `,
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
     iframeId: 'winampFrame',
     iframeSrc: './applications/winamp-player/index.html',
     hasChrome: false,
+    setup(config) {
+        const quickCloseBtn = config.el.querySelector('#winampQuickClose');
+        if (quickCloseBtn) {
+            quickCloseBtn.addEventListener('click', () => WindoesApp.WindowManager.close('winamp'));
+        }
+    },
 });
 
 function openWinamp() {
