@@ -12,10 +12,6 @@ startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windoes">Wind
         <div class="menu-item" id="menuWindoesUpdate"><span class="menu-icon menu-icon-winupdate"></span>Windoes Update</div>
         <div class="menu-separator"></div>
         <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
-        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-favorites"></span>Favorites</div>
-        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-docs"></span>Documents</div>
-        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-settings"></span>Settings</div>
-        <div class="menu-item menu-item-arrow"><span class="menu-icon menu-icon-find"></span>Find</div>
         <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
         <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
         <div class="menu-separator"></div>
@@ -31,7 +27,6 @@ const programsSubmenu = document.createElement('div');
 programsSubmenu.className = 'programs-submenu';
 programsSubmenu.id = 'programsSubmenu';
 programsSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories</div>
-    <div class="submenu-item" id="subStartup"><span class="submenu-icon submenu-icon-folder"></span>StartUp</div>
     <div class="context-menu-sep"></div>
     <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
     <div class="submenu-item" id="subMSDOS"><span class="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
