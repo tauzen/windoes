@@ -13,6 +13,7 @@ startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windoes">Wind
         <div class="menu-separator"></div>
         <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
         <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
+        <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
         <div class="menu-separator"></div>
         <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon menu-icon-shutdown"></span>Shut Down...</div>
     </div>`;
