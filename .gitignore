@@ -16,5 +16,8 @@ Thumbs.db
 test-results/
 playwright-report/
 
+# Build output
+dist/
+
 # Claude Code
 .claude/

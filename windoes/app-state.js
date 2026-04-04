@@ -7,9 +7,15 @@
 // references instead of implicit globals.
 // ══════════════════════════════════════════════
 
-window.WindoesApp = {
+import defaultConfig from './simulator.config.js';
+
+// Allow runtime config override (used by tests via addInitScript)
+const runtimeOverride = window.WIN_ME_SIMULATOR_CONFIG;
+const config = runtimeOverride ? { ...defaultConfig, ...runtimeOverride } : defaultConfig;
+
+const WindoesApp = {
     // ── shared state ──────────────────────────
-    config: window.WIN_ME_SIMULATOR_CONFIG || {},
+    config,
     bootDone: false,
 
     // DOM refs populated once the DOM is ready (set by boot.js)
@@ -41,3 +47,8 @@ window.WindoesApp = {
     // ── misc helpers (filled by ie-window.js) ──
     helpers: {},
 };
+
+// Keep on window for iframe communication
+window.WindoesApp = WindoesApp;
+
+export default WindoesApp;

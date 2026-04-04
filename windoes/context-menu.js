@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // Right-click Context Menu (generated from JS)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const contextMenu = document.createElement('div');
 contextMenu.className = 'context-menu';
 contextMenu.id = 'contextMenu';

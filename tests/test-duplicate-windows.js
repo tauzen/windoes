@@ -7,9 +7,9 @@
  */
 
 const path = require('path');
-const { launchBrowser } = require('./launch-browser');
+const { launchBrowser, startStaticServer } = require('./launch-browser');
 
-const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'windoes', 'index.html');
+const WINDOES_DIR = path.resolve(__dirname, '..', 'windoes');
 const BOOT_TIMEOUT = 10000;
 
 let passed = 0;
@@ -33,8 +33,8 @@ async function getVisibleWindows(page) {
     );
 }
 
-async function waitForBoot(page) {
-    await page.goto(FILE_URL);
+async function waitForBoot(page, baseUrl) {
+    await page.goto(baseUrl + '/index.html');
     // Wait until desktop is visible (boot animation completed)
     await page.waitForFunction(
         () => {
@@ -48,13 +48,16 @@ async function waitForBoot(page) {
 }
 
 async function runTests() {
+    const { server, baseUrl } = await startStaticServer(WINDOES_DIR);
     const browser = await launchBrowser();
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
 
+    try {
+
     // ── Test 1: Winamp icon opens exactly one window ──────────────────────────
     console.log('\nTest 1: Winamp icon opens exactly one window');
-    await waitForBoot(page);
+    await waitForBoot(page, baseUrl);
     const beforeWinamp = await getVisibleWindows(page);
     assert(beforeWinamp.length === 0, 'No windows visible before clicking icon');
 
@@ -74,7 +77,7 @@ async function runTests() {
 
     // ── Test 3: Minesweeper icon opens exactly one window ────────────────────
     console.log('\nTest 3: Minesweeper icon opens exactly one window');
-    await waitForBoot(page);
+    await waitForBoot(page, baseUrl);
     const beforeMine = await getVisibleWindows(page);
     assert(beforeMine.length === 0, 'No windows visible before clicking icon');
 
@@ -94,7 +97,7 @@ async function runTests() {
 
     // ── Test 5: Both Winamp and Minesweeper can be open simultaneously ────────
     console.log('\nTest 5: Both apps can be open independently at the same time');
-    await waitForBoot(page);
+    await waitForBoot(page, baseUrl);
     await page.dblclick('#iconWinamp');
     await page.waitForTimeout(200);
     await page.dblclick('#iconMinesweeper');
@@ -119,7 +122,7 @@ async function runTests() {
             ]
         };
     });
-    await waitForBoot(page2);
+    await waitForBoot(page2, baseUrl);
 
     await page2.dblclick('#iconWinamp');
     await page2.waitForTimeout(300);
@@ -138,7 +141,10 @@ async function runTests() {
 
     await ctx2.close();
 
-    await browser.close();
+    } finally {
+        await browser.close();
+        server.close();
+    }
 
     // ── Summary ───────────────────────────────────────────────────────────────
     console.log(`\n${'='.repeat(50)}`);

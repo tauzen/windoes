@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
         id: 'appWindow',

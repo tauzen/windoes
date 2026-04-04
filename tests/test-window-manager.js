@@ -12,9 +12,9 @@
  */
 
 const path = require('path');
-const { launchBrowser } = require('./launch-browser');
+const { launchBrowser, startStaticServer } = require('./launch-browser');
 
-const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'windoes', 'index.html');
+const WINDOES_DIR = path.resolve(__dirname, '..', 'windoes');
 const BOOT_TIMEOUT = 10000;
 
 let passed = 0;
@@ -30,8 +30,8 @@ function assert(condition, message) {
     }
 }
 
-async function waitForBoot(page) {
-    await page.goto(FILE_URL);
+async function waitForBoot(page, baseUrl) {
+    await page.goto(baseUrl + '/index.html');
     await page.waitForFunction(
         () => {
             const desktop = document.getElementById('theDesktop');
@@ -51,13 +51,16 @@ async function getVisibleWindows(page) {
 }
 
 async function runTests() {
+    const { server, baseUrl } = await startStaticServer(WINDOES_DIR);
     const browser = await launchBrowser();
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
 
+    try {
+
     // ── Test 1: Winamp open → close → reopen loads iframe correctly ───────
     console.log('\nTest 1: Winamp reopen loads iframe after close');
-    await waitForBoot(page);
+    await waitForBoot(page, baseUrl);
 
     await page.dblclick('#iconWinamp');
     await page.waitForTimeout(500);
@@ -210,10 +213,10 @@ async function runTests() {
     // ── Test 9: WindowManager stack is accessible ─────────────────────────
     console.log('\nTest 9: WindowManager API available and stack works');
 
-    const hasWM = await page.evaluate(() => typeof WindowManager !== 'undefined' && typeof WindowManager.getStack === 'function');
-    assert(hasWM, 'WindowManager is accessible globally');
+    const hasWM = await page.evaluate(() => typeof WindoesApp !== 'undefined' && typeof WindoesApp.WindowManager.getStack === 'function');
+    assert(hasWM, 'WindoesApp.WindowManager is accessible globally');
 
-    const stack = await page.evaluate(() => WindowManager.getStack());
+    const stack = await page.evaluate(() => WindoesApp.WindowManager.getStack());
     assert(Array.isArray(stack), 'getStack() returns an array');
 
     // ── Test 10: Close removes from stack ─────────────────────────────────
@@ -223,13 +226,13 @@ async function runTests() {
     await page.dblclick('#iconWinamp');
     await page.waitForTimeout(200);
 
-    const stackWithWinamp = await page.evaluate(() => WindowManager.getStack());
+    const stackWithWinamp = await page.evaluate(() => WindoesApp.WindowManager.getStack());
     assert(stackWithWinamp.includes('winamp'), 'Stack includes winamp after open');
 
     await page.click('#winampCloseBtn');
     await page.waitForTimeout(200);
 
-    const stackAfterClose = await page.evaluate(() => WindowManager.getStack());
+    const stackAfterClose = await page.evaluate(() => WindoesApp.WindowManager.getStack());
     assert(!stackAfterClose.includes('winamp'), 'Stack does not include winamp after close');
 
     // ── Test 11: Multiple reopen cycles ───────────────────────────────────
@@ -261,7 +264,10 @@ async function runTests() {
         await page.waitForTimeout(200);
     }
 
-    await browser.close();
+    } finally {
+        await browser.close();
+        server.close();
+    }
 
     // ── Summary ───────────────────────────────────────────────────────────
     console.log(`\n${'='.repeat(50)}`);

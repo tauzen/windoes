@@ -1,13 +1,14 @@
 // ══════════════════════════════════════════════
 // Window Dragging
 // ══════════════════════════════════════════════
+import { bringToFront } from './window-manager.js';
 
 // Shared overlay to prevent iframes from stealing pointer events during drag
 const dragOverlay = document.createElement('div');
 dragOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:none;cursor:move;';
 document.body.appendChild(dragOverlay);
 
-function makeDraggable(titlebarEl, windowEl) {
+export function makeDraggable(titlebarEl, windowEl) {
     let isDragging = false;
     let startX, startY, origLeft, origTop;
 
@@ -43,8 +44,7 @@ function makeDraggable(titlebarEl, windowEl) {
         let newLeft = origLeft + dx;
         let newTop = origTop + dy;
 
-        // Keep the window reachable: at least 60px visible horizontally,
-        // titlebar can't go above viewport or below taskbar area
+        // Keep the window reachable
         const minVisible = 60;
         const taskbarHeight = 36;
         newLeft = Math.max(-windowEl.offsetWidth + minVisible, Math.min(newLeft, window.innerWidth - minVisible));
@@ -71,9 +71,3 @@ function makeDraggable(titlebarEl, windowEl) {
     document.addEventListener('touchend', pointerUp);
     document.addEventListener('touchcancel', pointerUp);
 }
-
-// Register on shared namespace
-WindoesApp.helpers.makeDraggable = makeDraggable;
-
-// Note: makeDraggable calls are now handled by WindowManager.register()
-// via the draggable config option (default: true).

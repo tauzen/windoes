@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // Desktop Icons — generated from config, open on double-click (or tap)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const appEventType = isTouchDevice ? 'click' : 'dblclick';
 
@@ -38,7 +40,6 @@ const dedicatedHandlers = {
 Object.entries(dedicatedHandlers).forEach(([id, handler]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    // IE uses click on touch devices, dblclick on desktop (same as appEventType)
     el.addEventListener(appEventType, handler);
 });
 

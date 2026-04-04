@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 // IE Window
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
 
 // Register IE with template-based DOM generation
 const ieConfig = WindoesApp.WindowManager.register('ie', {

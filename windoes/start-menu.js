@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 // Start Menu & Submenus (generated from JS)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
 
 // Create Start Menu DOM and register on shared namespace
 const startMenuEl = document.createElement('div');

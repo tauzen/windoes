@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // Sound System (Web Audio API)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 function ensureAudio() {
