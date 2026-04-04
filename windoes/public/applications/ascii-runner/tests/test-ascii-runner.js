@@ -11,7 +11,7 @@
  */
 
 const path = require('path');
-const { launchBrowser } = require('../../../../tests/launch-browser');
+const { launchBrowser } = require('../../../../../tests/launch-browser');
 
 const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
