@@ -412,10 +412,9 @@ const WindowManager = {
                     tb.classList.add('inactive');
                 }
             }
-            // Taskbar button: pressed for focused window or minimized windows
+            // Taskbar button: pressed only for the focused window
             if (win.taskBtn && win.taskBtn.style.display !== 'none') {
-                const isMinimized = win.el.classList.contains('hidden') && win.isOpen;
-                if (isActive || isMinimized) {
+                if (isActive) {
                     win.taskBtn.classList.add('active');
                 } else {
                     win.taskBtn.classList.remove('active');
