@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // BSOD System
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const bsod = document.getElementById('bsod');
 const bsodText = document.getElementById('bsodText');
 

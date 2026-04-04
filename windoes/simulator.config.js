@@ -1,4 +1,4 @@
-window.WIN_ME_SIMULATOR_CONFIG = {
+const config = {
     bootMessages: [
         'Loading Windoes...',
         'Loading system files...',
@@ -45,3 +45,5 @@ window.WIN_ME_SIMULATOR_CONFIG = {
         'sol.exe': 'openSolitaire'
     }
 };
+
+export default config;

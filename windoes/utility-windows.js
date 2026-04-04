@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // My Computer Window
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
         id: 'myComputerWindow',

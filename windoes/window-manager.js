@@ -1,6 +1,9 @@
 // ══════════════════════════════════════════════
 // Window Manager (with template-based DOM generation)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
+import { makeDraggable } from './dragging.js';
+
 const WindowManager = {
     _stack: [],      // ordered bottom→top by z-index
     _windows: {},    // id → config
@@ -93,26 +96,6 @@ const WindowManager = {
 
     /**
      * Register a window with the manager.
-     *
-     * If config.template is provided, the window DOM is built from it.
-     * If config.taskButton is provided, a taskbar button is built.
-     * Standard controls (close, minimize, taskbar toggle, dragging) are auto-wired.
-     *
-     * @param {string} id         - unique key
-     * @param {object} config
-     *   .template      - template config for DOM generation (optional)
-     *   .taskButton    - { id, icon, label, labelId } for taskbar button (optional)
-     *   .el            - pre-existing window element (if no template)
-     *   .taskBtn       - pre-existing taskbar button (if no taskButton)
-     *   .iframe        - iframe element (or null)
-     *   .iframeId      - id of iframe within template (resolved after build)
-     *   .iframeSrc     - source URL to load when opening (or null)
-     *   .hasChrome     - true if window has menubar/toolbar/status
-     *   .draggable     - true (default) to auto-wire dragging
-     *   .onOpen        - optional callback after opening
-     *   .onClose       - optional callback after closing
-     *   .setup         - optional callback after DOM creation (receives config)
-     * @returns {object} The config object (with .el, .taskBtn, .iframe populated)
      */
     register(id, config) {
         // Build DOM from template if provided
@@ -237,7 +220,6 @@ const WindowManager = {
 
     /**
      * Open (show) a window. If already open, just brings to front.
-     * On first open, attaches the DOM to the document.
      */
     open(id) {
         const win = this._windows[id];
@@ -246,7 +228,7 @@ const WindowManager = {
         // Lazy DOM attachment
         this._ensureAttached(win);
 
-        // Load iframe if needed (first open or after close cleared it)
+        // Load iframe if needed
         if (win.iframe && win.iframeSrc) {
             const currentSrc = win.iframe.getAttribute('src');
             if (!currentSrc || currentSrc === '' || currentSrc === 'about:blank') {
@@ -301,25 +283,18 @@ const WindowManager = {
         if (win.onClose) win.onClose();
     },
 
-    /**
-     * Minimize a window (hide it but keep taskbar button visible).
-     */
     minimize(id) {
         const win = this._windows[id];
         if (!win) return;
 
         win.el.classList.add('hidden');
 
-        // Remove from stack so it doesn't hold focus
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
 
         this._updateTitlebars();
     },
 
-    /**
-     * Restore a minimized window (show + bring to front).
-     */
     restore(id) {
         const win = this._windows[id];
         if (!win) return;
@@ -328,9 +303,6 @@ const WindowManager = {
         this.bringToFront(id);
     },
 
-    /**
-     * Toggle from taskbar: if visible → minimize, if hidden → restore.
-     */
     toggleFromTaskbar(id) {
         const win = this._windows[id];
         if (!win) return;
@@ -342,18 +314,11 @@ const WindowManager = {
         }
     },
 
-    /**
-     * Minimize all open windows (Show Desktop).
-     */
     minimizeAll() {
-        // Copy stack since minimize mutates it
         const openIds = this._stack.slice();
         openIds.forEach(id => this.minimize(id));
     },
 
-    /**
-     * Maximize a window to fill the desktop area (minus taskbar).
-     */
     maximize(id) {
         const win = this._windows[id];
         if (!win || win.isMaximized) return;
@@ -365,9 +330,6 @@ const WindowManager = {
         this.bringToFront(id);
     },
 
-    /**
-     * Restore a maximized window to its previous size and position.
-     */
     unmaximize(id) {
         const win = this._windows[id];
         if (!win || !win.isMaximized) return;
@@ -384,22 +346,17 @@ const WindowManager = {
         this.bringToFront(id);
     },
 
-    /**
-     * Toggle between maximized and restored states.
-     */
     toggleMaximize(id) {
         const win = this._windows[id];
         if (!win) return;
         win.isMaximized ? this.unmaximize(id) : this.maximize(id);
     },
 
-    /** Sync the maximize button icon to the current window state */
     _updateMaxBtn(win) {
         const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
         if (btn) btn.innerHTML = win.isMaximized ? '&#10697;' : '&square;';
     },
 
-    /** Update titlebar active/inactive classes and taskbar button states */
     _updateTitlebars() {
         const focusedId = this.getFocused();
         Object.values(this._windows).forEach(win => {
@@ -412,7 +369,6 @@ const WindowManager = {
                     tb.classList.add('inactive');
                 }
             }
-            // Taskbar button: pressed only for the focused window
             if (win.taskBtn && win.taskBtn.style.display !== 'none') {
                 if (isActive) {
                     win.taskBtn.classList.add('active');
@@ -428,12 +384,11 @@ const WindowManager = {
 WindoesApp.WindowManager = WindowManager;
 
 // Legacy helper for any code still calling bringToFront(el)
-function bringToFront(windowEl) {
+export function bringToFront(windowEl) {
     const entry = Object.values(WindowManager._windows).find(w => w.el === windowEl);
     if (entry) {
         WindowManager.bringToFront(entry.id);
     } else {
-        // Fallback for unregistered windows (dialogs etc.)
         const maxZ = WindowManager._baseZ + WindowManager._stack.length + 1;
         windowEl.style.zIndex = maxZ;
     }

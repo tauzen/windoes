@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 // Boot Sequence
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
 
 const bootBios = document.getElementById('bootBios');
 const bootScreen = document.getElementById('bootScreen');
@@ -89,5 +90,3 @@ function finishBoot() {
 
 // Register on shared namespace
 WindoesApp.boot = { runBootSequence };
-
-// Boot is triggered by main.js (the orchestrator entry point)

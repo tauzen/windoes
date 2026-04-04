@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 // Run Dialog (generated from JS)
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
 
 // Create Run Dialog DOM
 const runDialog = document.createElement('div');
