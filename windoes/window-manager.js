@@ -399,16 +399,27 @@ const WindowManager = {
         if (btn) btn.innerHTML = win.isMaximized ? '&#10697;' : '&square;';
     },
 
-    /** Update titlebar active/inactive classes */
+    /** Update titlebar active/inactive classes and taskbar button states */
     _updateTitlebars() {
         const focusedId = this.getFocused();
         Object.values(this._windows).forEach(win => {
             const tb = win.el.querySelector('.titlebar');
-            if (!tb) return;
-            if (win.id === focusedId && !win.el.classList.contains('hidden')) {
-                tb.classList.remove('inactive');
-            } else {
-                tb.classList.add('inactive');
+            const isActive = win.id === focusedId && !win.el.classList.contains('hidden');
+            if (tb) {
+                if (isActive) {
+                    tb.classList.remove('inactive');
+                } else {
+                    tb.classList.add('inactive');
+                }
+            }
+            // Taskbar button: pressed for focused window or minimized windows
+            if (win.taskBtn && win.taskBtn.style.display !== 'none') {
+                const isMinimized = win.el.classList.contains('hidden') && win.isOpen;
+                if (isActive || isMinimized) {
+                    win.taskBtn.classList.add('active');
+                } else {
+                    win.taskBtn.classList.remove('active');
+                }
             }
         });
     }

@@ -945,10 +945,10 @@
         .task-button {
             height: 22px;
             background: #C0C0C0;
-            border-top: 1px solid #808080;
-            border-left: 1px solid #808080;
-            border-bottom: 1px solid #fff;
-            border-right: 1px solid #fff;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-bottom: 1px solid #808080;
+            border-right: 1px solid #808080;
             min-width: 140px;
             max-width: 180px;
             text-align: left;
@@ -963,6 +963,13 @@
             gap: 4px;
             overflow: hidden;
             white-space: nowrap;
+        }
+
+        .task-button.active {
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-bottom: 1px solid #fff;
+            border-right: 1px solid #fff;
         }
 
         .task-button .task-icon {
