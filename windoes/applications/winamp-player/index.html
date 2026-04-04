@@ -46,10 +46,10 @@
             height: 14px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
             padding: 0 3px;
             cursor: default;
             border-bottom: 1px solid #0a0a10;
+            gap: 3px;
         }
 
         .title-bar-text {
@@ -58,9 +58,36 @@
             font-weight: bold;
             letter-spacing: 4px;
             text-shadow: 1px 1px 0 #000;
-            flex: 1;
             text-align: center;
             font-family: 'Arial Narrow', Arial, sans-serif;
+            border: 1px solid;
+            border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
+            padding: 0 8px;
+            line-height: 10px;
+        }
+
+        /* Decorative groove lines flanking title text */
+        .winamp-title-bar {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .title-bar-line {
+            flex: 1;
+            height: 5px;
+            background: repeating-linear-gradient(
+                180deg,
+                transparent 0px,
+                transparent 1px,
+                #0e1828 1px,
+                #0e1828 2px,
+                #4a5a78 2px,
+                #4a5a78 3px,
+                transparent 3px,
+                transparent 5px
+            );
+            min-width: 8px;
         }
 
         .title-btn {
@@ -142,13 +169,13 @@
             image-rendering: pixelated;
             flex-shrink: 0;
             margin-left: 10px;
+            margin-top: 1px;
         }
 
         .display-time-section {
             display: flex;
             align-items: center;
             gap: 2px;
-            margin-top: 1px;
             margin-left: 4px;
         }
 
@@ -224,7 +251,7 @@
 
         .display-bitrate {
             font-size: 7px;
-            color: #009900;
+            color: #00aa00;
             font-family: 'Courier New', monospace;
             display: flex;
             gap: 4px;
@@ -270,8 +297,28 @@
 
         /* ===== SEEK BAR ===== */
         .seek-container {
-            padding: 3px 7px 2px;
+            padding: 4px 7px 3px;
             position: relative;
+        }
+
+        .seek-track {
+            position: absolute;
+            left: 7px;
+            right: 7px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 5px;
+            background: linear-gradient(180deg, #0a0a0e, #16161c, #0a0a0e);
+            border-top: 1px solid #060608;
+            border-bottom: 1px solid #2a2a32;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .seek-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(180deg, #b89850, #8a7040, #6a5430);
         }
 
         /* Shared slider styles */
@@ -327,20 +374,23 @@
         /* Seek bar specific */
         #seek-bar {
             height: 10px;
+            position: relative;
+            z-index: 1;
+            background: transparent !important;
         }
         #seek-bar::-webkit-slider-runnable-track {
-            height: 3px;
+            height: 5px;
             background: transparent;
         }
         #seek-bar::-moz-range-track {
-            height: 3px;
+            height: 5px;
             background: transparent;
         }
 
         #seek-bar::-webkit-slider-thumb {
             width: 29px;
             height: 10px;
-            background: linear-gradient(180deg, #8a7848 0%, #6a5a38 30%, #4e4228 70%, #3a3220 100%);
+            background: linear-gradient(180deg, #9a8858 0%, #7a6a48 30%, #5e5238 70%, #4a4230 100%);
             border-top: 1px solid #a09060;
             border-left: 1px solid #a09060;
             border-right: 1px solid #2a2218;
@@ -352,7 +402,7 @@
         #seek-bar::-moz-range-thumb {
             width: 29px;
             height: 10px;
-            background: linear-gradient(180deg, #8a7848 0%, #6a5a38 30%, #4e4228 70%, #3a3220 100%);
+            background: linear-gradient(180deg, #9a8858 0%, #7a6a48 30%, #5e5238 70%, #4a4230 100%);
             border-top: 1px solid #a09060;
             border-left: 1px solid #a09060;
             border-right: 1px solid #2a2218;
@@ -601,19 +651,16 @@
             border-right: 1px solid #0e0e12;
             border-bottom: 1px solid #0e0e12;
             overflow: hidden;
-            display: none;
         }
-
-        .winamp-eq.visible { display: block; }
 
         .eq-title {
             background: linear-gradient(180deg, #384868 0%, #2a3a55 30%, #1e2e48 60%, #162440 100%);
             height: 14px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 6px;
+            padding: 0 4px;
             border-bottom: 1px solid #0a0a10;
+            gap: 3px;
         }
 
         .eq-title span {
@@ -621,6 +668,10 @@
             color: #c0c8d8;
             font-weight: bold;
             letter-spacing: 1.5px;
+            border: 1px solid;
+            border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
+            padding: 0 6px;
+            line-height: 10px;
         }
 
         .eq-header-row {
@@ -689,7 +740,7 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 52px;
+            height: 90px;
             background: linear-gradient(
                 180deg,
                 #cc2200 0%,
@@ -706,7 +757,7 @@
                 #105500 88%,
                 #0a4400 100%
             );
-            opacity: 0.25;
+            opacity: 0.35;
             pointer-events: none;
             z-index: 0;
             border-radius: 1px;
@@ -719,7 +770,7 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 52px;
+            height: 90px;
             background: repeating-linear-gradient(
                 180deg,
                 transparent 0px,
@@ -732,21 +783,20 @@
         }
 
         .eq-db-labels {
-            position: absolute;
-            left: -4px;
-            top: 0;
-            height: 52px;
+            height: 90px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             pointer-events: none;
             z-index: 2;
+            padding: 0 2px;
         }
 
         .eq-db-labels span {
             font-size: 5px;
-            color: #4a4a52;
+            color: #5a5a62;
             font-family: 'Courier New', monospace;
+            white-space: nowrap;
         }
 
         .eq-band {
@@ -763,97 +813,97 @@
             font-family: 'Arial', sans-serif;
         }
 
-        .eq-slider {
+        input[type="range"].eq-slider {
             writing-mode: vertical-lr;
             direction: rtl;
-            height: 52px;
+            height: 90px;
             width: 14px;
             -webkit-appearance: none;
             appearance: none;
             background: transparent;
         }
 
-        .eq-slider::-webkit-slider-runnable-track {
+        input[type="range"].eq-slider::-webkit-slider-runnable-track {
             width: 3px;
             background: linear-gradient(90deg, #111116, #1e1e24, #111116);
             border-left: 1px solid #0a0a0e;
             border-right: 1px solid #2a2a32;
         }
 
-        .eq-slider::-webkit-slider-thumb {
+        input[type="range"].eq-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px !important;
-            height: 4px !important;
-            background: linear-gradient(180deg, #88aa88 0%, #5a8a5a 30%, #3a6a3a 70%, #2a5a2a 100%);
-            border-top: 1px solid #99cc99;
-            border-left: 1px solid #99cc99;
+            width: 16px !important;
+            height: 6px !important;
+            background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
+            border-top: 1px solid #bbddbb;
+            border-left: 1px solid #bbddbb;
             border-bottom: 1px solid #1a3a1a;
             border-right: 1px solid #1a3a1a;
-            margin-left: -6px;
+            margin-left: -7px;
             cursor: pointer;
         }
 
-        .eq-slider::-moz-range-track {
+        input[type="range"].eq-slider::-moz-range-track {
             width: 3px;
             background: linear-gradient(90deg, #111116, #1e1e24, #111116);
             border-left: 1px solid #0a0a0e;
             border-right: 1px solid #2a2a32;
         }
 
-        .eq-slider::-moz-range-thumb {
-            width: 14px !important;
-            height: 4px !important;
-            background: linear-gradient(180deg, #88aa88 0%, #5a8a5a 30%, #3a6a3a 70%, #2a5a2a 100%);
-            border-top: 1px solid #99cc99;
-            border-left: 1px solid #99cc99;
+        input[type="range"].eq-slider::-moz-range-thumb {
+            width: 16px !important;
+            height: 6px !important;
+            background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
+            border-top: 1px solid #bbddbb;
+            border-left: 1px solid #bbddbb;
             border-bottom: 1px solid #1a3a1a;
             border-right: 1px solid #1a3a1a;
             cursor: pointer;
         }
 
-        #eq-preamp-slider {
+        input#eq-preamp-slider {
             writing-mode: vertical-lr;
             direction: rtl;
-            height: 52px;
+            height: 90px;
             width: 14px;
             -webkit-appearance: none;
             appearance: none;
             background: transparent;
         }
 
-        #eq-preamp-slider::-webkit-slider-runnable-track {
+        input#eq-preamp-slider::-webkit-slider-runnable-track {
             width: 3px;
             background: linear-gradient(90deg, #111116, #1e1e24, #111116);
             border-left: 1px solid #0a0a0e;
             border-right: 1px solid #2a2a32;
         }
 
-        #eq-preamp-slider::-webkit-slider-thumb {
+        input#eq-preamp-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 4px;
-            background: linear-gradient(180deg, #88aa88 0%, #5a8a5a 30%, #3a6a3a 70%, #2a5a2a 100%);
-            border-top: 1px solid #99cc99;
-            border-left: 1px solid #99cc99;
+            width: 16px;
+            height: 6px;
+            background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
+            border-top: 1px solid #bbddbb;
+            border-left: 1px solid #bbddbb;
             border-bottom: 1px solid #1a3a1a;
             border-right: 1px solid #1a3a1a;
-            margin-left: -6px;
+            margin-left: -7px;
             cursor: pointer;
         }
 
-        #eq-preamp-slider::-moz-range-track {
+        input#eq-preamp-slider::-moz-range-track {
             width: 3px;
             background: linear-gradient(90deg, #111116, #1e1e24, #111116);
             border-left: 1px solid #0a0a0e;
             border-right: 1px solid #2a2a32;
         }
 
-        #eq-preamp-slider::-moz-range-thumb {
-            width: 14px;
-            height: 4px;
-            background: linear-gradient(180deg, #88aa88 0%, #5a8a5a 30%, #3a6a3a 70%, #2a5a2a 100%);
-            border-top: 1px solid #99cc99;
-            border-left: 1px solid #99cc99;
+        input#eq-preamp-slider::-moz-range-thumb {
+            width: 16px;
+            height: 6px;
+            background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
+            border-top: 1px solid #bbddbb;
+            border-left: 1px solid #bbddbb;
             border-bottom: 1px solid #1a3a1a;
             border-right: 1px solid #1a3a1a;
             cursor: pointer;
@@ -888,9 +938,9 @@
             height: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 0 6px;
+            padding: 0 4px;
             border-bottom: 1px solid #0a0a10;
+            gap: 3px;
         }
 
         .playlist-title span {
@@ -898,6 +948,10 @@
             color: #c0c8d8;
             font-weight: bold;
             letter-spacing: 1.5px;
+            border: 1px solid;
+            border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
+            padding: 0 6px;
+            line-height: 10px;
         }
 
         .playlist-tracks {
@@ -928,7 +982,7 @@
             padding: 1px 6px;
             font-size: 8px;
             font-family: 'Courier New', monospace;
-            color: #00bb00;
+            color: #00cc00;
             cursor: pointer;
             display: flex;
             gap: 4px;
@@ -954,7 +1008,7 @@
         }
 
         .track-num {
-            color: #009900;
+            color: #00cc00;
             min-width: 16px;
             text-align: right;
         }
@@ -967,7 +1021,7 @@
         }
 
         .track-duration {
-            color: #009900;
+            color: #00cc00;
             min-width: 32px;
             text-align: right;
         }
@@ -1007,7 +1061,7 @@
 
         .playlist-info {
             font-size: 7px;
-            color: #00bb00;
+            color: #00cc00;
             font-family: 'Courier New', monospace;
         }
 
@@ -1147,12 +1201,14 @@
         <div class="winamp-main" id="main-window">
             <div class="title-bar" id="title-bar">
                 <div class="title-buttons">
-                    <div class="title-btn" onclick="showAbout()" title="About">?</div>
+                    <div class="title-btn" title="Minimize" style="visibility:hidden">_</div>
+                    <div class="title-btn" title="Close" style="visibility:hidden">×</div>
                 </div>
+                <div class="title-bar-line"></div>
                 <span class="title-bar-text">WINAMP</span>
+                <div class="title-bar-line"></div>
                 <div class="title-buttons">
                     <div class="title-btn" title="Minimize">_</div>
-                    <div class="title-btn" title="Window shade">□</div>
                     <div class="title-btn" title="Close">×</div>
                 </div>
             </div>
@@ -1168,13 +1224,13 @@
                         <div class="clutterbar-btn">D</div>
                         <div class="clutterbar-btn">V</div>
                     </div>
-                    <!-- Left column: visualizer + time -->
+                    <!-- Left column: time + visualizer -->
                     <div class="display-left">
-                        <canvas id="visualizer" width="76" height="32"></canvas>
                         <div class="display-time-section">
                             <span class="play-indicator" id="play-indicator">▶</span>
                             <span class="display-time" id="time-display">01:51</span>
                         </div>
+                        <canvas id="visualizer" width="76" height="32"></canvas>
                     </div>
                     <!-- Right column: title + bitrate + stereo -->
                     <div class="display-right">
@@ -1197,6 +1253,9 @@
 
             <!-- Seek bar -->
             <div class="seek-container">
+                <div class="seek-track">
+                    <div class="seek-fill" id="seek-fill"></div>
+                </div>
                 <input type="range" id="seek-bar" min="0" max="100" value="0" title="Seek">
             </div>
 
@@ -1213,7 +1272,7 @@
                     <input type="range" id="balance-slider" min="-100" max="100" value="0" title="Balance">
                 </div>
                 <div class="controls-toggles">
-                    <button class="toggle-btn toggle-small" id="btn-eq" title="Equalizer">EQ</button>
+                    <button class="toggle-btn toggle-small active" id="btn-eq" title="Equalizer">EQ</button>
                     <button class="toggle-btn toggle-small active" id="btn-pl" title="Playlist">PL</button>
                 </div>
             </div>
@@ -1241,7 +1300,11 @@
 
         <!-- Equalizer Window -->
         <div class="winamp-eq" id="eq-window">
-            <div class="eq-title"><span>WINAMP EQUALIZER</span></div>
+            <div class="eq-title">
+                <div class="title-bar-line"></div>
+                <span>WINAMP EQUALIZER</span>
+                <div class="title-bar-line"></div>
+            </div>
             <div class="eq-header-row">
                 <div class="eq-header-left">
                     <button class="toggle-btn active" id="eq-on-btn">ON</button>
@@ -1266,7 +1329,9 @@
         <!-- Playlist Window -->
         <div class="winamp-playlist" id="playlist-window">
             <div class="playlist-title">
+                <div class="title-bar-line"></div>
                 <span>WINAMP PLAYLIST</span>
+                <div class="title-bar-line"></div>
             </div>
             <div class="playlist-tracks" id="playlist-tracks">
                 <!-- Tracks added dynamically -->
@@ -1475,9 +1540,8 @@
             document.getElementById('time-display').textContent = formatTime(current);
             if (duration > 0) {
                 const pct = (current / duration) * 100;
-                const sb = document.getElementById('seek-bar');
-                sb.value = pct;
-                sb.style.background = 'linear-gradient(to right, #7a6030 0%, #9a7840 ' + pct + '%, #0e0e12 ' + pct + '%, #16161c 100%)';
+                document.getElementById('seek-bar').value = pct;
+                document.getElementById('seek-fill').style.width = pct + '%';
             }
 
             updatePlaylistTimeDisplay();
@@ -1602,9 +1666,10 @@
                 indicator.textContent = '';
             }
 
-            if (!state.isPlaying && !state.isPaused) {
+            if (!state.isPlaying && !state.isPaused && audioElement && audioElement.src) {
                 document.getElementById('time-display').textContent = '00:00';
                 document.getElementById('seek-bar').value = 0;
+                document.getElementById('seek-fill').style.width = '0%';
             }
         }
 
@@ -1626,11 +1691,24 @@
             const container = document.getElementById('eq-bands');
             container.innerHTML = '';
 
+            // Add dB labels between preamp and sliders
+            const eqBody = container.parentElement;
+            let dbLabels = eqBody.querySelector('.eq-db-labels');
+            if (!dbLabels) {
+                dbLabels = document.createElement('div');
+                dbLabels.className = 'eq-db-labels';
+                dbLabels.innerHTML = '<span>+12dB</span><span>0dB</span><span>-12dB</span>';
+                eqBody.insertBefore(dbLabels, container);
+            }
+
+            // Initial slider positions for a natural curve
+            const initValues = [3, 5, 4, 2, 0, -1, -2, -1, 1, 2];
+
             EQ_LABELS.forEach((label, i) => {
                 const band = document.createElement('div');
                 band.className = 'eq-band';
                 band.innerHTML = `
-                    <input type="range" class="eq-slider" min="-12" max="12" value="0"
+                    <input type="range" class="eq-slider" min="-12" max="12" value="${initValues[i]}"
                            data-band="${i}" title="${label}">
                 `;
                 band.querySelector('input').addEventListener('input', (e) => {
@@ -1657,13 +1735,50 @@
         const visCtx = visCanvas.getContext('2d');
         let visMode = 0;
 
+        // Visualizer bar rendering config
+        const VIS_BAR_COUNT = 16;
+        const VIS_BAR_WIDTH = 4;
+        const VIS_BAR_GAP = 1;
+        const VIS_SEG_HEIGHT = 2;
+        const VIS_SEG_GAP = 1;
+        const VIS_SEG_STEP = VIS_SEG_HEIGHT + VIS_SEG_GAP;
+        const VIS_MAX_SEGS = Math.floor(visCanvas.height / VIS_SEG_STEP);
+
+        function getSegColor(seg, totalSegs) {
+            const ratio = seg / totalSegs;
+            if (ratio < 0.55) {
+                return '#22cc22';
+            } else if (ratio < 0.75) {
+                return '#88cc22';
+            } else if (ratio < 0.88) {
+                return '#cccc22';
+            } else {
+                return '#cc6622';
+            }
+        }
+
+        function drawBars(heights) {
+            visCtx.fillStyle = '#000';
+            visCtx.fillRect(0, 0, visCanvas.width, visCanvas.height);
+            for (let i = 0; i < heights.length; i++) {
+                const segs = Math.round((heights[i] / 32) * VIS_MAX_SEGS);
+                const x = i * (VIS_BAR_WIDTH + VIS_BAR_GAP);
+                for (let s = 0; s < segs; s++) {
+                    const y = visCanvas.height - (s * VIS_SEG_STEP) - VIS_SEG_HEIGHT;
+                    visCtx.fillStyle = getSegColor(s, VIS_MAX_SEGS);
+                    visCtx.fillRect(x, y, VIS_BAR_WIDTH, VIS_SEG_HEIGHT);
+                }
+            }
+        }
+
+        const staticBarHeights = [14, 22, 18, 26, 20, 24, 12, 28, 22, 16, 10, 24, 18, 14, 26, 20];
+
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
 
             if (!analyserNode || !state.isPlaying) {
-                visCtx.fillStyle = '#000';
-                visCtx.fillRect(0, 0, visCanvas.width, visCanvas.height);
-                if (!state.isPlaying) return;
+                drawBars(staticBarHeights);
+                return;
             }
 
             const bufferLength = analyserNode.frequencyBinCount;
@@ -1672,36 +1787,12 @@
                 const dataArray = new Uint8Array(bufferLength);
                 analyserNode.getByteFrequencyData(dataArray);
 
-                visCtx.fillStyle = '#000';
-                visCtx.fillRect(0, 0, visCanvas.width, visCanvas.height);
-
-                const barCount = 20;
-                const barWidth = Math.floor(visCanvas.width / barCount);
-
-                for (let i = 0; i < barCount; i++) {
-                    const dataIndex = Math.floor(i * bufferLength / barCount);
-                    const value = dataArray[dataIndex];
-                    const barHeight = (value / 255) * visCanvas.height;
-
-                    const segments = Math.floor(barHeight / 2);
-                    for (let s = 0; s < segments; s++) {
-                        const y = visCanvas.height - (s * 2) - 2;
-                        const ratio = s / (visCanvas.height / 2);
-                        let r, g;
-                        if (ratio < 0.6) {
-                            r = Math.floor(ratio * 1.5 * 60);
-                            g = 180;
-                        } else if (ratio < 0.85) {
-                            r = Math.floor(160 + (ratio - 0.6) * 300);
-                            g = 180;
-                        } else {
-                            r = 220;
-                            g = Math.floor(180 * (1 - (ratio - 0.85) * 4));
-                        }
-                        visCtx.fillStyle = `rgb(${r}, ${g}, 0)`;
-                        visCtx.fillRect(i * barWidth, y, barWidth - 1, 1);
-                    }
+                const heights = [];
+                for (let i = 0; i < VIS_BAR_COUNT; i++) {
+                    const dataIndex = Math.floor(i * bufferLength / VIS_BAR_COUNT);
+                    heights.push((dataArray[dataIndex] / 255) * visCanvas.height);
                 }
+                drawBars(heights);
             } else {
                 const dataArray = new Uint8Array(bufferLength);
                 analyserNode.getByteTimeDomainData(dataArray);
@@ -1770,9 +1861,9 @@
 
         // Seek
         const seekBar = document.getElementById('seek-bar');
+        const seekFill = document.getElementById('seek-fill');
         function updateSeekFill() {
-            const pct = seekBar.value;
-            seekBar.style.background = 'linear-gradient(to right, #7a6030 0%, #9a7840 ' + pct + '%, #0e0e12 ' + pct + '%, #16161c 100%)';
+            seekFill.style.width = seekBar.value + '%';
         }
         updateSeekFill();
         seekBar.addEventListener('mousedown', () => { state.seekDragging = true; });
@@ -1802,8 +1893,9 @@
         // EQ toggle
         document.getElementById('btn-eq').addEventListener('click', function() {
             const eq = document.getElementById('eq-window');
-            eq.classList.toggle('visible');
-            this.classList.toggle('active', eq.classList.contains('visible'));
+            const isVisible = eq.style.display !== 'none';
+            eq.style.display = isVisible ? 'none' : 'block';
+            this.classList.toggle('active', !isVisible);
         });
 
         // PL toggle
@@ -1818,6 +1910,22 @@
         document.getElementById('eq-on-btn').addEventListener('click', function() {
             state.eqEnabled = !state.eqEnabled;
             this.classList.toggle('active', state.eqEnabled);
+        });
+
+        // EQ auto (reset to defaults)
+        document.getElementById('eq-auto-btn').addEventListener('click', function() {
+            // Reset all EQ band sliders to 0
+            document.querySelectorAll('.eq-sliders-section .eq-slider').forEach((slider, i) => {
+                slider.value = 0;
+                if (eqFilters[i]) {
+                    eqFilters[i].gain.value = 0;
+                }
+            });
+            // Reset preamp
+            document.getElementById('eq-preamp-slider').value = 0;
+            if (gainNode) {
+                gainNode.gain.value = state.volume;
+            }
         });
 
         // EQ preamp
@@ -1922,6 +2030,7 @@
         buildEQ();
         drawVisualizer();
 
+
         // Load bundled demo tracks
         const demoTracks = [
             { name: 'Mori Calliope - Go-Getters', file: '01 - Chiptune Dreams.mp3' },
@@ -1945,6 +2054,15 @@
         const initTrack = state.playlist[state.currentTrack];
         updateScrollingTitle(initTrack, state.currentTrack);
         document.getElementById('time-display').textContent = '01:15';
+
+        // Set initial seek bar position (1:15 of 3:50 = 75/230 ≈ 32.6%)
+        // Set initial seek bar position (1:15 of 3:50 = 75/230 ≈ 32.6%)
+        const initPct = 32.6;
+        document.getElementById('seek-bar').value = initPct;
+        document.getElementById('seek-fill').style.width = initPct + '%';
+
+        // Set initial playlist time display
+        document.getElementById('playlist-total-time').textContent = '0:00:27:45';
 
     })();
 
