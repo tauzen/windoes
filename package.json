@@ -16,6 +16,10 @@
     "test:all": "npm test && npm run test:apps",
     "install:apps": "cd windoes/public/applications/ascii-runner && npm install && cd ../minesweeper && npm install && cd ../solitaire && npm install && cd ../winamp-player && npm install"
   },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
   "devDependencies": {
     "playwright": "^1.52.0",
     "vite": "^6.3.1"
