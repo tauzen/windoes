@@ -1,7 +1,8 @@
 // ══════════════════════════════════════════════
-// My Computer Window
+// My Computer Window — VirtualFS-backed explorer
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { initFS, navigateTo, goBack, goUp, render, setDomRefs } from './fs-explorer.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -9,40 +10,29 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
         ariaLabel: 'My Computer',
         title: 'My Computer',
         titleIcon: 'titlelogo-mycomputer',
+        titleSpanId: 'explorerTitleSpan',
         titlebarId: 'myComputerTitlebar',
         minimizeBtnId: 'myComputerMinBtn',
         maximizeBtn: true,
         closeBtnId: 'myComputerCloseBtn',
         style: 'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
         menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
-        view: `<div class="folder-view">
-                    <div class="folder-item" id="driveA">
-                        <div class="folder-item-icon drive-icon-floppy"></div>
-                        <div>3&frac12; Floppy (A:)</div>
-                    </div>
-                    <div class="folder-item" id="driveC">
-                        <div class="folder-item-icon drive-icon-hdd"></div>
-                        <div>Local Disk (C:)</div>
-                    </div>
-                    <div class="folder-item" id="driveD">
-                        <div class="folder-item-icon drive-icon-cdrom"></div>
-                        <div>CD-ROM (D:)</div>
-                    </div>
-                    <div class="folder-item">
-                        <div class="folder-item-icon folder-icon-cp"></div>
-                        <div>Control Panel</div>
-                    </div>
-                    <div class="folder-item">
-                        <div class="folder-item-icon folder-icon-folder"></div>
-                        <div>My Documents</div>
-                    </div>
-                    <div class="folder-item">
-                        <div class="folder-item-icon folder-icon-folder"></div>
-                        <div>Shared Documents</div>
-                    </div>
-                </div>`,
+        toolbar: `<div class="toolbar explorer-toolbar">
+                <div class="toolbar-grip"></div>
+                <button class="tb-btn" id="explorerBackBtn" disabled><span class="tb-icon tb-icon-back"></span>Back</button>
+                <button class="tb-btn" id="explorerUpBtn"><span class="tb-icon tb-icon-up"></span>Up</button>
+            </div>
+            <div class="address-row">
+                <div class="toolbar-grip"></div>
+                <label for="explorerAddress">Address</label>
+                <div class="address-input-wrap">
+                    <span class="address-icon address-icon-folder" aria-hidden="true"></span>
+                    <input id="explorerAddress" value="My Computer" aria-label="Address bar" readonly />
+                </div>
+            </div>`,
+        view: '<div class="folder-view explorer-folder-view"></div>',
         viewStyle: 'overflow-y:auto;',
-        statusBar: '<span class="status-left">6 object(s)</span><span class="status-right">My Computer</span>',
+        statusBar: '<span class="status-left explorer-status-left">0 object(s)</span><span class="status-right">My Computer</span>',
     },
     taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
     iframe: null,
@@ -50,27 +40,35 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     hasChrome: true,
 });
 
+// Wire explorer navigation buttons
+myComputerConfig.el.querySelector('#explorerBackBtn').addEventListener('click', goBack);
+myComputerConfig.el.querySelector('#explorerUpBtn').addEventListener('click', goUp);
+
+// Give explorer module its DOM refs
+setDomRefs(myComputerConfig);
+
+let fsReady = false;
+
+async function ensureFS() {
+    if (fsReady) return;
+    await initFS();
+    fsReady = true;
+}
+
 function openMyComputer() {
     WindoesApp.WindowManager.open('myComputer');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
     WindoesApp.sound.playClickSound();
+
+    ensureFS().then(() => {
+        navigateTo(null);
+    });
 }
 
 function closeMyComputer() {
     WindoesApp.WindowManager.close('myComputer');
 }
-
-// Drive click actions
-myComputerConfig.el.querySelector('#driveA').addEventListener('dblclick', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'A:\\', text: 'A:\\ is not accessible.\n\nThe device is not ready.', icon: 'error' });
-});
-myComputerConfig.el.querySelector('#driveC').addEventListener('dblclick', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'Local Disk (C:)', text: 'Access to C:\\ is restricted by system policy.\n\nContact your system administrator.', icon: 'warning' });
-});
-myComputerConfig.el.querySelector('#driveD').addEventListener('dblclick', () => {
-    WindoesApp.bsod.showErrorDialog({ title: 'D:\\', text: 'D:\\ is not accessible.\n\nPlease insert a disc into drive D:.', icon: 'error' });
-});
 
 // ══════════════════════════════════════════════
 // Notepad

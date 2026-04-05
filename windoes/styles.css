@@ -1587,6 +1587,65 @@
         .folder-icon-folder::before,
         .folder-icon-folder::after { content: none; }
 
+        /* File icon (generic document) */
+        .folder-icon-file {
+            background: linear-gradient(135deg, #fff 60%, #c0c0c0 60%) no-repeat center;
+            background-size: 24px 28px;
+            border: 1px solid #808080;
+            border-radius: 1px;
+            position: relative;
+        }
+        .folder-icon-file::before {
+            content: "";
+            position: absolute;
+            top: 8px; left: 6px;
+            width: 18px; height: 2px;
+            background: #808080;
+            box-shadow: 0 4px 0 #808080, 0 8px 0 #808080, 0 12px 0 #808080;
+        }
+        .folder-icon-file::after { content: none; }
+
+        /* Up toolbar button icon */
+        .tb-icon-up { position: relative; }
+        .tb-icon-up::before {
+            content: "";
+            position: absolute;
+            top: 3px; left: 6px;
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 6px solid #000080;
+        }
+        .tb-icon-up::after {
+            content: "";
+            position: absolute;
+            top: 9px; left: 8px;
+            width: 6px; height: 6px;
+            background: #000080;
+        }
+
+        /* Explorer empty state */
+        .explorer-empty {
+            color: #808080;
+            font-size: 11px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        /* Explorer folder address icon override */
+        .address-icon-folder {
+            background: linear-gradient(180deg, #fc0 0%, #e8a000 100%);
+            border-radius: 1px;
+            width: 14px !important;
+            height: 11px !important;
+            top: 50% !important;
+            margin-top: -5px !important;
+            border: none;
+        }
+
+        /* Explorer-specific context menu layering */
+        .explorer-ctx { z-index: 10000; }
+
         /* ── Clock tooltip ── */
         .clock-tooltip {
             position: fixed;
