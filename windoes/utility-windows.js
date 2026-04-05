@@ -2,7 +2,8 @@
 // My Computer Window — VirtualFS-backed explorer
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { initFS, navigateTo, goBack, goUp, render, setDomRefs } from './fs-explorer.js';
+import { basename } from './virtual-fs.js';
+import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -95,6 +96,59 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     hasChrome: true,
     onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
+
+async function saveNotepadDocument(forceSaveAs = false) {
+    try {
+        await ensureFS();
+
+        const textarea = notepadConfig.el.querySelector('#notepadText');
+        if (!textarea) return;
+
+        let filePath = textarea.dataset.filePath || '';
+        if (!filePath || forceSaveAs) {
+            const suggested = filePath || '/C:/My Documents/Untitled.txt';
+            const selectedPath = window.prompt('Save as', suggested);
+            if (!selectedPath) return; // user cancelled
+            filePath = selectedPath.trim();
+            if (!filePath) return;
+        }
+
+        await saveTextFile(filePath, textarea.value || '');
+        textarea.dataset.filePath = filePath;
+
+        const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+        if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
+
+        WindoesApp.sound.playClickSound();
+    } catch (e) {
+        WindoesApp.bsod.showErrorDialog({
+            title: 'Save Error',
+            text: `Cannot save file: ${e.message}`,
+            icon: 'error',
+        });
+    }
+}
+
+function setupNotepadSaving() {
+    const notepadWindowEl = notepadConfig.el;
+    const fileMenu = notepadWindowEl.querySelector('#notepadFileMenu');
+
+    if (fileMenu) {
+        // For now, clicking File performs a Save As action.
+        fileMenu.addEventListener('click', () => saveNotepadDocument(true));
+    }
+
+    const saveShortcutHandler = (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            saveNotepadDocument(false);
+        }
+    };
+
+    notepadWindowEl.addEventListener('keydown', saveShortcutHandler);
+}
+
+setupNotepadSaving();
 
 function openNotepad() {
     WindoesApp.WindowManager.open('notepad');
