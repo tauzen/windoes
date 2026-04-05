@@ -269,10 +269,16 @@ async function createNewFolder() {
         name = `New Folder (${counter})`;
     }
 
+    const createdPath = currentPath + '/' + name;
+
     try {
-        await fs.mkdir(currentPath + '/' + name);
+        await fs.mkdir(createdPath);
         WindoesApp.sound.playClickSound();
+
+        // Immediately start inline rename on the newly created folder
+        selectedItemPath = createdPath;
         await render();
+        startInlineRename();
     } catch (e) {
         WindoesApp.bsod.showErrorDialog({ title: 'Error', text: `Cannot create folder: ${e.message}`, icon: 'error' });
     }
