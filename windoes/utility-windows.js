@@ -129,26 +129,96 @@ async function saveNotepadDocument(forceSaveAs = false) {
     }
 }
 
-function setupNotepadSaving() {
+function newNotepadDocument() {
+    const textarea = notepadConfig.el.querySelector('#notepadText');
+    if (!textarea) return;
+
+    textarea.value = '';
+    delete textarea.dataset.filePath;
+
+    const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+    if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+
+    textarea.focus();
+    WindoesApp.sound.playClickSound();
+}
+
+function setupNotepadFileMenu() {
     const notepadWindowEl = notepadConfig.el;
     const fileMenu = notepadWindowEl.querySelector('#notepadFileMenu');
+    if (!fileMenu) return;
 
-    if (fileMenu) {
-        // For now, clicking File performs a Save As action.
-        fileMenu.addEventListener('click', () => saveNotepadDocument(true));
+    const dropdown = document.createElement('div');
+    dropdown.id = 'notepadFileDropdown';
+    dropdown.className = 'context-menu notepad-file-menu';
+    dropdown.innerHTML = `
+        <div class="context-menu-item" data-action="new">New</div>
+        <div class="context-menu-item" data-action="save">Save</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="exit">Exit</div>
+    `;
+    document.body.appendChild(dropdown);
+
+    function closeMenu() {
+        dropdown.classList.remove('open');
     }
 
-    const saveShortcutHandler = (e) => {
+    function openMenu() {
+        const rect = fileMenu.getBoundingClientRect();
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = rect.bottom + 'px';
+        dropdown.classList.add('open');
+    }
+
+    fileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (dropdown.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    dropdown.addEventListener('click', (e) => {
+        const item = e.target.closest('.context-menu-item');
+        if (!item) return;
+
+        const action = item.dataset.action;
+        closeMenu();
+
+        if (action === 'new') {
+            newNotepadDocument();
+        } else if (action === 'save') {
+            saveNotepadDocument(false);
+        } else if (action === 'exit') {
+            closeNotepad();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.classList.contains('open')) return;
+        if (dropdown.contains(e.target) || fileMenu.contains(e.target)) return;
+        closeMenu();
+    });
+
+    notepadWindowEl.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
             saveNotepadDocument(false);
+            return;
         }
-    };
-
-    notepadWindowEl.addEventListener('keydown', saveShortcutHandler);
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+            e.preventDefault();
+            newNotepadDocument();
+            return;
+        }
+        if (e.key === 'Escape') {
+            closeMenu();
+        }
+    });
 }
 
-setupNotepadSaving();
+setupNotepadFileMenu();
 
 function openNotepad() {
     WindoesApp.WindowManager.open('notepad');
