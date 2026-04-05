@@ -13,29 +13,13 @@ const fs = new VirtualFS();
 const DEFAULT_DIRS = [
     '/C:',
     '/C:/My Documents',
-    '/C:/Program Files',
-    '/C:/Program Files/Accessories',
-    '/C:/Program Files/Common Files',
-    '/C:/Program Files/Internet Explorer',
-    '/C:/Program Files/Windows Media Player',
-    '/C:/Windows',
-    '/C:/Windows/Desktop',
-    '/C:/Windows/Fonts',
-    '/C:/Windows/Help',
-    '/C:/Windows/Media',
-    '/C:/Windows/Start Menu',
-    '/C:/Windows/Start Menu/Programs',
-    '/C:/Windows/System',
-    '/C:/Windows/System32',
-    '/C:/Windows/Temp',
-    '/D:',
 ];
 
 // Special top-level items shown in "My Computer" root view
 const MY_COMPUTER_ITEMS = [
     { label: '3\u00BD Floppy (A:)',  icon: 'drive-icon-floppy',  action: 'error', errorTitle: 'A:\\', errorText: 'A:\\ is not accessible.\n\nThe device is not ready.', errorIcon: 'error' },
     { label: 'Local Disk (C:)',      icon: 'drive-icon-hdd',     action: 'navigate', path: '/C:' },
-    { label: 'CD-ROM (D:)',          icon: 'drive-icon-cdrom',   action: 'navigate', path: '/D:' },
+    { label: 'CD-ROM (D:)',          icon: 'drive-icon-cdrom',   action: 'error', errorTitle: 'D:\\', errorText: 'D:\\ is not accessible.\n\nPlease insert a disc into drive D:.', errorIcon: 'error' },
     { label: 'Control Panel',        icon: 'folder-icon-cp',     action: 'error', errorTitle: 'Control Panel', errorText: 'Control Panel is not available in this version of Windoes.', errorIcon: 'info' },
 ];
 
@@ -71,12 +55,8 @@ async function initFS() {
             await fs.mkdir(dir);
         }
     }
-    // Add a couple of sample files
-    if (!(await fs.exists('/C:/Windows/README.txt'))) {
-        await fs.writeFile('/C:/Windows/README.txt', 'Welcome to Windoes XD — Millennium Edition.');
-    }
-    if (!(await fs.exists('/C:/My Documents/notes.txt'))) {
-        await fs.writeFile('/C:/My Documents/notes.txt', 'My important notes.');
+    if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
+        await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
     }
 }
 
