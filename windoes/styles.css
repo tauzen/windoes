@@ -401,15 +401,13 @@
 
         .headless-drag-handle {
             position: absolute;
-            top: 0;
+            top: 14px;
             left: 0;
             right: 0;
             height: 14px;
             z-index: 1;
             cursor: move;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
+            width: 262px;
         }
 
         .headless-close-btn {

@@ -65,7 +65,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         ariaLabel: 'Winamp',
         title: 'Winamp',
         style: 'left: 200px; top: 50px; width: 275px; height: 316px; min-width: unset; min-height: unset;',
-        view: '<div class="headless-drag-handle"><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
+        view: '<div><div class="headless-drag-handle"></div><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
             + '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
@@ -75,7 +75,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
     draggable: false,
     setup(config) {
         const handle = config.el.querySelector('.headless-drag-handle');
-        const closeBtn = handle.querySelector('.headless-close-btn');
+        const closeBtn = config.el.querySelector('.headless-close-btn');
         makeDraggable(handle, config.el);
         closeBtn.addEventListener('click', () => WindoesApp.WindowManager.close('winamp'));
     },
