@@ -64,7 +64,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         id: 'winampWindow',
         ariaLabel: 'Winamp',
         title: 'Winamp',
-        style: 'left: 200px; top: 50px; width: 275px; height: 316px; min-width: unset; min-height: unset;',
+        style: 'left: 200px; top: 50px; width: 275px; height: 369px; min-width: unset; min-height: unset;',
         view: '<div><div class="headless-drag-handle"></div><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
             + '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
     },
