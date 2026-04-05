@@ -97,6 +97,78 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
 
+const notepadSaveDialog = document.createElement('div');
+notepadSaveDialog.className = 'dialog-overlay notepad-save-dialog';
+notepadSaveDialog.id = 'notepadSaveDialog';
+notepadSaveDialog.innerHTML = `<div class="dialog-box" style="min-width:420px;">
+    <div class="dialog-titlebar">
+        <span>Save As</span>
+        <button class="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="dialog-body">
+        <div class="dialog-icon dialog-icon-info"></div>
+        <div class="notepad-save-fields">
+            <div class="dialog-text">Choose where to save this text document.</div>
+            <div class="notepad-save-row">
+                <label for="notepadSavePathInput">File name:</label>
+                <input type="text" id="notepadSavePathInput" aria-label="Save path" />
+            </div>
+        </div>
+    </div>
+    <div class="dialog-buttons">
+        <button class="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
+        <button class="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
+    </div>
+</div>`;
+document.body.appendChild(notepadSaveDialog);
+
+const notepadSavePathInput = notepadSaveDialog.querySelector('#notepadSavePathInput');
+const notepadSaveConfirmBtn = notepadSaveDialog.querySelector('#notepadSaveConfirmBtn');
+const notepadSaveCancelBtn = notepadSaveDialog.querySelector('#notepadSaveCancelBtn');
+const notepadSaveCloseBtn = notepadSaveDialog.querySelector('#notepadSaveCloseBtn');
+let notepadSaveResolver = null;
+
+function closeNotepadSaveDialog(resultPath = null) {
+    notepadSaveDialog.classList.remove('active');
+    if (notepadSaveResolver) {
+        const resolve = notepadSaveResolver;
+        notepadSaveResolver = null;
+        resolve(resultPath);
+    }
+}
+
+function requestNotepadSavePath(suggestedPath) {
+    if (notepadSaveResolver) {
+        closeNotepadSaveDialog(null);
+    }
+
+    notepadSavePathInput.value = suggestedPath || '/C:/My Documents/Untitled.txt';
+    notepadSaveDialog.classList.add('active');
+    notepadSavePathInput.focus();
+    notepadSavePathInput.select();
+
+    return new Promise((resolve) => {
+        notepadSaveResolver = resolve;
+    });
+}
+
+notepadSaveConfirmBtn.addEventListener('click', () => {
+    closeNotepadSaveDialog((notepadSavePathInput.value || '').trim());
+});
+notepadSaveCancelBtn.addEventListener('click', () => closeNotepadSaveDialog(null));
+notepadSaveCloseBtn.addEventListener('click', () => closeNotepadSaveDialog(null));
+notepadSavePathInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        closeNotepadSaveDialog((notepadSavePathInput.value || '').trim());
+        return;
+    }
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        closeNotepadSaveDialog(null);
+    }
+});
+
 async function saveNotepadDocument(forceSaveAs = false) {
     try {
         await ensureFS();
@@ -107,7 +179,7 @@ async function saveNotepadDocument(forceSaveAs = false) {
         let filePath = textarea.dataset.filePath || '';
         if (!filePath || forceSaveAs) {
             const suggested = filePath || '/C:/My Documents/Untitled.txt';
-            const selectedPath = window.prompt('Save as', suggested);
+            const selectedPath = await requestNotepadSavePath(suggested);
             if (!selectedPath) return; // user cancelled
             filePath = selectedPath.trim();
             if (!filePath) return;
@@ -154,6 +226,7 @@ function setupNotepadFileMenu() {
     dropdown.innerHTML = `
         <div class="context-menu-item" data-action="new">New</div>
         <div class="context-menu-item" data-action="save">Save</div>
+        <div class="context-menu-item" data-action="save-as">Save As...</div>
         <div class="context-menu-sep"></div>
         <div class="context-menu-item" data-action="exit">Exit</div>
     `;
@@ -190,6 +263,8 @@ function setupNotepadFileMenu() {
             newNotepadDocument();
         } else if (action === 'save') {
             saveNotepadDocument(false);
+        } else if (action === 'save-as') {
+            saveNotepadDocument(true);
         } else if (action === 'exit') {
             closeNotepad();
         }
@@ -202,6 +277,11 @@ function setupNotepadFileMenu() {
     });
 
     notepadWindowEl.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            saveNotepadDocument(true);
+            return;
+        }
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
             saveNotepadDocument(false);
