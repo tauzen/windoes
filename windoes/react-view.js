@@ -1,9 +1,6 @@
-const React = window.React;
-const ReactDOM = window.ReactDOM;
-
-if (!React || !ReactDOM || typeof ReactDOM.createRoot !== 'function') {
-    throw new Error('React runtime is not available. Ensure vendor/react*.js is loaded before main.js');
-}
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 
 export const h = React.createElement;
 export const Fragment = React.Fragment;
@@ -100,10 +97,10 @@ export function htmlToReactNodes(html, keyPrefix = 'html') {
 
 export function renderInto(container, node) {
     if (!container.__windoesReactRoot) {
-        container.__windoesReactRoot = ReactDOM.createRoot(container);
+        container.__windoesReactRoot = createRoot(container);
     }
 
-    ReactDOM.flushSync(() => {
+    flushSync(() => {
         container.__windoesReactRoot.render(node);
     });
 }
