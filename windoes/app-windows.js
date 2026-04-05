@@ -170,6 +170,9 @@ function onWinampDragMove(e) {
 }
 
 function onWinampDragEnd() {
+    if (winampDrag) {
+        winampDrag.iframe.style.pointerEvents = '';
+    }
     winampDrag = null;
     document.removeEventListener('mousemove', onWinampDragMove);
     document.removeEventListener('mouseup', onWinampDragEnd);
@@ -189,8 +192,11 @@ window.addEventListener('message', (e) => {
     }
     if (e.data && e.data.type === 'winamp-drag-start') {
         const el = winampConfig.el;
-        const iframeRect = el.querySelector('iframe').getBoundingClientRect();
+        const iframe = el.querySelector('iframe');
+        const iframeRect = iframe.getBoundingClientRect();
+        iframe.style.pointerEvents = 'none';
         winampDrag = {
+            iframe,
             startX: iframeRect.left + e.data.clientX,
             startY: iframeRect.top + e.data.clientY,
             startLeft: parseInt(el.style.left) || el.offsetLeft,
