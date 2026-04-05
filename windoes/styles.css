@@ -409,7 +409,7 @@
 
         .headless-drag-handle {
             position: absolute;
-            top: 14px;
+            top: 0px;
             left: 0;
             right: 0;
             height: 14px;
