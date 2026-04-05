@@ -200,6 +200,7 @@ function createContextMenu() {
     explorerMenu.innerHTML = `
         <div class="context-menu-item" data-action="new-folder">New Folder</div>
         <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="rename">Rename</div>
         <div class="context-menu-item" data-action="delete">Delete</div>
     `;
     document.body.appendChild(explorerMenu);
@@ -209,6 +210,8 @@ function createContextMenu() {
         explorerMenu.classList.remove('open');
         if (action === 'new-folder') {
             createNewFolder();
+        } else if (action === 'rename') {
+            startInlineRename();
         } else if (action === 'delete') {
             deleteSelected();
         }
@@ -238,10 +241,13 @@ function wireContextMenu() {
 
         // Update menu items visibility
         const deleteItem = explorerMenu.querySelector('[data-action="delete"]');
+        const renameItem = explorerMenu.querySelector('[data-action="rename"]');
         if (selectedItemPath) {
             deleteItem.classList.remove('disabled');
+            renameItem.classList.remove('disabled');
         } else {
             deleteItem.classList.add('disabled');
+            renameItem.classList.add('disabled');
         }
 
         explorerMenu.style.left = e.clientX + 'px';
@@ -290,6 +296,80 @@ async function deleteSelected() {
         WindoesApp.bsod.showErrorDialog({ title: 'Error Deleting File', text: `Cannot delete '${name}': ${e.message}`, icon: 'error' });
     }
     selectedItemPath = null;
+}
+
+// ── Inline Rename ──────────────────────────────────────────────────────────
+
+function startInlineRename() {
+    if (!selectedItemPath) return;
+
+    const itemEl = viewEl.querySelector(`.folder-item[data-path="${CSS.escape(selectedItemPath)}"]`);
+    if (!itemEl) return;
+
+    const pathToRename = selectedItemPath;
+    const oldName = basename(pathToRename);
+
+    // Replace the name label with an input
+    const labelEl = itemEl.querySelector('div:last-child');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'folder-rename-input';
+    input.value = oldName;
+    labelEl.replaceWith(input);
+
+    input.focus();
+    // Select name without extension for files
+    const dotIndex = oldName.lastIndexOf('.');
+    if (dotIndex > 0 && itemEl.dataset.type === 'file') {
+        input.setSelectionRange(0, dotIndex);
+    } else {
+        input.select();
+    }
+
+    let committed = false;
+
+    async function commitRename() {
+        if (committed) return;
+        committed = true;
+
+        const newName = input.value.trim();
+        if (!newName || newName === oldName) {
+            await render();
+            return;
+        }
+
+        const parentDir = pathToRename.slice(0, pathToRename.lastIndexOf('/'));
+        const newPath = parentDir + '/' + newName;
+
+        try {
+            await fs.rename(pathToRename, newPath);
+            WindoesApp.sound.playClickSound();
+        } catch (e) {
+            WindoesApp.bsod.showErrorDialog({
+                title: 'Error Renaming',
+                text: `Cannot rename '${oldName}': ${e.message}`,
+                icon: 'error'
+            });
+        }
+        await render();
+    }
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            commitRename();
+        } else if (e.key === 'Escape') {
+            committed = true;
+            render();
+        }
+    });
+
+    input.addEventListener('blur', () => {
+        commitRename();
+    });
+
+    // Prevent double-click on input from navigating
+    input.addEventListener('dblclick', (e) => e.stopPropagation());
 }
 
 // ── File opener ─────────────────────────────────────────────────────────────

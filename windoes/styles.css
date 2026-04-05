@@ -1522,6 +1522,15 @@
             background: #000080;
             color: #fff;
         }
+        .folder-rename-input {
+            width: 66px;
+            font-size: 11px;
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Geneva, sans-serif;
+            border: 1px solid #000;
+            padding: 1px 2px;
+            text-align: center;
+            outline: none;
+        }
         .folder-item-icon {
             width: 32px;
             height: 32px;
