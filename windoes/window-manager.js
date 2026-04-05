@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
+import { Fragment, h, htmlToReactNodes, renderInto } from './react-view.js';
 
 const WindowManager = {
     _stack: [],      // ordered bottom→top by z-index
@@ -30,7 +31,9 @@ const WindowManager = {
         section.id = tmpl.id;
         section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
         if (tmpl.style) section.style.cssText = tmpl.style;
-        section.innerHTML = tmpl.view || '';
+
+        renderInto(section, h(Fragment, null, ...htmlToReactNodes(tmpl.view || '', `${tmpl.id}-headless`)));
+
         return section;
     },
 
@@ -39,49 +42,93 @@ const WindowManager = {
      */
     _buildWindowEl(tmpl) {
         const hasMaxBtn = tmpl.maximizeBtn || tmpl.maximizeBtnId;
-        const controlsHtml = [
-            tmpl.minimizeBtnId ? `<div class="ctrl-btn" id="${tmpl.minimizeBtnId}">_</div>` : '',
-            hasMaxBtn ? `<div class="ctrl-btn ctrl-max"${tmpl.maximizeBtnId ? ` id="${tmpl.maximizeBtnId}"` : ''}>&square;</div>` : '',
-            tmpl.closeBtnId ? `<button class="ctrl-btn" id="${tmpl.closeBtnId}" aria-label="Close">&times;</button>` : '',
-        ].join('');
 
-        const logoClass = tmpl.titleLogoClass || ('app-title-logo ' + (tmpl.titleIcon || ''));
-        const titleLogoHtml = (tmpl.titleIcon || tmpl.titleLogoClass)
-            ? `<span class="${logoClass}" aria-hidden="true"></span>`
-            : '';
+        const titleLeftChildren = [];
+        if (tmpl.titleIcon || tmpl.titleLogoClass) {
+            titleLeftChildren.push(h('span', {
+                key: 'title-logo',
+                className: tmpl.titleLogoClass || ('app-title-logo ' + (tmpl.titleIcon || '')),
+                'aria-hidden': true,
+            }));
+        }
 
-        const titleSpanAttr = tmpl.titleSpanId ? ` id="${tmpl.titleSpanId}"` : '';
+        titleLeftChildren.push(h('span', {
+            key: 'title-text',
+            ...(tmpl.titleSpanId ? { id: tmpl.titleSpanId } : {}),
+        }, tmpl.title));
 
-        let html = '';
+        const controlChildren = [];
+        if (tmpl.minimizeBtnId) {
+            controlChildren.push(h('div', { key: 'min', className: 'ctrl-btn', id: tmpl.minimizeBtnId }, '_'));
+        }
+        if (hasMaxBtn) {
+            controlChildren.push(h('div', {
+                key: 'max',
+                className: 'ctrl-btn ctrl-max',
+                ...(tmpl.maximizeBtnId ? { id: tmpl.maximizeBtnId } : {}),
+            }, '\u25a1'));
+        }
+        if (tmpl.closeBtnId) {
+            controlChildren.push(h('button', {
+                key: 'close',
+                className: 'ctrl-btn',
+                id: tmpl.closeBtnId,
+                'aria-label': 'Close',
+            }, '\u00d7'));
+        }
 
-        // Titlebar
-        html += `<div class="titlebar"${tmpl.titlebarId ? ` id="${tmpl.titlebarId}"` : ''}>`;
-        html += `<div class="title-left">${titleLogoHtml}<span${titleSpanAttr}>${tmpl.title}</span></div>`;
-        html += `<div class="window-controls">${controlsHtml}</div>`;
-        html += `</div>`;
+        const content = [
+            h('div', {
+                key: 'titlebar',
+                className: 'titlebar',
+                ...(tmpl.titlebarId ? { id: tmpl.titlebarId } : {}),
+            },
+            h('div', { className: 'title-left' }, ...titleLeftChildren),
+            h('div', { className: 'window-controls' }, ...controlChildren)
+            ),
+        ];
 
-        // Menubar
         if (tmpl.menubar) {
-            const items = typeof tmpl.menubar === 'string'
-                ? tmpl.menubar
-                : tmpl.menubar.map(m =>
-                    typeof m === 'string' ? `<span>${m}</span>` : `<span id="${m.id}">${m.label}</span>`
-                ).join('');
-            html += `<div class="menubar">${items}</div>`;
+            if (typeof tmpl.menubar === 'string') {
+                content.push(h('div', { key: 'menubar', className: 'menubar' }, ...htmlToReactNodes(tmpl.menubar, `${tmpl.id}-menubar`)));
+            } else {
+                content.push(h(
+                    'div',
+                    { key: 'menubar', className: 'menubar' },
+                    ...tmpl.menubar.map((item, index) => {
+                        if (typeof item === 'string') {
+                            return h('span', { key: `menu-${index}` }, item);
+                        }
+                        return h('span', { key: `menu-${item.id || index}`, ...(item.id ? { id: item.id } : {}) }, item.label);
+                    })
+                ));
+            }
         }
 
-        // Toolbar (custom raw HTML)
-        if (tmpl.toolbar) html += tmpl.toolbar;
+        if (tmpl.toolbar) {
+            content.push(...htmlToReactNodes(tmpl.toolbar, `${tmpl.id}-toolbar`));
+        }
 
-        // View
         if (tmpl.view !== undefined) {
-            const viewStyle = tmpl.viewStyle ? ` style="${tmpl.viewStyle}"` : '';
-            html += `<div class="view"${viewStyle}>${tmpl.view}</div>`;
+            content.push(h(
+                'div',
+                {
+                    key: 'view',
+                    className: 'view',
+                    ...(tmpl.viewStyle ? { style: tmpl.viewStyle.split(';').filter(Boolean).reduce((acc, chunk) => {
+                        const [rawKey, ...rawValue] = chunk.split(':');
+                        if (!rawKey || rawValue.length === 0) return acc;
+                        const key = rawKey.trim().replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+                        acc[key] = rawValue.join(':').trim();
+                        return acc;
+                    }, {}) } : {}),
+                },
+                ...htmlToReactNodes(tmpl.view, `${tmpl.id}-view`)
+            ));
         }
 
-        // Status bar
         if (tmpl.statusBar) {
-            html += `<div class="status">${tmpl.statusBar}</div>`;
+            content.push(h('div', { key: 'status', className: 'status' }, ...htmlToReactNodes(tmpl.statusBar, `${tmpl.id}-status`)));
         }
 
         const section = document.createElement('section');
@@ -89,7 +136,8 @@ const WindowManager = {
         section.id = tmpl.id;
         section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
         if (tmpl.style) section.style.cssText = tmpl.style;
-        section.innerHTML = html;
+
+        renderInto(section, h(Fragment, null, ...content));
 
         return section;
     },
@@ -102,8 +150,14 @@ const WindowManager = {
         btn.className = 'task-button';
         btn.style.display = 'none';
         if (cfg.id) btn.id = cfg.id;
-        btn.innerHTML = `<span class="task-icon ${cfg.icon}"></span>`
-            + `<span${cfg.labelId ? ` id="${cfg.labelId}"` : ''}>${cfg.label}</span>`;
+
+        renderInto(btn, h(
+            Fragment,
+            null,
+            h('span', { className: `task-icon ${cfg.icon}` }),
+            h('span', cfg.labelId ? { id: cfg.labelId } : {}, cfg.label)
+        ));
+
         return btn;
     },
 
