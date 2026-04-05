@@ -2,6 +2,7 @@
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { dragOverlay } from './dragging.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
@@ -157,7 +158,7 @@ WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 
-// Winamp headless window dragging
+// Winamp headless window dragging (uses shared dragOverlay from dragging.js)
 let winampDrag = null;
 
 function onWinampDragMove(e) {
@@ -165,15 +166,23 @@ function onWinampDragMove(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const el = winampConfig.el;
-    el.style.left = (winampDrag.startLeft + clientX - winampDrag.startX) + 'px';
-    el.style.top = (winampDrag.startTop + clientY - winampDrag.startY) + 'px';
+
+    let newLeft = winampDrag.startLeft + clientX - winampDrag.startX;
+    let newTop = winampDrag.startTop + clientY - winampDrag.startY;
+
+    // Keep the window reachable
+    const minVisible = 60;
+    const taskbarHeight = 36;
+    newLeft = Math.max(-el.offsetWidth + minVisible, Math.min(newLeft, window.innerWidth - minVisible));
+    newTop = Math.max(0, Math.min(newTop, window.innerHeight - taskbarHeight));
+
+    el.style.left = newLeft + 'px';
+    el.style.top = newTop + 'px';
 }
 
 function onWinampDragEnd() {
-    if (winampDrag) {
-        winampDrag.iframe.style.pointerEvents = '';
-    }
     winampDrag = null;
+    dragOverlay.style.display = 'none';
     document.removeEventListener('mousemove', onWinampDragMove);
     document.removeEventListener('mouseup', onWinampDragEnd);
     document.removeEventListener('touchmove', onWinampDragMove);
@@ -192,17 +201,15 @@ window.addEventListener('message', (e) => {
     }
     if (e.data && e.data.type === 'winamp-drag-start') {
         const el = winampConfig.el;
-        const iframe = el.querySelector('iframe');
-        const iframeRect = iframe.getBoundingClientRect();
-        iframe.style.pointerEvents = 'none';
+        const iframeRect = el.querySelector('iframe').getBoundingClientRect();
         winampDrag = {
-            iframe,
             startX: iframeRect.left + e.data.clientX,
             startY: iframeRect.top + e.data.clientY,
             startLeft: parseInt(el.style.left) || el.offsetLeft,
             startTop: parseInt(el.style.top) || el.offsetTop,
         };
         WindoesApp.WindowManager.bringToFront('winamp');
+        dragOverlay.style.display = 'block';
         document.addEventListener('mousemove', onWinampDragMove);
         document.addEventListener('mouseup', onWinampDragEnd);
         document.addEventListener('touchmove', onWinampDragMove);

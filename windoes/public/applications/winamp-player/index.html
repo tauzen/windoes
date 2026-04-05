@@ -2109,6 +2109,7 @@
         // Forward drag events from title bar to parent for window dragging
         const titleBar = document.getElementById('title-bar');
         if (titleBar) {
+            titleBar.style.cursor = 'move';
             titleBar.addEventListener('mousedown', (e) => {
                 if (e.target.closest('.title-btn')) return;
                 e.preventDefault();
