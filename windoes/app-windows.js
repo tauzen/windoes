@@ -2,6 +2,7 @@
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { makeDraggable } from './dragging.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
@@ -63,17 +64,21 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         id: 'winampWindow',
         ariaLabel: 'Winamp',
         title: 'Winamp',
-        titleIcon: 'titlelogo-winamp',
-        titlebarId: 'winampTitlebar',
-        minimizeBtnId: 'winampMinBtn',
-        closeBtnId: 'winampCloseBtn',
-        style: 'left: 200px; top: 50px; width: 289px; height: 330px; min-width: unset; min-height: unset;',
-        view: '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+        style: 'left: 200px; top: 50px; width: 275px; height: 316px; min-width: unset; min-height: unset;',
+        view: '<div class="headless-drag-handle"><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
+            + '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
     iframeId: 'winampFrame',
     iframeSrc: './applications/winamp-player/index.html',
-    hasChrome: false,
+    headless: true,
+    draggable: false,
+    setup(config) {
+        const handle = config.el.querySelector('.headless-drag-handle');
+        const closeBtn = handle.querySelector('.headless-close-btn');
+        makeDraggable(handle, config.el);
+        closeBtn.addEventListener('click', () => WindoesApp.WindowManager.close('winamp'));
+    },
 });
 
 function openWinamp() {
@@ -160,8 +165,16 @@ WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 
-// Listen for app resize messages
+// Listen for app messages (resize, close)
 window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'winamp-close') {
+        WindoesApp.WindowManager.close('winamp');
+    }
+    if (e.data && e.data.type === 'winamp-resize' && e.data.width > 0 && e.data.height > 0) {
+        const winampWindow = winampConfig.el;
+        winampWindow.style.width = e.data.width + 'px';
+        winampWindow.style.height = e.data.height + 'px';
+    }
     if (e.data && e.data.type === 'minesweeper-resize') {
         const minesweeperWindow = minesweeperConfig.el;
         const titlebarHeight = minesweeperConfig.el.querySelector('.titlebar').offsetHeight;

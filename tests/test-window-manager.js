@@ -68,8 +68,8 @@ async function runTests() {
     const winampSrc1 = await page.evaluate(() => document.getElementById('winampFrame').getAttribute('src'));
     assert(winampSrc1 && winampSrc1.includes('winamp-player'), `First open sets iframe src (got: ${winampSrc1})`);
 
-    // Close Winamp
-    await page.click('#winampCloseBtn');
+    // Close Winamp (headless window — close via WindowManager API)
+    await page.evaluate(() => WindoesApp.WindowManager.close('winamp'));
     await page.waitForTimeout(200);
 
     // Reopen Winamp
@@ -83,7 +83,7 @@ async function runTests() {
     assert(winampVisible, 'Winamp is visible after reopen');
 
     // Clean up
-    await page.click('#winampCloseBtn');
+    await page.evaluate(() => WindoesApp.WindowManager.close('winamp'));
     await page.waitForTimeout(200);
 
     // ── Test 2: Minesweeper open → close → reopen loads iframe correctly ──
@@ -150,25 +150,23 @@ async function runTests() {
     console.log('\nTest 5: Titlebar active/inactive state');
 
     const titlebarStates = await page.evaluate(() => {
-        const winampTb = document.querySelector('#winampWindow .titlebar');
         const minesweeperTb = document.querySelector('#minesweeperWindow .titlebar');
         const myComputerTb = document.querySelector('#myComputerWindow .titlebar');
         return {
-            winampInactive: winampTb.classList.contains('inactive'),
             minesweeperInactive: minesweeperTb.classList.contains('inactive'),
             myComputerInactive: myComputerTb.classList.contains('inactive'),
         };
     });
 
-    assert(!titlebarStates.winampInactive, 'Winamp (focused) titlebar is active');
+    // Winamp is headless (no titlebar), so just check the others are inactive
     assert(titlebarStates.minesweeperInactive, 'Minesweeper titlebar is inactive');
     assert(titlebarStates.myComputerInactive, 'My Computer titlebar is inactive');
 
     // ── Test 6: Minimize via button and restore via taskbar ───────────────
     console.log('\nTest 6: Minimize and restore via taskbar');
 
-    // Minimize Winamp
-    await page.click('#winampMinBtn');
+    // Minimize Winamp (headless — use WindowManager API)
+    await page.evaluate(() => WindoesApp.WindowManager.minimize('winamp'));
     await page.waitForTimeout(100);
 
     const winampHiddenAfterMin = await page.evaluate(() => document.getElementById('winampWindow').classList.contains('hidden'));
@@ -229,7 +227,7 @@ async function runTests() {
     const stackWithWinamp = await page.evaluate(() => WindoesApp.WindowManager.getStack());
     assert(stackWithWinamp.includes('winamp'), 'Stack includes winamp after open');
 
-    await page.click('#winampCloseBtn');
+    await page.evaluate(() => WindoesApp.WindowManager.close('winamp'));
     await page.waitForTimeout(200);
 
     const stackAfterClose = await page.evaluate(() => WindoesApp.WindowManager.getStack());
@@ -248,7 +246,7 @@ async function runTests() {
         const visible = await page.evaluate(() => !document.getElementById('winampWindow').classList.contains('hidden'));
         assert(visible, `Cycle ${i + 1}: Winamp visible`);
 
-        await page.click('#winampCloseBtn');
+        await page.evaluate(() => WindoesApp.WindowManager.close('winamp'));
         await page.waitForTimeout(200);
     }
 

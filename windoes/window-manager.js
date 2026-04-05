@@ -22,6 +22,19 @@ const WindowManager = {
     },
 
     /**
+     * Build a headless window element (bare iframe, no chrome).
+     */
+    _buildHeadlessEl(tmpl) {
+        const section = document.createElement('section');
+        section.className = 'window window-headless hidden' + (tmpl.className ? ' ' + tmpl.className : '');
+        section.id = tmpl.id;
+        section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
+        if (tmpl.style) section.style.cssText = tmpl.style;
+        section.innerHTML = tmpl.view || '';
+        return section;
+    },
+
+    /**
      * Build a window <section> element from a template config object.
      */
     _buildWindowEl(tmpl) {
@@ -100,7 +113,9 @@ const WindowManager = {
     register(id, config) {
         // Build DOM from template if provided
         if (config.template) {
-            config.el = this._buildWindowEl(config.template);
+            config.el = config.headless
+                ? this._buildHeadlessEl(config.template)
+                : this._buildWindowEl(config.template);
         }
 
         // Build taskbar button if specified

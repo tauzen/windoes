@@ -70,7 +70,7 @@ async function runTests() {
 
     // ── Test 2: Closing Winamp leaves no other window ─────────────────────────
     console.log('\nTest 2: Closing Winamp leaves no residual window');
-    await page.click('#winampCloseBtn');
+    await page.evaluate(() => WindoesApp.WindowManager.close('winamp'));
     await page.waitForTimeout(200);
     const afterCloseWinamp = await getVisibleWindows(page);
     assert(afterCloseWinamp.length === 0, `No windows remain after closing Winamp (got ${afterCloseWinamp.length}: ${afterCloseWinamp})`);
@@ -130,7 +130,7 @@ async function runTests() {
     assert(guardedWinamp.length === 1, `Defensive guard: only 1 window opens for Winamp (got ${guardedWinamp.length}: ${guardedWinamp})`);
     assert(!guardedWinamp.includes('appWindow'), 'Defensive guard: generic appWindow NOT opened for Winamp');
 
-    await page2.evaluate(() => document.getElementById('winampCloseBtn').click());
+    await page2.evaluate(() => WindoesApp.WindowManager.close('winamp'));
     await page2.waitForTimeout(200);
 
     await page2.dblclick('#iconMinesweeper');
