@@ -2106,29 +2106,6 @@
             eqBtn.addEventListener('click', () => setTimeout(reportSize, 50));
         }
 
-        // Forward drag events from title bar to parent for window dragging
-        const titleBar = document.getElementById('title-bar');
-        if (titleBar) {
-            titleBar.style.cursor = 'move';
-            titleBar.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.title-btn')) return;
-                e.preventDefault();
-                window.parent.postMessage({
-                    type: 'winamp-drag-start',
-                    clientX: e.clientX,
-                    clientY: e.clientY
-                }, '*');
-            });
-            titleBar.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.title-btn')) return;
-                const touch = e.touches[0];
-                window.parent.postMessage({
-                    type: 'winamp-drag-start',
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                }, '*');
-            }, { passive: true });
-        }
     }
     </script>
 </body>

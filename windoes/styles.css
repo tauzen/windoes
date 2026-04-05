@@ -399,6 +399,31 @@
             border: none;
         }
 
+        .headless-drag-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 14px;
+            z-index: 1;
+            cursor: move;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .headless-close-btn {
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: transparent;
+            cursor: pointer;
+            margin-right: 4px;
+            font-size: 0;
+        }
+
         .window.maximized {
             position: fixed !important;
             left: 0 !important;

@@ -4,7 +4,7 @@
 import { bringToFront } from './window-manager.js';
 
 // Shared overlay to prevent iframes from stealing pointer events during drag
-export const dragOverlay = document.createElement('div');
+const dragOverlay = document.createElement('div');
 dragOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:none;cursor:move;';
 document.body.appendChild(dragOverlay);
 

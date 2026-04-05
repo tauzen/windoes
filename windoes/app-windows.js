@@ -2,7 +2,7 @@
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { dragOverlay } from './dragging.js';
+import { makeDraggable } from './dragging.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
@@ -65,13 +65,20 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         ariaLabel: 'Winamp',
         title: 'Winamp',
         style: 'left: 200px; top: 50px; width: 275px; height: 316px; min-width: unset; min-height: unset;',
-        view: '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+        view: '<div class="headless-drag-handle"><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
+            + '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
     iframeId: 'winampFrame',
     iframeSrc: './applications/winamp-player/index.html',
     headless: true,
     draggable: false,
+    setup(config) {
+        const handle = config.el.querySelector('.headless-drag-handle');
+        const closeBtn = handle.querySelector('.headless-close-btn');
+        makeDraggable(handle, config.el);
+        closeBtn.addEventListener('click', () => WindoesApp.WindowManager.close('winamp'));
+    },
 });
 
 function openWinamp() {
@@ -158,38 +165,7 @@ WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 
-// Winamp headless window dragging (uses shared dragOverlay from dragging.js)
-let winampDrag = null;
-
-function onWinampDragMove(e) {
-    if (!winampDrag) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const el = winampConfig.el;
-
-    let newLeft = winampDrag.startLeft + clientX - winampDrag.startX;
-    let newTop = winampDrag.startTop + clientY - winampDrag.startY;
-
-    // Keep the window reachable
-    const minVisible = 60;
-    const taskbarHeight = 36;
-    newLeft = Math.max(-el.offsetWidth + minVisible, Math.min(newLeft, window.innerWidth - minVisible));
-    newTop = Math.max(0, Math.min(newTop, window.innerHeight - taskbarHeight));
-
-    el.style.left = newLeft + 'px';
-    el.style.top = newTop + 'px';
-}
-
-function onWinampDragEnd() {
-    winampDrag = null;
-    dragOverlay.style.display = 'none';
-    document.removeEventListener('mousemove', onWinampDragMove);
-    document.removeEventListener('mouseup', onWinampDragEnd);
-    document.removeEventListener('touchmove', onWinampDragMove);
-    document.removeEventListener('touchend', onWinampDragEnd);
-}
-
-// Listen for app messages (resize, close, drag)
+// Listen for app messages (resize, close)
 window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'winamp-close') {
         WindoesApp.WindowManager.close('winamp');
@@ -198,22 +174,6 @@ window.addEventListener('message', (e) => {
         const winampWindow = winampConfig.el;
         winampWindow.style.width = e.data.width + 'px';
         winampWindow.style.height = e.data.height + 'px';
-    }
-    if (e.data && e.data.type === 'winamp-drag-start') {
-        const el = winampConfig.el;
-        const iframeRect = el.querySelector('iframe').getBoundingClientRect();
-        winampDrag = {
-            startX: iframeRect.left + e.data.clientX,
-            startY: iframeRect.top + e.data.clientY,
-            startLeft: parseInt(el.style.left) || el.offsetLeft,
-            startTop: parseInt(el.style.top) || el.offsetTop,
-        };
-        WindoesApp.WindowManager.bringToFront('winamp');
-        dragOverlay.style.display = 'block';
-        document.addEventListener('mousemove', onWinampDragMove);
-        document.addEventListener('mouseup', onWinampDragEnd);
-        document.addEventListener('touchmove', onWinampDragMove);
-        document.addEventListener('touchend', onWinampDragEnd);
     }
     if (e.data && e.data.type === 'minesweeper-resize') {
         const minesweeperWindow = minesweeperConfig.el;
