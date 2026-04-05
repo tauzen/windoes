@@ -5,7 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/test-window-manager.js && node tests/test-duplicate-windows.js && node tests/test-icons.js && node tests/test-virtual-fs.js",
+    "test": "node tests/test-window-manager.js && node tests/test-duplicate-windows.js && node tests/test-icons.js && node tests/test-notepad-save.js && node tests/test-notepad-file-menu.js && node tests/test-virtual-fs.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
     "test:ascii-runner": "cd windoes/public/applications/ascii-runner && node tests/test-ascii-runner.js",
     "test:minesweeper": "cd windoes/public/applications/minesweeper && node tests/test-minesweeper.js",

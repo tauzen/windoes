@@ -48,7 +48,11 @@ function setDomRefs(cfg) {
 
 // ── Initialise VirtualFS ────────────────────────────────────────────────────
 
+let fsInitialized = false;
+
 async function initFS() {
+    if (fsInitialized) return;
+
     await fs.init();
     for (const dir of DEFAULT_DIRS) {
         if (!(await fs.exists(dir))) {
@@ -58,6 +62,8 @@ async function initFS() {
     if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
         await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
     }
+
+    fsInitialized = true;
 }
 
 // ── Navigation ──────────────────────────────────────────────────────────────
@@ -387,13 +393,21 @@ async function openFileInNotepad(path) {
         // Give notepad a tick to open, then set content
         setTimeout(() => {
             const textarea = document.getElementById('notepadText');
-            if (textarea) textarea.value = content;
+            if (textarea) {
+                textarea.value = content;
+                textarea.dataset.filePath = path;
+            }
             const titleEl = document.getElementById('notepadTitle');
             if (titleEl) titleEl.textContent = `${basename(path)} - Notepad`;
         }, 50);
     } catch (e) {
         WindoesApp.bsod.showErrorDialog({ title: 'Error', text: `Cannot open file: ${e.message}`, icon: 'error' });
     }
+}
+
+async function saveTextFile(path, content) {
+    await initFS();
+    await fs.writeFile(path, content);
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -408,4 +422,4 @@ function escapeAttr(str) {
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export { initFS, navigateTo, goBack, goUp, render, setDomRefs, currentPath };
+export { initFS, navigateTo, goBack, goUp, render, setDomRefs, currentPath, saveTextFile };

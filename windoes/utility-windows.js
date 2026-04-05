@@ -2,7 +2,8 @@
 // My Computer Window — VirtualFS-backed explorer
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { initFS, navigateTo, goBack, goUp, render, setDomRefs } from './fs-explorer.js';
+import { basename } from './virtual-fs.js';
+import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -95,6 +96,129 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     hasChrome: true,
     onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
+
+async function saveNotepadDocument(forceSaveAs = false) {
+    try {
+        await ensureFS();
+
+        const textarea = notepadConfig.el.querySelector('#notepadText');
+        if (!textarea) return;
+
+        let filePath = textarea.dataset.filePath || '';
+        if (!filePath || forceSaveAs) {
+            const suggested = filePath || '/C:/My Documents/Untitled.txt';
+            const selectedPath = window.prompt('Save as', suggested);
+            if (!selectedPath) return; // user cancelled
+            filePath = selectedPath.trim();
+            if (!filePath) return;
+        }
+
+        await saveTextFile(filePath, textarea.value || '');
+        textarea.dataset.filePath = filePath;
+
+        const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+        if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
+
+        WindoesApp.sound.playClickSound();
+    } catch (e) {
+        WindoesApp.bsod.showErrorDialog({
+            title: 'Save Error',
+            text: `Cannot save file: ${e.message}`,
+            icon: 'error',
+        });
+    }
+}
+
+function newNotepadDocument() {
+    const textarea = notepadConfig.el.querySelector('#notepadText');
+    if (!textarea) return;
+
+    textarea.value = '';
+    delete textarea.dataset.filePath;
+
+    const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+    if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+
+    textarea.focus();
+    WindoesApp.sound.playClickSound();
+}
+
+function setupNotepadFileMenu() {
+    const notepadWindowEl = notepadConfig.el;
+    const fileMenu = notepadWindowEl.querySelector('#notepadFileMenu');
+    if (!fileMenu) return;
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'notepadFileDropdown';
+    dropdown.className = 'context-menu notepad-file-menu';
+    dropdown.innerHTML = `
+        <div class="context-menu-item" data-action="new">New</div>
+        <div class="context-menu-item" data-action="save">Save</div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item" data-action="exit">Exit</div>
+    `;
+    document.body.appendChild(dropdown);
+
+    function closeMenu() {
+        dropdown.classList.remove('open');
+    }
+
+    function openMenu() {
+        const rect = fileMenu.getBoundingClientRect();
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = rect.bottom + 'px';
+        dropdown.classList.add('open');
+    }
+
+    fileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (dropdown.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    dropdown.addEventListener('click', (e) => {
+        const item = e.target.closest('.context-menu-item');
+        if (!item) return;
+
+        const action = item.dataset.action;
+        closeMenu();
+
+        if (action === 'new') {
+            newNotepadDocument();
+        } else if (action === 'save') {
+            saveNotepadDocument(false);
+        } else if (action === 'exit') {
+            closeNotepad();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.classList.contains('open')) return;
+        if (dropdown.contains(e.target) || fileMenu.contains(e.target)) return;
+        closeMenu();
+    });
+
+    notepadWindowEl.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            saveNotepadDocument(false);
+            return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+            e.preventDefault();
+            newNotepadDocument();
+            return;
+        }
+        if (e.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+setupNotepadFileMenu();
 
 function openNotepad() {
     WindoesApp.WindowManager.open('notepad');
