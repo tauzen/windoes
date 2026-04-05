@@ -9,16 +9,14 @@ const { chromium, firefox, webkit } = require('playwright');
 async function startStaticServer(rootDir) {
     const { createServer } = await import('vite');
 
+    const projectRoot = path.resolve(rootDir, '..');
     const viteServer = await createServer({
-        configFile: false,
-        root: rootDir,
-        publicDir: path.join(rootDir, 'public'),
+        configFile: path.join(projectRoot, 'vite.config.js'),
         server: {
             host: '127.0.0.1',
             port: 0,
             strictPort: false,
         },
-        appType: 'spa',
         clearScreen: false,
         logLevel: 'error',
     });

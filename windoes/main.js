@@ -20,14 +20,14 @@
 // ══════════════════════════════════════════════
 
 import './sound.js';
-import './window-manager.js';
+import './window-manager.jsx';
 import './boot.js';
 import './bsod.js';
 import './ie-window.js';
 import './app-windows.js';
 import './utility-windows.js';
-import './desktop.js';
-import './start-menu.js';
+import './desktop.jsx';
+import './start-menu.jsx';
 import './run-dialog.js';
 import './context-menu.js';
 import WindoesApp from './app-state.js';

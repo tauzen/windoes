@@ -2,7 +2,7 @@
 // Desktop Icons — generated from config, open on double-click (or tap)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { Fragment, h, renderInto } from './react-view.js';
+import { renderInto } from './react-view.js';
 
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const appEventType = isTouchDevice ? 'click' : 'dblclick';
@@ -21,16 +21,14 @@ const desktopIconDefs = [
 const desktopIcons = document.getElementById('desktopIcons');
 renderInto(
     desktopIcons,
-    h(
-        Fragment,
-        null,
-        ...desktopIconDefs.map(def => h(
-            'div',
-            { key: def.id, className: 'icon ' + def.className, id: def.id },
-            h('div', { className: 'icon-graphic' }),
-            h('span', { className: 'icon-label' }, def.label)
-        ))
-    )
+    <>
+        {desktopIconDefs.map(def => (
+            <div key={def.id} className={'icon ' + def.className} id={def.id}>
+                <div className="icon-graphic"></div>
+                <span className="icon-label">{def.label}</span>
+            </div>
+        ))}
+    </>
 );
 
 // Dedicated icon handlers (these must use their own window, not openApp)

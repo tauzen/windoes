@@ -2,12 +2,13 @@
 // Run Dialog (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { htmlToReactNodes, renderInto } from './react-view.js';
 
 // Create Run Dialog DOM
 const runDialog = document.createElement('div');
 runDialog.className = 'dialog-overlay run-dialog';
 runDialog.id = 'runDialog';
-runDialog.innerHTML = `<div class="dialog-box" style="min-width:380px;">
+renderInto(runDialog, htmlToReactNodes(`<div class="dialog-box" style="min-width:380px;">
     <div class="dialog-titlebar">
         <span>Run</span>
         <button class="ctrl-btn" id="runCloseBtn" aria-label="Close">&times;</button>
@@ -30,7 +31,7 @@ runDialog.innerHTML = `<div class="dialog-box" style="min-width:380px;">
         <button class="dialog-btn" id="runCancelBtn">Cancel</button>
         <button class="dialog-btn">Browse...</button>
     </div>
-</div>`;
+</div>`, 'run-dialog'));
 document.body.appendChild(runDialog);
 
 const runInput = document.getElementById('runInput');

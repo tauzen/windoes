@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
+import { htmlToReactNodes, renderInto } from './react-view.js';
 
 const fs = new VirtualFS();
 
@@ -145,7 +146,7 @@ async function render() {
             html = '<div class="explorer-empty">This folder is empty.</div>';
         }
 
-        viewEl.innerHTML = html;
+        renderInto(viewEl, htmlToReactNodes(html, 'explorer-folder-items'));
         statusEl.textContent = `${items.length} object(s)`;
 
         // Wire double-click handlers
@@ -164,7 +165,7 @@ async function render() {
 
         wireContextMenu();
     } catch (e) {
-        viewEl.innerHTML = `<div class="explorer-empty">Error reading directory.</div>`;
+        renderInto(viewEl, htmlToReactNodes(`<div class="explorer-empty">Error reading directory.</div>`, 'explorer-folder-error'));
         statusEl.textContent = '0 object(s)';
     }
 }
@@ -177,7 +178,7 @@ function renderMyComputerRoot() {
             <div>${item.label}</div>
         </div>`;
     }
-    viewEl.innerHTML = html;
+    renderInto(viewEl, htmlToReactNodes(html, 'my-computer-root-items'));
     statusEl.textContent = `${MY_COMPUTER_ITEMS.length} object(s)`;
 
     viewEl.querySelectorAll('.folder-item').forEach(el => {
@@ -203,12 +204,12 @@ function createContextMenu() {
     if (explorerMenu) return;
     explorerMenu = document.createElement('div');
     explorerMenu.className = 'context-menu explorer-ctx';
-    explorerMenu.innerHTML = `
+    renderInto(explorerMenu, htmlToReactNodes(`
         <div class="context-menu-item" data-action="new-folder">New Folder</div>
         <div class="context-menu-sep"></div>
         <div class="context-menu-item" data-action="rename">Rename</div>
         <div class="context-menu-item" data-action="delete">Delete</div>
-    `;
+    `, 'explorer-context-menu'));
     document.body.appendChild(explorerMenu);
 
     explorerMenu.addEventListener('click', (e) => {

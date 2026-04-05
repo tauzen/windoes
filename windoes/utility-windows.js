@@ -4,6 +4,7 @@
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
 import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.js';
+import { htmlToReactNodes, renderInto } from './react-view.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -100,7 +101,7 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
 const notepadSaveDialog = document.createElement('div');
 notepadSaveDialog.className = 'dialog-overlay notepad-save-dialog';
 notepadSaveDialog.id = 'notepadSaveDialog';
-notepadSaveDialog.innerHTML = `<div class="dialog-box" style="min-width:420px;">
+renderInto(notepadSaveDialog, htmlToReactNodes(`<div class="dialog-box" style="min-width:420px;">
     <div class="dialog-titlebar">
         <span>Save As</span>
         <button class="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">&times;</button>
@@ -119,7 +120,7 @@ notepadSaveDialog.innerHTML = `<div class="dialog-box" style="min-width:420px;">
         <button class="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
         <button class="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
     </div>
-</div>`;
+</div>`, 'notepad-save-dialog'));
 document.body.appendChild(notepadSaveDialog);
 
 const notepadSavePathInput = notepadSaveDialog.querySelector('#notepadSavePathInput');
@@ -223,13 +224,13 @@ function setupNotepadFileMenu() {
     const dropdown = document.createElement('div');
     dropdown.id = 'notepadFileDropdown';
     dropdown.className = 'context-menu notepad-file-menu';
-    dropdown.innerHTML = `
+    renderInto(dropdown, htmlToReactNodes(`
         <div class="context-menu-item" data-action="new">New</div>
         <div class="context-menu-item" data-action="save">Save</div>
         <div class="context-menu-item" data-action="save-as">Save As...</div>
         <div class="context-menu-sep"></div>
         <div class="context-menu-item" data-action="exit">Exit</div>
-    `;
+    `, 'notepad-file-dropdown'));
     document.body.appendChild(dropdown);
 
     function closeMenu() {

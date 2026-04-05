@@ -2,8 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 
-export const h = React.createElement;
-export const Fragment = React.Fragment;
 
 function toCamelCase(str) {
     return str.replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
@@ -78,19 +76,19 @@ function domNodeToReact(node, key) {
         .filter(child => child !== null);
 
     if (children.length === 0) {
-        return h(tagName, props);
+        return React.createElement(tagName, props);
     }
 
-    return h(tagName, props, ...children);
+    return React.createElement(tagName, props, ...children);
 }
 
 export function htmlToReactNodes(html, keyPrefix = 'html') {
     if (!html) return [];
 
-    const template = document.createElement('template');
-    template.innerHTML = html.trim();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html.trim()}</body>`, 'text/html');
 
-    return Array.from(template.content.childNodes)
+    return Array.from(doc.body.childNodes)
         .map((node, idx) => domNodeToReact(node, `${keyPrefix}-${idx}`))
         .filter(node => node !== null);
 }

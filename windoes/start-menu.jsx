@@ -2,7 +2,7 @@
 // Start Menu & Submenus (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { Fragment, h, renderInto } from './react-view.js';
+import { renderInto } from './react-view.js';
 
 // Create Start Menu DOM and register on shared namespace
 const startMenuEl = document.createElement('div');
@@ -11,38 +11,36 @@ startMenuEl.id = 'startMenu';
 startMenuEl.setAttribute('aria-label', 'Start menu');
 renderInto(
     startMenuEl,
-    h(
-        Fragment,
-        null,
-        h('div', { className: 'start-rail' },
-            h('span', { className: 'rail-windoes' }, 'Windoes'),
-            h('strong', null, 'XD')
-        ),
-        h('div', { className: 'menu-list' },
-            h('div', { className: 'menu-item', id: 'menuWindoesUpdate' },
-                h('span', { className: 'menu-icon menu-icon-winupdate' }),
-                'Windoes Update'
-            ),
-            h('div', { className: 'menu-separator' }),
-            h('div', { className: 'menu-item menu-item-arrow', id: 'menuPrograms' },
-                h('span', { className: 'menu-icon menu-icon-programs' }),
-                'Programs'
-            ),
-            h('div', { className: 'menu-item', id: 'menuHelp' },
-                h('span', { className: 'menu-icon menu-icon-help' }),
-                'Help'
-            ),
-            h('div', { className: 'menu-item', id: 'menuRun' },
-                h('span', { className: 'menu-icon menu-icon-run' }),
-                'Run...'
-            ),
-            h('div', { className: 'menu-separator' }),
-            h('div', { className: 'menu-item menu-shutdown', id: 'menuShutdown' },
-                h('span', { className: 'menu-icon menu-icon-shutdown' }),
-                'Shut Down...'
-            )
-        )
-    )
+    <>
+        <div className="start-rail">
+            <span className="rail-windoes">Windoes</span>
+            <strong>XD</strong>
+        </div>
+        <div className="menu-list">
+            <div className="menu-item" id="menuWindoesUpdate">
+                <span className="menu-icon menu-icon-winupdate"></span>
+                Windoes Update
+            </div>
+            <div className="menu-separator"></div>
+            <div className="menu-item menu-item-arrow" id="menuPrograms">
+                <span className="menu-icon menu-icon-programs"></span>
+                Programs
+            </div>
+            <div className="menu-item" id="menuHelp">
+                <span className="menu-icon menu-icon-help"></span>
+                Help
+            </div>
+            <div className="menu-item" id="menuRun">
+                <span className="menu-icon menu-icon-run"></span>
+                Run...
+            </div>
+            <div className="menu-separator"></div>
+            <div className="menu-item menu-shutdown" id="menuShutdown">
+                <span className="menu-icon menu-icon-shutdown"></span>
+                Shut Down...
+            </div>
+        </div>
+    </>
 );
 // Hidden during boot — finishBoot() will show it
 startMenuEl.style.display = 'none';
@@ -55,31 +53,29 @@ programsSubmenu.className = 'programs-submenu';
 programsSubmenu.id = 'programsSubmenu';
 renderInto(
     programsSubmenu,
-    h(
-        Fragment,
-        null,
-        h('div', { className: 'submenu-item submenu-item-arrow', id: 'subAccessories' },
-            h('span', { className: 'submenu-icon submenu-icon-folder' }),
-            'Accessories'
-        ),
-        h('div', { className: 'context-menu-sep' }),
-        h('div', { className: 'submenu-item', id: 'subIE' },
-            h('span', { className: 'submenu-icon submenu-icon-ie' }),
-            'Internet Explorer'
-        ),
-        h('div', { className: 'submenu-item', id: 'subMSDOS' },
-            h('span', { className: 'submenu-icon submenu-icon-msdos' }),
-            'MS-DOS Prompt'
-        ),
-        h('div', { className: 'submenu-item', id: 'subOutlook' },
-            h('span', { className: 'submenu-icon submenu-icon-outlook' }),
-            'Outlook Express'
-        ),
-        h('div', { className: 'submenu-item', id: 'subExplorer' },
-            h('span', { className: 'submenu-icon submenu-icon-explorer' }),
-            'Windoes Explorer'
-        )
-    )
+    <>
+        <div className="submenu-item submenu-item-arrow" id="subAccessories">
+            <span className="submenu-icon submenu-icon-folder"></span>
+            Accessories
+        </div>
+        <div className="context-menu-sep"></div>
+        <div className="submenu-item" id="subIE">
+            <span className="submenu-icon submenu-icon-ie"></span>
+            Internet Explorer
+        </div>
+        <div className="submenu-item" id="subMSDOS">
+            <span className="submenu-icon submenu-icon-msdos"></span>
+            MS-DOS Prompt
+        </div>
+        <div className="submenu-item" id="subOutlook">
+            <span className="submenu-icon submenu-icon-outlook"></span>
+            Outlook Express
+        </div>
+        <div className="submenu-item" id="subExplorer">
+            <span className="submenu-icon submenu-icon-explorer"></span>
+            Windoes Explorer
+        </div>
+    </>
 );
 document.body.appendChild(programsSubmenu);
 
@@ -89,35 +85,33 @@ accessoriesSubmenu.className = 'programs-submenu accessories-submenu';
 accessoriesSubmenu.id = 'accessoriesSubmenu';
 renderInto(
     accessoriesSubmenu,
-    h(
-        Fragment,
-        null,
-        h('div', { className: 'submenu-item submenu-item-arrow', id: 'subAccGames' },
-            h('span', { className: 'submenu-icon submenu-icon-folder' }),
-            'Games'
-        ),
-        h('div', { className: 'context-menu-sep' }),
-        h('div', { className: 'submenu-item', id: 'subAccCalculator' },
-            h('span', { className: 'submenu-icon submenu-icon-calculator' }),
-            'Calculator'
-        ),
-        h('div', { className: 'submenu-item', id: 'subAccImaging' },
-            h('span', { className: 'submenu-icon submenu-icon-imaging' }),
-            'Imaging'
-        ),
-        h('div', { className: 'submenu-item', id: 'subAccNotepad' },
-            h('span', { className: 'submenu-icon submenu-icon-notepad' }),
-            'Notepad'
-        ),
-        h('div', { className: 'submenu-item', id: 'subAccPaint' },
-            h('span', { className: 'submenu-icon submenu-icon-paint' }),
-            'Paint'
-        ),
-        h('div', { className: 'submenu-item', id: 'subAccWordPad' },
-            h('span', { className: 'submenu-icon submenu-icon-wordpad' }),
-            'WordPad'
-        )
-    )
+    <>
+        <div className="submenu-item submenu-item-arrow" id="subAccGames">
+            <span className="submenu-icon submenu-icon-folder"></span>
+            Games
+        </div>
+        <div className="context-menu-sep"></div>
+        <div className="submenu-item" id="subAccCalculator">
+            <span className="submenu-icon submenu-icon-calculator"></span>
+            Calculator
+        </div>
+        <div className="submenu-item" id="subAccImaging">
+            <span className="submenu-icon submenu-icon-imaging"></span>
+            Imaging
+        </div>
+        <div className="submenu-item" id="subAccNotepad">
+            <span className="submenu-icon submenu-icon-notepad"></span>
+            Notepad
+        </div>
+        <div className="submenu-item" id="subAccPaint">
+            <span className="submenu-icon submenu-icon-paint"></span>
+            Paint
+        </div>
+        <div className="submenu-item" id="subAccWordPad">
+            <span className="submenu-icon submenu-icon-wordpad"></span>
+            WordPad
+        </div>
+    </>
 );
 document.body.appendChild(accessoriesSubmenu);
 
@@ -127,22 +121,20 @@ gamesSubmenu.className = 'programs-submenu games-submenu';
 gamesSubmenu.id = 'gamesSubmenu';
 renderInto(
     gamesSubmenu,
-    h(
-        Fragment,
-        null,
-        h('div', { className: 'submenu-item', id: 'subGameAsciiRunner' },
-            h('span', { className: 'submenu-icon submenu-icon-ascii-runner' }),
-            'ASCII Runner'
-        ),
-        h('div', { className: 'submenu-item', id: 'subGameMinesweeper' },
-            h('span', { className: 'submenu-icon submenu-icon-minesweeper' }),
-            'Minesweeper'
-        ),
-        h('div', { className: 'submenu-item', id: 'subGameSolitaire' },
-            h('span', { className: 'submenu-icon submenu-icon-solitaire' }),
-            'Solitaire'
-        )
-    )
+    <>
+        <div className="submenu-item" id="subGameAsciiRunner">
+            <span className="submenu-icon submenu-icon-ascii-runner"></span>
+            ASCII Runner
+        </div>
+        <div className="submenu-item" id="subGameMinesweeper">
+            <span className="submenu-icon submenu-icon-minesweeper"></span>
+            Minesweeper
+        </div>
+        <div className="submenu-item" id="subGameSolitaire">
+            <span className="submenu-icon submenu-icon-solitaire"></span>
+            Solitaire
+        </div>
+    </>
 );
 document.body.appendChild(gamesSubmenu);
 
@@ -379,37 +371,34 @@ shutdownDialog.className = 'dialog-overlay shutdown-dialog';
 shutdownDialog.id = 'shutdownDialog';
 renderInto(
     shutdownDialog,
-    h('div', { className: 'dialog-box' },
-        h('div', { className: 'dialog-titlebar' },
-            h('span', null, 'Shut Down Windows'),
-            h('button', { className: 'ctrl-btn', id: 'shutdownCloseBtn', 'aria-label': 'Close' }, '×')
-        ),
-        h('div', { className: 'dialog-body' },
-            h('div', { className: 'shutdown-question' },
-                h('img', { src: 'icons/my-computer.png', className: 'shutdown-computer-icon', alt: 'My Computer', draggable: false }),
-                h('div', { className: 'dialog-text' }, 'What do you want the computer to do?')
-            ),
-            h('div', { className: 'shutdown-options' },
-                h('label', null,
-                    h('input', { type: 'radio', name: 'shutdownOption', value: 'shutdown', defaultChecked: true }),
-                    ' Shut down'
-                ),
-                h('label', null,
-                    h('input', { type: 'radio', name: 'shutdownOption', value: 'restart' }),
-                    ' Restart'
-                ),
-                h('label', null,
-                    h('input', { type: 'radio', name: 'shutdownOption', value: 'msdos' }),
-                    ' Restart in MS-DOS mode'
-                )
-            )
-        ),
-        h('div', { className: 'dialog-buttons' },
-            h('button', { className: 'dialog-btn', id: 'shutdownOkBtn' }, 'OK'),
-            h('button', { className: 'dialog-btn', id: 'shutdownCancelBtn' }, 'Cancel'),
-            h('button', { className: 'dialog-btn', id: 'shutdownHelpBtn' }, 'Help')
-        )
-    )
+    <div className="dialog-box">
+        <div className="dialog-titlebar">
+            <span>Shut Down Windows</span>
+            <button className="ctrl-btn" id="shutdownCloseBtn" aria-label="Close">×</button>
+        </div>
+        <div className="dialog-body">
+            <div className="shutdown-question">
+                <img src="icons/my-computer.png" className="shutdown-computer-icon" alt="My Computer" draggable={false} />
+                <div className="dialog-text">What do you want the computer to do?</div>
+            </div>
+            <div className="shutdown-options">
+                <label>
+                    <input type="radio" name="shutdownOption" value="shutdown" defaultChecked /> Shut down
+                </label>
+                <label>
+                    <input type="radio" name="shutdownOption" value="restart" /> Restart
+                </label>
+                <label>
+                    <input type="radio" name="shutdownOption" value="msdos" /> Restart in MS-DOS mode
+                </label>
+            </div>
+        </div>
+        <div className="dialog-buttons">
+            <button className="dialog-btn" id="shutdownOkBtn">OK</button>
+            <button className="dialog-btn" id="shutdownCancelBtn">Cancel</button>
+            <button className="dialog-btn" id="shutdownHelpBtn">Help</button>
+        </div>
+    </div>
 );
 document.body.appendChild(shutdownDialog);
 
@@ -426,8 +415,14 @@ function performShutdown() {
 
     const shutdownMsg = document.createElement('div');
     shutdownMsg.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#FF8000;font-size:24px;font-family:"MS Sans Serif",sans-serif;background:#000;z-index:99998;';
-    shutdownMsg.innerHTML = 'It\'s now safe to turn off<br>your computer.';
     shutdownMsg.style.textAlign = 'center';
+    renderInto(
+        shutdownMsg,
+        <>
+            <div>It's now safe to turn off</div>
+            <div>your computer.</div>
+        </>
+    );
     document.body.appendChild(shutdownMsg);
 }
 

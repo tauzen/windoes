@@ -2,6 +2,7 @@
 // BSOD System
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { htmlToReactNodes, renderInto } from './react-view.js';
 
 const bsod = document.getElementById('bsod');
 const bsodText = document.getElementById('bsodText');
@@ -48,7 +49,7 @@ function scheduleRandomBSOD() {
 const errorDialog = document.createElement('div');
 errorDialog.className = 'dialog-overlay';
 errorDialog.id = 'errorDialog';
-errorDialog.innerHTML = `<div class="dialog-box">
+renderInto(errorDialog, htmlToReactNodes(`<div class="dialog-box">
     <div class="dialog-titlebar">
         <span id="errorDialogTitle">Windoes</span>
         <button class="ctrl-btn" id="errorCloseBtn" aria-label="Close">&times;</button>
@@ -60,7 +61,7 @@ errorDialog.innerHTML = `<div class="dialog-box">
     <div class="dialog-buttons">
         <button class="dialog-btn" id="errorOkBtn">OK</button>
     </div>
-</div>`;
+</div>`, 'error-dialog'));
 document.body.appendChild(errorDialog);
 
 const errorDialogTitle = document.getElementById('errorDialogTitle');

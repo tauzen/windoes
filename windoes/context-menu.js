@@ -2,11 +2,12 @@
 // Right-click Context Menu (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { htmlToReactNodes, renderInto } from './react-view.js';
 
 const contextMenu = document.createElement('div');
 contextMenu.className = 'context-menu';
 contextMenu.id = 'contextMenu';
-contextMenu.innerHTML = `<div class="context-menu-item" data-action="arrange">Arrange Icons</div>
+renderInto(contextMenu, htmlToReactNodes(`<div class="context-menu-item" data-action="arrange">Arrange Icons</div>
     <div class="context-menu-item" data-action="lineup">Line Up Icons</div>
     <div class="context-menu-sep"></div>
     <div class="context-menu-item" data-action="refresh">Refresh</div>
@@ -16,7 +17,7 @@ contextMenu.innerHTML = `<div class="context-menu-item" data-action="arrange">Ar
     <div class="context-menu-sep"></div>
     <div class="context-menu-item" data-action="new">New &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#9654;</div>
     <div class="context-menu-sep"></div>
-    <div class="context-menu-item" data-action="properties">Properties</div>`;
+    <div class="context-menu-item" data-action="properties">Properties</div>`, 'desktop-context-menu'));
 document.body.appendChild(contextMenu);
 
 document.getElementById('theDesktop').addEventListener('contextmenu', (e) => {
