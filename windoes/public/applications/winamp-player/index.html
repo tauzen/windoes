@@ -2033,36 +2033,30 @@
 
         // Load bundled demo tracks
         const demoTracks = [
-            { name: 'Mori Calliope - Go-Getters', file: '01 - Chiptune Dreams.mp3' },
-            { name: 'CircusP - Goodbye', file: '02 - Ambient Waves.mp3' },
-            { name: 'AmaLee - Siren', file: '01 - Chiptune Dreams.mp3' },
-            { name: 'Crusher-P - Echo', file: '02 - Ambient Waves.mp3' },
-            { name: 'M83 - Midnight City', file: '01 - Chiptune Dreams.mp3' },
-            { name: 'Sunnexo - Please Wait', file: '02 - Ambient Waves.mp3' },
-            { name: 'Omaru Polka - Persona', file: '01 - Chiptune Dreams.mp3' }
+            { name: 'Chiptune Dreams', file: '01 - Chiptune Dreams.mp3' },
+            { name: 'Ambient Waves', file: '02 - Ambient Waves.mp3' },
         ];
 
-        const demoDurations = [195, 204, 242, 230, 243, 255, 296];
+        const demoDurations = [195, 204];
 
         demoTracks.forEach((track, i) => {
             state.playlist.push({ name: track.name, url: track.file, duration: demoDurations[i] });
         });
 
-        state.currentTrack = 3;
+        state.currentTrack = 0;
         renderPlaylist();
 
         const initTrack = state.playlist[state.currentTrack];
         updateScrollingTitle(initTrack, state.currentTrack);
         document.getElementById('time-display').textContent = '01:15';
 
-        // Set initial seek bar position (1:15 of 3:50 = 75/230 ≈ 32.6%)
-        // Set initial seek bar position (1:15 of 3:50 = 75/230 ≈ 32.6%)
-        const initPct = 32.6;
+        // Set initial seek bar position (1:15 of 3:15 = 75/195 ≈ 38.5%)
+        const initPct = 38.5;
         document.getElementById('seek-bar').value = initPct;
         document.getElementById('seek-fill').style.width = initPct + '%';
 
         // Set initial playlist time display
-        document.getElementById('playlist-total-time').textContent = '0:00:27:45';
+        document.getElementById('playlist-total-time').textContent = '0:00:06:39';
 
     })();
 
