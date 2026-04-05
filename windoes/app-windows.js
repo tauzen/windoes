@@ -63,17 +63,14 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         id: 'winampWindow',
         ariaLabel: 'Winamp',
         title: 'Winamp',
-        titleIcon: 'titlelogo-winamp',
-        titlebarId: 'winampTitlebar',
-        minimizeBtnId: 'winampMinBtn',
-        closeBtnId: 'winampCloseBtn',
-        style: 'left: 200px; top: 50px; width: 289px; height: 330px; min-width: unset; min-height: unset;',
+        style: 'left: 200px; top: 50px; width: 275px; height: 316px; min-width: unset; min-height: unset;',
         view: '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
     iframeId: 'winampFrame',
     iframeSrc: './applications/winamp-player/index.html',
-    hasChrome: false,
+    headless: true,
+    draggable: false,
 });
 
 function openWinamp() {
@@ -160,8 +157,51 @@ WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 
-// Listen for app resize messages
+// Winamp headless window dragging
+let winampDrag = null;
+
+function onWinampDragMove(e) {
+    if (!winampDrag) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const el = winampConfig.el;
+    el.style.left = (winampDrag.startLeft + clientX - winampDrag.startX) + 'px';
+    el.style.top = (winampDrag.startTop + clientY - winampDrag.startY) + 'px';
+}
+
+function onWinampDragEnd() {
+    winampDrag = null;
+    document.removeEventListener('mousemove', onWinampDragMove);
+    document.removeEventListener('mouseup', onWinampDragEnd);
+    document.removeEventListener('touchmove', onWinampDragMove);
+    document.removeEventListener('touchend', onWinampDragEnd);
+}
+
+// Listen for app messages (resize, close, drag)
 window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'winamp-close') {
+        WindoesApp.WindowManager.close('winamp');
+    }
+    if (e.data && e.data.type === 'winamp-resize' && e.data.width > 0 && e.data.height > 0) {
+        const winampWindow = winampConfig.el;
+        winampWindow.style.width = e.data.width + 'px';
+        winampWindow.style.height = e.data.height + 'px';
+    }
+    if (e.data && e.data.type === 'winamp-drag-start') {
+        const el = winampConfig.el;
+        const iframeRect = el.querySelector('iframe').getBoundingClientRect();
+        winampDrag = {
+            startX: iframeRect.left + e.data.clientX,
+            startY: iframeRect.top + e.data.clientY,
+            startLeft: parseInt(el.style.left) || el.offsetLeft,
+            startTop: parseInt(el.style.top) || el.offsetTop,
+        };
+        WindoesApp.WindowManager.bringToFront('winamp');
+        document.addEventListener('mousemove', onWinampDragMove);
+        document.addEventListener('mouseup', onWinampDragEnd);
+        document.addEventListener('touchmove', onWinampDragMove);
+        document.addEventListener('touchend', onWinampDragEnd);
+    }
     if (e.data && e.data.type === 'minesweeper-resize') {
         const minesweeperWindow = minesweeperConfig.el;
         const titlebarHeight = minesweeperConfig.el.querySelector('.titlebar').offsetHeight;

@@ -88,13 +88,6 @@ async function runTests() {
     const myComputerIcon = await hasLoadedBackgroundImage(page, '#myComputerWindow .titlelogo-mycomputer');
     assert(myComputerIcon.found, `My Computer titlebar icon loads (${myComputerIcon.reason || myComputerIcon.url})`);
 
-    // Open Winamp
-    await page.dblclick('#iconWinamp');
-    await page.waitForTimeout(300);
-
-    const winampIcon = await hasLoadedBackgroundImage(page, '#winampWindow .titlelogo-winamp');
-    assert(winampIcon.found, `Winamp titlebar icon loads (${winampIcon.reason || winampIcon.url})`);
-
     // Open Minesweeper
     await page.dblclick('#iconMinesweeper');
     await page.waitForTimeout(300);
@@ -103,7 +96,6 @@ async function runTests() {
     assert(minesweeperIcon.found, `Minesweeper titlebar icon loads (${minesweeperIcon.reason || minesweeperIcon.url})`);
 
     // Close all windows
-    await page.click('#winampCloseBtn');
     await page.click('#minesweeperCloseBtn');
     await page.evaluate(() => {
         const btn = document.querySelector('#myComputerWindow .close-btn');

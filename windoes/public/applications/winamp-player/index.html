@@ -2071,6 +2071,63 @@
             winampEl.style.top = '0';
             winampEl.style.left = '0';
         }
+
+        // Wire close buttons to notify parent
+        document.querySelectorAll('.title-btn').forEach(btn => {
+            if (btn.title === 'Close') {
+                btn.style.visibility = 'visible';
+                btn.addEventListener('click', () => {
+                    window.parent.postMessage({ type: 'winamp-close' }, '*');
+                });
+            }
+        });
+
+        // Report size to parent so iframe window can match
+        function reportSize() {
+            const winampEl = document.getElementById('winamp');
+            if (winampEl) {
+                const rect = winampEl.getBoundingClientRect();
+                window.parent.postMessage({
+                    type: 'winamp-resize',
+                    width: Math.ceil(rect.width),
+                    height: Math.ceil(rect.height)
+                }, '*');
+            }
+        }
+
+        // Report after layout settles and when playlist toggles
+        setTimeout(reportSize, 100);
+        const plBtn = document.getElementById('btn-pl');
+        if (plBtn) {
+            plBtn.addEventListener('click', () => setTimeout(reportSize, 50));
+        }
+        const eqBtn = document.getElementById('btn-eq');
+        if (eqBtn) {
+            eqBtn.addEventListener('click', () => setTimeout(reportSize, 50));
+        }
+
+        // Forward drag events from title bar to parent for window dragging
+        const titleBar = document.getElementById('title-bar');
+        if (titleBar) {
+            titleBar.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.title-btn')) return;
+                e.preventDefault();
+                window.parent.postMessage({
+                    type: 'winamp-drag-start',
+                    clientX: e.clientX,
+                    clientY: e.clientY
+                }, '*');
+            });
+            titleBar.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.title-btn')) return;
+                const touch = e.touches[0];
+                window.parent.postMessage({
+                    type: 'winamp-drag-start',
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                }, '*');
+            }, { passive: true });
+        }
     }
     </script>
 </body>
