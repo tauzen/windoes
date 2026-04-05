@@ -36,17 +36,26 @@ function startStaticServer(rootDir) {
                 return;
             }
 
-            fs.readFile(filePath, (err, data) => {
-                if (err) {
+            // Try the direct path first, then fall back to public/ subdirectory
+            // (mirrors Vite's behavior of serving public/ assets at the root)
+            const publicFilePath = path.join(rootDir, 'public', urlPath);
+            const candidates = [filePath, publicFilePath];
+
+            function tryRead(i) {
+                if (i >= candidates.length) {
                     res.writeHead(404);
                     res.end('Not Found');
                     return;
                 }
-                const ext = path.extname(filePath).toLowerCase();
-                const mime = MIME_TYPES[ext] || 'application/octet-stream';
-                res.writeHead(200, { 'Content-Type': mime });
-                res.end(data);
-            });
+                fs.readFile(candidates[i], (err, data) => {
+                    if (err) return tryRead(i + 1);
+                    const ext = path.extname(candidates[i]).toLowerCase();
+                    const mime = MIME_TYPES[ext] || 'application/octet-stream';
+                    res.writeHead(200, { 'Content-Type': mime });
+                    res.end(data);
+                });
+            }
+            tryRead(0);
         });
 
         server.listen(0, '127.0.0.1', () => {
@@ -60,15 +69,20 @@ function startStaticServer(rootDir) {
 
 async function launchBrowser() {
     // Try to find an existing chromium installation that may not match the exact Playwright version
-    const msPlaywrightDir = path.join(process.env.HOME || '', '.cache', 'ms-playwright');
+    const searchDirs = [
+        path.join(process.env.HOME || '', '.cache', 'ms-playwright'),
+        '/opt/pw-browsers',
+    ];
     let existingChromiumPath = null;
-    try {
-        const dirs = fs.readdirSync(msPlaywrightDir).filter(d => d.startsWith('chromium-'));
-        if (dirs.length > 0) {
-            const candidate = path.join(msPlaywrightDir, dirs[dirs.length - 1], 'chrome-linux', 'chrome');
-            if (fs.existsSync(candidate)) existingChromiumPath = candidate;
-        }
-    } catch (_) {}
+    for (const msPlaywrightDir of searchDirs) {
+        try {
+            const dirs = fs.readdirSync(msPlaywrightDir).filter(d => d.startsWith('chromium-'));
+            if (dirs.length > 0) {
+                const candidate = path.join(msPlaywrightDir, dirs[dirs.length - 1], 'chrome-linux', 'chrome');
+                if (fs.existsSync(candidate)) { existingChromiumPath = candidate; break; }
+            }
+        } catch (_) {}
+    }
 
     const attempts = [
         { label: 'bundled chromium', launcher: chromium, options: { headless: true } },
