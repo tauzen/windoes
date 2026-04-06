@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
+import { renderInto } from './react-view.js';
 
 const WindowManager = {
     _stack: [],      // ordered bottom→top by z-index
@@ -30,7 +31,9 @@ const WindowManager = {
         section.id = tmpl.id;
         section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
         if (tmpl.style) section.style.cssText = tmpl.style;
-        section.innerHTML = tmpl.view || '';
+
+        renderInto(section, <>{tmpl.view || null}</>);
+
         return section;
     },
 
@@ -39,49 +42,77 @@ const WindowManager = {
      */
     _buildWindowEl(tmpl) {
         const hasMaxBtn = tmpl.maximizeBtn || tmpl.maximizeBtnId;
-        const controlsHtml = [
-            tmpl.minimizeBtnId ? `<div class="ctrl-btn" id="${tmpl.minimizeBtnId}">_</div>` : '',
-            hasMaxBtn ? `<div class="ctrl-btn ctrl-max"${tmpl.maximizeBtnId ? ` id="${tmpl.maximizeBtnId}"` : ''}>&square;</div>` : '',
-            tmpl.closeBtnId ? `<button class="ctrl-btn" id="${tmpl.closeBtnId}" aria-label="Close">&times;</button>` : '',
-        ].join('');
+        const viewStyle = tmpl.viewStyle
+            ? tmpl.viewStyle.split(';').filter(Boolean).reduce((acc, chunk) => {
+                const [rawKey, ...rawValue] = chunk.split(':');
+                if (!rawKey || rawValue.length === 0) return acc;
+                const key = rawKey.trim().replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+                acc[key] = rawValue.join(':').trim();
+                return acc;
+            }, {})
+            : undefined;
 
-        const logoClass = tmpl.titleLogoClass || ('app-title-logo ' + (tmpl.titleIcon || ''));
-        const titleLogoHtml = (tmpl.titleIcon || tmpl.titleLogoClass)
-            ? `<span class="${logoClass}" aria-hidden="true"></span>`
-            : '';
+        const content = [
+            <div
+                key="titlebar"
+                className="titlebar"
+                {...(tmpl.titlebarId ? { id: tmpl.titlebarId } : {})}
+            >
+                <div className="title-left">
+                    {(tmpl.titleIcon || tmpl.titleLogoClass) && (
+                        <span
+                            className={tmpl.titleLogoClass || ('app-title-logo ' + (tmpl.titleIcon || ''))}
+                            aria-hidden={true}
+                        ></span>
+                    )}
+                    <span {...(tmpl.titleSpanId ? { id: tmpl.titleSpanId } : {})}>{tmpl.title}</span>
+                </div>
+                <div className="window-controls">
+                    {tmpl.minimizeBtnId && <div className="ctrl-btn" id={tmpl.minimizeBtnId}>_</div>}
+                    {hasMaxBtn && (
+                        <div
+                            className="ctrl-btn ctrl-max"
+                            {...(tmpl.maximizeBtnId ? { id: tmpl.maximizeBtnId } : {})}
+                        >
+                            □
+                        </div>
+                    )}
+                    {tmpl.closeBtnId && <button className="ctrl-btn" id={tmpl.closeBtnId} aria-label="Close">×</button>}
+                </div>
+            </div>,
+        ];
 
-        const titleSpanAttr = tmpl.titleSpanId ? ` id="${tmpl.titleSpanId}"` : '';
-
-        let html = '';
-
-        // Titlebar
-        html += `<div class="titlebar"${tmpl.titlebarId ? ` id="${tmpl.titlebarId}"` : ''}>`;
-        html += `<div class="title-left">${titleLogoHtml}<span${titleSpanAttr}>${tmpl.title}</span></div>`;
-        html += `<div class="window-controls">${controlsHtml}</div>`;
-        html += `</div>`;
-
-        // Menubar
         if (tmpl.menubar) {
-            const items = typeof tmpl.menubar === 'string'
-                ? tmpl.menubar
-                : tmpl.menubar.map(m =>
-                    typeof m === 'string' ? `<span>${m}</span>` : `<span id="${m.id}">${m.label}</span>`
-                ).join('');
-            html += `<div class="menubar">${items}</div>`;
+            content.push(
+                <div key="menubar" className="menubar">
+                    {tmpl.menubar.map((item, index) => {
+                        if (typeof item === 'string') {
+                            return <span key={`menu-${index}`}>{item}</span>;
+                        }
+                        return <span key={`menu-${item.id || index}`} {...(item.id ? { id: item.id } : {})}>{item.label}</span>;
+                    })}
+                </div>
+            );
         }
 
-        // Toolbar (custom raw HTML)
-        if (tmpl.toolbar) html += tmpl.toolbar;
+        if (tmpl.toolbar) {
+            content.push(tmpl.toolbar);
+        }
 
-        // View
         if (tmpl.view !== undefined) {
-            const viewStyle = tmpl.viewStyle ? ` style="${tmpl.viewStyle}"` : '';
-            html += `<div class="view"${viewStyle}>${tmpl.view}</div>`;
+            content.push(
+                <div key="view" className="view" {...(viewStyle ? { style: viewStyle } : {})}>
+                    {tmpl.view}
+                </div>
+            );
         }
 
-        // Status bar
         if (tmpl.statusBar) {
-            html += `<div class="status">${tmpl.statusBar}</div>`;
+            content.push(
+                <div key="status" className="status">
+                    {tmpl.statusBar}
+                </div>
+            );
         }
 
         const section = document.createElement('section');
@@ -89,7 +120,8 @@ const WindowManager = {
         section.id = tmpl.id;
         section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
         if (tmpl.style) section.style.cssText = tmpl.style;
-        section.innerHTML = html;
+
+        renderInto(section, <>{content}</>);
 
         return section;
     },
@@ -102,8 +134,15 @@ const WindowManager = {
         btn.className = 'task-button';
         btn.style.display = 'none';
         if (cfg.id) btn.id = cfg.id;
-        btn.innerHTML = `<span class="task-icon ${cfg.icon}"></span>`
-            + `<span${cfg.labelId ? ` id="${cfg.labelId}"` : ''}>${cfg.label}</span>`;
+
+        renderInto(
+            btn,
+            <>
+                <span className={`task-icon ${cfg.icon}`}></span>
+                <span {...(cfg.labelId ? { id: cfg.labelId } : {})}>{cfg.label}</span>
+            </>
+        );
+
         return btn;
     },
 
@@ -369,7 +408,7 @@ const WindowManager = {
 
     _updateMaxBtn(win) {
         const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
-        if (btn) btn.innerHTML = win.isMaximized ? '&#10697;' : '&square;';
+        if (btn) btn.textContent = win.isMaximized ? '⧉' : '□';
     },
 
     _updateTitlebars() {

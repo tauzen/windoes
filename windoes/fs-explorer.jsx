@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
+import { renderInto } from './react-view.js';
 
 const fs = new VirtualFS();
 
@@ -132,20 +133,24 @@ async function render() {
             items.push({ name, path: childPath, type: stat.type });
         }
 
-        let html = '';
-        for (const item of items) {
-            const iconClass = item.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file';
-            html += `<div class="folder-item" data-path="${escapeAttr(item.path)}" data-type="${item.type}">
-                <div class="folder-item-icon ${iconClass}"></div>
-                <div>${escapeHtml(item.name)}</div>
-            </div>`;
-        }
-
-        if (items.length === 0) {
-            html = '<div class="explorer-empty">This folder is empty.</div>';
-        }
-
-        viewEl.innerHTML = html;
+        renderInto(
+            viewEl,
+            items.length === 0 ? (
+                <div className="explorer-empty">This folder is empty.</div>
+            ) : (
+                <>
+                    {items.map((item) => {
+                        const iconClass = item.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file';
+                        return (
+                            <div key={item.path} className="folder-item" data-path={item.path} data-type={item.type}>
+                                <div className={`folder-item-icon ${iconClass}`}></div>
+                                <div>{item.name}</div>
+                            </div>
+                        );
+                    })}
+                </>
+            )
+        );
         statusEl.textContent = `${items.length} object(s)`;
 
         // Wire double-click handlers
@@ -164,20 +169,23 @@ async function render() {
 
         wireContextMenu();
     } catch (e) {
-        viewEl.innerHTML = `<div class="explorer-empty">Error reading directory.</div>`;
+        renderInto(viewEl, <div className="explorer-empty">Error reading directory.</div>);
         statusEl.textContent = '0 object(s)';
     }
 }
 
 function renderMyComputerRoot() {
-    let html = '';
-    for (const item of MY_COMPUTER_ITEMS) {
-        html += `<div class="folder-item" data-mc-idx="${MY_COMPUTER_ITEMS.indexOf(item)}">
-            <div class="folder-item-icon ${item.icon}"></div>
-            <div>${item.label}</div>
-        </div>`;
-    }
-    viewEl.innerHTML = html;
+    renderInto(
+        viewEl,
+        <>
+            {MY_COMPUTER_ITEMS.map((item, index) => (
+                <div key={`${item.label}-${index}`} className="folder-item" data-mc-idx={index}>
+                    <div className={`folder-item-icon ${item.icon}`}></div>
+                    <div>{item.label}</div>
+                </div>
+            ))}
+        </>
+    );
     statusEl.textContent = `${MY_COMPUTER_ITEMS.length} object(s)`;
 
     viewEl.querySelectorAll('.folder-item').forEach(el => {
@@ -203,12 +211,15 @@ function createContextMenu() {
     if (explorerMenu) return;
     explorerMenu = document.createElement('div');
     explorerMenu.className = 'context-menu explorer-ctx';
-    explorerMenu.innerHTML = `
-        <div class="context-menu-item" data-action="new-folder">New Folder</div>
-        <div class="context-menu-sep"></div>
-        <div class="context-menu-item" data-action="rename">Rename</div>
-        <div class="context-menu-item" data-action="delete">Delete</div>
-    `;
+    renderInto(
+        explorerMenu,
+        <>
+            <div className="context-menu-item" data-action="new-folder">New Folder</div>
+            <div className="context-menu-sep"></div>
+            <div className="context-menu-item" data-action="rename">Rename</div>
+            <div className="context-menu-item" data-action="delete">Delete</div>
+        </>
+    );
     document.body.appendChild(explorerMenu);
 
     explorerMenu.addEventListener('click', (e) => {
@@ -408,16 +419,6 @@ async function openFileInNotepad(path) {
 async function saveTextFile(path, content) {
     await initFS();
     await fs.writeFile(path, content);
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function escapeAttr(str) {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────

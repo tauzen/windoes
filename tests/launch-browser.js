@@ -1,70 +1,42 @@
 const path = require('path');
-const http = require('http');
 const fs = require('fs');
 const { chromium, firefox, webkit } = require('playwright');
 
-const MIME_TYPES = {
-    '.html': 'text/html',
-    '.js':   'application/javascript',
-    '.css':  'text/css',
-    '.json': 'application/json',
-    '.png':  'image/png',
-    '.jpg':  'image/jpeg',
-    '.gif':  'image/gif',
-    '.svg':  'image/svg+xml',
-    '.mp3':  'audio/mpeg',
-    '.wav':  'audio/wav',
-    '.ico':  'image/x-icon',
-};
-
 /**
- * Start a simple static file server for the windoes directory.
- * Returns { server, baseUrl } where baseUrl is like 'http://localhost:PORT'.
+ * Start a Vite dev server rooted at the simulator directory.
+ * Returns { server, baseUrl } where baseUrl is like 'http://127.0.0.1:PORT'.
  */
-function startStaticServer(rootDir) {
-    return new Promise((resolve, reject) => {
-        const server = http.createServer((req, res) => {
-            let urlPath = decodeURIComponent(req.url.split('?')[0]);
-            if (urlPath.endsWith('/')) urlPath += 'index.html';
+async function startStaticServer(rootDir) {
+    const { createServer } = await import('vite');
 
-            const filePath = path.join(rootDir, urlPath);
-
-            // Prevent directory traversal
-            if (!filePath.startsWith(rootDir)) {
-                res.writeHead(403);
-                res.end('Forbidden');
-                return;
-            }
-
-            // Try the direct path first, then fall back to public/ subdirectory
-            // (mirrors Vite's behavior of serving public/ assets at the root)
-            const publicFilePath = path.join(rootDir, 'public', urlPath);
-            const candidates = [filePath, publicFilePath];
-
-            function tryRead(i) {
-                if (i >= candidates.length) {
-                    res.writeHead(404);
-                    res.end('Not Found');
-                    return;
-                }
-                fs.readFile(candidates[i], (err, data) => {
-                    if (err) return tryRead(i + 1);
-                    const ext = path.extname(candidates[i]).toLowerCase();
-                    const mime = MIME_TYPES[ext] || 'application/octet-stream';
-                    res.writeHead(200, { 'Content-Type': mime });
-                    res.end(data);
-                });
-            }
-            tryRead(0);
-        });
-
-        server.listen(0, '127.0.0.1', () => {
-            const { port } = server.address();
-            resolve({ server, baseUrl: `http://127.0.0.1:${port}` });
-        });
-
-        server.on('error', reject);
+    const projectRoot = path.resolve(rootDir, '..');
+    const viteServer = await createServer({
+        configFile: path.join(projectRoot, 'vite.config.js'),
+        server: {
+            host: '127.0.0.1',
+            port: 0,
+            strictPort: false,
+        },
+        clearScreen: false,
+        logLevel: 'error',
     });
+
+    await viteServer.listen();
+
+    const resolved = viteServer.resolvedUrls?.local?.[0] || viteServer.resolvedUrls?.network?.[0];
+    if (!resolved) {
+        await viteServer.close();
+        throw new Error('Failed to resolve Vite test server URL');
+    }
+
+    return {
+        server: {
+            close: () => {
+                viteServer.close().catch(() => {});
+            },
+        },
+        baseUrl: resolved.replace(/\/$/, ''),
+    };
 }
 
 async function launchBrowser() {

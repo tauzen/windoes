@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 // Window Dragging
 // ══════════════════════════════════════════════
-import { bringToFront } from './window-manager.js';
+import { bringToFront } from './window-manager.jsx';
 
 // Shared overlay to prevent iframes from stealing pointer events during drag
 const dragOverlay = document.createElement('div');

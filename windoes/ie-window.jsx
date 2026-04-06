@@ -16,29 +16,38 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
         maximizeBtnId: 'maximizeIeBtn',
         closeBtnId: 'closeWindowBtn',
         menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
-        toolbar: `<div class="toolbar">
-                <div class="toolbar-grip"></div>
-                <button class="tb-btn" id="backBtn"><span class="tb-icon tb-icon-back"></span>Back</button>
-                <button class="tb-btn" id="forwardBtn"><span class="tb-icon tb-icon-forward"></span>Forward</button>
-                <button class="tb-btn" id="stopBtn"><span class="tb-icon tb-icon-stop"></span>Stop</button>
-                <button class="tb-btn" id="refreshBtn"><span class="tb-icon tb-icon-refresh"></span>Refresh</button>
-                <button class="tb-btn" id="homeBtn"><span class="tb-icon tb-icon-home"></span>Home</button>
-                <div class="tb-sep"></div>
-                <button class="tb-btn" id="searchBtn"><span class="tb-icon tb-icon-search"></span>Search</button>
-                <button class="tb-btn" id="favoritesBtn"><span class="tb-icon tb-icon-favorites"></span>Favorites</button>
-                <button class="tb-btn" id="historyBtn"><span class="tb-icon tb-icon-history"></span>History</button>
-            </div>
-            <div class="address-row">
-                <div class="toolbar-grip"></div>
-                <label for="addressInput">Address</label>
-                <div class="address-input-wrap">
-                    <span class="address-icon" aria-hidden="true"></span>
-                    <input id="addressInput" value="about:blank" aria-label="Address bar" />
+        toolbar: (
+            <>
+                <div className="toolbar">
+                    <div className="toolbar-grip"></div>
+                    <button className="tb-btn" id="backBtn"><span className="tb-icon tb-icon-back"></span>Back</button>
+                    <button className="tb-btn" id="forwardBtn"><span className="tb-icon tb-icon-forward"></span>Forward</button>
+                    <button className="tb-btn" id="stopBtn"><span className="tb-icon tb-icon-stop"></span>Stop</button>
+                    <button className="tb-btn" id="refreshBtn"><span className="tb-icon tb-icon-refresh"></span>Refresh</button>
+                    <button className="tb-btn" id="homeBtn"><span className="tb-icon tb-icon-home"></span>Home</button>
+                    <div className="tb-sep"></div>
+                    <button className="tb-btn" id="searchBtn"><span className="tb-icon tb-icon-search"></span>Search</button>
+                    <button className="tb-btn" id="favoritesBtn"><span className="tb-icon tb-icon-favorites"></span>Favorites</button>
+                    <button className="tb-btn" id="historyBtn"><span className="tb-icon tb-icon-history"></span>History</button>
                 </div>
-                <button class="go-btn" id="goBtn">Go</button>
-            </div>`,
-        view: '<iframe id="browserFrame" title="Internet Explorer content" referrerpolicy="no-referrer"></iframe>',
-        statusBar: '<span class="status-left" id="statusText">Done</span><span class="status-right"><span class="status-icon"></span>Internet</span>',
+                <div className="address-row">
+                    <div className="toolbar-grip"></div>
+                    <label htmlFor="addressInput">Address</label>
+                    <div className="address-input-wrap">
+                        <span className="address-icon" aria-hidden="true"></span>
+                        <input id="addressInput" defaultValue="about:blank" aria-label="Address bar" />
+                    </div>
+                    <button className="go-btn" id="goBtn">Go</button>
+                </div>
+            </>
+        ),
+        view: <iframe id="browserFrame" title="Internet Explorer content" referrerPolicy="no-referrer"></iframe>,
+        statusBar: (
+            <>
+                <span className="status-left" id="statusText">Done</span>
+                <span className="status-right"><span className="status-icon"></span>Internet</span>
+            </>
+        ),
     },
     taskButton: { id: 'taskButton', icon: 'task-icon-ie', label: 'about:blank - Microsoft Int...' },
     iframe: null,       // IE manages its own iframe/navigation

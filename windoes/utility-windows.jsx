@@ -3,7 +3,8 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.js';
+import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.jsx';
+import { renderInto } from './react-view.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -18,22 +19,37 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
         closeBtnId: 'myComputerCloseBtn',
         style: 'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
         menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
-        toolbar: `<div class="toolbar explorer-toolbar">
-                <div class="toolbar-grip"></div>
-                <button class="tb-btn" id="explorerBackBtn" disabled><span class="tb-icon tb-icon-back"></span>Back</button>
-                <button class="tb-btn" id="explorerUpBtn"><span class="tb-icon tb-icon-up"></span>Up</button>
-            </div>
-            <div class="address-row">
-                <div class="toolbar-grip"></div>
-                <label for="explorerAddress">Address</label>
-                <div class="address-input-wrap">
-                    <span class="address-icon address-icon-folder" aria-hidden="true"></span>
-                    <input id="explorerAddress" value="My Computer" aria-label="Address bar" readonly />
+        toolbar: (
+            <>
+                <div className="toolbar explorer-toolbar">
+                    <div className="toolbar-grip"></div>
+                    <button className="tb-btn" id="explorerBackBtn" disabled>
+                        <span className="tb-icon tb-icon-back"></span>
+                        Back
+                    </button>
+                    <button className="tb-btn" id="explorerUpBtn">
+                        <span className="tb-icon tb-icon-up"></span>
+                        Up
+                    </button>
                 </div>
-            </div>`,
-        view: '<div class="folder-view explorer-folder-view"></div>',
+                <div className="address-row">
+                    <div className="toolbar-grip"></div>
+                    <label htmlFor="explorerAddress">Address</label>
+                    <div className="address-input-wrap">
+                        <span className="address-icon address-icon-folder" aria-hidden="true"></span>
+                        <input id="explorerAddress" defaultValue="My Computer" aria-label="Address bar" readOnly />
+                    </div>
+                </div>
+            </>
+        ),
+        view: <div className="folder-view explorer-folder-view"></div>,
         viewStyle: 'overflow-y:auto;',
-        statusBar: '<span class="status-left explorer-status-left">0 object(s)</span><span class="status-right">My Computer</span>',
+        statusBar: (
+            <>
+                <span className="status-left explorer-status-left">0 object(s)</span>
+                <span className="status-right">My Computer</span>
+            </>
+        ),
     },
     taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
     iframe: null,
@@ -88,7 +104,7 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
         closeBtnId: 'notepadCloseBtn',
         style: 'left: clamp(120px, 14vw, 200px); top: 30px; width: min(640px, calc(100vw - 100px)); height: min(440px, calc(100vh - 60px));',
         menubar: [{ id: 'notepadFileMenu', label: 'File' }, 'Edit', 'Search', 'Help'],
-        view: '<textarea class="notepad-textarea" id="notepadText" spellcheck="false"></textarea>',
+        view: <textarea className="notepad-textarea" id="notepadText" spellCheck={false}></textarea>,
     },
     taskButton: { id: 'notepadTaskBtn', icon: 'task-icon-notepad', label: 'Notepad' },
     iframe: null,
@@ -100,26 +116,29 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
 const notepadSaveDialog = document.createElement('div');
 notepadSaveDialog.className = 'dialog-overlay notepad-save-dialog';
 notepadSaveDialog.id = 'notepadSaveDialog';
-notepadSaveDialog.innerHTML = `<div class="dialog-box" style="min-width:420px;">
-    <div class="dialog-titlebar">
-        <span>Save As</span>
-        <button class="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">&times;</button>
-    </div>
-    <div class="dialog-body">
-        <div class="dialog-icon dialog-icon-info"></div>
-        <div class="notepad-save-fields">
-            <div class="dialog-text">Choose where to save this text document.</div>
-            <div class="notepad-save-row">
-                <label for="notepadSavePathInput">File name:</label>
-                <input type="text" id="notepadSavePathInput" aria-label="Save path" />
+renderInto(
+    notepadSaveDialog,
+    <div className="dialog-box" style={{ minWidth: '420px' }}>
+        <div className="dialog-titlebar">
+            <span>Save As</span>
+            <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">×</button>
+        </div>
+        <div className="dialog-body">
+            <div className="dialog-icon dialog-icon-info"></div>
+            <div className="notepad-save-fields">
+                <div className="dialog-text">Choose where to save this text document.</div>
+                <div className="notepad-save-row">
+                    <label htmlFor="notepadSavePathInput">File name:</label>
+                    <input type="text" id="notepadSavePathInput" aria-label="Save path" />
+                </div>
             </div>
         </div>
+        <div className="dialog-buttons">
+            <button className="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
+            <button className="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
+        </div>
     </div>
-    <div class="dialog-buttons">
-        <button class="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
-        <button class="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
-    </div>
-</div>`;
+);
 document.body.appendChild(notepadSaveDialog);
 
 const notepadSavePathInput = notepadSaveDialog.querySelector('#notepadSavePathInput');
@@ -223,13 +242,16 @@ function setupNotepadFileMenu() {
     const dropdown = document.createElement('div');
     dropdown.id = 'notepadFileDropdown';
     dropdown.className = 'context-menu notepad-file-menu';
-    dropdown.innerHTML = `
-        <div class="context-menu-item" data-action="new">New</div>
-        <div class="context-menu-item" data-action="save">Save</div>
-        <div class="context-menu-item" data-action="save-as">Save As...</div>
-        <div class="context-menu-sep"></div>
-        <div class="context-menu-item" data-action="exit">Exit</div>
-    `;
+    renderInto(
+        dropdown,
+        <>
+            <div className="context-menu-item" data-action="new">New</div>
+            <div className="context-menu-item" data-action="save">Save</div>
+            <div className="context-menu-item" data-action="save-as">Save As...</div>
+            <div className="context-menu-sep"></div>
+            <div className="context-menu-item" data-action="exit">Exit</div>
+        </>
+    );
     document.body.appendChild(dropdown);
 
     function closeMenu() {
@@ -327,13 +349,15 @@ WindoesApp.WindowManager.register('recycleBin', {
         closeBtnId: 'recycleBinCloseBtn',
         style: 'left: clamp(100px, 12vw, 180px); top: 24px; width: min(550px, calc(100vw - 100px)); height: min(380px, calc(100vh - 60px));',
         menubar: ['File', 'Edit', 'View', 'Help'],
-        view: `<div class="folder-view" style="align-items:center;justify-content:center;color:#808080;font-size:11px;">
-                    <div style="text-align:center;padding:40px;">
-                        <div style="font-size:14px;margin-bottom:8px;">Recycle Bin is empty.</div>
-                    </div>
-                </div>`,
+        view: (
+            <div className="folder-view" style={{ alignItems: 'center', justifyContent: 'center', color: '#808080', fontSize: '11px' }}>
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div style={{ fontSize: '14px', marginBottom: '8px' }}>Recycle Bin is empty.</div>
+                </div>
+            </div>
+        ),
         viewStyle: 'overflow-y:auto;',
-        statusBar: '<span class="status-left">0 object(s)</span>',
+        statusBar: <span className="status-left">0 object(s)</span>,
     },
     taskButton: { id: 'recycleBinTaskBtn', icon: 'task-icon-recyclebin', label: 'Recycle Bin' },
     iframe: null,

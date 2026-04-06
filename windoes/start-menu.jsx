@@ -2,22 +2,46 @@
 // Start Menu & Submenus (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { renderInto } from './react-view.js';
 
 // Create Start Menu DOM and register on shared namespace
 const startMenuEl = document.createElement('div');
 startMenuEl.className = 'start-menu';
 startMenuEl.id = 'startMenu';
 startMenuEl.setAttribute('aria-label', 'Start menu');
-startMenuEl.innerHTML = `<div class="start-rail"><span class="rail-windoes">Windoes</span><strong>XD</strong></div>
-    <div class="menu-list">
-        <div class="menu-item" id="menuWindoesUpdate"><span class="menu-icon menu-icon-winupdate"></span>Windoes Update</div>
-        <div class="menu-separator"></div>
-        <div class="menu-item menu-item-arrow" id="menuPrograms"><span class="menu-icon menu-icon-programs"></span>Programs</div>
-        <div class="menu-item" id="menuHelp"><span class="menu-icon menu-icon-help"></span>Help</div>
-        <div class="menu-item" id="menuRun"><span class="menu-icon menu-icon-run"></span>Run...</div>
-        <div class="menu-separator"></div>
-        <div class="menu-item menu-shutdown" id="menuShutdown"><span class="menu-icon menu-icon-shutdown"></span>Shut Down...</div>
-    </div>`;
+renderInto(
+    startMenuEl,
+    <>
+        <div className="start-rail">
+            <span className="rail-windoes">Windoes</span>
+            <strong>XD</strong>
+        </div>
+        <div className="menu-list">
+            <div className="menu-item" id="menuWindoesUpdate">
+                <span className="menu-icon menu-icon-winupdate"></span>
+                Windoes Update
+            </div>
+            <div className="menu-separator"></div>
+            <div className="menu-item menu-item-arrow" id="menuPrograms">
+                <span className="menu-icon menu-icon-programs"></span>
+                Programs
+            </div>
+            <div className="menu-item" id="menuHelp">
+                <span className="menu-icon menu-icon-help"></span>
+                Help
+            </div>
+            <div className="menu-item" id="menuRun">
+                <span className="menu-icon menu-icon-run"></span>
+                Run...
+            </div>
+            <div className="menu-separator"></div>
+            <div className="menu-item menu-shutdown" id="menuShutdown">
+                <span className="menu-icon menu-icon-shutdown"></span>
+                Shut Down...
+            </div>
+        </div>
+    </>
+);
 // Hidden during boot — finishBoot() will show it
 startMenuEl.style.display = 'none';
 document.body.appendChild(startMenuEl);
@@ -27,34 +51,91 @@ WindoesApp.dom.startMenu = startMenuEl;
 const programsSubmenu = document.createElement('div');
 programsSubmenu.className = 'programs-submenu';
 programsSubmenu.id = 'programsSubmenu';
-programsSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="subAccessories"><span class="submenu-icon submenu-icon-folder"></span>Accessories</div>
-    <div class="context-menu-sep"></div>
-    <div class="submenu-item" id="subIE"><span class="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
-    <div class="submenu-item" id="subMSDOS"><span class="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
-    <div class="submenu-item" id="subOutlook"><span class="submenu-icon submenu-icon-outlook"></span>Outlook Express</div>
-    <div class="submenu-item" id="subExplorer"><span class="submenu-icon submenu-icon-explorer"></span>Windoes Explorer</div>`;
+renderInto(
+    programsSubmenu,
+    <>
+        <div className="submenu-item submenu-item-arrow" id="subAccessories">
+            <span className="submenu-icon submenu-icon-folder"></span>
+            Accessories
+        </div>
+        <div className="context-menu-sep"></div>
+        <div className="submenu-item" id="subIE">
+            <span className="submenu-icon submenu-icon-ie"></span>
+            Internet Explorer
+        </div>
+        <div className="submenu-item" id="subMSDOS">
+            <span className="submenu-icon submenu-icon-msdos"></span>
+            MS-DOS Prompt
+        </div>
+        <div className="submenu-item" id="subOutlook">
+            <span className="submenu-icon submenu-icon-outlook"></span>
+            Outlook Express
+        </div>
+        <div className="submenu-item" id="subExplorer">
+            <span className="submenu-icon submenu-icon-explorer"></span>
+            Windoes Explorer
+        </div>
+    </>
+);
 document.body.appendChild(programsSubmenu);
 
 // Create Accessories Submenu DOM
 const accessoriesSubmenu = document.createElement('div');
 accessoriesSubmenu.className = 'programs-submenu accessories-submenu';
 accessoriesSubmenu.id = 'accessoriesSubmenu';
-accessoriesSubmenu.innerHTML = `<div class="submenu-item submenu-item-arrow" id="subAccGames"><span class="submenu-icon submenu-icon-folder"></span>Games</div>
-    <div class="context-menu-sep"></div>
-    <div class="submenu-item" id="subAccCalculator"><span class="submenu-icon submenu-icon-calculator"></span>Calculator</div>
-    <div class="submenu-item" id="subAccImaging"><span class="submenu-icon submenu-icon-imaging"></span>Imaging</div>
-    <div class="submenu-item" id="subAccNotepad"><span class="submenu-icon submenu-icon-notepad"></span>Notepad</div>
-    <div class="submenu-item" id="subAccPaint"><span class="submenu-icon submenu-icon-paint"></span>Paint</div>
-    <div class="submenu-item" id="subAccWordPad"><span class="submenu-icon submenu-icon-wordpad"></span>WordPad</div>`;
+renderInto(
+    accessoriesSubmenu,
+    <>
+        <div className="submenu-item submenu-item-arrow" id="subAccGames">
+            <span className="submenu-icon submenu-icon-folder"></span>
+            Games
+        </div>
+        <div className="context-menu-sep"></div>
+        <div className="submenu-item" id="subAccCalculator">
+            <span className="submenu-icon submenu-icon-calculator"></span>
+            Calculator
+        </div>
+        <div className="submenu-item" id="subAccImaging">
+            <span className="submenu-icon submenu-icon-imaging"></span>
+            Imaging
+        </div>
+        <div className="submenu-item" id="subAccNotepad">
+            <span className="submenu-icon submenu-icon-notepad"></span>
+            Notepad
+        </div>
+        <div className="submenu-item" id="subAccPaint">
+            <span className="submenu-icon submenu-icon-paint"></span>
+            Paint
+        </div>
+        <div className="submenu-item" id="subAccWordPad">
+            <span className="submenu-icon submenu-icon-wordpad"></span>
+            WordPad
+        </div>
+    </>
+);
 document.body.appendChild(accessoriesSubmenu);
 
 // Create Games Submenu DOM
 const gamesSubmenu = document.createElement('div');
 gamesSubmenu.className = 'programs-submenu games-submenu';
 gamesSubmenu.id = 'gamesSubmenu';
-gamesSubmenu.innerHTML = `<div class="submenu-item" id="subGameAsciiRunner"><span class="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner</div>
-    <div class="submenu-item" id="subGameMinesweeper"><span class="submenu-icon submenu-icon-minesweeper"></span>Minesweeper</div>
-    <div class="submenu-item" id="subGameSolitaire"><span class="submenu-icon submenu-icon-solitaire"></span>Solitaire</div>`;
+renderInto(
+    gamesSubmenu,
+    <>
+        <div className="submenu-item" id="subGameAsciiRunner">
+            <span className="submenu-icon submenu-icon-ascii-runner"></span>
+            ASCII Runner
+        </div>
+        <div className="submenu-item" id="subGameMinesweeper">
+            <span className="submenu-icon submenu-icon-minesweeper"></span>
+            Minesweeper
+        </div>
+        <div className="submenu-item" id="subGameSolitaire">
+            <span className="submenu-icon submenu-icon-solitaire"></span>
+            Solitaire
+        </div>
+    </>
+);
 document.body.appendChild(gamesSubmenu);
 
 // Helper to close all menus and depress start button
@@ -288,28 +369,37 @@ document.getElementById('menuHelp').addEventListener('click', () => {
 const shutdownDialog = document.createElement('div');
 shutdownDialog.className = 'dialog-overlay shutdown-dialog';
 shutdownDialog.id = 'shutdownDialog';
-shutdownDialog.innerHTML = `<div class="dialog-box">
-    <div class="dialog-titlebar">
-        <span>Shut Down Windows</span>
-        <button class="ctrl-btn" id="shutdownCloseBtn" aria-label="Close">&times;</button>
-    </div>
-    <div class="dialog-body">
-        <div class="shutdown-question">
-            <img src="icons/my-computer.png" class="shutdown-computer-icon" alt="My Computer" draggable="false">
-            <div class="dialog-text">What do you want the computer to do?</div>
+renderInto(
+    shutdownDialog,
+    <div className="dialog-box">
+        <div className="dialog-titlebar">
+            <span>Shut Down Windows</span>
+            <button className="ctrl-btn" id="shutdownCloseBtn" aria-label="Close">×</button>
         </div>
-        <div class="shutdown-options">
-            <label><input type="radio" name="shutdownOption" value="shutdown" checked> Shut down</label>
-            <label><input type="radio" name="shutdownOption" value="restart"> Restart</label>
-            <label><input type="radio" name="shutdownOption" value="msdos"> Restart in MS-DOS mode</label>
+        <div className="dialog-body">
+            <div className="shutdown-question">
+                <img src="icons/my-computer.png" className="shutdown-computer-icon" alt="My Computer" draggable={false} />
+                <div className="dialog-text">What do you want the computer to do?</div>
+            </div>
+            <div className="shutdown-options">
+                <label>
+                    <input type="radio" name="shutdownOption" value="shutdown" defaultChecked /> Shut down
+                </label>
+                <label>
+                    <input type="radio" name="shutdownOption" value="restart" /> Restart
+                </label>
+                <label>
+                    <input type="radio" name="shutdownOption" value="msdos" /> Restart in MS-DOS mode
+                </label>
+            </div>
+        </div>
+        <div className="dialog-buttons">
+            <button className="dialog-btn" id="shutdownOkBtn">OK</button>
+            <button className="dialog-btn" id="shutdownCancelBtn">Cancel</button>
+            <button className="dialog-btn" id="shutdownHelpBtn">Help</button>
         </div>
     </div>
-    <div class="dialog-buttons">
-        <button class="dialog-btn" id="shutdownOkBtn">OK</button>
-        <button class="dialog-btn" id="shutdownCancelBtn">Cancel</button>
-        <button class="dialog-btn" id="shutdownHelpBtn">Help</button>
-    </div>
-</div>`;
+);
 document.body.appendChild(shutdownDialog);
 
 function closeShutdownDialog() {
@@ -325,8 +415,14 @@ function performShutdown() {
 
     const shutdownMsg = document.createElement('div');
     shutdownMsg.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#FF8000;font-size:24px;font-family:"MS Sans Serif",sans-serif;background:#000;z-index:99998;';
-    shutdownMsg.innerHTML = 'It\'s now safe to turn off<br>your computer.';
     shutdownMsg.style.textAlign = 'center';
+    renderInto(
+        shutdownMsg,
+        <>
+            <div>It's now safe to turn off</div>
+            <div>your computer.</div>
+        </>
+    );
     document.body.appendChild(shutdownMsg);
 }
 
