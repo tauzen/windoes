@@ -1785,10 +1785,6 @@
                 font-size: 14px;
             }
 
-            .menubar {
-                display: none;
-            }
-
             .toolbar {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
