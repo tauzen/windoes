@@ -1,49 +1,9 @@
 // ══════════════════════════════════════════════
-// Boot Sequence
+// Boot Sequence (state-driven)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 
-const bootBios = document.getElementById('bootBios');
-const bootScreen = document.getElementById('bootScreen');
-const bootProgress = document.getElementById('bootProgress');
-const bootStatus = document.getElementById('bootStatus');
-const biosMemory = document.getElementById('biosMemory');
-const biosStatus = document.getElementById('biosStatus');
-
-// Populate shared DOM refs in namespace
-WindoesApp.dom.startButton = document.getElementById('startButton');
-WindoesApp.dom.theDesktop = document.getElementById('theDesktop');
-WindoesApp.dom.theTaskbar = document.getElementById('theTaskbar');
-
-// Hide desktop & taskbar during boot
-WindoesApp.dom.theDesktop.style.display = 'none';
-WindoesApp.dom.theTaskbar.style.display = 'none';
-
 function runBootSequence() {
-    // Phase 1: BIOS POST
-    let memCount = 0;
-    const memTarget = 262144; // 256 MB in KB
-    const memInterval = setInterval(() => {
-        memCount += 32768;
-        if (memCount >= memTarget) {
-            memCount = memTarget;
-            clearInterval(memInterval);
-            biosMemory.textContent = memCount.toLocaleString();
-            biosStatus.textContent = 'Press DEL to enter SETUP, ESC to skip memory test';
-            setTimeout(() => {
-                biosStatus.textContent = 'Starting Windoes XD...';
-                setTimeout(showSplashScreen, 600);
-            }, 500);
-        } else {
-            biosMemory.textContent = memCount.toLocaleString();
-        }
-    }, 80);
-}
-
-function showSplashScreen() {
-    bootBios.classList.add('hidden');
-    bootScreen.classList.remove('hidden');
-
     const bootMessages = WindoesApp.config.bootMessages || [
         'Loading Windoes...',
         'Loading system files...',
@@ -54,17 +14,46 @@ function showSplashScreen() {
         'Applying computer settings...'
     ];
 
+    WindoesApp.state.dispatch({ type: 'BOOT_RESET', splashStatus: bootMessages[0] });
+
+    // Phase 1: BIOS POST
+    let memCount = 0;
+    const memTarget = 262144; // 256 MB in KB
+    const memInterval = setInterval(() => {
+        memCount += 32768;
+        if (memCount >= memTarget) {
+            memCount = memTarget;
+            clearInterval(memInterval);
+            WindoesApp.state.dispatch({ type: 'BOOT_BIOS_PROGRESS', value: memCount.toLocaleString() });
+            WindoesApp.state.dispatch({ type: 'BOOT_BIOS_STATUS', value: 'Press DEL to enter SETUP, ESC to skip memory test' });
+            setTimeout(() => {
+                WindoesApp.state.dispatch({ type: 'BOOT_BIOS_STATUS', value: 'Starting Windoes XD...' });
+                setTimeout(() => showSplashScreen(bootMessages), 600);
+            }, 500);
+        } else {
+            WindoesApp.state.dispatch({ type: 'BOOT_BIOS_PROGRESS', value: memCount.toLocaleString() });
+        }
+    }, 80);
+}
+
+function showSplashScreen(bootMessages) {
+    WindoesApp.state.dispatch({ type: 'BOOT_PHASE_SPLASH', status: bootMessages[0] });
+
     let progress = 0;
     let msgIdx = 0;
     const progressInterval = setInterval(() => {
         progress += Math.random() * 8 + 2;
         if (progress > 100) progress = 100;
-        bootProgress.style.width = progress + '%';
 
         if (progress > (msgIdx + 1) * 14 && msgIdx < bootMessages.length - 1) {
             msgIdx++;
-            bootStatus.textContent = bootMessages[msgIdx];
         }
+
+        WindoesApp.state.dispatch({
+            type: 'BOOT_SPLASH_PROGRESS',
+            progress,
+            status: bootMessages[msgIdx],
+        });
 
         if (progress >= 100) {
             clearInterval(progressInterval);
@@ -74,11 +63,7 @@ function showSplashScreen() {
 }
 
 function finishBoot() {
-    bootScreen.classList.add('hidden');
-    WindoesApp.dom.theDesktop.style.display = '';
-    WindoesApp.dom.theTaskbar.style.display = '';
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.style.display = '';
-    WindoesApp.bootDone = true;
+    WindoesApp.state.dispatch({ type: 'BOOT_FINISH' });
 
     // Trigger startup sound after user interaction enables audio
     WindoesApp.sound.playStartupSound();
