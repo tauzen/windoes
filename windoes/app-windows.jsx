@@ -18,8 +18,8 @@ const appConfig = WindoesApp.WindowManager.register('app', {
         closeBtnId: 'appCloseBtn',
         style: 'left: clamp(110px, 15vw, 190px); top: 28px;',
         menubar: ['File', 'View', 'Help'],
-        view: '<iframe id="appFrame" title="Application content" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
-        statusBar: '<span class="status-left" id="appStatusText">Done</span>',
+        view: <iframe id="appFrame" title="Application content" referrerPolicy="no-referrer" allow="autoplay"></iframe>,
+        statusBar: <span className="status-left" id="appStatusText">Done</span>,
     },
     taskButton: { id: 'appTaskButton', icon: 'task-icon-app', label: 'Application', labelId: 'appTaskLabel' },
     iframeId: 'appFrame',
@@ -65,8 +65,15 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         ariaLabel: 'Winamp',
         title: 'Winamp',
         style: 'left: 200px; top: 50px; width: 275px; height: 369px; min-width: unset; min-height: unset;',
-        view: '<div><div class="headless-drag-handle"></div><button class="headless-close-btn" aria-label="Close">&times;</button></div>'
-            + '<iframe id="winampFrame" title="Winamp" referrerpolicy="no-referrer" allow="autoplay"></iframe>',
+        view: (
+            <>
+                <div>
+                    <div className="headless-drag-handle"></div>
+                    <button className="headless-close-btn" aria-label="Close">×</button>
+                </div>
+                <iframe id="winampFrame" title="Winamp" referrerPolicy="no-referrer" allow="autoplay"></iframe>
+            </>
+        ),
     },
     taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
     iframeId: 'winampFrame',
@@ -106,7 +113,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
         minimizeBtnId: 'minesweeperMinBtn',
         closeBtnId: 'minesweeperCloseBtn',
         style: 'left: 250px; top: 80px; width: 260px; height: 280px; min-width: unset; min-height: unset;',
-        view: '<iframe id="minesweeperFrame" title="Minesweeper" referrerpolicy="no-referrer"></iframe>',
+        view: <iframe id="minesweeperFrame" title="Minesweeper" referrerPolicy="no-referrer"></iframe>,
     },
     taskButton: { id: 'minesweeperTaskBtn', icon: 'task-icon-minesweeper', label: 'Minesweeper' },
     iframeId: 'minesweeperFrame',
@@ -139,7 +146,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
         minimizeBtnId: 'solitaireMinBtn',
         closeBtnId: 'solitaireCloseBtn',
         style: 'left: 180px; top: 40px; width: 700px; height: 540px; min-width: unset; min-height: unset;',
-        view: '<iframe id="solitaireFrame" title="Solitaire" referrerpolicy="no-referrer"></iframe>',
+        view: <iframe id="solitaireFrame" title="Solitaire" referrerPolicy="no-referrer"></iframe>,
     },
     taskButton: { id: 'solitaireTaskBtn', icon: 'task-icon-solitaire', label: 'Solitaire' },
     iframeId: 'solitaireFrame',

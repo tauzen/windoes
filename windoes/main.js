@@ -22,14 +22,14 @@
 import './sound.js';
 import './window-manager.jsx';
 import './boot.js';
-import './bsod.js';
-import './ie-window.js';
-import './app-windows.js';
-import './utility-windows.js';
+import './bsod.jsx';
+import './ie-window.jsx';
+import './app-windows.jsx';
+import './utility-windows.jsx';
 import './desktop.jsx';
 import './start-menu.jsx';
-import './run-dialog.js';
-import './context-menu.js';
+import './run-dialog.jsx';
+import './context-menu.jsx';
 import WindoesApp from './app-state.js';
 
 setTimeout(WindoesApp.boot.runBootSequence, 300);

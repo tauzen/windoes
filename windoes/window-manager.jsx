@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
-import { htmlToReactNodes, renderInto } from './react-view.js';
+import { renderInto } from './react-view.js';
 
 const WindowManager = {
     _stack: [],      // ordered bottom→top by z-index
@@ -32,7 +32,7 @@ const WindowManager = {
         section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
         if (tmpl.style) section.style.cssText = tmpl.style;
 
-        renderInto(section, <>{htmlToReactNodes(tmpl.view || '', `${tmpl.id}-headless`)}</>);
+        renderInto(section, <>{tmpl.view || null}</>);
 
         return section;
     },
@@ -83,34 +83,26 @@ const WindowManager = {
         ];
 
         if (tmpl.menubar) {
-            if (typeof tmpl.menubar === 'string') {
-                content.push(
-                    <div key="menubar" className="menubar">
-                        {htmlToReactNodes(tmpl.menubar, `${tmpl.id}-menubar`)}
-                    </div>
-                );
-            } else {
-                content.push(
-                    <div key="menubar" className="menubar">
-                        {tmpl.menubar.map((item, index) => {
-                            if (typeof item === 'string') {
-                                return <span key={`menu-${index}`}>{item}</span>;
-                            }
-                            return <span key={`menu-${item.id || index}`} {...(item.id ? { id: item.id } : {})}>{item.label}</span>;
-                        })}
-                    </div>
-                );
-            }
+            content.push(
+                <div key="menubar" className="menubar">
+                    {tmpl.menubar.map((item, index) => {
+                        if (typeof item === 'string') {
+                            return <span key={`menu-${index}`}>{item}</span>;
+                        }
+                        return <span key={`menu-${item.id || index}`} {...(item.id ? { id: item.id } : {})}>{item.label}</span>;
+                    })}
+                </div>
+            );
         }
 
         if (tmpl.toolbar) {
-            content.push(...htmlToReactNodes(tmpl.toolbar, `${tmpl.id}-toolbar`));
+            content.push(tmpl.toolbar);
         }
 
         if (tmpl.view !== undefined) {
             content.push(
                 <div key="view" className="view" {...(viewStyle ? { style: viewStyle } : {})}>
-                    {htmlToReactNodes(tmpl.view, `${tmpl.id}-view`)}
+                    {tmpl.view}
                 </div>
             );
         }
@@ -118,7 +110,7 @@ const WindowManager = {
         if (tmpl.statusBar) {
             content.push(
                 <div key="status" className="status">
-                    {htmlToReactNodes(tmpl.statusBar, `${tmpl.id}-status`)}
+                    {tmpl.statusBar}
                 </div>
             );
         }
