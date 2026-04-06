@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 
-// Register IE with template-based DOM generation
+// Register IE shell window with JSX-rendered chrome
 const ieConfig = WindoesApp.WindowManager.register('ie', {
     template: {
         id: 'ieWindow',
