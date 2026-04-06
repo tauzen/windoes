@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════
-// Window Manager (with template-based DOM generation)
+// Window Manager (JSX-rendered shell windows)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
