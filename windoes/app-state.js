@@ -32,19 +32,19 @@ const WindoesApp = {
     // ── boot API (filled by boot.js) ──────────
     boot: {},
 
-    // ── bsod / error dialog API (filled by bsod.js) ──
+    // ── bsod / error dialog API (filled by bsod.jsx) ──
     bsod: {},
 
-    // ── window-open helpers (filled by ie-window, app-windows, utility-windows) ──
+    // ── window-open helpers (filled by ie-window.jsx, app-windows.jsx, utility-windows.jsx) ──
     open: {},
 
-    // ── menu helpers (filled by start-menu.js) ──
+    // ── menu helpers (filled by start-menu.jsx) ──
     menu: {},
 
-    // ── ie helpers (filled by ie-window.js) ──
+    // ── ie helpers (filled by ie-window.jsx) ──
     ie: {},
 
-    // ── misc helpers (filled by ie-window.js) ──
+    // ── misc helpers (filled by ie-window.jsx) ──
     helpers: {},
 };
 
