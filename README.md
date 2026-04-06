@@ -2,7 +2,7 @@
 
 A Windows 98-inspired desktop simulator built with HTML/CSS and modular JavaScript, bundled with Vite.
 
-Windoes recreates a retro desktop UX with draggable windows, taskbar behavior, Start menu interactions, desktop icons, and built-in mini apps. Simulator shell visuals are rendered with React + JSX, while bundled applications remain standalone under `windoes/public/applications/`.
+Windoes recreates a retro desktop UX with draggable windows, taskbar behavior, Start menu interactions, desktop icons, and built-in mini apps. The simulator now runs from a single React root (`#app`) and uses a portal registry (`renderInto`) so shell visuals render through one React application, while bundled applications remain standalone under `windoes/public/applications/`.
 
 ## Live demo
 
