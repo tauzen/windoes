@@ -5,17 +5,17 @@
 //   simulator.config.js  – static config (boot messages, BSOD texts, run actions)
 //   app-state.js         – WindoesApp namespace (shared state & cross-module APIs)
 //   sound.js             – WindoesApp.sound (playBeep, playStartupSound, …)
-//   window-manager.js    – WindoesApp.WindowManager + bringToFront()
-//   dragging.js          – makeDraggable() (imported by window-manager.js)
+//   window-manager.jsx   – WindoesApp.WindowManager + bringToFront()
+//   dragging.js          – makeDraggable() (imported by window-manager.jsx)
 //   boot.js              – WindoesApp.boot, WindoesApp.dom refs
-//   bsod.js              – WindoesApp.bsod (showErrorDialog, scheduleRandom*, …)
-//   ie-window.js         – WindoesApp.open.internetExplorer, WindoesApp.ie, WindoesApp.helpers
-//   app-windows.js       – WindoesApp.open.app/winamp/minesweeper
-//   utility-windows.js   – WindoesApp.open.myComputer/notepad/recycleBin
-//   desktop.js           – icon double-click handlers, taskbar button wiring
-//   start-menu.js        – WindoesApp.dom.startMenu, WindoesApp.menu
-//   run-dialog.js        – Run dialog command dispatch
-//   context-menu.js      – right-click menu, Show Desktop, clock tooltip, tray
+//   bsod.jsx             – WindoesApp.bsod (showErrorDialog, scheduleRandom*, …)
+//   ie-window.jsx        – WindoesApp.open.internetExplorer, WindoesApp.ie, WindoesApp.helpers
+//   app-windows.jsx      – WindoesApp.open.app/winamp/minesweeper
+//   utility-windows.jsx  – WindoesApp.open.myComputer/notepad/recycleBin
+//   desktop.jsx          – icon double-click handlers, taskbar button wiring
+//   start-menu.jsx       – WindoesApp.dom.startMenu, WindoesApp.menu
+//   run-dialog.jsx       – Run dialog command dispatch
+//   context-menu.jsx     – right-click menu, Show Desktop, clock tooltip, tray
 //   main.js              ← you are here
 // ══════════════════════════════════════════════
 

@@ -1,8 +1,8 @@
 # Windoes
 
-A Windows 98-inspired desktop simulator built with vanilla HTML, CSS, and JavaScript, bundled with Vite.
+A Windows 98-inspired desktop simulator built with HTML/CSS and modular JavaScript, bundled with Vite.
 
-Windoes recreates a retro desktop UX with draggable windows, taskbar behavior, Start menu interactions, desktop icons, and built-in mini apps.
+Windoes recreates a retro desktop UX with draggable windows, taskbar behavior, Start menu interactions, desktop icons, and built-in mini apps. Simulator shell visuals are rendered with React + JSX, while bundled applications remain standalone under `windoes/public/applications/`.
 
 ## Live demo
 
@@ -10,10 +10,10 @@ https://tauzen.github.io/windoes/
 
 ## What is included
 
-- Boot flow + retro dialogs (`boot.js`, `bsod.js`, `utility-windows.js`)
-- Desktop shell and taskbar (`desktop.js`, `start-menu.js`, `window-manager.js`)
-- Windowed app launching (`app-windows.js`, `ie-window.js`, `run-dialog.js`)
-- Virtual file system and explorer-style navigation (`virtual-fs.js`, `fs-explorer.js`)
+- Boot flow + retro dialogs (`boot.js`, `bsod.jsx`, `utility-windows.jsx`)
+- Desktop shell and taskbar (`desktop.jsx`, `start-menu.jsx`, `window-manager.jsx`)
+- Windowed app launching (`app-windows.jsx`, `ie-window.jsx`, `run-dialog.jsx`)
+- Virtual file system and explorer-style navigation (`virtual-fs.js`, `fs-explorer.jsx`)
 - Built-in applications under `windoes/public/applications/`:
   - ASCII Runner
   - Minesweeper
@@ -27,6 +27,10 @@ windoes/
   main.js                app entrypoint
   index.html             shell markup
   styles.css             global styles
+  react-view.js          React root mounting helper (renderInto)
+  window-manager.jsx     shell window rendering + lifecycle
+  desktop.jsx            desktop icon rendering/events
+  start-menu.jsx         Start menu rendering/events
   simulator.config.js    app/window configuration
   public/
     icons/               desktop/start menu icon assets
@@ -72,6 +76,8 @@ Run simulator tests:
 ```bash
 npm test
 ```
+
+Simulator tests launch a Vite dev server using the project `vite.config.js` (so JSX/React transforms match normal local development).
 
 Run embedded app tests:
 
