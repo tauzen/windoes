@@ -1,29 +1,147 @@
 // ══════════════════════════════════════════════
 // Shared Application State & Namespace
-//
-// Loaded early (before all other modules) to provide a single
-// namespace for cross-module state and APIs.  Modules register
-// their public functions here so consumers can use explicit
-// references instead of implicit globals.
 // ══════════════════════════════════════════════
-
+import { useSyncExternalStore } from 'react';
 import defaultConfig from './simulator.config.js';
 
 // Allow runtime config override (used by tests via addInitScript)
 const runtimeOverride = window.WIN_ME_SIMULATOR_CONFIG;
 const config = runtimeOverride ? { ...defaultConfig, ...runtimeOverride } : defaultConfig;
 
-const WindoesApp = {
-    // ── shared state ──────────────────────────
-    config,
-    bootDone: false,
+const initialState = {
+    boot: {
+        phase: 'bios', // bios | splash | ready
+        biosMemory: 0,
+        biosStatus: 'Initializing Plug and Play Cards...',
+        splashProgress: 0,
+        splashStatus: 'Loading Windoes...',
+        done: false,
+    },
+    windows: {
+        stack: [],
+        focusedId: null,
+    },
+};
 
-    // DOM refs populated once the DOM is ready (set by boot.js)
+let state = initialState;
+const listeners = new Set();
+
+function reduce(current, action) {
+    switch (action.type) {
+    case 'BOOT_RESET':
+        return {
+            ...current,
+            boot: {
+                ...initialState.boot,
+                splashStatus: action.splashStatus || initialState.boot.splashStatus,
+            },
+        };
+    case 'BOOT_BIOS_PROGRESS':
+        return {
+            ...current,
+            boot: {
+                ...current.boot,
+                biosMemory: action.value,
+            },
+        };
+    case 'BOOT_BIOS_STATUS':
+        return {
+            ...current,
+            boot: {
+                ...current.boot,
+                biosStatus: action.value,
+            },
+        };
+    case 'BOOT_PHASE_SPLASH':
+        return {
+            ...current,
+            boot: {
+                ...current.boot,
+                phase: 'splash',
+                splashProgress: 0,
+                splashStatus: action.status || current.boot.splashStatus,
+            },
+        };
+    case 'BOOT_SPLASH_PROGRESS':
+        return {
+            ...current,
+            boot: {
+                ...current.boot,
+                splashProgress: action.progress,
+                splashStatus: action.status || current.boot.splashStatus,
+            },
+        };
+    case 'BOOT_FINISH':
+        return {
+            ...current,
+            boot: {
+                ...current.boot,
+                phase: 'ready',
+                splashProgress: 100,
+                done: true,
+            },
+        };
+    case 'WINDOW_STACK_SET': {
+        const stack = action.stack || [];
+        return {
+            ...current,
+            windows: {
+                ...current.windows,
+                stack,
+                focusedId: stack.length ? stack[stack.length - 1] : null,
+            },
+        };
+    }
+    default:
+        return current;
+    }
+}
+
+function emit() {
+    for (const listener of listeners) {
+        listener();
+    }
+}
+
+function dispatch(action) {
+    const next = reduce(state, action);
+    if (next !== state) {
+        state = next;
+        emit();
+    }
+}
+
+function getState() {
+    return state;
+}
+
+function subscribe(listener) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+}
+
+function useWindoesState(selector = (s) => s) {
+    return useSyncExternalStore(subscribe, () => selector(state), () => selector(state));
+}
+
+const WindoesApp = {
+    // ── shared config ──────────────────────────
+    config,
+
+    // DOM refs populated by shell-app.jsx
     dom: {
         startButton: null,
         startMenu: null,
         theDesktop: null,
         theTaskbar: null,
+    },
+
+    // state store
+    state: {
+        get: getState,
+        subscribe,
+        dispatch,
+        use: useWindoesState,
     },
 
     // ── sound API (filled by sound.js) ────────
@@ -47,6 +165,17 @@ const WindoesApp = {
     // ── misc helpers (filled by ie-window.jsx) ──
     helpers: {},
 };
+
+Object.defineProperty(WindoesApp, 'bootDone', {
+    get() {
+        return state.boot.done;
+    },
+    set(value) {
+        if (value) {
+            dispatch({ type: 'BOOT_FINISH' });
+        }
+    },
+});
 
 // Keep on window for iframe communication
 window.WindoesApp = WindoesApp;
