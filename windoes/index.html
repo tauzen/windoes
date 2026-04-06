@@ -5,67 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Windoes XD</title>
     <link rel="stylesheet" href="./styles.css">
-
 </head>
 <body>
-
-    <!-- Boot BIOS screen -->
-    <div class="boot-bios" id="bootBios">
-Award Modular BIOS v6.00PG, An Energy Star Ally
-Copyright (C) 1984-2000, Award Software, Inc.
-
-Intel Pentium III 800MHz Processor
-Memory Test: <span id="biosMemory">0</span>K OK
-
-Detecting Primary Master... WDC AC310200R
-Detecting Primary Slave... GENERIC CD-ROM
-Detecting Secondary Master... None
-Detecting Secondary Slave... None
-
-<span id="biosStatus">Initializing Plug and Play Cards...</span>
-    </div>
-
-    <!-- Boot splash screen -->
-    <div class="boot-screen hidden" id="bootScreen">
-        <div class="boot-logo">
-            <img src="img/boot.png" alt="Windoes XD" class="boot-image">
-            <div class="boot-progress-container">
-                <div class="boot-progress-bar" id="bootProgress"></div>
-            </div>
-            <div class="boot-status" id="bootStatus">Loading Windoes...</div>
-        </div>
-    </div>
-
-    <!-- BSOD -->
-    <div class="bsod" id="bsod">
-        <span class="bsod-header"> Windoes </span>
-<pre id="bsodText"></pre>
-    </div>
-
-    <!-- Desktop shell (windows and icons are injected by JS) -->
-    <div class="desktop" id="theDesktop">
-        <div class="desktop-icons" id="desktopIcons"></div>
-    </div>
-
-    <!-- Taskbar shell (task buttons are injected by JS) -->
-    <div class="taskbar" id="theTaskbar">
-        <button class="start-btn" id="startButton">
-            <span class="start-flag"><span class="f1"></span><span class="f2"></span><span class="f3"></span><span class="f4"></span></span>
-            Start
-        </button>
-        <div class="quick-launch">
-            <span class="ql-btn ql-ie" id="qlIE" title="Launch Internet Explorer"></span>
-            <span class="ql-btn ql-desktop" title="Show Desktop"></span>
-        </div>
-        <div class="task-divider"></div>
-        <div class="task-area" id="taskArea"></div>
-        <div class="tray">
-            <span class="tray-volume" aria-label="Volume" id="trayVolume"></span>
-            <span id="clock">12:00 PM</span>
-        </div>
-    </div>
-
+    <div id="app"></div>
     <script type="module" src="./main.js"></script>
-
 </body>
 </html>
