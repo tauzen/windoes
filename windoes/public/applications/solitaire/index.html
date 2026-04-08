@@ -170,7 +170,26 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 28px;
+            font-size: 24px;
+        }
+
+        .card-pips {
+            position: absolute;
+            top: 16px;
+            bottom: 16px;
+            left: 4px;
+            right: 4px;
+        }
+
+        .pip {
+            position: absolute;
+            font-size: 12px;
+            line-height: 1;
+            transform: translate(-50%, -50%);
+        }
+
+        .pip-flip {
+            transform: translate(-50%, -50%) rotate(180deg);
         }
 
         .card-back {
@@ -517,6 +536,41 @@
         function suitColor(s) { return SUIT_COLORS[s]; }
         function isRed(s) { return s === 'hearts' || s === 'diamonds'; }
 
+        // Pip layouts: [x%, y%, flipped] for each number card (2-10)
+        const PIP_LAYOUTS = {
+            2:  [[50,8,0],[50,92,1]],
+            3:  [[50,8,0],[50,50,0],[50,92,1]],
+            4:  [[30,8,0],[70,8,0],[30,92,1],[70,92,1]],
+            5:  [[30,8,0],[70,8,0],[50,50,0],[30,92,1],[70,92,1]],
+            6:  [[30,8,0],[70,8,0],[30,50,0],[70,50,0],[30,92,1],[70,92,1]],
+            7:  [[30,8,0],[70,8,0],[30,50,0],[70,50,0],[30,92,1],[70,92,1],[50,29,0]],
+            8:  [[30,8,0],[70,8,0],[30,50,0],[70,50,0],[30,92,1],[70,92,1],[50,29,0],[50,71,1]],
+            9:  [[30,8,0],[70,8,0],[30,36,0],[70,36,0],[50,50,0],[30,64,1],[70,64,1],[30,92,1],[70,92,1]],
+            10: [[30,8,0],[70,8,0],[50,22,0],[30,36,0],[70,36,0],[30,64,1],[70,64,1],[50,78,1],[30,92,1],[70,92,1]]
+        };
+
+        function generatePipsHTML(rank, sym) {
+            // Ace: single large symbol
+            if (rank === 0) {
+                return `<div class="card-center">${sym}</div>`;
+            }
+            // Face cards (J=10, Q=11, K=12): large rank letter
+            if (rank >= 10) {
+                return `<div class="card-center">${RANKS[rank]}</div>`;
+            }
+            // Number cards (2-10)
+            var count = rank + 1;
+            var positions = PIP_LAYOUTS[count];
+            var html = '<div class="card-pips">';
+            for (var i = 0; i < positions.length; i++) {
+                var p = positions[i];
+                var cls = p[2] ? 'pip pip-flip' : 'pip';
+                html += '<span class="' + cls + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + sym + '</span>';
+            }
+            html += '</div>';
+            return html;
+        }
+
         // ===== CARD ELEMENT =====
         function createCardElement(card) {
             let el = document.createElement('div');
@@ -536,9 +590,10 @@
                 let color = suitColor(card.suit);
                 let sym = suitSymbol(card.suit);
                 let rn = rankName(card.rank);
+                let pipsHTML = generatePipsHTML(card.rank, sym);
                 el.innerHTML = `<div class="card-face ${color}">
                     <div class="card-top"><span class="card-rank">${rn}</span><span class="card-suit-small">${sym}</span></div>
-                    <div class="card-center">${sym}</div>
+                    ${pipsHTML}
                     <div class="card-bottom"><span class="card-rank">${rn}</span><span class="card-suit-small">${sym}</span></div>
                 </div>`;
             } else {
