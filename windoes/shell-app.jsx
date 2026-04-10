@@ -281,6 +281,15 @@ export default function ShellApp() {
                 <div className="context-menu-item" data-action="exit">Exit</div>
             </div>
 
+            <div className="context-menu explorer-ctx" id="explorerContextMenu">
+                <div className="context-menu-item" data-action="new-folder">New Folder</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item" data-action="rename">Rename</div>
+                <div className="context-menu-item" data-action="delete">Delete</div>
+            </div>
+
+            <div id="dragOverlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 99999, display: 'none', cursor: 'move' }}></div>
+
             <RenderRegistryPortals />
         </>
     );

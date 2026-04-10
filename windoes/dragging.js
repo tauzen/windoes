@@ -4,9 +4,7 @@
 import { bringToFront } from './window-manager.jsx';
 
 // Shared overlay to prevent iframes from stealing pointer events during drag
-const dragOverlay = document.createElement('div');
-dragOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:none;cursor:move;';
-document.body.appendChild(dragOverlay);
+const dragOverlay = document.getElementById('dragOverlay');
 
 export function makeDraggable(titlebarEl, windowEl) {
     let isDragging = false;
@@ -28,7 +26,7 @@ export function makeDraggable(titlebarEl, windowEl) {
         origLeft = rect.left;
         origTop = rect.top;
         bringToFront(windowEl);
-        dragOverlay.style.display = 'block';
+        if (dragOverlay) dragOverlay.style.display = 'block';
         e.preventDefault();
     }
 
@@ -57,7 +55,7 @@ export function makeDraggable(titlebarEl, windowEl) {
     function pointerUp() {
         if (!isDragging) return;
         isDragging = false;
-        dragOverlay.style.display = 'none';
+        if (dragOverlay) dragOverlay.style.display = 'none';
     }
 
     // Mouse events

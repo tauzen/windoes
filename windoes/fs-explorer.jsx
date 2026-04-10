@@ -205,22 +205,14 @@ function renderMyComputerRoot() {
 
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
-let explorerMenu = null;
+let explorerMenu = document.getElementById('explorerContextMenu');
 
 function createContextMenu() {
-    if (explorerMenu) return;
-    explorerMenu = document.createElement('div');
-    explorerMenu.className = 'context-menu explorer-ctx';
-    renderInto(
-        explorerMenu,
-        <>
-            <div className="context-menu-item" data-action="new-folder">New Folder</div>
-            <div className="context-menu-sep"></div>
-            <div className="context-menu-item" data-action="rename">Rename</div>
-            <div className="context-menu-item" data-action="delete">Delete</div>
-        </>
-    );
-    document.body.appendChild(explorerMenu);
+    if (!explorerMenu) {
+        explorerMenu = document.getElementById('explorerContextMenu');
+    }
+    if (!explorerMenu || explorerMenu.dataset.bound === '1') return;
+    explorerMenu.dataset.bound = '1';
 
     explorerMenu.addEventListener('click', (e) => {
         const action = e.target.dataset.action;
@@ -251,6 +243,7 @@ function wireContextMenu() {
         e.preventDefault();
         e.stopPropagation();
         createContextMenu();
+        if (!explorerMenu) return;
 
         // Check if right-clicked on an item
         const itemEl = e.target.closest('.folder-item');
