@@ -4,47 +4,9 @@
 import WindoesApp from './app-state.js';
 import { renderInto } from './react-view.js';
 
-// Create Start Menu DOM and register on shared namespace
-const startMenuEl = document.createElement('div');
-startMenuEl.className = 'start-menu';
-startMenuEl.id = 'startMenu';
-startMenuEl.setAttribute('aria-label', 'Start menu');
-renderInto(
-    startMenuEl,
-    <>
-        <div className="start-rail">
-            <span className="rail-windoes">Windoes</span>
-            <strong>XD</strong>
-        </div>
-        <div className="menu-list">
-            <div className="menu-item" id="menuWindoesUpdate">
-                <span className="menu-icon menu-icon-winupdate"></span>
-                Windoes Update
-            </div>
-            <div className="menu-separator"></div>
-            <div className="menu-item menu-item-arrow" id="menuPrograms">
-                <span className="menu-icon menu-icon-programs"></span>
-                Programs
-            </div>
-            <div className="menu-item" id="menuHelp">
-                <span className="menu-icon menu-icon-help"></span>
-                Help
-            </div>
-            <div className="menu-item" id="menuRun">
-                <span className="menu-icon menu-icon-run"></span>
-                Run...
-            </div>
-            <div className="menu-separator"></div>
-            <div className="menu-item menu-shutdown" id="menuShutdown">
-                <span className="menu-icon menu-icon-shutdown"></span>
-                Shut Down...
-            </div>
-        </div>
-    </>
-);
-// Hidden during boot; state subscriber reveals it once boot is done
+// Start menu DOM is rendered by ShellApp
+const startMenuEl = document.getElementById('startMenu');
 startMenuEl.style.display = 'none';
-document.body.appendChild(startMenuEl);
 WindoesApp.dom.startMenu = startMenuEl;
 
 function syncStartMenuVisibility() {
@@ -55,96 +17,9 @@ function syncStartMenuVisibility() {
 WindoesApp.state.subscribe(syncStartMenuVisibility);
 syncStartMenuVisibility();
 
-// Create Programs Submenu DOM
-const programsSubmenu = document.createElement('div');
-programsSubmenu.className = 'programs-submenu';
-programsSubmenu.id = 'programsSubmenu';
-renderInto(
-    programsSubmenu,
-    <>
-        <div className="submenu-item submenu-item-arrow" id="subAccessories">
-            <span className="submenu-icon submenu-icon-folder"></span>
-            Accessories
-        </div>
-        <div className="context-menu-sep"></div>
-        <div className="submenu-item" id="subIE">
-            <span className="submenu-icon submenu-icon-ie"></span>
-            Internet Explorer
-        </div>
-        <div className="submenu-item" id="subMSDOS">
-            <span className="submenu-icon submenu-icon-msdos"></span>
-            MS-DOS Prompt
-        </div>
-        <div className="submenu-item" id="subOutlook">
-            <span className="submenu-icon submenu-icon-outlook"></span>
-            Outlook Express
-        </div>
-        <div className="submenu-item" id="subExplorer">
-            <span className="submenu-icon submenu-icon-explorer"></span>
-            Windoes Explorer
-        </div>
-    </>
-);
-document.body.appendChild(programsSubmenu);
-
-// Create Accessories Submenu DOM
-const accessoriesSubmenu = document.createElement('div');
-accessoriesSubmenu.className = 'programs-submenu accessories-submenu';
-accessoriesSubmenu.id = 'accessoriesSubmenu';
-renderInto(
-    accessoriesSubmenu,
-    <>
-        <div className="submenu-item submenu-item-arrow" id="subAccGames">
-            <span className="submenu-icon submenu-icon-folder"></span>
-            Games
-        </div>
-        <div className="context-menu-sep"></div>
-        <div className="submenu-item" id="subAccCalculator">
-            <span className="submenu-icon submenu-icon-calculator"></span>
-            Calculator
-        </div>
-        <div className="submenu-item" id="subAccImaging">
-            <span className="submenu-icon submenu-icon-imaging"></span>
-            Imaging
-        </div>
-        <div className="submenu-item" id="subAccNotepad">
-            <span className="submenu-icon submenu-icon-notepad"></span>
-            Notepad
-        </div>
-        <div className="submenu-item" id="subAccPaint">
-            <span className="submenu-icon submenu-icon-paint"></span>
-            Paint
-        </div>
-        <div className="submenu-item" id="subAccWordPad">
-            <span className="submenu-icon submenu-icon-wordpad"></span>
-            WordPad
-        </div>
-    </>
-);
-document.body.appendChild(accessoriesSubmenu);
-
-// Create Games Submenu DOM
-const gamesSubmenu = document.createElement('div');
-gamesSubmenu.className = 'programs-submenu games-submenu';
-gamesSubmenu.id = 'gamesSubmenu';
-renderInto(
-    gamesSubmenu,
-    <>
-        <div className="submenu-item" id="subGameAsciiRunner">
-            <span className="submenu-icon submenu-icon-ascii-runner"></span>
-            ASCII Runner
-        </div>
-        <div className="submenu-item" id="subGameMinesweeper">
-            <span className="submenu-icon submenu-icon-minesweeper"></span>
-            Minesweeper
-        </div>
-        <div className="submenu-item" id="subGameSolitaire">
-            <span className="submenu-icon submenu-icon-solitaire"></span>
-            Solitaire
-        </div>
-    </>
-);
-document.body.appendChild(gamesSubmenu);
+const programsSubmenu = document.getElementById('programsSubmenu');
+const accessoriesSubmenu = document.getElementById('accessoriesSubmenu');
+const gamesSubmenu = document.getElementById('gamesSubmenu');
 
 // Helper to close all menus and depress start button
 function closeAllMenus() {
@@ -372,43 +247,9 @@ document.getElementById('menuHelp').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════
-// Shutdown Dialog
+// Shutdown Dialog (rendered by ShellApp)
 // ══════════════════════════════════════════════
-const shutdownDialog = document.createElement('div');
-shutdownDialog.className = 'dialog-overlay shutdown-dialog';
-shutdownDialog.id = 'shutdownDialog';
-renderInto(
-    shutdownDialog,
-    <div className="dialog-box">
-        <div className="dialog-titlebar">
-            <span>Shut Down Windows</span>
-            <button className="ctrl-btn" id="shutdownCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="shutdown-question">
-                <img src="icons/my-computer.png" className="shutdown-computer-icon" alt="My Computer" draggable={false} />
-                <div className="dialog-text">What do you want the computer to do?</div>
-            </div>
-            <div className="shutdown-options">
-                <label>
-                    <input type="radio" name="shutdownOption" value="shutdown" defaultChecked /> Shut down
-                </label>
-                <label>
-                    <input type="radio" name="shutdownOption" value="restart" /> Restart
-                </label>
-                <label>
-                    <input type="radio" name="shutdownOption" value="msdos" /> Restart in MS-DOS mode
-                </label>
-            </div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="shutdownOkBtn">OK</button>
-            <button className="dialog-btn" id="shutdownCancelBtn">Cancel</button>
-            <button className="dialog-btn" id="shutdownHelpBtn">Help</button>
-        </div>
-    </div>
-);
-document.body.appendChild(shutdownDialog);
+const shutdownDialog = document.getElementById('shutdownDialog');
 
 function closeShutdownDialog() {
     shutdownDialog.classList.remove('active');
