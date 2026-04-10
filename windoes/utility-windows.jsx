@@ -4,7 +4,6 @@
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
 import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.jsx';
-import { renderInto } from './react-view.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -113,33 +112,7 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
 
-const notepadSaveDialog = document.createElement('div');
-notepadSaveDialog.className = 'dialog-overlay notepad-save-dialog';
-notepadSaveDialog.id = 'notepadSaveDialog';
-renderInto(
-    notepadSaveDialog,
-    <div className="dialog-box" style={{ minWidth: '420px' }}>
-        <div className="dialog-titlebar">
-            <span>Save As</span>
-            <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-info"></div>
-            <div className="notepad-save-fields">
-                <div className="dialog-text">Choose where to save this text document.</div>
-                <div className="notepad-save-row">
-                    <label htmlFor="notepadSavePathInput">File name:</label>
-                    <input type="text" id="notepadSavePathInput" aria-label="Save path" />
-                </div>
-            </div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
-            <button className="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
-        </div>
-    </div>
-);
-document.body.appendChild(notepadSaveDialog);
+const notepadSaveDialog = document.getElementById('notepadSaveDialog');
 
 const notepadSavePathInput = notepadSaveDialog.querySelector('#notepadSavePathInput');
 const notepadSaveConfirmBtn = notepadSaveDialog.querySelector('#notepadSaveConfirmBtn');
@@ -239,20 +212,8 @@ function setupNotepadFileMenu() {
     const fileMenu = notepadWindowEl.querySelector('#notepadFileMenu');
     if (!fileMenu) return;
 
-    const dropdown = document.createElement('div');
-    dropdown.id = 'notepadFileDropdown';
-    dropdown.className = 'context-menu notepad-file-menu';
-    renderInto(
-        dropdown,
-        <>
-            <div className="context-menu-item" data-action="new">New</div>
-            <div className="context-menu-item" data-action="save">Save</div>
-            <div className="context-menu-item" data-action="save-as">Save As...</div>
-            <div className="context-menu-sep"></div>
-            <div className="context-menu-item" data-action="exit">Exit</div>
-        </>
-    );
-    document.body.appendChild(dropdown);
+    const dropdown = document.getElementById('notepadFileDropdown');
+    if (!dropdown) return;
 
     function closeMenu() {
         dropdown.classList.remove('open');

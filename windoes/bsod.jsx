@@ -2,7 +2,6 @@
 // BSOD System
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { renderInto } from './react-view.js';
 
 const bsod = document.getElementById('bsod');
 const bsodText = document.getElementById('bsodText');
@@ -44,28 +43,9 @@ function scheduleRandomBSOD() {
 }
 
 // ══════════════════════════════════════════════
-// Error / Info Dialog (created on demand)
+// Error / Info Dialog (rendered by ShellApp)
 // ══════════════════════════════════════════════
-const errorDialog = document.createElement('div');
-errorDialog.className = 'dialog-overlay';
-errorDialog.id = 'errorDialog';
-renderInto(
-    errorDialog,
-    <div className="dialog-box">
-        <div className="dialog-titlebar">
-            <span id="errorDialogTitle">Windoes</span>
-            <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
-            <div className="dialog-text" id="errorDialogText">An error has occurred.</div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="errorOkBtn">OK</button>
-        </div>
-    </div>
-);
-document.body.appendChild(errorDialog);
+const errorDialog = document.getElementById('errorDialog');
 
 const errorDialogTitle = document.getElementById('errorDialogTitle');
 const errorDialogText = document.getElementById('errorDialogText');

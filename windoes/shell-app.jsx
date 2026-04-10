@@ -234,6 +234,53 @@ export default function ShellApp() {
 
             <div className="clock-tooltip" id="clockTooltip"></div>
 
+            <div className="dialog-overlay" id="errorDialog">
+                <div className="dialog-box">
+                    <div className="dialog-titlebar">
+                        <span id="errorDialogTitle">Windoes</span>
+                        <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close">×</button>
+                    </div>
+                    <div className="dialog-body">
+                        <div className="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
+                        <div className="dialog-text" id="errorDialogText">An error has occurred.</div>
+                    </div>
+                    <div className="dialog-buttons">
+                        <button className="dialog-btn" id="errorOkBtn">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="dialog-overlay notepad-save-dialog" id="notepadSaveDialog">
+                <div className="dialog-box" style={{ minWidth: '420px' }}>
+                    <div className="dialog-titlebar">
+                        <span>Save As</span>
+                        <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">×</button>
+                    </div>
+                    <div className="dialog-body">
+                        <div className="dialog-icon dialog-icon-info"></div>
+                        <div className="notepad-save-fields">
+                            <div className="dialog-text">Choose where to save this text document.</div>
+                            <div className="notepad-save-row">
+                                <label htmlFor="notepadSavePathInput">File name:</label>
+                                <input type="text" id="notepadSavePathInput" aria-label="Save path" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="dialog-buttons">
+                        <button className="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
+                        <button className="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="context-menu notepad-file-menu" id="notepadFileDropdown">
+                <div className="context-menu-item" data-action="new">New</div>
+                <div className="context-menu-item" data-action="save">Save</div>
+                <div className="context-menu-item" data-action="save-as">Save As...</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item" data-action="exit">Exit</div>
+            </div>
+
             <RenderRegistryPortals />
         </>
     );
