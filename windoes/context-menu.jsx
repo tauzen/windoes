@@ -2,28 +2,8 @@
 // Right-click Context Menu (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { renderInto } from './react-view.js';
 
-const contextMenu = document.createElement('div');
-contextMenu.className = 'context-menu';
-contextMenu.id = 'contextMenu';
-renderInto(
-    contextMenu,
-    <>
-        <div className="context-menu-item" data-action="arrange">Arrange Icons</div>
-        <div className="context-menu-item" data-action="lineup">Line Up Icons</div>
-        <div className="context-menu-sep"></div>
-        <div className="context-menu-item" data-action="refresh">Refresh</div>
-        <div className="context-menu-sep"></div>
-        <div className="context-menu-item disabled" data-action="paste">Paste</div>
-        <div className="context-menu-item disabled" data-action="paste-shortcut">Paste Shortcut</div>
-        <div className="context-menu-sep"></div>
-        <div className="context-menu-item" data-action="new">New         ▶</div>
-        <div className="context-menu-sep"></div>
-        <div className="context-menu-item" data-action="properties">Properties</div>
-    </>
-);
-document.body.appendChild(contextMenu);
+const contextMenu = document.getElementById('contextMenu');
 
 document.getElementById('theDesktop').addEventListener('contextmenu', (e) => {
     if (e.target.closest('.window') || e.target.closest('.icon')) return;
@@ -65,13 +45,9 @@ document.querySelector('.ql-desktop').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════
-// Clock Tooltip (generated from JS)
+// Clock Tooltip (rendered by ShellApp)
 // ══════════════════════════════════════════════
-const clockTooltip = document.createElement('div');
-clockTooltip.className = 'clock-tooltip';
-clockTooltip.id = 'clockTooltip';
-document.body.appendChild(clockTooltip);
-
+const clockTooltip = document.getElementById('clockTooltip');
 const clockEl = document.getElementById('clock');
 
 clockEl.addEventListener('mouseenter', (e) => {

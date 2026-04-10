@@ -62,6 +62,49 @@ export default function ShellApp() {
                 </div>
             </div>
 
+            <div className="context-menu" id="contextMenu">
+                <div className="context-menu-item" data-action="arrange">Arrange Icons</div>
+                <div className="context-menu-item" data-action="lineup">Line Up Icons</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item" data-action="refresh">Refresh</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item disabled" data-action="paste">Paste</div>
+                <div className="context-menu-item disabled" data-action="paste-shortcut">Paste Shortcut</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item" data-action="new">New         ▶</div>
+                <div className="context-menu-sep"></div>
+                <div className="context-menu-item" data-action="properties">Properties</div>
+            </div>
+
+            <div className="dialog-overlay run-dialog" id="runDialog">
+                <div className="dialog-box" style={{ minWidth: '380px' }}>
+                    <div className="dialog-titlebar">
+                        <span>Run</span>
+                        <button className="ctrl-btn" id="runCloseBtn" aria-label="Close">×</button>
+                    </div>
+                    <div className="dialog-body">
+                        <div className="run-icon-area">
+                            <div className="dialog-icon" style={{ background: '#C0C0C0', border: '2px solid #808080', borderRadius: '2px' }}>
+                                <div style={{ position: 'absolute', top: '4px', left: '4px', right: '4px', height: '10px', background: '#000080' }}></div>
+                                <div style={{ position: 'absolute', bottom: '4px', left: '4px', width: '12px', height: '8px', background: '#fff', border: '1px solid #808080' }}></div>
+                            </div>
+                            <div className="dialog-text">Type the name of a program, folder, document, or Internet resource, and Windoes will open it for you.</div>
+                        </div>
+                        <div className="run-row">
+                            <label>Open:</label>
+                            <input type="text" id="runInput" />
+                        </div>
+                    </div>
+                    <div className="dialog-buttons">
+                        <button className="dialog-btn" id="runOkBtn">OK</button>
+                        <button className="dialog-btn" id="runCancelBtn">Cancel</button>
+                        <button className="dialog-btn">Browse...</button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="clock-tooltip" id="clockTooltip"></div>
+
             <RenderRegistryPortals />
         </>
     );

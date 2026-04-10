@@ -2,40 +2,8 @@
 // Run Dialog (generated from JS)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { renderInto } from './react-view.js';
 
-// Create Run Dialog DOM
-const runDialog = document.createElement('div');
-runDialog.className = 'dialog-overlay run-dialog';
-runDialog.id = 'runDialog';
-renderInto(
-    runDialog,
-    <div className="dialog-box" style={{ minWidth: '380px' }}>
-        <div className="dialog-titlebar">
-            <span>Run</span>
-            <button className="ctrl-btn" id="runCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="run-icon-area">
-                <div className="dialog-icon" style={{ background: '#C0C0C0', border: '2px solid #808080', borderRadius: '2px' }}>
-                    <div style={{ position: 'absolute', top: '4px', left: '4px', right: '4px', height: '10px', background: '#000080' }}></div>
-                    <div style={{ position: 'absolute', bottom: '4px', left: '4px', width: '12px', height: '8px', background: '#fff', border: '1px solid #808080' }}></div>
-                </div>
-                <div className="dialog-text">Type the name of a program, folder, document, or Internet resource, and Windoes will open it for you.</div>
-            </div>
-            <div className="run-row">
-                <label>Open:</label>
-                <input type="text" id="runInput" />
-            </div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="runOkBtn">OK</button>
-            <button className="dialog-btn" id="runCancelBtn">Cancel</button>
-            <button className="dialog-btn">Browse...</button>
-        </div>
-    </div>
-);
-document.body.appendChild(runDialog);
+const runDialog = document.getElementById('runDialog');
 
 const runInput = document.getElementById('runInput');
 
