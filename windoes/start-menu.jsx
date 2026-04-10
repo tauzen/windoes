@@ -42,10 +42,18 @@ renderInto(
         </div>
     </>
 );
-// Hidden during boot — finishBoot() will show it
+// Hidden during boot; state subscriber reveals it once boot is done
 startMenuEl.style.display = 'none';
 document.body.appendChild(startMenuEl);
 WindoesApp.dom.startMenu = startMenuEl;
+
+function syncStartMenuVisibility() {
+    const bootDone = WindoesApp.state.get().boot.done;
+    startMenuEl.style.display = bootDone ? '' : 'none';
+}
+
+WindoesApp.state.subscribe(syncStartMenuVisibility);
+syncStartMenuVisibility();
 
 // Create Programs Submenu DOM
 const programsSubmenu = document.createElement('div');

@@ -22,6 +22,10 @@ const WindowManager = {
         return this._taskAreaEl;
     },
 
+    _syncState() {
+        WindoesApp.state.dispatch({ type: 'WINDOW_STACK_SET', stack: this._stack.slice() });
+    },
+
     /**
      * Build a headless window element (bare iframe, no chrome).
      */
@@ -246,6 +250,7 @@ const WindowManager = {
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
         this._stack.push(id);
+        this._syncState();
 
         // Reassign z-indices based on stack position
         this._stack.forEach((wid, i) => {
@@ -331,6 +336,7 @@ const WindowManager = {
         // Remove from stack
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
+        this._syncState();
 
         this._updateTitlebars();
 
@@ -345,6 +351,7 @@ const WindowManager = {
 
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
+        this._syncState();
 
         this._updateTitlebars();
     },
