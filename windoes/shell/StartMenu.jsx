@@ -207,6 +207,11 @@ export default function StartMenu() {
             subGameAsciiRunner: () => WindoesApp.open.app('ASCII Runner', './applications/ascii-runner/index.html'),
             menuWindoesUpdate: () => WindoesApp.open.internetExplorer(),
             menuHelp: () => WindoesApp.bsod.showErrorDialog({ title: 'Windoes Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' }),
+            menuRun: () => {
+                if (typeof WindoesApp.dialogs.openRunDialog === 'function') {
+                    WindoesApp.dialogs.openRunDialog();
+                }
+            },
         };
 
         const cleanupActions = Object.entries(actionHandlers).map(([id, handler]) => {
