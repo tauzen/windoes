@@ -17,9 +17,32 @@ const initialState = {
         splashStatus: 'Loading Windoes...',
         done: false,
     },
+    menus: {
+        startOpen: false,
+        programsOpen: false,
+        accessoriesOpen: false,
+        gamesOpen: false,
+        desktopContextOpen: false,
+        explorerContextOpen: false,
+    },
+    dialogs: {
+        runOpen: false,
+        errorOpen: false,
+        shutdownOpen: false,
+        notepadSaveOpen: false,
+        notepadUnsavedOpen: false,
+    },
     windows: {
         stack: [],
         focusedId: null,
+    },
+    selection: {
+        desktopIconId: null,
+        explorerItemPath: null,
+    },
+    drag: {
+        active: false,
+        sourceId: null,
     },
 };
 
@@ -128,7 +151,9 @@ const WindoesApp = {
     // ── shared config ──────────────────────────
     config,
 
-    // DOM refs populated by shell-app.jsx
+    // DOM refs populated by shell-app.jsx.
+    // Compatibility-only escape hatch during React migration.
+    // Migration target: pass refs through React components/hooks instead of global DOM refs.
     dom: {
         startButton: null,
         startMenu: null,
@@ -136,7 +161,8 @@ const WindoesApp = {
         theTaskbar: null,
     },
 
-    // state store
+    // Canonical shell state store.
+    // Allowed imperative API long-term: get/dispatch/subscribe/use
     state: {
         get: getState,
         subscribe,
@@ -145,24 +171,31 @@ const WindoesApp = {
     },
 
     // ── sound API (filled by sound.js) ────────
+    // Allowed imperative API (non-UI side-effect service).
     sound: {},
 
     // ── boot API (filled by boot.js) ──────────
+    // @deprecated bridge. Migration target: boot transitions dispatched from React boot controller.
     boot: {},
 
     // ── bsod / error dialog API (filled by bsod.jsx) ──
+    // @deprecated bridge. Migration target: dialog state/actions in React shell reducer.
     bsod: {},
 
     // ── window-open helpers (filled by ie-window.jsx, app-windows.jsx, utility-windows.jsx) ──
+    // @deprecated bridge. Migration target: typed window actions dispatched through WindoesApp.state.
     open: {},
 
     // ── menu helpers (filled by start-menu.jsx) ──
+    // @deprecated bridge. Migration target: menu open/close/focus state in reducer + component handlers.
     menu: {},
 
     // ── ie helpers (filled by ie-window.jsx) ──
+    // @deprecated bridge. Migration target: feature-local module exports/hooks.
     ie: {},
 
     // ── misc helpers (filled by ie-window.jsx) ──
+    // @deprecated bridge. Migration target: explicit utility modules.
     helpers: {},
 };
 
