@@ -23,9 +23,6 @@ async function bootstrap() {
     await import('./app-windows.jsx');
     await import('./utility-windows.jsx');
     await import('./desktop.jsx');
-    await import('./start-menu.jsx');
-    await import('./run-dialog.jsx');
-    await import('./context-menu.jsx');
 
     setTimeout(WindoesApp.boot.runBootSequence, 300);
 }

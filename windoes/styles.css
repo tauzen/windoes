@@ -104,6 +104,15 @@
             font-family: inherit;
         }
 
+        #dragOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            cursor: move;
+        }
+        #dragOverlay.active { display: block; }
+
         /* ── Loading cursor ── */
         body.loading, body.loading * {
             cursor: wait !important;
