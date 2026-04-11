@@ -35,9 +35,9 @@ Move Windoes from the current hybrid React + imperative DOM model to a fully Rea
   - Error/Notepad dialogs
 
 ### Checklist
-- [ ] Move click/keydown handlers into component-level React handlers.
-- [ ] Remove global document listeners where avoidable.
-- [ ] Ensure cleanup for any remaining global listeners in `useEffect`.
+- [x] Move click/keydown handlers into component-level React handlers.
+- [x] Remove global document listeners where avoidable.
+- [x] Ensure cleanup for any remaining global listeners in `useEffect`.
 
 ---
 

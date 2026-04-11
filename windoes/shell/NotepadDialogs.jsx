@@ -1,84 +1,83 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function NotepadDialogs() {
-    const saveDialogRef = useRef(null);
     const savePathInputRef = useRef(null);
     const resolverRef = useRef(null);
-    const dropdownRef = useRef(null);
+    const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+    const [savePath, setSavePath] = useState('/C:/My Documents/Untitled.txt');
+    const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
+
+    function closeSaveDialog(resultPath = null) {
+        setIsSaveDialogOpen(false);
+        if (resolverRef.current) {
+            const resolve = resolverRef.current;
+            resolverRef.current = null;
+            resolve(resultPath);
+        }
+    }
+
+    function requestSavePath(suggestedPath) {
+        if (resolverRef.current) {
+            closeSaveDialog(null);
+        }
+
+        setSavePath(suggestedPath || '/C:/My Documents/Untitled.txt');
+        setIsSaveDialogOpen(true);
+
+        requestAnimationFrame(() => {
+            const input = savePathInputRef.current;
+            if (!input) return;
+            input.focus();
+            input.select();
+        });
+
+        return new Promise((resolve) => {
+            resolverRef.current = resolve;
+        });
+    }
+
+    function runNotepadAction(action) {
+        const actions = WindoesApp.notepadMenuActions || {};
+        const handler = actions[action];
+        if (typeof handler === 'function') handler();
+    }
 
     useEffect(() => {
-        const saveDialog = saveDialogRef.current;
-        const savePathInput = savePathInputRef.current;
-        const saveConfirmBtn = document.getElementById('notepadSaveConfirmBtn');
-        const saveCancelBtn = document.getElementById('notepadSaveCancelBtn');
-        const saveCloseBtn = document.getElementById('notepadSaveCloseBtn');
-        const dropdown = dropdownRef.current;
-        if (!saveDialog || !savePathInput || !saveConfirmBtn || !saveCancelBtn || !saveCloseBtn || !dropdown) return;
+        if (!WindoesApp.notepadDialogs) WindoesApp.notepadDialogs = {};
+        WindoesApp.notepadDialogs.requestSavePath = requestSavePath;
 
-        function closeSaveDialog(resultPath = null) {
-            saveDialog.classList.remove('active');
-            if (resolverRef.current) {
-                const resolve = resolverRef.current;
-                resolverRef.current = null;
-                resolve(resultPath);
-            }
-        }
+        return () => {
+            delete WindoesApp.notepadDialogs.requestSavePath;
+        };
+    }, []);
 
-        function requestSavePath(suggestedPath) {
-            if (resolverRef.current) {
-                closeSaveDialog(null);
-            }
-
-            savePathInput.value = suggestedPath || '/C:/My Documents/Untitled.txt';
-            saveDialog.classList.add('active');
-            savePathInput.focus();
-            savePathInput.select();
-
-            return new Promise((resolve) => {
-                resolverRef.current = resolve;
-            });
-        }
-
-        function closeMenu() {
-            dropdown.classList.remove('open');
-        }
-
-        function openMenu(fileMenuEl) {
-            const rect = fileMenuEl.getBoundingClientRect();
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.top = rect.bottom + 'px';
-            dropdown.classList.add('open');
-        }
-
-        function runNotepadAction(action) {
-            const actions = WindoesApp.notepadMenuActions || {};
-            const handler = actions[action];
-            if (typeof handler === 'function') handler();
-        }
-
+    useEffect(() => {
         function onDocumentClick(e) {
             const fileMenuEl = e.target.closest('#notepadFileMenu');
             if (fileMenuEl) {
                 e.stopPropagation();
-                if (dropdown.classList.contains('open')) {
-                    closeMenu();
+                if (isFileMenuOpen) {
+                    setIsFileMenuOpen(false);
                 } else {
-                    openMenu(fileMenuEl);
+                    const rect = fileMenuEl.getBoundingClientRect();
+                    setMenuPosition({ left: rect.left, top: rect.bottom });
+                    setIsFileMenuOpen(true);
                 }
                 return;
             }
 
             const item = e.target.closest('#notepadFileDropdown .context-menu-item');
-            if (item && dropdown.contains(item)) {
+            if (item && isFileMenuOpen) {
                 const action = item.dataset.action;
-                closeMenu();
+                setIsFileMenuOpen(false);
                 runNotepadAction(action);
                 return;
             }
 
-            if (dropdown.classList.contains('open') && !dropdown.contains(e.target)) {
-                closeMenu();
+            if (isFileMenuOpen && !e.target.closest('#notepadFileDropdown')) {
+                setIsFileMenuOpen(false);
             }
         }
 
@@ -103,47 +102,26 @@ export default function NotepadDialogs() {
                 return;
             }
             if (e.key === 'Escape') {
-                closeMenu();
+                setIsFileMenuOpen(false);
             }
         }
 
-        function onSavePathKeyDown(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                closeSaveDialog((savePathInput.value || '').trim());
-                return;
-            }
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeSaveDialog(null);
-            }
-        }
-
-        if (!WindoesApp.notepadDialogs) WindoesApp.notepadDialogs = {};
-        WindoesApp.notepadDialogs.requestSavePath = requestSavePath;
-
-        saveConfirmBtn.addEventListener('click', () => closeSaveDialog((savePathInput.value || '').trim()));
-        saveCancelBtn.addEventListener('click', () => closeSaveDialog(null));
-        saveCloseBtn.addEventListener('click', () => closeSaveDialog(null));
-        savePathInput.addEventListener('keydown', onSavePathKeyDown);
         document.addEventListener('click', onDocumentClick);
         document.addEventListener('keydown', onDocumentKeyDown);
 
         return () => {
-            delete WindoesApp.notepadDialogs.requestSavePath;
-            savePathInput.removeEventListener('keydown', onSavePathKeyDown);
             document.removeEventListener('click', onDocumentClick);
             document.removeEventListener('keydown', onDocumentKeyDown);
         };
-    }, []);
+    }, [isFileMenuOpen]);
 
     return (
         <>
-            <div ref={saveDialogRef} className="dialog-overlay notepad-save-dialog" id="notepadSaveDialog">
+            <div className={`dialog-overlay notepad-save-dialog${isSaveDialogOpen ? ' active' : ''}`} id="notepadSaveDialog">
                 <div className="dialog-box" style={{ minWidth: '420px' }}>
                     <div className="dialog-titlebar">
                         <span>Save As</span>
-                        <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">×</button>
+                        <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close" onClick={() => closeSaveDialog(null)}>×</button>
                     </div>
                     <div className="dialog-body">
                         <div className="dialog-icon dialog-icon-info"></div>
@@ -151,18 +129,40 @@ export default function NotepadDialogs() {
                             <div className="dialog-text">Choose where to save this text document.</div>
                             <div className="notepad-save-row">
                                 <label htmlFor="notepadSavePathInput">File name:</label>
-                                <input ref={savePathInputRef} type="text" id="notepadSavePathInput" aria-label="Save path" />
+                                <input
+                                    ref={savePathInputRef}
+                                    type="text"
+                                    id="notepadSavePathInput"
+                                    aria-label="Save path"
+                                    value={savePath}
+                                    onChange={(e) => setSavePath(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            closeSaveDialog((savePath || '').trim());
+                                            return;
+                                        }
+                                        if (e.key === 'Escape') {
+                                            e.preventDefault();
+                                            closeSaveDialog(null);
+                                        }
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
                     <div className="dialog-buttons">
-                        <button className="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
-                        <button className="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
+                        <button className="dialog-btn" id="notepadSaveConfirmBtn" onClick={() => closeSaveDialog((savePath || '').trim())}>Save</button>
+                        <button className="dialog-btn" id="notepadSaveCancelBtn" onClick={() => closeSaveDialog(null)}>Cancel</button>
                     </div>
                 </div>
             </div>
 
-            <div ref={dropdownRef} className="context-menu notepad-file-menu" id="notepadFileDropdown">
+            <div
+                className={`context-menu notepad-file-menu${isFileMenuOpen ? ' open' : ''}`}
+                id="notepadFileDropdown"
+                style={{ left: `${menuPosition.left}px`, top: `${menuPosition.top}px` }}
+            >
                 <div className="context-menu-item" data-action="new">New</div>
                 <div className="context-menu-item" data-action="save">Save</div>
                 <div className="context-menu-item" data-action="save-as">Save As...</div>

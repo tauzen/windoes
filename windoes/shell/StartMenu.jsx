@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function StartMenu() {
@@ -141,7 +141,7 @@ export default function StartMenu() {
         closeAllMenus();
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const startMenuEl = startMenuRef.current;
         const startButton = WindoesApp.dom.startButton || document.getElementById('startButton');
         if (!startMenuEl || !startButton) return;
