@@ -43,13 +43,19 @@ function scheduleRandomBSOD() {
 }
 
 // ══════════════════════════════════════════════
-// Error / Info Dialog (rendered by ShellApp)
+// Error / Info Dialog API (implemented in shell/ErrorDialog.jsx)
 // ══════════════════════════════════════════════
-const errorDialog = document.getElementById('errorDialog');
+function showErrorDialog(err) {
+    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.show === 'function') {
+        WindoesApp.dialogs.error.show(err);
+    }
+}
 
-const errorDialogTitle = document.getElementById('errorDialogTitle');
-const errorDialogText = document.getElementById('errorDialogText');
-const errorDialogIcon = document.getElementById('errorDialogIcon');
+function closeErrorDialog() {
+    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.hide === 'function') {
+        WindoesApp.dialogs.error.hide();
+    }
+}
 
 const randomErrors = WindoesApp.config.randomErrors || [
     { title: 'Explorer', text: 'This program has performed an illegal operation and will be shut down. If the problem persists, contact the program vendor.', icon: 'error' },
@@ -62,25 +68,11 @@ const randomErrors = WindoesApp.config.randomErrors || [
     { title: 'Disk Cleanup', text: 'The disk cleanup utility could not free any space. Your hard drive may be full.', icon: 'info' }
 ];
 
-function showErrorDialog(err) {
-    errorDialogTitle.textContent = err.title;
-    errorDialogText.textContent = err.text;
-    errorDialogIcon.className = 'dialog-icon dialog-icon-' + err.icon;
-    errorDialog.classList.add('active');
-    WindoesApp.sound.playErrorSound();
-}
-
-function closeErrorDialog() {
-    errorDialog.classList.remove('active');
-}
-
-document.getElementById('errorOkBtn').addEventListener('click', closeErrorDialog);
-document.getElementById('errorCloseBtn').addEventListener('click', closeErrorDialog);
-
 function scheduleRandomError() {
     const delay = (60 + Math.random() * 180) * 1000;
     setTimeout(() => {
-        if (WindoesApp.bootDone && !bsodActive && !errorDialog.classList.contains('active')) {
+        const isErrorOpen = !!(WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.isOpen === 'function' && WindoesApp.dialogs.error.isOpen());
+        if (WindoesApp.bootDone && !bsodActive && !isErrorOpen) {
             const err = randomErrors[Math.floor(Math.random() * randomErrors.length)];
             showErrorDialog(err);
         }

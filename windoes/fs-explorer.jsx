@@ -205,35 +205,6 @@ function renderMyComputerRoot() {
 
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
-let explorerMenu = document.getElementById('explorerContextMenu');
-
-function createContextMenu() {
-    if (!explorerMenu) {
-        explorerMenu = document.getElementById('explorerContextMenu');
-    }
-    if (!explorerMenu || explorerMenu.dataset.bound === '1') return;
-    explorerMenu.dataset.bound = '1';
-
-    explorerMenu.addEventListener('click', (e) => {
-        const action = e.target.dataset.action;
-        explorerMenu.classList.remove('open');
-        if (action === 'new-folder') {
-            createNewFolder();
-        } else if (action === 'rename') {
-            startInlineRename();
-        } else if (action === 'delete') {
-            deleteSelected();
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (explorerMenu && !explorerMenu.contains(e.target)) {
-            explorerMenu.classList.remove('open');
-            selectedItemPath = null;
-        }
-    });
-}
-
 let selectedItemPath = null;
 
 function wireContextMenu() {
@@ -242,27 +213,23 @@ function wireContextMenu() {
     viewEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        createContextMenu();
-        if (!explorerMenu) return;
 
-        // Check if right-clicked on an item
         const itemEl = e.target.closest('.folder-item');
         selectedItemPath = itemEl ? itemEl.dataset.path : null;
 
-        // Update menu items visibility
-        const deleteItem = explorerMenu.querySelector('[data-action="delete"]');
-        const renameItem = explorerMenu.querySelector('[data-action="rename"]');
-        if (selectedItemPath) {
-            deleteItem.classList.remove('disabled');
-            renameItem.classList.remove('disabled');
-        } else {
-            deleteItem.classList.add('disabled');
-            renameItem.classList.add('disabled');
+        if (WindoesApp.explorerContextMenu && typeof WindoesApp.explorerContextMenu.open === 'function') {
+            WindoesApp.explorerContextMenu.open({
+                x: e.clientX,
+                y: e.clientY,
+                hasSelection: !!selectedItemPath,
+                onNewFolder: () => createNewFolder(),
+                onRename: () => startInlineRename(),
+                onDelete: () => deleteSelected(),
+                onClose: () => {
+                    selectedItemPath = null;
+                },
+            });
         }
-
-        explorerMenu.style.left = e.clientX + 'px';
-        explorerMenu.style.top = e.clientY + 'px';
-        explorerMenu.classList.add('open');
     });
 }
 
