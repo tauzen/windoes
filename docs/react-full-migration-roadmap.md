@@ -18,9 +18,9 @@ Move Windoes from the current hybrid React + imperative DOM model to a fully Rea
 - Document `WindoesApp` as temporary compatibility layer only.
 
 ### Checklist
-- [ ] Add architecture section to README or dedicated ADR doc.
-- [ ] Enumerate allowed cross-module imperative APIs.
-- [ ] Mark deprecated `WindoesApp.*` handles with migration target.
+- [x] Add architecture section to README or dedicated ADR doc.
+- [x] Enumerate allowed cross-module imperative APIs.
+- [x] Mark deprecated `WindoesApp.*` handles with migration target.
 
 ---
 
