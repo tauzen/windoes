@@ -48,10 +48,10 @@ Move Windoes from the current hybrid React + imperative DOM model to a fully Rea
 - Keep a thin adapter for existing imperative callers during transition.
 
 ### Checklist
-- [ ] Open/close/minimize/restore/focus/z-index controlled by state.
-- [ ] Taskbar button state derived from reducer state.
-- [ ] Drag/maximize interactions dispatch actions, not direct DOM mutations.
-- [ ] Keep parity with existing WindowManager tests.
+- [x] Open/close/minimize/restore/focus/z-index controlled by state.
+- [x] Taskbar button state derived from reducer state.
+- [x] Drag/maximize interactions dispatch actions, not direct DOM mutations.
+- [x] Keep parity with existing WindowManager tests.
 
 ---
 

@@ -12,6 +12,8 @@ const WindowManager = {
     _baseZ: 10,
     _desktopEl: null,
     _taskAreaEl: null,
+    _lastInteractionSeq: 0,
+    _lastDragSnapshot: null,
 
     _getDesktop() {
         if (!this._desktopEl) this._desktopEl = document.getElementById('theDesktop');
@@ -24,7 +26,28 @@ const WindowManager = {
     },
 
     _syncState() {
-        WindoesApp.state.dispatch({ type: 'WINDOW_STACK_SET', stack: this._stack.slice() });
+        const stack = this._stack.slice();
+        const focusedId = stack.length ? stack[stack.length - 1] : null;
+        const byId = {};
+
+        Object.entries(this._windows).forEach(([id, win]) => {
+            byId[id] = {
+                id,
+                open: !!win.isOpen,
+                minimized: !!win.isMinimized,
+                maximized: !!win.isMaximized,
+                focused: id === focusedId,
+                zIndex: win.el ? Number.parseInt(win.el.style.zIndex || '0', 10) || 0 : 0,
+                taskbarVisible: !!(win.taskBtn && win.taskBtn.style.display !== 'none'),
+            };
+        });
+
+        WindoesApp.state.dispatch({
+            type: 'WINDOWS_STATE_SET',
+            stack,
+            focusedId,
+            byId,
+        });
     },
 
     /**
@@ -173,7 +196,10 @@ const WindowManager = {
         }
 
         config.id = id;
+        if (config.el) config.el.dataset.windowId = id;
         config.isOpen = false;
+        config.isMinimized = false;
+        config.isMaximized = !!config.isMaximized;
         config._attached = false;
         this._windows[id] = config;
 
@@ -195,7 +221,14 @@ const WindowManager = {
         // Auto-wire maximize button
         if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
             const maxBtn = config.el.querySelector('.ctrl-max');
-            if (maxBtn) maxBtn.addEventListener('click', () => this.toggleMaximize(id));
+            if (maxBtn) {
+                maxBtn.addEventListener('click', () => {
+                    WindoesApp.state.dispatch({
+                        type: 'WINDOW_INTERACTION_DISPATCH',
+                        command: { type: 'TOGGLE_MAXIMIZE', id },
+                    });
+                });
+            }
         }
 
         // Auto-wire taskbar toggle
@@ -213,7 +246,11 @@ const WindowManager = {
                 // Double-click titlebar to toggle maximize (if window has a maximize button)
                 if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
                     titlebar.addEventListener('dblclick', (e) => {
-                        if (!e.target.classList.contains('ctrl-btn')) this.toggleMaximize(id);
+                        if (e.target.classList.contains('ctrl-btn')) return;
+                        WindoesApp.state.dispatch({
+                            type: 'WINDOW_INTERACTION_DISPATCH',
+                            command: { type: 'TOGGLE_MAXIMIZE', id },
+                        });
                     });
                 }
             }
@@ -298,6 +335,7 @@ const WindowManager = {
 
         win.el.classList.remove('hidden');
         win.isOpen = true;
+        win.isMinimized = false;
 
         if (win.taskBtn) {
             win.taskBtn.style.display = 'flex';
@@ -323,6 +361,7 @@ const WindowManager = {
 
         win.el.classList.add('hidden');
         win.isOpen = false;
+        win.isMinimized = false;
 
         if (win.taskBtn) {
             win.taskBtn.style.display = 'none';
@@ -349,6 +388,7 @@ const WindowManager = {
         if (!win) return;
 
         win.el.classList.add('hidden');
+        win.isMinimized = true;
 
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
@@ -362,6 +402,7 @@ const WindowManager = {
         if (!win) return;
 
         win.el.classList.remove('hidden');
+        win.isMinimized = false;
         this.bringToFront(id);
     },
 
@@ -414,16 +455,68 @@ const WindowManager = {
         win.isMaximized ? this.unmaximize(id) : this.maximize(id);
     },
 
+    _processInteractionCommand(command) {
+        if (!command || !command.type) return;
+        if (command.type === 'TOGGLE_MAXIMIZE' && command.id) {
+            this.toggleMaximize(command.id);
+            return;
+        }
+        if (command.type === 'BRING_TO_FRONT' && command.id) {
+            this.bringToFront(command.id);
+        }
+    },
+
+    _applyDragState(dragState) {
+        const prev = this._lastDragSnapshot || { active: false };
+
+        if (dragState && dragState.active && dragState.sourceId) {
+            const win = this._windows[dragState.sourceId];
+            if (win && win.el) {
+                if (Number.isFinite(dragState.currentLeft)) {
+                    win.el.style.left = dragState.currentLeft + 'px';
+                }
+                if (Number.isFinite(dragState.currentTop)) {
+                    win.el.style.top = dragState.currentTop + 'px';
+                }
+            }
+            if (!prev.active && WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.show === 'function') {
+                WindoesApp.dragOverlay.show();
+            }
+        }
+
+        if (prev.active && (!dragState || !dragState.active)) {
+            if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.hide === 'function') {
+                WindoesApp.dragOverlay.hide();
+            }
+        }
+
+        this._lastDragSnapshot = dragState;
+    },
+
+    _bridgeFromState() {
+        const state = WindoesApp.state.get();
+        const windowsState = state.windows || {};
+        const seq = windowsState.interactionCommandSeq || 0;
+
+        if (seq > this._lastInteractionSeq) {
+            this._lastInteractionSeq = seq;
+            this._processInteractionCommand(windowsState.interactionCommand);
+        }
+
+        this._applyDragState(state.drag || null);
+    },
+
     _updateMaxBtn(win) {
         const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
         if (btn) btn.textContent = win.isMaximized ? '⧉' : '□';
     },
 
     _updateTitlebars() {
-        const focusedId = this.getFocused();
+        const windowsState = WindoesApp.state.get().windows.byId || {};
         Object.values(this._windows).forEach(win => {
             const tb = win.el.querySelector('.titlebar');
-            const isActive = win.id === focusedId && !win.el.classList.contains('hidden');
+            const winState = windowsState[win.id] || {};
+            const isActive = !!(winState.focused && winState.open && !winState.minimized);
             if (tb) {
                 if (isActive) {
                     tb.classList.remove('inactive');
@@ -444,6 +537,11 @@ const WindowManager = {
 
 // Register on shared namespace
 WindoesApp.WindowManager = WindowManager;
+
+// Reducer-to-DOM compatibility bridge for interaction commands and drag state.
+WindoesApp.state.subscribe(() => {
+    WindowManager._bridgeFromState();
+});
 
 // Legacy helper for any code still calling bringToFront(el)
 export function bringToFront(windowEl) {
