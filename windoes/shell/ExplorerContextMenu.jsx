@@ -1,75 +1,86 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function ExplorerContextMenu() {
     const menuRef = useRef(null);
     const callbacksRef = useRef({});
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [hasSelection, setHasSelection] = useState(false);
+
+    function closeMenu() {
+        setIsOpen(false);
+        if (callbacksRef.current.onClose) callbacksRef.current.onClose();
+    }
+
+    function openMenu(options) {
+        callbacksRef.current = {
+            onNewFolder: options.onNewFolder,
+            onRename: options.onRename,
+            onDelete: options.onDelete,
+            onClose: options.onClose,
+        };
+
+        setHasSelection(!!options.hasSelection);
+        setPosition({ x: options.x, y: options.y });
+        setIsOpen(true);
+    }
 
     useEffect(() => {
-        const menu = menuRef.current;
-        if (!menu) return;
-
-        function close() {
-            menu.classList.remove('open');
-            if (callbacksRef.current.onClose) callbacksRef.current.onClose();
-        }
-
-        function open(options) {
-            callbacksRef.current = {
-                onNewFolder: options.onNewFolder,
-                onRename: options.onRename,
-                onDelete: options.onDelete,
-                onClose: options.onClose,
-            };
-
-            const deleteItem = menu.querySelector('[data-action="delete"]');
-            const renameItem = menu.querySelector('[data-action="rename"]');
-            if (options.hasSelection) {
-                deleteItem.classList.remove('disabled');
-                renameItem.classList.remove('disabled');
-            } else {
-                deleteItem.classList.add('disabled');
-                renameItem.classList.add('disabled');
-            }
-
-            menu.style.left = options.x + 'px';
-            menu.style.top = options.y + 'px';
-            menu.classList.add('open');
-        }
-
-        function onMenuClick(e) {
-            const item = e.target.closest('.context-menu-item');
-            if (!item || item.classList.contains('disabled')) return;
-            const action = item.dataset.action;
-            close();
-            if (action === 'new-folder' && callbacksRef.current.onNewFolder) callbacksRef.current.onNewFolder();
-            if (action === 'rename' && callbacksRef.current.onRename) callbacksRef.current.onRename();
-            if (action === 'delete' && callbacksRef.current.onDelete) callbacksRef.current.onDelete();
-        }
-
-        function onDocumentClick(e) {
-            if (!menu.contains(e.target)) {
-                close();
-            }
-        }
-
-        WindoesApp.explorerContextMenu = { open, close };
-        menu.addEventListener('click', onMenuClick);
-        document.addEventListener('click', onDocumentClick);
-
+        WindoesApp.explorerContextMenu = { open: openMenu, close: closeMenu };
         return () => {
             delete WindoesApp.explorerContextMenu;
-            menu.removeEventListener('click', onMenuClick);
-            document.removeEventListener('click', onDocumentClick);
         };
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) return;
+
+        function onDocumentClick(e) {
+            const menu = menuRef.current;
+            if (!menu || !menu.contains(e.target)) {
+                closeMenu();
+            }
+        }
+
+        document.addEventListener('click', onDocumentClick);
+        return () => document.removeEventListener('click', onDocumentClick);
+    }, [isOpen]);
+
+    function runAction(action) {
+        closeMenu();
+        if (action === 'new-folder' && callbacksRef.current.onNewFolder) callbacksRef.current.onNewFolder();
+        if (action === 'rename' && callbacksRef.current.onRename) callbacksRef.current.onRename();
+        if (action === 'delete' && callbacksRef.current.onDelete) callbacksRef.current.onDelete();
+    }
+
     return (
-        <div ref={menuRef} className="context-menu explorer-ctx" id="explorerContextMenu">
-            <div className="context-menu-item" data-action="new-folder">New Folder</div>
+        <div
+            ref={menuRef}
+            className={`context-menu explorer-ctx${isOpen ? ' open' : ''}`}
+            id="explorerContextMenu"
+            style={{ left: `${position.x}px`, top: `${position.y}px` }}
+        >
+            <div className="context-menu-item" data-action="new-folder" onClick={() => runAction('new-folder')}>New Folder</div>
             <div className="context-menu-sep"></div>
-            <div className="context-menu-item" data-action="rename">Rename</div>
-            <div className="context-menu-item" data-action="delete">Delete</div>
+            <div
+                className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
+                data-action="rename"
+                onClick={() => {
+                    if (hasSelection) runAction('rename');
+                }}
+            >
+                Rename
+            </div>
+            <div
+                className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
+                data-action="delete"
+                onClick={() => {
+                    if (hasSelection) runAction('delete');
+                }}
+            >
+                Delete
+            </div>
         </div>
     );
 }

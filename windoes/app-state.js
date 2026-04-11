@@ -182,6 +182,10 @@ const WindoesApp = {
     // @deprecated bridge. Migration target: dialog state/actions in React shell reducer.
     bsod: {},
 
+    // ── shell dialog helpers (filled by shell/RunDialog.jsx, etc.) ──
+    // @deprecated bridge. Migration target: reducer-driven dialog open/close actions.
+    dialogs: {},
+
     // ── window-open helpers (filled by ie-window.jsx, app-windows.jsx, utility-windows.jsx) ──
     // @deprecated bridge. Migration target: typed window actions dispatched through WindoesApp.state.
     open: {},

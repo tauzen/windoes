@@ -1,59 +1,46 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function ErrorDialog() {
-    const dialogRef = useRef(null);
-    const titleRef = useRef(null);
-    const textRef = useRef(null);
-    const iconRef = useRef(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [title, setTitle] = useState('Windoes');
+    const [text, setText] = useState('An error has occurred.');
+    const [icon, setIcon] = useState('error');
+
+    function show(err) {
+        setTitle(err.title);
+        setText(err.text);
+        setIcon(err.icon);
+        setIsOpen(true);
+        WindoesApp.sound.playErrorSound();
+    }
+
+    function hide() {
+        setIsOpen(false);
+    }
 
     useEffect(() => {
-        const dialog = dialogRef.current;
-        const titleEl = titleRef.current;
-        const textEl = textRef.current;
-        const iconEl = iconRef.current;
-        const okBtn = document.getElementById('errorOkBtn');
-        const closeBtn = document.getElementById('errorCloseBtn');
-        if (!dialog || !titleEl || !textEl || !iconEl || !okBtn || !closeBtn) return;
-
-        function show(err) {
-            titleEl.textContent = err.title;
-            textEl.textContent = err.text;
-            iconEl.className = 'dialog-icon dialog-icon-' + err.icon;
-            dialog.classList.add('active');
-            WindoesApp.sound.playErrorSound();
-        }
-
-        function hide() {
-            dialog.classList.remove('active');
-        }
-
         if (!WindoesApp.dialogs) WindoesApp.dialogs = {};
-        WindoesApp.dialogs.error = { show, hide, isOpen: () => dialog.classList.contains('active') };
-
-        okBtn.addEventListener('click', hide);
-        closeBtn.addEventListener('click', hide);
+        WindoesApp.dialogs.error = { show, hide, isOpen: () => isOpen };
 
         return () => {
-            okBtn.removeEventListener('click', hide);
-            closeBtn.removeEventListener('click', hide);
             if (WindoesApp.dialogs?.error) delete WindoesApp.dialogs.error;
         };
-    }, []);
+    }, [isOpen]);
 
     return (
-        <div ref={dialogRef} className="dialog-overlay" id="errorDialog">
+        <div className={`dialog-overlay${isOpen ? ' active' : ''}`} id="errorDialog">
             <div className="dialog-box">
                 <div className="dialog-titlebar">
-                    <span ref={titleRef} id="errorDialogTitle">Windoes</span>
-                    <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close">×</button>
+                    <span id="errorDialogTitle">{title}</span>
+                    <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close" onClick={hide}>×</button>
                 </div>
                 <div className="dialog-body">
-                    <div ref={iconRef} className="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
-                    <div ref={textRef} className="dialog-text" id="errorDialogText">An error has occurred.</div>
+                    <div className={`dialog-icon dialog-icon-${icon}`} id="errorDialogIcon"></div>
+                    <div className="dialog-text" id="errorDialogText">{text}</div>
                 </div>
                 <div className="dialog-buttons">
-                    <button className="dialog-btn" id="errorOkBtn">OK</button>
+                    <button className="dialog-btn" id="errorOkBtn" onClick={hide}>OK</button>
                 </div>
             </div>
         </div>
