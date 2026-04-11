@@ -48,10 +48,10 @@ export default function ExplorerContextMenu() {
     }, [isOpen]);
 
     function runAction(action) {
-        closeMenu();
         if (action === 'new-folder' && callbacksRef.current.onNewFolder) callbacksRef.current.onNewFolder();
         if (action === 'rename' && callbacksRef.current.onRename) callbacksRef.current.onRename();
         if (action === 'delete' && callbacksRef.current.onDelete) callbacksRef.current.onDelete();
+        closeMenu();
     }
 
     return (
