@@ -2,7 +2,6 @@
 // Window Dragging
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { bringToFront } from './window-manager.jsx';
 
 export function makeDraggable(titlebarEl, windowEl) {
     let isDragging = false;
@@ -23,10 +22,22 @@ export function makeDraggable(titlebarEl, windowEl) {
         const rect = windowEl.getBoundingClientRect();
         origLeft = rect.left;
         origTop = rect.top;
-        bringToFront(windowEl);
-        if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.show === 'function') {
-            WindoesApp.dragOverlay.show();
-        }
+        const sourceId = windowEl.dataset.windowId || windowEl.id;
+
+        WindoesApp.state.dispatch({
+            type: 'WINDOW_INTERACTION_DISPATCH',
+            command: { type: 'BRING_TO_FRONT', id: sourceId },
+        });
+
+        WindoesApp.state.dispatch({
+            type: 'DRAG_START',
+            sourceId,
+            startX,
+            startY,
+            origLeft,
+            origTop,
+        });
+
         e.preventDefault();
     }
 
@@ -48,16 +59,18 @@ export function makeDraggable(titlebarEl, windowEl) {
         newLeft = Math.max(-windowEl.offsetWidth + minVisible, Math.min(newLeft, window.innerWidth - minVisible));
         newTop = Math.max(0, Math.min(newTop, window.innerHeight - taskbarHeight));
 
-        windowEl.style.left = newLeft + 'px';
-        windowEl.style.top = newTop + 'px';
+        WindoesApp.state.dispatch({
+            type: 'DRAG_MOVE',
+            sourceId: windowEl.dataset.windowId || windowEl.id,
+            left: newLeft,
+            top: newTop,
+        });
     }
 
     function pointerUp() {
         if (!isDragging) return;
         isDragging = false;
-        if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.hide === 'function') {
-            WindoesApp.dragOverlay.hide();
-        }
+        WindoesApp.state.dispatch({ type: 'DRAG_END' });
     }
 
     // Mouse events

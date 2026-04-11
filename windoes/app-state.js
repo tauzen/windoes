@@ -36,6 +36,8 @@ const initialState = {
         stack: [],
         focusedId: null,
         byId: {},
+        interactionCommand: null,
+        interactionCommandSeq: 0,
     },
     selection: {
         desktopIconId: null,
@@ -44,6 +46,12 @@ const initialState = {
     drag: {
         active: false,
         sourceId: null,
+        startX: null,
+        startY: null,
+        origLeft: null,
+        origTop: null,
+        currentLeft: null,
+        currentTop: null,
     },
 };
 
@@ -131,6 +139,47 @@ function reduce(current, action) {
             },
         };
     }
+    case 'WINDOW_INTERACTION_DISPATCH':
+        return {
+            ...current,
+            windows: {
+                ...current.windows,
+                interactionCommand: action.command || null,
+                interactionCommandSeq: (current.windows.interactionCommandSeq || 0) + 1,
+            },
+        };
+    case 'DRAG_START':
+        return {
+            ...current,
+            drag: {
+                active: true,
+                sourceId: action.sourceId || null,
+                startX: action.startX,
+                startY: action.startY,
+                origLeft: action.origLeft,
+                origTop: action.origTop,
+                currentLeft: action.origLeft,
+                currentTop: action.origTop,
+            },
+        };
+    case 'DRAG_MOVE':
+        if (!current.drag.active || current.drag.sourceId !== action.sourceId) return current;
+        return {
+            ...current,
+            drag: {
+                ...current.drag,
+                currentLeft: action.left,
+                currentTop: action.top,
+            },
+        };
+    case 'DRAG_END':
+        if (!current.drag.active) return current;
+        return {
+            ...current,
+            drag: {
+                ...initialState.drag,
+            },
+        };
     default:
         return current;
     }
