@@ -15,12 +15,12 @@ export default function RunDialog() {
         if (!runDialog || !runInput || !runOkBtn || !runCancelBtn || !runCloseBtn || !menuRun) return;
 
         const runActionHandlers = {
-            openNotepad: WindoesApp.open.notepad,
-            openMyComputer: WindoesApp.open.myComputer,
-            openInternetExplorer: WindoesApp.open.internetExplorer,
-            openWinamp: WindoesApp.open.winamp,
-            openMinesweeper: WindoesApp.open.minesweeper,
-            openSolitaire: WindoesApp.open.solitaire,
+            openNotepad: () => WindoesApp.open.notepad(),
+            openMyComputer: () => WindoesApp.open.myComputer(),
+            openInternetExplorer: () => WindoesApp.open.internetExplorer(),
+            openWinamp: () => WindoesApp.open.winamp(),
+            openMinesweeper: () => WindoesApp.open.minesweeper(),
+            openSolitaire: () => WindoesApp.open.solitaire(),
         };
 
         function closeDialog() {
