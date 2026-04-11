@@ -205,8 +205,6 @@ function renderMyComputerRoot() {
 
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
-let selectedItemPath = null;
-
 function wireContextMenu() {
     if (currentPath === null) return; // no context menu on My Computer root
 
@@ -215,7 +213,7 @@ function wireContextMenu() {
         e.stopPropagation();
 
         const itemEl = e.target.closest('.folder-item');
-        selectedItemPath = itemEl ? itemEl.dataset.path : null;
+        const selectedItemPath = itemEl ? itemEl.dataset.path : null;
 
         if (WindoesApp.explorerContextMenu && typeof WindoesApp.explorerContextMenu.open === 'function') {
             WindoesApp.explorerContextMenu.open({
@@ -223,11 +221,9 @@ function wireContextMenu() {
                 y: e.clientY,
                 hasSelection: !!selectedItemPath,
                 onNewFolder: () => createNewFolder(),
-                onRename: () => startInlineRename(),
-                onDelete: () => deleteSelected(),
-                onClose: () => {
-                    selectedItemPath = null;
-                },
+                onRename: () => startInlineRename(selectedItemPath),
+                onDelete: () => deleteSelected(selectedItemPath),
+                onClose: () => {},
             });
         }
     });
@@ -253,15 +249,15 @@ async function createNewFolder() {
         WindoesApp.sound.playClickSound();
 
         // Immediately start inline rename on the newly created folder
-        selectedItemPath = createdPath;
+        const selectedItemPath = createdPath;
         await render();
-        startInlineRename();
+        startInlineRename(selectedItemPath);
     } catch (e) {
         WindoesApp.bsod.showErrorDialog({ title: 'Error', text: `Cannot create folder: ${e.message}`, icon: 'error' });
     }
 }
 
-async function deleteSelected() {
+async function deleteSelected(selectedItemPath) {
     if (!selectedItemPath) return;
 
     const name = basename(selectedItemPath);
@@ -283,7 +279,7 @@ async function deleteSelected() {
 
 // ── Inline Rename ──────────────────────────────────────────────────────────
 
-function startInlineRename() {
+function startInlineRename(selectedItemPath) {
     if (!selectedItemPath) return;
 
     const itemEl = viewEl.querySelector(`.folder-item[data-path="${CSS.escape(selectedItemPath)}"]`);
