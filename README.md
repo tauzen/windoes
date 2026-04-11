@@ -40,6 +40,21 @@ tests/                   top-level simulator test suite
 .github/workflows/       CI + deploy workflows
 ```
 
+## Architecture contract (React shell migration)
+
+Windoes uses a single canonical shell state contract during migration, centered on:
+
+- `boot`
+- `menus`
+- `dialogs`
+- `windows`
+- `selection`
+- `drag`
+
+See `docs/adr-react-shell-state-contract.md` for the complete contract and compatibility-layer boundaries.
+
+`WindoesApp` should be treated as a temporary bridge for legacy integration only. New shell behavior should be implemented as reducer actions + React component handlers instead of new global imperative handles.
+
 ## Local development
 
 Requirements:
