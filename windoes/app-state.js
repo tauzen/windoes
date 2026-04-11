@@ -35,6 +35,7 @@ const initialState = {
     windows: {
         stack: [],
         focusedId: null,
+        byId: {},
     },
     selection: {
         desktopIconId: null,
@@ -112,6 +113,21 @@ function reduce(current, action) {
                 ...current.windows,
                 stack,
                 focusedId: stack.length ? stack[stack.length - 1] : null,
+            },
+        };
+    }
+    case 'WINDOWS_STATE_SET': {
+        const stack = action.stack || [];
+        const focusedId = action.focusedId !== undefined
+            ? action.focusedId
+            : (stack.length ? stack[stack.length - 1] : null);
+        return {
+            ...current,
+            windows: {
+                ...current.windows,
+                stack,
+                focusedId,
+                byId: action.byId || {},
             },
         };
     }

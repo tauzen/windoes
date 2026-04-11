@@ -24,7 +24,28 @@ const WindowManager = {
     },
 
     _syncState() {
-        WindoesApp.state.dispatch({ type: 'WINDOW_STACK_SET', stack: this._stack.slice() });
+        const stack = this._stack.slice();
+        const focusedId = stack.length ? stack[stack.length - 1] : null;
+        const byId = {};
+
+        Object.entries(this._windows).forEach(([id, win]) => {
+            byId[id] = {
+                id,
+                open: !!win.isOpen,
+                minimized: !!win.isMinimized,
+                maximized: !!win.isMaximized,
+                focused: id === focusedId,
+                zIndex: win.el ? Number.parseInt(win.el.style.zIndex || '0', 10) || 0 : 0,
+                taskbarVisible: !!(win.taskBtn && win.taskBtn.style.display !== 'none'),
+            };
+        });
+
+        WindoesApp.state.dispatch({
+            type: 'WINDOWS_STATE_SET',
+            stack,
+            focusedId,
+            byId,
+        });
     },
 
     /**
@@ -174,6 +195,8 @@ const WindowManager = {
 
         config.id = id;
         config.isOpen = false;
+        config.isMinimized = false;
+        config.isMaximized = !!config.isMaximized;
         config._attached = false;
         this._windows[id] = config;
 
@@ -298,6 +321,7 @@ const WindowManager = {
 
         win.el.classList.remove('hidden');
         win.isOpen = true;
+        win.isMinimized = false;
 
         if (win.taskBtn) {
             win.taskBtn.style.display = 'flex';
@@ -323,6 +347,7 @@ const WindowManager = {
 
         win.el.classList.add('hidden');
         win.isOpen = false;
+        win.isMinimized = false;
 
         if (win.taskBtn) {
             win.taskBtn.style.display = 'none';
@@ -349,6 +374,7 @@ const WindowManager = {
         if (!win) return;
 
         win.el.classList.add('hidden');
+        win.isMinimized = true;
 
         const idx = this._stack.indexOf(id);
         if (idx !== -1) this._stack.splice(idx, 1);
@@ -362,6 +388,7 @@ const WindowManager = {
         if (!win) return;
 
         win.el.classList.remove('hidden');
+        win.isMinimized = false;
         this.bringToFront(id);
     },
 
@@ -420,10 +447,11 @@ const WindowManager = {
     },
 
     _updateTitlebars() {
-        const focusedId = this.getFocused();
+        const windowsState = WindoesApp.state.get().windows.byId || {};
         Object.values(this._windows).forEach(win => {
             const tb = win.el.querySelector('.titlebar');
-            const isActive = win.id === focusedId && !win.el.classList.contains('hidden');
+            const winState = windowsState[win.id] || {};
+            const isActive = !!(winState.focused && winState.open && !winState.minimized);
             if (tb) {
                 if (isActive) {
                     tb.classList.remove('inactive');
