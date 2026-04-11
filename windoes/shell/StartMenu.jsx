@@ -150,8 +150,7 @@ export default function StartMenu() {
 
         WindoesApp.menu.closeProgramsSubmenu = closeSubmenus;
 
-        function onStartButtonClick(e) {
-            e.stopPropagation();
+        function toggleStartMenu() {
             startMenuEl.classList.toggle('open');
             startButton.classList.toggle('pressed', startMenuEl.classList.contains('open'));
             if (!startMenuEl.classList.contains('open')) {
@@ -159,6 +158,8 @@ export default function StartMenu() {
             }
             WindoesApp.sound.playClickSound();
         }
+
+        WindoesApp.menu.toggleStartMenu = toggleStartMenu;
 
         function onDocumentClick(e) {
             const programsSubmenu = programsSubmenuRef.current;
@@ -175,12 +176,11 @@ export default function StartMenu() {
             }
         }
 
-        startButton.addEventListener('click', onStartButtonClick);
         document.addEventListener('click', onDocumentClick);
 
         return () => {
             delete WindoesApp.menu.closeProgramsSubmenu;
-            startButton.removeEventListener('click', onStartButtonClick);
+            delete WindoesApp.menu.toggleStartMenu;
             document.removeEventListener('click', onDocumentClick);
         };
     }, []);

@@ -5,7 +5,16 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
 
     return (
         <div ref={taskbarRef} className="taskbar" id="theTaskbar" style={{ display: bootDone ? '' : 'none' }}>
-            <button ref={startButtonRef} className="start-btn" id="startButton">
+            <button
+                ref={startButtonRef}
+                className="start-btn"
+                id="startButton"
+                onClick={() => {
+                    if (typeof WindoesApp.menu.toggleStartMenu === 'function') {
+                        WindoesApp.menu.toggleStartMenu();
+                    }
+                }}
+            >
                 <span className="start-flag"><span className="f1"></span><span className="f2"></span><span className="f3"></span><span className="f4"></span></span>
                 Start
             </button>
