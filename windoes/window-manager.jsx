@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 // Window Manager (JSX-rendered shell windows)
 // ══════════════════════════════════════════════
+import { Fragment } from 'react';
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
 import { renderInto } from './react-view.js';
@@ -100,7 +101,7 @@ const WindowManager = {
         }
 
         if (tmpl.toolbar) {
-            content.push(tmpl.toolbar);
+            content.push(<Fragment key="toolbar">{tmpl.toolbar}</Fragment>);
         }
 
         if (tmpl.view !== undefined) {

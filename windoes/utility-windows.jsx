@@ -4,7 +4,6 @@
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
 import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.jsx';
-import { renderInto } from './react-view.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -113,80 +112,12 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
 
-const notepadSaveDialog = document.createElement('div');
-notepadSaveDialog.className = 'dialog-overlay notepad-save-dialog';
-notepadSaveDialog.id = 'notepadSaveDialog';
-renderInto(
-    notepadSaveDialog,
-    <div className="dialog-box" style={{ minWidth: '420px' }}>
-        <div className="dialog-titlebar">
-            <span>Save As</span>
-            <button className="ctrl-btn" id="notepadSaveCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-info"></div>
-            <div className="notepad-save-fields">
-                <div className="dialog-text">Choose where to save this text document.</div>
-                <div className="notepad-save-row">
-                    <label htmlFor="notepadSavePathInput">File name:</label>
-                    <input type="text" id="notepadSavePathInput" aria-label="Save path" />
-                </div>
-            </div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="notepadSaveConfirmBtn">Save</button>
-            <button className="dialog-btn" id="notepadSaveCancelBtn">Cancel</button>
-        </div>
-    </div>
-);
-document.body.appendChild(notepadSaveDialog);
-
-const notepadSavePathInput = notepadSaveDialog.querySelector('#notepadSavePathInput');
-const notepadSaveConfirmBtn = notepadSaveDialog.querySelector('#notepadSaveConfirmBtn');
-const notepadSaveCancelBtn = notepadSaveDialog.querySelector('#notepadSaveCancelBtn');
-const notepadSaveCloseBtn = notepadSaveDialog.querySelector('#notepadSaveCloseBtn');
-let notepadSaveResolver = null;
-
-function closeNotepadSaveDialog(resultPath = null) {
-    notepadSaveDialog.classList.remove('active');
-    if (notepadSaveResolver) {
-        const resolve = notepadSaveResolver;
-        notepadSaveResolver = null;
-        resolve(resultPath);
-    }
-}
-
 function requestNotepadSavePath(suggestedPath) {
-    if (notepadSaveResolver) {
-        closeNotepadSaveDialog(null);
+    if (WindoesApp.notepadDialogs && typeof WindoesApp.notepadDialogs.requestSavePath === 'function') {
+        return WindoesApp.notepadDialogs.requestSavePath(suggestedPath);
     }
-
-    notepadSavePathInput.value = suggestedPath || '/C:/My Documents/Untitled.txt';
-    notepadSaveDialog.classList.add('active');
-    notepadSavePathInput.focus();
-    notepadSavePathInput.select();
-
-    return new Promise((resolve) => {
-        notepadSaveResolver = resolve;
-    });
+    return Promise.resolve(null);
 }
-
-notepadSaveConfirmBtn.addEventListener('click', () => {
-    closeNotepadSaveDialog((notepadSavePathInput.value || '').trim());
-});
-notepadSaveCancelBtn.addEventListener('click', () => closeNotepadSaveDialog(null));
-notepadSaveCloseBtn.addEventListener('click', () => closeNotepadSaveDialog(null));
-notepadSavePathInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        closeNotepadSaveDialog((notepadSavePathInput.value || '').trim());
-        return;
-    }
-    if (e.key === 'Escape') {
-        e.preventDefault();
-        closeNotepadSaveDialog(null);
-    }
-});
 
 async function saveNotepadDocument(forceSaveAs = false) {
     try {
@@ -234,93 +165,12 @@ function newNotepadDocument() {
     WindoesApp.sound.playClickSound();
 }
 
-function setupNotepadFileMenu() {
-    const notepadWindowEl = notepadConfig.el;
-    const fileMenu = notepadWindowEl.querySelector('#notepadFileMenu');
-    if (!fileMenu) return;
-
-    const dropdown = document.createElement('div');
-    dropdown.id = 'notepadFileDropdown';
-    dropdown.className = 'context-menu notepad-file-menu';
-    renderInto(
-        dropdown,
-        <>
-            <div className="context-menu-item" data-action="new">New</div>
-            <div className="context-menu-item" data-action="save">Save</div>
-            <div className="context-menu-item" data-action="save-as">Save As...</div>
-            <div className="context-menu-sep"></div>
-            <div className="context-menu-item" data-action="exit">Exit</div>
-        </>
-    );
-    document.body.appendChild(dropdown);
-
-    function closeMenu() {
-        dropdown.classList.remove('open');
-    }
-
-    function openMenu() {
-        const rect = fileMenu.getBoundingClientRect();
-        dropdown.style.left = rect.left + 'px';
-        dropdown.style.top = rect.bottom + 'px';
-        dropdown.classList.add('open');
-    }
-
-    fileMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (dropdown.classList.contains('open')) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    });
-
-    dropdown.addEventListener('click', (e) => {
-        const item = e.target.closest('.context-menu-item');
-        if (!item) return;
-
-        const action = item.dataset.action;
-        closeMenu();
-
-        if (action === 'new') {
-            newNotepadDocument();
-        } else if (action === 'save') {
-            saveNotepadDocument(false);
-        } else if (action === 'save-as') {
-            saveNotepadDocument(true);
-        } else if (action === 'exit') {
-            closeNotepad();
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!dropdown.classList.contains('open')) return;
-        if (dropdown.contains(e.target) || fileMenu.contains(e.target)) return;
-        closeMenu();
-    });
-
-    notepadWindowEl.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
-            e.preventDefault();
-            saveNotepadDocument(true);
-            return;
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-            e.preventDefault();
-            saveNotepadDocument(false);
-            return;
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
-            e.preventDefault();
-            newNotepadDocument();
-            return;
-        }
-        if (e.key === 'Escape') {
-            closeMenu();
-        }
-    });
-}
-
-setupNotepadFileMenu();
+WindoesApp.notepadMenuActions = {
+    new: newNotepadDocument,
+    save: () => saveNotepadDocument(false),
+    'save-as': () => saveNotepadDocument(true),
+    exit: closeNotepad,
+};
 
 function openNotepad() {
     WindoesApp.WindowManager.open('notepad');

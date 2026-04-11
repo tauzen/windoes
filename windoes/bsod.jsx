@@ -2,7 +2,6 @@
 // BSOD System
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { renderInto } from './react-view.js';
 
 const bsod = document.getElementById('bsod');
 const bsodText = document.getElementById('bsodText');
@@ -44,32 +43,19 @@ function scheduleRandomBSOD() {
 }
 
 // ══════════════════════════════════════════════
-// Error / Info Dialog (created on demand)
+// Error / Info Dialog API (implemented in shell/ErrorDialog.jsx)
 // ══════════════════════════════════════════════
-const errorDialog = document.createElement('div');
-errorDialog.className = 'dialog-overlay';
-errorDialog.id = 'errorDialog';
-renderInto(
-    errorDialog,
-    <div className="dialog-box">
-        <div className="dialog-titlebar">
-            <span id="errorDialogTitle">Windoes</span>
-            <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close">×</button>
-        </div>
-        <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-error" id="errorDialogIcon"></div>
-            <div className="dialog-text" id="errorDialogText">An error has occurred.</div>
-        </div>
-        <div className="dialog-buttons">
-            <button className="dialog-btn" id="errorOkBtn">OK</button>
-        </div>
-    </div>
-);
-document.body.appendChild(errorDialog);
+function showErrorDialog(err) {
+    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.show === 'function') {
+        WindoesApp.dialogs.error.show(err);
+    }
+}
 
-const errorDialogTitle = document.getElementById('errorDialogTitle');
-const errorDialogText = document.getElementById('errorDialogText');
-const errorDialogIcon = document.getElementById('errorDialogIcon');
+function closeErrorDialog() {
+    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.hide === 'function') {
+        WindoesApp.dialogs.error.hide();
+    }
+}
 
 const randomErrors = WindoesApp.config.randomErrors || [
     { title: 'Explorer', text: 'This program has performed an illegal operation and will be shut down. If the problem persists, contact the program vendor.', icon: 'error' },
@@ -82,25 +68,11 @@ const randomErrors = WindoesApp.config.randomErrors || [
     { title: 'Disk Cleanup', text: 'The disk cleanup utility could not free any space. Your hard drive may be full.', icon: 'info' }
 ];
 
-function showErrorDialog(err) {
-    errorDialogTitle.textContent = err.title;
-    errorDialogText.textContent = err.text;
-    errorDialogIcon.className = 'dialog-icon dialog-icon-' + err.icon;
-    errorDialog.classList.add('active');
-    WindoesApp.sound.playErrorSound();
-}
-
-function closeErrorDialog() {
-    errorDialog.classList.remove('active');
-}
-
-document.getElementById('errorOkBtn').addEventListener('click', closeErrorDialog);
-document.getElementById('errorCloseBtn').addEventListener('click', closeErrorDialog);
-
 function scheduleRandomError() {
     const delay = (60 + Math.random() * 180) * 1000;
     setTimeout(() => {
-        if (WindoesApp.bootDone && !bsodActive && !errorDialog.classList.contains('active')) {
+        const isErrorOpen = !!(WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.isOpen === 'function' && WindoesApp.dialogs.error.isOpen());
+        if (WindoesApp.bootDone && !bsodActive && !isErrorOpen) {
             const err = randomErrors[Math.floor(Math.random() * randomErrors.length)];
             showErrorDialog(err);
         }
