@@ -1,10 +1,8 @@
 // ══════════════════════════════════════════════
 // Window Dragging
 // ══════════════════════════════════════════════
+import WindoesApp from './app-state.js';
 import { bringToFront } from './window-manager.jsx';
-
-// Shared overlay to prevent iframes from stealing pointer events during drag
-const dragOverlay = document.getElementById('dragOverlay');
 
 export function makeDraggable(titlebarEl, windowEl) {
     let isDragging = false;
@@ -26,7 +24,9 @@ export function makeDraggable(titlebarEl, windowEl) {
         origLeft = rect.left;
         origTop = rect.top;
         bringToFront(windowEl);
-        if (dragOverlay) dragOverlay.style.display = 'block';
+        if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.show === 'function') {
+            WindoesApp.dragOverlay.show();
+        }
         e.preventDefault();
     }
 
@@ -55,7 +55,9 @@ export function makeDraggable(titlebarEl, windowEl) {
     function pointerUp() {
         if (!isDragging) return;
         isDragging = false;
-        if (dragOverlay) dragOverlay.style.display = 'none';
+        if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.hide === 'function') {
+            WindoesApp.dragOverlay.hide();
+        }
     }
 
     // Mouse events
