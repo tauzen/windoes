@@ -382,17 +382,7 @@ function startInlineRename(selectedItemPath) {
 async function openFileInNotepad(path) {
     try {
         const content = await fs.readFile(path);
-        WindoesApp.open.notepad();
-        // Give notepad a tick to open, then set content
-        setTimeout(() => {
-            const textarea = document.getElementById('notepadText');
-            if (textarea) {
-                textarea.value = content;
-                textarea.dataset.filePath = path;
-            }
-            const titleEl = document.getElementById('notepadTitle');
-            if (titleEl) titleEl.textContent = `${basename(path)} - Notepad`;
-        }, 50);
+        WindoesApp.open.notepad({ filePath: path, content });
     } catch (e) {
         WindoesApp.bsod.showErrorDialog({ title: 'Error', text: `Cannot open file: ${e.message}`, icon: 'error' });
     }
