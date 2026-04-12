@@ -148,7 +148,7 @@ export default function StartMenu() {
 
         WindoesApp.dom.startMenu = startMenuEl;
 
-        WindoesApp.menu.closeProgramsSubmenu = closeSubmenus;
+        WindoesApp.startMenu.closeSubmenus = closeSubmenus;
 
         function toggleStartMenu() {
             startMenuEl.classList.toggle('open');
@@ -159,7 +159,7 @@ export default function StartMenu() {
             WindoesApp.sound.playClickSound();
         }
 
-        WindoesApp.menu.toggleStartMenu = toggleStartMenu;
+        WindoesApp.startMenu.toggle = toggleStartMenu;
 
         function onDocumentClick(e) {
             const programsSubmenu = programsSubmenuRef.current;
@@ -179,8 +179,8 @@ export default function StartMenu() {
         document.addEventListener('click', onDocumentClick);
 
         return () => {
-            delete WindoesApp.menu.closeProgramsSubmenu;
-            delete WindoesApp.menu.toggleStartMenu;
+            delete WindoesApp.startMenu.closeSubmenus;
+            delete WindoesApp.startMenu.toggle;
             document.removeEventListener('click', onDocumentClick);
         };
     }, []);
@@ -197,7 +197,7 @@ export default function StartMenu() {
                     <div className="menu-separator"></div>
                     <div ref={menuProgramsRef} className="menu-item menu-item-arrow" id="menuPrograms" onMouseEnter={onProgramsEnter}><span className="menu-icon menu-icon-programs"></span>Programs</div>
                     <div className="menu-item" id="menuHelp" onMouseEnter={closeSubmenus} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Windoes Help', text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.', icon: 'info' }))}><span className="menu-icon menu-icon-help"></span>Help</div>
-                    <div className="menu-item" id="menuRun" onMouseEnter={closeSubmenus} onClick={() => runAction(() => WindoesApp.dialogs.openRunDialog?.())}><span className="menu-icon menu-icon-run"></span>Run...</div>
+                    <div className="menu-item" id="menuRun" onMouseEnter={closeSubmenus} onClick={() => runAction(() => WindoesApp.runDialog.open?.())}><span className="menu-icon menu-icon-run"></span>Run...</div>
                     <div className="menu-separator"></div>
                     <div
                         className="menu-item menu-shutdown"

@@ -20,7 +20,7 @@ export default function DesktopContextMenu() {
     function onMenuAction(action) {
         setIsContextMenuOpen(false);
         if (action === 'refresh') {
-            WindoesApp.helpers.body_loading(true);
+            WindoesApp.ui.setBodyLoading?.(true);
         } else if (action === 'properties') {
             WindoesApp.bsod.showErrorDialog({
                 title: 'Display Properties',

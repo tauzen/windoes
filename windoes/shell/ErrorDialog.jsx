@@ -20,11 +20,14 @@ export default function ErrorDialog() {
     }
 
     useEffect(() => {
-        if (!WindoesApp.dialogs) WindoesApp.dialogs = {};
-        WindoesApp.dialogs.error = { show, hide, isOpen: () => isOpen };
+        WindoesApp.errorDialog.show = show;
+        WindoesApp.errorDialog.hide = hide;
+        WindoesApp.errorDialog.isOpen = () => isOpen;
 
         return () => {
-            if (WindoesApp.dialogs?.error) delete WindoesApp.dialogs.error;
+            delete WindoesApp.errorDialog.show;
+            delete WindoesApp.errorDialog.hide;
+            delete WindoesApp.errorDialog.isOpen;
         };
     }, [isOpen]);
 

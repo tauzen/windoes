@@ -42,8 +42,8 @@ function openApp(title, url) {
     WindoesApp.WindowManager.open('app');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
-    WindoesApp.helpers.body_loading(true);
+    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
+    WindoesApp.ui.setBodyLoading?.(true);
     WindoesApp.sound.playClickSound();
 }
 
@@ -53,7 +53,7 @@ function closeApp() {
 
 appFrame.addEventListener('load', () => {
     appStatusText.textContent = 'Done';
-    WindoesApp.helpers.body_loading(false);
+    WindoesApp.ui.setBodyLoading?.(false);
 });
 
 // ══════════════════════════════════════════════
@@ -92,7 +92,7 @@ function openWinamp() {
     WindoesApp.WindowManager.open('winamp');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
     WindoesApp.sound.playClickSound();
 }
 
@@ -125,7 +125,7 @@ function openMinesweeper() {
     WindoesApp.WindowManager.open('minesweeper');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
     WindoesApp.sound.playClickSound();
 }
 
@@ -158,7 +158,7 @@ function openSolitaire() {
     WindoesApp.WindowManager.open('solitaire');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
     WindoesApp.sound.playClickSound();
 }
 

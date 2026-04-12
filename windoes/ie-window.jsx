@@ -192,5 +192,5 @@ updateClock();
 
 // Register on shared namespace
 WindoesApp.open.internetExplorer = openInternetExplorer;
-WindoesApp.ie = { navigate };
-WindoesApp.helpers.body_loading = body_loading;
+WindoesApp.browser.navigate = navigate;
+WindoesApp.ui.setBodyLoading = body_loading;
