@@ -197,8 +197,26 @@ function handleNotepadStateActions() {
 
 WindoesApp.state.subscribe(handleNotepadStateActions);
 
-function openNotepad() {
+function openNotepad(options = {}) {
+    const { filePath = '', content = '', preserveCurrentDocument = false } = options;
+
     WindoesApp.WindowManager.open('notepad');
+
+    const textarea = notepadConfig.el.querySelector('#notepadText');
+    const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+
+    if (textarea && !preserveCurrentDocument) {
+        textarea.value = content;
+
+        if (filePath) {
+            textarea.dataset.filePath = filePath;
+            if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
+        } else {
+            delete textarea.dataset.filePath;
+            if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+        }
+    }
+
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
     if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
