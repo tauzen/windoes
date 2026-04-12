@@ -10,8 +10,8 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
                 className="start-btn"
                 id="startButton"
                 onClick={() => {
-                    if (typeof WindoesApp.menu.toggleStartMenu === 'function') {
-                        WindoesApp.menu.toggleStartMenu();
+                    if (typeof WindoesApp.startMenu.toggle === 'function') {
+                        WindoesApp.startMenu.toggle();
                         return;
                     }
 

@@ -201,7 +201,7 @@ function openNotepad() {
     WindoesApp.WindowManager.open('notepad');
     if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
     WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.menu.closeProgramsSubmenu) WindoesApp.menu.closeProgramsSubmenu();
+    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
     WindoesApp.sound.playClickSound();
 }
 

@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 
-function runBootSequence() {
+export function runBootSequence() {
     const bootMessages = WindoesApp.config.bootMessages || [
         'Loading Windoes...',
         'Loading system files...',
@@ -73,5 +73,3 @@ function finishBoot() {
     WindoesApp.bsod.scheduleRandomError();
 }
 
-// Register on shared namespace
-WindoesApp.boot = { runBootSequence };

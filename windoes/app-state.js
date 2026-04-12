@@ -343,36 +343,18 @@ const WindoesApp = {
     },
 
     // ── sound API (filled by sound.js) ────────
-    // Allowed imperative API (non-UI side-effect service).
     sound: {},
 
-    // ── boot API (filled by boot.js) ──────────
-    // @deprecated bridge. Migration target: boot transitions dispatched from React boot controller.
-    boot: {},
-
-    // ── bsod / error dialog API (filled by bsod.jsx) ──
-    // @deprecated bridge. Migration target: dialog state/actions in React shell reducer.
+    // ── runtime service APIs (filled by feature modules) ────────
     bsod: {},
-
-    // ── shell dialog helpers (filled by shell/RunDialog.jsx, etc.) ──
-    // @deprecated bridge. Migration target: reducer-driven dialog open/close actions.
-    dialogs: {},
-
-    // ── window-open helpers (filled by ie-window.jsx, app-windows.jsx, utility-windows.jsx) ──
-    // @deprecated bridge. Migration target: typed window actions dispatched through WindoesApp.state.
     open: {},
-
-    // ── menu helpers (filled by start-menu.jsx) ──
-    // @deprecated bridge. Migration target: menu open/close/focus state in reducer + component handlers.
-    menu: {},
-
-    // ── ie helpers (filled by ie-window.jsx) ──
-    // @deprecated bridge. Migration target: feature-local module exports/hooks.
-    ie: {},
-
-    // ── misc helpers (filled by ie-window.jsx) ──
-    // @deprecated bridge. Migration target: explicit utility modules.
-    helpers: {},
+    startMenu: {},
+    runDialog: {},
+    errorDialog: {},
+    browser: {},
+    ui: {},
+    desktopContext: {},
+    notepadDialogs: {},
 };
 
 Object.defineProperty(WindoesApp, 'bootDone', {

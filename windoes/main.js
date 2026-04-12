@@ -17,14 +17,14 @@ async function bootstrap() {
 
     await import('./sound.js');
     await import('./window-manager.jsx');
-    await import('./boot.js');
+    const { runBootSequence } = await import('./boot.js');
     await import('./bsod.jsx');
     await import('./ie-window.jsx');
     await import('./app-windows.jsx');
     await import('./utility-windows.jsx');
     await import('./desktop.jsx');
 
-    setTimeout(WindoesApp.boot.runBootSequence, 300);
+    setTimeout(runBootSequence, 300);
 }
 
 bootstrap();

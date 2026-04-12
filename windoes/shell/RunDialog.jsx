@@ -41,18 +41,18 @@ export default function RunDialog() {
             WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Windoes cannot find \'calc.exe\'. Make sure you typed the name correctly, and then try again.', icon: 'error' });
         } else if (cmd.startsWith('http://') || cmd.startsWith('https://') || cmd.startsWith('www.')) {
             WindoesApp.open.internetExplorer();
-            WindoesApp.ie.navigate(cmd);
+            WindoesApp.browser.navigate?.(cmd);
         } else {
             WindoesApp.bsod.showErrorDialog({ title: 'Run', text: `Windoes cannot find '${rawCommand}'. Make sure you typed the name correctly, and then try again. To search for a file, click the Start button, and then click Search.`, icon: 'error' });
         }
     }
 
     useEffect(() => {
-        WindoesApp.dialogs.openRunDialog = openDialog;
-        WindoesApp.dialogs.closeRunDialog = closeDialog;
+        WindoesApp.runDialog.open = openDialog;
+        WindoesApp.runDialog.close = closeDialog;
         return () => {
-            delete WindoesApp.dialogs.openRunDialog;
-            delete WindoesApp.dialogs.closeRunDialog;
+            delete WindoesApp.runDialog.open;
+            delete WindoesApp.runDialog.close;
         };
     }, []);
 

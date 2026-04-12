@@ -46,14 +46,14 @@ function scheduleRandomBSOD() {
 // Error / Info Dialog API (implemented in shell/ErrorDialog.jsx)
 // ══════════════════════════════════════════════
 function showErrorDialog(err) {
-    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.show === 'function') {
-        WindoesApp.dialogs.error.show(err);
+    if (typeof WindoesApp.errorDialog.show === 'function') {
+        WindoesApp.errorDialog.show(err);
     }
 }
 
 function closeErrorDialog() {
-    if (WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.hide === 'function') {
-        WindoesApp.dialogs.error.hide();
+    if (typeof WindoesApp.errorDialog.hide === 'function') {
+        WindoesApp.errorDialog.hide();
     }
 }
 
@@ -71,7 +71,7 @@ const randomErrors = WindoesApp.config.randomErrors || [
 function scheduleRandomError() {
     const delay = (60 + Math.random() * 180) * 1000;
     setTimeout(() => {
-        const isErrorOpen = !!(WindoesApp.dialogs && WindoesApp.dialogs.error && typeof WindoesApp.dialogs.error.isOpen === 'function' && WindoesApp.dialogs.error.isOpen());
+        const isErrorOpen = !!(typeof WindoesApp.errorDialog.isOpen === 'function' && WindoesApp.errorDialog.isOpen());
         if (WindoesApp.bootDone && !bsodActive && !isErrorOpen) {
             const err = randomErrors[Math.floor(Math.random() * randomErrors.length)];
             showErrorDialog(err);
