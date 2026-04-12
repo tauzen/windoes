@@ -1,37 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function ExplorerContextMenu() {
     const menuRef = useRef(null);
-    const callbacksRef = useRef({});
-    const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [hasSelection, setHasSelection] = useState(false);
+    const explorerState = WindoesApp.state.use((s) => s.explorer || {});
+    const isOpen = !!explorerState.contextMenuOpen;
+    const position = {
+        x: explorerState.contextMenuX || 0,
+        y: explorerState.contextMenuY || 0,
+    };
+    const selectedPath = explorerState.selectedPath || null;
+    const hasSelection = !!selectedPath;
 
     function closeMenu() {
-        setIsOpen(false);
-        if (callbacksRef.current.onClose) callbacksRef.current.onClose();
+        WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
     }
 
-    function openMenu(options) {
-        callbacksRef.current = {
-            onNewFolder: options.onNewFolder,
-            onRename: options.onRename,
-            onDelete: options.onDelete,
-            onClose: options.onClose,
-        };
-
-        setHasSelection(!!options.hasSelection);
-        setPosition({ x: options.x, y: options.y });
-        setIsOpen(true);
+    function runAction(actionType) {
+        WindoesApp.state.dispatch({
+            type: 'EXPLORER_CONTEXT_ACTION_DISPATCH',
+            commandType: actionType,
+            selectedPath,
+        });
     }
-
-    useEffect(() => {
-        WindoesApp.explorerContextMenu = { open: openMenu, close: closeMenu };
-        return () => {
-            delete WindoesApp.explorerContextMenu;
-        };
-    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -46,13 +37,6 @@ export default function ExplorerContextMenu() {
         document.addEventListener('click', onDocumentClick);
         return () => document.removeEventListener('click', onDocumentClick);
     }, [isOpen]);
-
-    function runAction(action) {
-        if (action === 'new-folder' && callbacksRef.current.onNewFolder) callbacksRef.current.onNewFolder();
-        if (action === 'rename' && callbacksRef.current.onRename) callbacksRef.current.onRename();
-        if (action === 'delete' && callbacksRef.current.onDelete) callbacksRef.current.onDelete();
-        closeMenu();
-    }
 
     return (
         <div

@@ -29,6 +29,7 @@ const MY_COMPUTER_ITEMS = [
 let currentPath = null;   // null = My Computer root
 let historyStack = [];
 let historyIndex = -1;
+let lastExplorerActionSeq = 0;
 
 // ── Cached DOM refs (set after window registers) ────────────────────────────
 let viewEl = null;
@@ -46,6 +47,30 @@ function setDomRefs(cfg) {
     backBtnEl   = cfg.el.querySelector('#explorerBackBtn');
     upBtnEl     = cfg.el.querySelector('#explorerUpBtn');
 }
+
+function handleExplorerStateActions() {
+    const explorerState = WindoesApp.state.get().explorer || {};
+    const seq = explorerState.actionSeq || 0;
+    if (seq <= lastExplorerActionSeq) return;
+    lastExplorerActionSeq = seq;
+
+    const command = explorerState.actionCommand || {};
+    const selectedPath = command.selectedPath || null;
+
+    if (command.type === 'new-folder') {
+        createNewFolder();
+        return;
+    }
+    if (command.type === 'rename') {
+        startInlineRename(selectedPath);
+        return;
+    }
+    if (command.type === 'delete') {
+        deleteSelected(selectedPath);
+    }
+}
+
+WindoesApp.state.subscribe(handleExplorerStateActions);
 
 // ── Initialise VirtualFS ────────────────────────────────────────────────────
 
@@ -206,27 +231,28 @@ function renderMyComputerRoot() {
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
 function wireContextMenu() {
-    if (currentPath === null) return; // no context menu on My Computer root
+    if (!viewEl) return;
 
-    viewEl.addEventListener('contextmenu', (e) => {
+    if (currentPath === null) {
+        viewEl.oncontextmenu = null;
+        WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
+        return;
+    }
+
+    viewEl.oncontextmenu = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         const itemEl = e.target.closest('.folder-item');
         const selectedItemPath = itemEl ? itemEl.dataset.path : null;
 
-        if (WindoesApp.explorerContextMenu && typeof WindoesApp.explorerContextMenu.open === 'function') {
-            WindoesApp.explorerContextMenu.open({
-                x: e.clientX,
-                y: e.clientY,
-                hasSelection: !!selectedItemPath,
-                onNewFolder: () => createNewFolder(),
-                onRename: () => startInlineRename(selectedItemPath),
-                onDelete: () => deleteSelected(selectedItemPath),
-                onClose: () => {},
-            });
-        }
-    });
+        WindoesApp.state.dispatch({
+            type: 'EXPLORER_CONTEXT_OPEN',
+            x: e.clientX,
+            y: e.clientY,
+            selectedPath: selectedItemPath,
+        });
+    };
 }
 
 // ── Folder Operations ───────────────────────────────────────────────────────

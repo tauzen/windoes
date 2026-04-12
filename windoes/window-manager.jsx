@@ -479,15 +479,6 @@ const WindowManager = {
                     win.el.style.top = dragState.currentTop + 'px';
                 }
             }
-            if (!prev.active && WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.show === 'function') {
-                WindoesApp.dragOverlay.show();
-            }
-        }
-
-        if (prev.active && (!dragState || !dragState.active)) {
-            if (WindoesApp.dragOverlay && typeof WindoesApp.dragOverlay.hide === 'function') {
-                WindoesApp.dragOverlay.hide();
-            }
         }
 
         this._lastDragSnapshot = dragState;

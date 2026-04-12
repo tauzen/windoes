@@ -1,16 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import WindoesApp from '../app-state.js';
 
 export default function NotepadDialogs() {
     const savePathInputRef = useRef(null);
     const resolverRef = useRef(null);
-    const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-    const [savePath, setSavePath] = useState('/C:/My Documents/Untitled.txt');
-    const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
+    const notepadState = WindoesApp.state.use((s) => s.notepad || {});
+
+    const isSaveDialogOpen = !!notepadState.saveDialogOpen;
+    const savePath = notepadState.saveDialogPath || '/C:/My Documents/Untitled.txt';
+    const isFileMenuOpen = !!notepadState.fileMenuOpen;
+    const menuPosition = {
+        left: notepadState.fileMenuLeft || 0,
+        top: notepadState.fileMenuTop || 0,
+    };
 
     function closeSaveDialog(resultPath = null) {
-        setIsSaveDialogOpen(false);
+        WindoesApp.state.dispatch({ type: 'NOTEPAD_SAVE_DIALOG_CLOSE' });
         if (resolverRef.current) {
             const resolve = resolverRef.current;
             resolverRef.current = null;
@@ -23,14 +28,9 @@ export default function NotepadDialogs() {
             closeSaveDialog(null);
         }
 
-        setSavePath(suggestedPath || '/C:/My Documents/Untitled.txt');
-        setIsSaveDialogOpen(true);
-
-        requestAnimationFrame(() => {
-            const input = savePathInputRef.current;
-            if (!input) return;
-            input.focus();
-            input.select();
+        WindoesApp.state.dispatch({
+            type: 'NOTEPAD_SAVE_DIALOG_OPEN',
+            path: suggestedPath || '/C:/My Documents/Untitled.txt',
         });
 
         return new Promise((resolve) => {
@@ -38,10 +38,11 @@ export default function NotepadDialogs() {
         });
     }
 
-    function runNotepadAction(action) {
-        const actions = WindoesApp.notepadMenuActions || {};
-        const handler = actions[action];
-        if (typeof handler === 'function') handler();
+    function dispatchNotepadAction(actionType) {
+        WindoesApp.state.dispatch({
+            type: 'NOTEPAD_ACTION_DISPATCH',
+            commandType: actionType,
+        });
     }
 
     useEffect(() => {
@@ -54,16 +55,30 @@ export default function NotepadDialogs() {
     }, []);
 
     useEffect(() => {
+        if (!isSaveDialogOpen) return;
+
+        requestAnimationFrame(() => {
+            const input = savePathInputRef.current;
+            if (!input) return;
+            input.focus();
+            input.select();
+        });
+    }, [isSaveDialogOpen]);
+
+    useEffect(() => {
         function onDocumentClick(e) {
             const fileMenuEl = e.target.closest('#notepadFileMenu');
             if (fileMenuEl) {
                 e.stopPropagation();
                 if (isFileMenuOpen) {
-                    setIsFileMenuOpen(false);
+                    WindoesApp.state.dispatch({ type: 'NOTEPAD_FILE_MENU_CLOSE' });
                 } else {
                     const rect = fileMenuEl.getBoundingClientRect();
-                    setMenuPosition({ left: rect.left, top: rect.bottom });
-                    setIsFileMenuOpen(true);
+                    WindoesApp.state.dispatch({
+                        type: 'NOTEPAD_FILE_MENU_OPEN',
+                        left: rect.left,
+                        top: rect.bottom,
+                    });
                 }
                 return;
             }
@@ -71,13 +86,12 @@ export default function NotepadDialogs() {
             const item = e.target.closest('#notepadFileDropdown .context-menu-item');
             if (item && isFileMenuOpen) {
                 const action = item.dataset.action;
-                setIsFileMenuOpen(false);
-                runNotepadAction(action);
+                dispatchNotepadAction(action);
                 return;
             }
 
             if (isFileMenuOpen && !e.target.closest('#notepadFileDropdown')) {
-                setIsFileMenuOpen(false);
+                WindoesApp.state.dispatch({ type: 'NOTEPAD_FILE_MENU_CLOSE' });
             }
         }
 
@@ -88,21 +102,21 @@ export default function NotepadDialogs() {
             const lower = e.key.toLowerCase();
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && lower === 's') {
                 e.preventDefault();
-                runNotepadAction('save-as');
+                dispatchNotepadAction('save-as');
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && lower === 's') {
                 e.preventDefault();
-                runNotepadAction('save');
+                dispatchNotepadAction('save');
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && lower === 'n') {
                 e.preventDefault();
-                runNotepadAction('new');
+                dispatchNotepadAction('new');
                 return;
             }
             if (e.key === 'Escape') {
-                setIsFileMenuOpen(false);
+                WindoesApp.state.dispatch({ type: 'NOTEPAD_FILE_MENU_CLOSE' });
             }
         }
 
@@ -135,7 +149,12 @@ export default function NotepadDialogs() {
                                     id="notepadSavePathInput"
                                     aria-label="Save path"
                                     value={savePath}
-                                    onChange={(e) => setSavePath(e.target.value)}
+                                    onChange={(e) => {
+                                        WindoesApp.state.dispatch({
+                                            type: 'NOTEPAD_SAVE_DIALOG_SET_PATH',
+                                            path: e.target.value,
+                                        });
+                                    }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();

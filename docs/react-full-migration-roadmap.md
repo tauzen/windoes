@@ -62,9 +62,9 @@ Move Windoes from the current hybrid React + imperative DOM model to a fully Rea
 - Reduce callback registry usage (`WindoesApp.*`) to strict minimum.
 
 ### Checklist
-- [ ] Explorer menu actions flow through React state + typed action handlers.
-- [ ] Notepad dialogs + file menu fully controlled by React state/events.
-- [ ] Drag overlay controlled by React state, no external imperative toggles unless strictly needed.
+- [x] Explorer menu actions flow through React state + typed action handlers.
+- [x] Notepad dialogs + file menu fully controlled by React state/events.
+- [x] Drag overlay controlled by React state, no external imperative toggles unless strictly needed.
 
 ---
 
