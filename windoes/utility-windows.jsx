@@ -64,6 +64,7 @@ myComputerConfig.el.querySelector('#explorerUpBtn').addEventListener('click', go
 setDomRefs(myComputerConfig);
 
 let fsReady = false;
+let lastNotepadActionSeq = 0;
 
 async function ensureFS() {
     if (fsReady) return;
@@ -165,12 +166,36 @@ function newNotepadDocument() {
     WindoesApp.sound.playClickSound();
 }
 
-WindoesApp.notepadMenuActions = {
-    new: newNotepadDocument,
-    save: () => saveNotepadDocument(false),
-    'save-as': () => saveNotepadDocument(true),
-    exit: closeNotepad,
-};
+function processNotepadActionCommand(command) {
+    if (!command || !command.type) return;
+
+    if (command.type === 'new') {
+        newNotepadDocument();
+        return;
+    }
+    if (command.type === 'save') {
+        saveNotepadDocument(false);
+        return;
+    }
+    if (command.type === 'save-as') {
+        saveNotepadDocument(true);
+        return;
+    }
+    if (command.type === 'exit') {
+        closeNotepad();
+    }
+}
+
+function handleNotepadStateActions() {
+    const notepadState = WindoesApp.state.get().notepad || {};
+    const seq = notepadState.actionSeq || 0;
+    if (seq <= lastNotepadActionSeq) return;
+
+    lastNotepadActionSeq = seq;
+    processNotepadActionCommand(notepadState.actionCommand);
+}
+
+WindoesApp.state.subscribe(handleNotepadStateActions);
 
 function openNotepad() {
     WindoesApp.WindowManager.open('notepad');

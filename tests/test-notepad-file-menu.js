@@ -71,15 +71,22 @@ async function runTests() {
             const labels = menu
                 ? [...menu.querySelectorAll('.context-menu-item')].map(el => el.textContent.trim())
                 : [];
+            const notepadState = (window.WindoesApp && WindoesApp.state && WindoesApp.state.get)
+                ? (WindoesApp.state.get().notepad || null)
+                : null;
             return {
                 exists: !!menu,
                 open: !!(menu && menu.classList.contains('open')),
                 labels,
+                hasNotepadState: !!notepadState,
+                stateMenuOpen: !!(notepadState && notepadState.fileMenuOpen),
             };
         });
 
         assert(menuState.exists, 'Notepad File dropdown exists');
         assert(menuState.open, 'Notepad File dropdown opens when clicking File');
+        assert(menuState.hasNotepadState, 'Notepad state slice exists in app reducer');
+        assert(menuState.stateMenuOpen, 'Notepad File dropdown open state is reflected in reducer state');
         assert(menuState.labels.includes('New'), 'File menu contains New');
         assert(menuState.labels.includes('Save'), 'File menu contains Save');
         assert(menuState.labels.includes('Save As...'), 'File menu contains Save As...');

@@ -51,6 +51,15 @@ const initialState = {
         actionCommand: null,
         actionSeq: 0,
     },
+    notepad: {
+        fileMenuOpen: false,
+        fileMenuLeft: 0,
+        fileMenuTop: 0,
+        actionCommand: null,
+        actionSeq: 0,
+        saveDialogOpen: false,
+        saveDialogPath: '/C:/My Documents/Untitled.txt',
+    },
     drag: {
         active: false,
         sourceId: null,
@@ -189,6 +198,61 @@ function reduce(current, action) {
                 },
                 actionSeq: (current.explorer.actionSeq || 0) + 1,
                 selectedPath: null,
+            },
+        };
+    case 'NOTEPAD_FILE_MENU_OPEN':
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                fileMenuOpen: true,
+                fileMenuLeft: Number.isFinite(action.left) ? action.left : current.notepad.fileMenuLeft,
+                fileMenuTop: Number.isFinite(action.top) ? action.top : current.notepad.fileMenuTop,
+            },
+        };
+    case 'NOTEPAD_FILE_MENU_CLOSE':
+        if (!current.notepad.fileMenuOpen) return current;
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                fileMenuOpen: false,
+            },
+        };
+    case 'NOTEPAD_ACTION_DISPATCH':
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                fileMenuOpen: false,
+                actionCommand: { type: action.commandType || null },
+                actionSeq: (current.notepad.actionSeq || 0) + 1,
+            },
+        };
+    case 'NOTEPAD_SAVE_DIALOG_OPEN':
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                saveDialogOpen: true,
+                saveDialogPath: action.path || current.notepad.saveDialogPath || '/C:/My Documents/Untitled.txt',
+            },
+        };
+    case 'NOTEPAD_SAVE_DIALOG_SET_PATH':
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                saveDialogPath: action.path,
+            },
+        };
+    case 'NOTEPAD_SAVE_DIALOG_CLOSE':
+        if (!current.notepad.saveDialogOpen) return current;
+        return {
+            ...current,
+            notepad: {
+                ...current.notepad,
+                saveDialogOpen: false,
             },
         };
     case 'DRAG_START':
