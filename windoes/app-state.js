@@ -43,6 +43,14 @@ const initialState = {
         desktopIconId: null,
         explorerItemPath: null,
     },
+    explorer: {
+        contextMenuOpen: false,
+        contextMenuX: 0,
+        contextMenuY: 0,
+        selectedPath: null,
+        actionCommand: null,
+        actionSeq: 0,
+    },
     drag: {
         active: false,
         sourceId: null,
@@ -146,6 +154,41 @@ function reduce(current, action) {
                 ...current.windows,
                 interactionCommand: action.command || null,
                 interactionCommandSeq: (current.windows.interactionCommandSeq || 0) + 1,
+            },
+        };
+    case 'EXPLORER_CONTEXT_OPEN':
+        return {
+            ...current,
+            explorer: {
+                ...current.explorer,
+                contextMenuOpen: true,
+                contextMenuX: action.x || 0,
+                contextMenuY: action.y || 0,
+                selectedPath: action.selectedPath || null,
+            },
+        };
+    case 'EXPLORER_CONTEXT_CLOSE':
+        if (!current.explorer.contextMenuOpen) return current;
+        return {
+            ...current,
+            explorer: {
+                ...current.explorer,
+                contextMenuOpen: false,
+                selectedPath: null,
+            },
+        };
+    case 'EXPLORER_CONTEXT_ACTION_DISPATCH':
+        return {
+            ...current,
+            explorer: {
+                ...current.explorer,
+                contextMenuOpen: false,
+                actionCommand: {
+                    type: action.commandType || null,
+                    selectedPath: action.selectedPath || null,
+                },
+                actionSeq: (current.explorer.actionSeq || 0) + 1,
+                selectedPath: null,
             },
         };
     case 'DRAG_START':
