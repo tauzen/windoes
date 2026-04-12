@@ -75,9 +75,9 @@ Move Windoes from the current hybrid React + imperative DOM model to a fully Rea
 - Retain only minimal bridge APIs required for iframe apps.
 
 ### Checklist
-- [ ] Remove unused `WindoesApp.*` handles.
-- [ ] Remove deprecated module shims/stubs.
-- [ ] Confirm no behavior regressions after cleanup.
+- [x] Remove unused `WindoesApp.*` handles.
+- [x] Remove deprecated module shims/stubs.
+- [x] Confirm no behavior regressions after cleanup.
 
 ---
 
