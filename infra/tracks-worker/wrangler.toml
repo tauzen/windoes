@@ -1,0 +1,28 @@
+name = "windoes-tracks"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# Allow-listed Origins that may request signed URLs and stream audio.
+# Comma-separated. Keep the production origin + any dev origins you use.
+[vars]
+ALLOWED_ORIGINS = "https://tauzen.github.io,http://localhost:5173"
+SIGN_TTL_SECONDS = "3600"
+
+# R2 bucket that holds the MP3 objects. Create it with:
+#   wrangler r2 bucket create windoes-tracks
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "windoes-tracks"
+
+# SIGNING_SECRET must be set as a secret, NOT a plain var:
+#   wrangler secret put SIGNING_SECRET
+# Use any long random string (e.g. `openssl rand -hex 32`). Never commit it.
+
+# Deployment:
+#   1. wrangler r2 bucket create windoes-tracks
+#   2. wrangler r2 object put windoes-tracks/tracks/my-song.mp3 --file ./my-song.mp3
+#   3. wrangler secret put SIGNING_SECRET
+#   4. wrangler deploy
+#
+# Once deployed, note the workers.dev URL (or your custom domain) and set it
+# in windoes/public/applications/winamp-player/tracks.json under "signEndpoint".
