@@ -1440,8 +1440,36 @@
             audioConnected = true;
         }
 
+        // ===== REMOTE TRACK SIGNING =====
+        // Tracks loaded from tracks.json carry a `key` (R2 object path) instead
+        // of a direct `url`. We fetch a short-lived signed URL from the Worker
+        // just before playback and cache it until it's about to expire.
+        const SIGN_REFRESH_MARGIN_MS = 30_000;
+        let signEndpoint = '';
+
+        async function resolveTrackUrl(track) {
+            const stillValid = track.url && track.signedExpiresAt &&
+                Date.now() + SIGN_REFRESH_MARGIN_MS < track.signedExpiresAt;
+            if (track.url && (!track.key || stillValid)) {
+                return track.url;
+            }
+            if (!track.key || !signEndpoint) {
+                return track.url || null;
+            }
+            const endpoint = signEndpoint.replace(/\/+$/, '');
+            const res = await fetch(
+                `${endpoint}/sign?key=${encodeURIComponent(track.key)}`,
+                { credentials: 'omit' }
+            );
+            if (!res.ok) throw new Error(`sign request failed: ${res.status}`);
+            const { url, expiresAt } = await res.json();
+            track.url = url;
+            track.signedExpiresAt = expiresAt;
+            return url;
+        }
+
         // ===== PLAYBACK =====
-        function playTrack(index) {
+        async function playTrack(index) {
             if (index < 0 || index >= state.playlist.length) return;
 
             initAudio();
@@ -1452,22 +1480,34 @@
             state.currentTrack = index;
             const track = state.playlist[index];
 
-            audioElement.src = track.url;
+            updateDisplayTrackInfo(track, index);
+            updateScrollingTitle(track, index);
+            highlightTrack(index);
+
+            let url;
+            try {
+                url = await resolveTrackUrl(track);
+            } catch (err) {
+                console.error('Failed to resolve track URL:', err);
+                return;
+            }
+            if (!url) return;
+            // User skipped to a different track while we were signing.
+            if (state.currentTrack !== index) return;
+
+            audioElement.src = url;
             audioElement.load();
 
             connectAudioGraph();
 
-            audioElement.play().then(() => {
+            try {
+                await audioElement.play();
                 state.isPlaying = true;
                 state.isPaused = false;
                 updateUI();
-            }).catch(err => {
+            } catch (err) {
                 console.error('Playback error:', err);
-            });
-
-            updateDisplayTrackInfo(track, index);
-            updateScrollingTitle(track, index);
-            highlightTrack(index);
+            }
         }
 
         function togglePlay() {
@@ -2057,6 +2097,31 @@
 
         // Set initial playlist time display
         document.getElementById('playlist-total-time').textContent = '0:00:06:39';
+
+        // Load external tracks manifest (metadata only; MP3s live behind a
+        // Cloudflare Worker that hands out short-lived signed URLs). If the
+        // manifest is absent or has no signEndpoint configured, the player
+        // just runs with the bundled demo tracks.
+        fetch('tracks.json', { cache: 'no-store' })
+            .then(res => res.ok ? res.json() : null)
+            .then(manifest => {
+                if (!manifest) return;
+                signEndpoint = manifest.signEndpoint || '';
+                if (!signEndpoint || !Array.isArray(manifest.tracks)) return;
+                let added = 0;
+                for (const t of manifest.tracks) {
+                    if (!t || !t.key || !t.name) continue;
+                    state.playlist.push({
+                        name: t.name,
+                        key: t.key,
+                        url: null,
+                        duration: Number(t.duration) || 0,
+                    });
+                    added++;
+                }
+                if (added > 0) renderPlaylist();
+            })
+            .catch(err => console.warn('tracks.json load failed:', err));
 
     })();
 
