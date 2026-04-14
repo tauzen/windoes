@@ -1,5 +1,5 @@
 {
-  "_comment": "External tracks for the Winamp player. The client fetches this manifest on boot and requests a short-lived signed URL from `signEndpoint` just before playback. Set `signEndpoint` to an empty string to disable remote tracks entirely. See infra/tracks-worker for the server.",
+  "_comment": "External tracks for the Winamp player. The client fetches this manifest on boot and requests a short-lived signed URL from `signEndpoint` just before playback. Set `signEndpoint` to an empty string to disable remote tracks entirely. The signing server is a Cloudflare Worker maintained in a separate private repo.",
   "signEndpoint": "",
   "tracks": [
     {
