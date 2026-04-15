@@ -1,11 +1,26 @@
 {
   "_comment": "External tracks for the Winamp player. The client fetches this manifest on boot and requests a short-lived signed URL from `signEndpoint` just before playback. Set `signEndpoint` to an empty string to disable remote tracks entirely. The signing server is a Cloudflare Worker maintained in a separate private repo.",
-  "signEndpoint": "",
+  "signEndpoint": "https://windoes-tracks.tauzen.workers.dev/sign",
   "tracks": [
     {
-      "name": "Example Track",
-      "key": "tracks/example.mp3",
-      "duration": 180
+      "name": "Osmoza - Cocoa Powder",
+      "key": "tracks/Osmoza - Cocoa Powder.mp3",
+      "duration": 274
+    },
+    {
+      "name": "Osmoza - Oczy",
+      "key": "tracks/Osmoza - Oczy.mp3",
+      "duration": 216
+    },
+    {
+      "name": "Osmoza - Rękawiczki",
+      "key": "tracks/Osmoza - Rękawiczki.mp3",
+      "duration": 221
+    },
+    {
+      "name": "Osmoza - Tryby",
+      "key": "tracks/Osmoza - Tryby.mp3",
+      "duration": 235
     }
   ]
 }
