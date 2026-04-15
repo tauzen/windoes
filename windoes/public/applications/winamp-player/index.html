@@ -1228,7 +1228,7 @@
                     <div class="display-left">
                         <div class="display-time-section">
                             <span class="play-indicator" id="play-indicator">▶</span>
-                            <span class="display-time" id="time-display">01:51</span>
+                            <span class="display-time" id="time-display">00:00</span>
                         </div>
                         <canvas id="visualizer" width="76" height="32"></canvas>
                     </div>
@@ -1811,7 +1811,7 @@
             }
         }
 
-        const staticBarHeights = [14, 22, 18, 26, 20, 24, 12, 28, 22, 16, 10, 24, 18, 14, 26, 20];
+        const staticBarHeights = new Array(VIS_BAR_COUNT).fill(0);
 
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
@@ -2071,37 +2071,10 @@
         drawVisualizer();
 
 
-        // Load bundled demo tracks
-        const demoTracks = [
-            { name: 'Chiptune Dreams', file: '01 - Chiptune Dreams.mp3' },
-            { name: 'Ambient Waves', file: '02 - Ambient Waves.mp3' },
-        ];
-
-        const demoDurations = [195, 204];
-
-        demoTracks.forEach((track, i) => {
-            state.playlist.push({ name: track.name, url: track.file, duration: demoDurations[i] });
-        });
-
-        state.currentTrack = 0;
         renderPlaylist();
 
-        const initTrack = state.playlist[state.currentTrack];
-        updateScrollingTitle(initTrack, state.currentTrack);
-        document.getElementById('time-display').textContent = '01:15';
-
-        // Set initial seek bar position (1:15 of 3:15 = 75/195 ≈ 38.5%)
-        const initPct = 38.5;
-        document.getElementById('seek-bar').value = initPct;
-        document.getElementById('seek-fill').style.width = initPct + '%';
-
-        // Set initial playlist time display
-        document.getElementById('playlist-total-time').textContent = '0:00:06:39';
-
         // Load external tracks manifest (metadata only; MP3s live behind a
-        // Cloudflare Worker that hands out short-lived signed URLs). If the
-        // manifest is absent or has no signEndpoint configured, the player
-        // just runs with the bundled demo tracks.
+        // Cloudflare Worker that hands out short-lived signed URLs).
         fetch('tracks.json', { cache: 'no-store' })
             .then(res => res.ok ? res.json() : null)
             .then(manifest => {
@@ -2119,7 +2092,12 @@
                     });
                     added++;
                 }
-                if (added > 0) renderPlaylist();
+                if (added > 0) {
+                    state.currentTrack = 0;
+                    renderPlaylist();
+                    updateScrollingTitle(state.playlist[0], 0);
+                    updateDisplayTrackInfo(state.playlist[0], 0);
+                }
             })
             .catch(err => console.warn('tracks.json load failed:', err));
 
@@ -2155,7 +2133,7 @@
                 window.parent.postMessage({
                     type: 'winamp-resize',
                     width: Math.ceil(rect.width),
-                    height: Math.ceil(rect.height)
+                    height: Math.ceil(rect.height) - 1
                 }, '*');
             }
         }
