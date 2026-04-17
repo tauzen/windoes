@@ -153,15 +153,15 @@ Set up the tooling we need before changing code.
 
 **Exit criteria:** `npm test` runs lint + reducer unit tests + Playwright; fresh clone produces a passing run.
 
-### Phase 1 — Dead code & quick wins (½ day, low risk)
+### Phase 1 — Dead code & quick wins (½ day, low risk) ✅ Done
 
-- [ ] **A3 / J1** Delete `windoes/context-menu.jsx`, `windoes/run-dialog.jsx`, `windoes/start-menu.jsx`.
-- [ ] **B5 / J2** Delete unused `closeApp` / `closeWinamp` / `closeMinesweeper` / `closeSolitaire`.
-- [ ] **B6 / J3** Remove `selectedItemPath = null;`.
-- [ ] **J4** Rename or delete `truncateTitle`.
-- [ ] **A6** Extract `closeStartMenuBoilerplate()` helper and call it from every `open*()`.
-- [ ] **D5** Extract `closeOtherSubmenus(except)` and deduplicate `onMouseEnter` inline handlers.
-- [ ] **J5** Introduce `windoes/constants.js` for taskbar height, viewBorder, z-index base, etc.
+- [x] **A3 / J1** Delete `windoes/context-menu.jsx`, `windoes/run-dialog.jsx`, `windoes/start-menu.jsx`.
+- [x] **B5 / J2** Delete unused `closeApp` / `closeWinamp` / `closeMinesweeper` / `closeSolitaire`.
+- [x] **B6 / J3** Remove `selectedItemPath = null;`.
+- [x] **J4** Rename or delete `truncateTitle`.
+- [x] **A6** Extract `closeStartMenuBoilerplate()` helper and call it from every `open*()`.
+- [x] **D5** Extract `closeOtherSubmenus(except)` and deduplicate `onMouseEnter` inline handlers.
+- [x] **J5** Introduce `windoes/constants.js` for taskbar height, viewBorder, z-index base, etc.
 
 **Exit criteria:** diff is all deletions/dedup; no behavior change.
 
