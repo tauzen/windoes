@@ -31,6 +31,7 @@ export default [
     rules: {
       'no-unused-vars': 'warn',
       'react/jsx-key': 'warn',
+      'react/jsx-uses-vars': 'warn',
       'no-implicit-globals': 'warn',
       'consistent-return': 'warn',
     },
