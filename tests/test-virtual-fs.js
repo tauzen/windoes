@@ -37,16 +37,7 @@ async function runTests() {
   const results = await page.evaluate(async () => {
     // Dynamic import of the module
     const mod = await import('./virtual-fs.js');
-    const {
-      VirtualFS,
-      FileNotFoundError,
-      FileExistsError,
-      NotADirectoryError,
-      DirectoryNotEmptyError,
-      normalizePath,
-      parentPath,
-      basename,
-    } = mod;
+    const { VirtualFS, normalizePath, parentPath, basename } = mod;
 
     const results = [];
     function check(condition, msg) {
@@ -58,7 +49,10 @@ async function runTests() {
         await fn();
         results.push({ pass: false, msg: msg + ' (no error thrown)' });
       } catch (e) {
-        results.push({ pass: e.constructor.name === errorName || e.name === errorName, msg: msg + ` (got ${e.name})` });
+        results.push({
+          pass: e.constructor.name === errorName || e.name === errorName,
+          msg: msg + ` (got ${e.name})`,
+        });
       }
     }
 
@@ -82,7 +76,7 @@ async function runTests() {
     try {
       normalizePath('relative');
       check(false, 'normalizePath rejects relative path');
-    } catch (e) {
+    } catch {
       check(true, 'normalizePath rejects relative path');
     }
 
@@ -111,7 +105,11 @@ async function runTests() {
     check(await fs.exists('/docs'), 'mkdir creates directory');
 
     await expectError(() => fs.mkdir('/docs'), 'FileExistsError', 'mkdir throws on duplicate');
-    await expectError(() => fs.mkdir('/nonexistent/child'), 'FileNotFoundError', 'mkdir throws if parent missing');
+    await expectError(
+      () => fs.mkdir('/nonexistent/child'),
+      'FileNotFoundError',
+      'mkdir throws if parent missing'
+    );
 
     await fs.mkdir('/docs/sub');
     check(await fs.exists('/docs/sub'), 'mkdir creates nested directory');
@@ -122,22 +120,37 @@ async function runTests() {
     const content = await fs.readFile('/docs/hello.txt');
     check(content === 'world', 'writeFile + readFile roundtrip');
 
-    await expectError(() => fs.readFile('/nofile'), 'FileNotFoundError', 'readFile throws for missing file');
-    await expectError(() => fs.writeFile('/nonexistent/file.txt', 'x'), 'FileNotFoundError', 'writeFile throws if parent missing');
+    await expectError(
+      () => fs.readFile('/nofile'),
+      'FileNotFoundError',
+      'readFile throws for missing file'
+    );
+    await expectError(
+      () => fs.writeFile('/nonexistent/file.txt', 'x'),
+      'FileNotFoundError',
+      'writeFile throws if parent missing'
+    );
 
     // Overwrite
     await fs.writeFile('/docs/hello.txt', 'updated');
-    check(await fs.readFile('/docs/hello.txt') === 'updated', 'writeFile overwrites existing');
+    check((await fs.readFile('/docs/hello.txt')) === 'updated', 'writeFile overwrites existing');
 
     // ArrayBuffer support
     const buf = new ArrayBuffer(4);
     new Uint8Array(buf).set([1, 2, 3, 4]);
     await fs.writeFile('/docs/binary.dat', buf);
     const readBuf = await fs.readFile('/docs/binary.dat');
-    check(readBuf instanceof ArrayBuffer && readBuf.byteLength === 4, 'writeFile supports ArrayBuffer');
+    check(
+      readBuf instanceof ArrayBuffer && readBuf.byteLength === 4,
+      'writeFile supports ArrayBuffer'
+    );
 
     // Writing to a directory path should throw
-    await expectError(() => fs.writeFile('/docs', 'bad'), 'NotADirectoryError', 'writeFile rejects writing to directory path');
+    await expectError(
+      () => fs.writeFile('/docs', 'bad'),
+      'NotADirectoryError',
+      'writeFile rejects writing to directory path'
+    );
 
     // ── readdir ───────────────────────────────────────────────────────
 
@@ -154,7 +167,11 @@ async function runTests() {
     const docsEntries2 = await fs.readdir('/docs');
     check(!docsEntries2.includes('deep.txt'), 'readdir does not list nested children');
 
-    await expectError(() => fs.readdir('/nope'), 'FileNotFoundError', 'readdir throws for missing directory');
+    await expectError(
+      () => fs.readdir('/nope'),
+      'FileNotFoundError',
+      'readdir throws for missing directory'
+    );
 
     // ── stat ──────────────────────────────────────────────────────────
 
@@ -167,39 +184,61 @@ async function runTests() {
     const dirStat = await fs.stat('/docs');
     check(dirStat.type === 'directory', 'stat returns directory type');
 
-    await expectError(() => fs.stat('/missing'), 'FileNotFoundError', 'stat throws for missing path');
+    await expectError(
+      () => fs.stat('/missing'),
+      'FileNotFoundError',
+      'stat throws for missing path'
+    );
 
     // createdAt preserved on overwrite
     const stat1 = await fs.stat('/docs/hello.txt');
     await fs.writeFile('/docs/hello.txt', 'third');
     const stat2 = await fs.stat('/docs/hello.txt');
-    check(stat1.createdAt.getTime() === stat2.createdAt.getTime(), 'createdAt preserved on overwrite');
-    check(stat2.modifiedAt.getTime() >= stat1.modifiedAt.getTime(), 'modifiedAt updated on overwrite');
+    check(
+      stat1.createdAt.getTime() === stat2.createdAt.getTime(),
+      'createdAt preserved on overwrite'
+    );
+    check(
+      stat2.modifiedAt.getTime() >= stat1.modifiedAt.getTime(),
+      'modifiedAt updated on overwrite'
+    );
 
     // ── rename ────────────────────────────────────────────────────────
 
     // File rename
     await fs.writeFile('/docs/a.txt', 'alpha');
     await fs.rename('/docs/a.txt', '/docs/b.txt');
-    check(await fs.readFile('/docs/b.txt') === 'alpha', 'rename file preserves content');
+    check((await fs.readFile('/docs/b.txt')) === 'alpha', 'rename file preserves content');
     check(!(await fs.exists('/docs/a.txt')), 'rename removes old file');
 
     // Directory rename with descendants
     await fs.rename('/docs', '/files');
     check(await fs.exists('/files'), 'rename moves directory');
-    check(await fs.readFile('/files/hello.txt') === 'third', 'rename moves descendant files');
+    check((await fs.readFile('/files/hello.txt')) === 'third', 'rename moves descendant files');
     check(await fs.exists('/files/sub/deep.txt'), 'rename moves nested descendants');
     check(!(await fs.exists('/docs')), 'rename removes old directory');
 
-    await expectError(() => fs.rename('/nope', '/somewhere'), 'FileNotFoundError', 'rename throws if source missing');
+    await expectError(
+      () => fs.rename('/nope', '/somewhere'),
+      'FileNotFoundError',
+      'rename throws if source missing'
+    );
 
     // Rename to existing path should fail
     await fs.mkdir('/other');
-    await expectError(() => fs.rename('/files', '/other'), 'FileExistsError', 'rename throws if target exists');
+    await expectError(
+      () => fs.rename('/files', '/other'),
+      'FileExistsError',
+      'rename throws if target exists'
+    );
     await fs.rm('/other');
 
     // Rename to path with missing parent
-    await expectError(() => fs.rename('/files', '/missing/files'), 'FileNotFoundError', 'rename throws if new parent missing');
+    await expectError(
+      () => fs.rename('/files', '/missing/files'),
+      'FileNotFoundError',
+      'rename throws if new parent missing'
+    );
 
     // ── rm ────────────────────────────────────────────────────────────
 
@@ -214,7 +253,11 @@ async function runTests() {
     check(!(await fs.exists('/emptydir')), 'rm deletes empty directory');
 
     // Remove non-empty directory without recursive should fail
-    await expectError(() => fs.rm('/files'), 'DirectoryNotEmptyError', 'rm throws on non-empty dir without recursive');
+    await expectError(
+      () => fs.rm('/files'),
+      'DirectoryNotEmptyError',
+      'rm throws on non-empty dir without recursive'
+    );
 
     // Recursive delete
     await fs.rm('/files', { recursive: true });
@@ -226,16 +269,20 @@ async function runTests() {
     try {
       await fs.rm('/');
       check(false, 'rm rejects deleting root');
-    } catch (e) {
+    } catch {
       check(true, 'rm rejects deleting root');
     }
 
-    await expectError(() => fs.rm('/nonexistent'), 'FileNotFoundError', 'rm throws for missing path');
+    await expectError(
+      () => fs.rm('/nonexistent'),
+      'FileNotFoundError',
+      'rm throws for missing path'
+    );
 
     // ── exists ────────────────────────────────────────────────────────
 
-    check(await fs.exists('/') === true, 'exists returns true for root');
-    check(await fs.exists('/nothing') === false, 'exists returns false for missing');
+    check((await fs.exists('/')) === true, 'exists returns true for root');
+    check((await fs.exists('/nothing')) === false, 'exists returns false for missing');
 
     // ── Full scenario from spec ───────────────────────────────────────
 
@@ -271,7 +318,7 @@ async function runTests() {
   process.exit(failed > 0 ? 1 : 0);
 }
 
-runTests().catch(err => {
+runTests().catch((err) => {
   console.error('Test runner error:', err);
   process.exit(1);
 });

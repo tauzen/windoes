@@ -3,58 +3,64 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.jsx';
+import { initFS, navigateTo, goBack, goUp, setDomRefs, saveTextFile } from './fs-explorer.jsx';
 import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
-    template: {
-        id: 'myComputerWindow',
-        ariaLabel: 'My Computer',
-        title: 'My Computer',
-        titleIcon: 'titlelogo-mycomputer',
-        titleSpanId: 'explorerTitleSpan',
-        titlebarId: 'myComputerTitlebar',
-        minimizeBtnId: 'myComputerMinBtn',
-        maximizeBtn: true,
-        closeBtnId: 'myComputerCloseBtn',
-        style: 'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
-        menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
-        toolbar: (
-            <>
-                <div className="toolbar explorer-toolbar">
-                    <div className="toolbar-grip"></div>
-                    <button className="tb-btn" id="explorerBackBtn" disabled>
-                        <span className="tb-icon tb-icon-back"></span>
-                        Back
-                    </button>
-                    <button className="tb-btn" id="explorerUpBtn">
-                        <span className="tb-icon tb-icon-up"></span>
-                        Up
-                    </button>
-                </div>
-                <div className="address-row">
-                    <div className="toolbar-grip"></div>
-                    <label htmlFor="explorerAddress">Address</label>
-                    <div className="address-input-wrap">
-                        <span className="address-icon address-icon-folder" aria-hidden="true"></span>
-                        <input id="explorerAddress" defaultValue="My Computer" aria-label="Address bar" readOnly />
-                    </div>
-                </div>
-            </>
-        ),
-        view: <div className="folder-view explorer-folder-view"></div>,
-        viewStyle: 'overflow-y:auto;',
-        statusBar: (
-            <>
-                <span className="status-left explorer-status-left">0 object(s)</span>
-                <span className="status-right">My Computer</span>
-            </>
-        ),
-    },
-    taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
-    iframe: null,
-    iframeSrc: null,
-    hasChrome: true,
+  template: {
+    id: 'myComputerWindow',
+    ariaLabel: 'My Computer',
+    title: 'My Computer',
+    titleIcon: 'titlelogo-mycomputer',
+    titleSpanId: 'explorerTitleSpan',
+    titlebarId: 'myComputerTitlebar',
+    minimizeBtnId: 'myComputerMinBtn',
+    maximizeBtn: true,
+    closeBtnId: 'myComputerCloseBtn',
+    style:
+      'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
+    menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
+    toolbar: (
+      <>
+        <div className="toolbar explorer-toolbar">
+          <div className="toolbar-grip"></div>
+          <button className="tb-btn" id="explorerBackBtn" disabled>
+            <span className="tb-icon tb-icon-back"></span>
+            Back
+          </button>
+          <button className="tb-btn" id="explorerUpBtn">
+            <span className="tb-icon tb-icon-up"></span>
+            Up
+          </button>
+        </div>
+        <div className="address-row">
+          <div className="toolbar-grip"></div>
+          <label htmlFor="explorerAddress">Address</label>
+          <div className="address-input-wrap">
+            <span className="address-icon address-icon-folder" aria-hidden="true"></span>
+            <input
+              id="explorerAddress"
+              defaultValue="My Computer"
+              aria-label="Address bar"
+              readOnly
+            />
+          </div>
+        </div>
+      </>
+    ),
+    view: <div className="folder-view explorer-folder-view"></div>,
+    viewStyle: 'overflow-y:auto;',
+    statusBar: (
+      <>
+        <span className="status-left explorer-status-left">0 object(s)</span>
+        <span className="status-right">My Computer</span>
+      </>
+    ),
+  },
+  taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
+  iframe: null,
+  iframeSrc: null,
+  hasChrome: true,
 });
 
 // Wire explorer navigation buttons
@@ -68,199 +74,204 @@ let fsReady = false;
 let lastNotepadActionSeq = 0;
 
 async function ensureFS() {
-    if (fsReady) return;
-    await initFS();
-    fsReady = true;
+  if (fsReady) return;
+  await initFS();
+  fsReady = true;
 }
 
 function openMyComputer() {
-    WindoesApp.WindowManager.open('myComputer');
-    closeStartMenuBoilerplate();
+  WindoesApp.WindowManager.open('myComputer');
+  closeStartMenuBoilerplate();
 
-    ensureFS().then(() => {
-        navigateTo(null);
-    });
-}
-
-function closeMyComputer() {
-    WindoesApp.WindowManager.close('myComputer');
+  ensureFS().then(() => {
+    navigateTo(null);
+  });
 }
 
 // ══════════════════════════════════════════════
 // Notepad
 // ══════════════════════════════════════════════
 const notepadConfig = WindoesApp.WindowManager.register('notepad', {
-    template: {
-        id: 'notepadWindow',
-        className: 'notepad-window',
-        ariaLabel: 'Notepad',
-        title: 'Untitled - Notepad',
-        titleIcon: 'titlelogo-notepad',
-        titleSpanId: 'notepadTitle',
-        titlebarId: 'notepadTitlebar',
-        minimizeBtnId: 'notepadMinBtn',
-        maximizeBtn: true,
-        closeBtnId: 'notepadCloseBtn',
-        style: 'left: clamp(120px, 14vw, 200px); top: 30px; width: min(640px, calc(100vw - 100px)); height: min(440px, calc(100vh - 60px));',
-        menubar: [{ id: 'notepadFileMenu', label: 'File' }, 'Edit', 'Search', 'Help'],
-        view: <textarea className="notepad-textarea" id="notepadText" spellCheck={false}></textarea>,
-    },
-    taskButton: { id: 'notepadTaskBtn', icon: 'task-icon-notepad', label: 'Notepad' },
-    iframe: null,
-    iframeSrc: null,
-    hasChrome: true,
-    onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
+  template: {
+    id: 'notepadWindow',
+    className: 'notepad-window',
+    ariaLabel: 'Notepad',
+    title: 'Untitled - Notepad',
+    titleIcon: 'titlelogo-notepad',
+    titleSpanId: 'notepadTitle',
+    titlebarId: 'notepadTitlebar',
+    minimizeBtnId: 'notepadMinBtn',
+    maximizeBtn: true,
+    closeBtnId: 'notepadCloseBtn',
+    style:
+      'left: clamp(120px, 14vw, 200px); top: 30px; width: min(640px, calc(100vw - 100px)); height: min(440px, calc(100vh - 60px));',
+    menubar: [{ id: 'notepadFileMenu', label: 'File' }, 'Edit', 'Search', 'Help'],
+    view: <textarea className="notepad-textarea" id="notepadText" spellCheck={false}></textarea>,
+  },
+  taskButton: { id: 'notepadTaskBtn', icon: 'task-icon-notepad', label: 'Notepad' },
+  iframe: null,
+  iframeSrc: null,
+  hasChrome: true,
+  onOpen: () => notepadConfig.el.querySelector('#notepadText').focus(),
 });
 
 function requestNotepadSavePath(suggestedPath) {
-    if (WindoesApp.notepadDialogs && typeof WindoesApp.notepadDialogs.requestSavePath === 'function') {
-        return WindoesApp.notepadDialogs.requestSavePath(suggestedPath);
-    }
-    return Promise.resolve(null);
+  if (
+    WindoesApp.notepadDialogs &&
+    typeof WindoesApp.notepadDialogs.requestSavePath === 'function'
+  ) {
+    return WindoesApp.notepadDialogs.requestSavePath(suggestedPath);
+  }
+  return Promise.resolve(null);
 }
 
 async function saveNotepadDocument(forceSaveAs = false) {
-    try {
-        await ensureFS();
+  try {
+    await ensureFS();
 
-        const textarea = notepadConfig.el.querySelector('#notepadText');
-        if (!textarea) return;
-
-        let filePath = textarea.dataset.filePath || '';
-        if (!filePath || forceSaveAs) {
-            const suggested = filePath || '/C:/My Documents/Untitled.txt';
-            const selectedPath = await requestNotepadSavePath(suggested);
-            if (!selectedPath) return; // user cancelled
-            filePath = selectedPath.trim();
-            if (!filePath) return;
-        }
-
-        await saveTextFile(filePath, textarea.value || '');
-        textarea.dataset.filePath = filePath;
-
-        const titleEl = notepadConfig.el.querySelector('#notepadTitle');
-        if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
-
-        WindoesApp.sound.playClickSound();
-    } catch (e) {
-        WindoesApp.bsod.showErrorDialog({
-            title: 'Save Error',
-            text: `Cannot save file: ${e.message}`,
-            icon: 'error',
-        });
-    }
-}
-
-function newNotepadDocument() {
     const textarea = notepadConfig.el.querySelector('#notepadText');
     if (!textarea) return;
 
-    textarea.value = '';
-    delete textarea.dataset.filePath;
+    let filePath = textarea.dataset.filePath || '';
+    if (!filePath || forceSaveAs) {
+      const suggested = filePath || '/C:/My Documents/Untitled.txt';
+      const selectedPath = await requestNotepadSavePath(suggested);
+      if (!selectedPath) return; // user cancelled
+      filePath = selectedPath.trim();
+      if (!filePath) return;
+    }
+
+    await saveTextFile(filePath, textarea.value || '');
+    textarea.dataset.filePath = filePath;
 
     const titleEl = notepadConfig.el.querySelector('#notepadTitle');
-    if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+    if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
 
-    textarea.focus();
     WindoesApp.sound.playClickSound();
+  } catch (e) {
+    WindoesApp.bsod.showErrorDialog({
+      title: 'Save Error',
+      text: `Cannot save file: ${e.message}`,
+      icon: 'error',
+    });
+  }
+}
+
+function newNotepadDocument() {
+  const textarea = notepadConfig.el.querySelector('#notepadText');
+  if (!textarea) return;
+
+  textarea.value = '';
+  delete textarea.dataset.filePath;
+
+  const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+  if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+
+  textarea.focus();
+  WindoesApp.sound.playClickSound();
 }
 
 function processNotepadActionCommand(command) {
-    if (!command || !command.type) return;
+  if (!command || !command.type) return;
 
-    if (command.type === 'new') {
-        newNotepadDocument();
-        return;
-    }
-    if (command.type === 'save') {
-        saveNotepadDocument(false);
-        return;
-    }
-    if (command.type === 'save-as') {
-        saveNotepadDocument(true);
-        return;
-    }
-    if (command.type === 'exit') {
-        closeNotepad();
-    }
+  if (command.type === 'new') {
+    newNotepadDocument();
+    return;
+  }
+  if (command.type === 'save') {
+    saveNotepadDocument(false);
+    return;
+  }
+  if (command.type === 'save-as') {
+    saveNotepadDocument(true);
+    return;
+  }
+  if (command.type === 'exit') {
+    closeNotepad();
+  }
 }
 
 function handleNotepadStateActions() {
-    const notepadState = WindoesApp.state.get().notepad || {};
-    const seq = notepadState.actionSeq || 0;
-    if (seq <= lastNotepadActionSeq) return;
+  const notepadState = WindoesApp.state.get().notepad || {};
+  const seq = notepadState.actionSeq || 0;
+  if (seq <= lastNotepadActionSeq) return;
 
-    lastNotepadActionSeq = seq;
-    processNotepadActionCommand(notepadState.actionCommand);
+  lastNotepadActionSeq = seq;
+  processNotepadActionCommand(notepadState.actionCommand);
 }
 
 WindoesApp.state.subscribe(handleNotepadStateActions);
 
 function openNotepad(options = {}) {
-    const { filePath = '', content = '', preserveCurrentDocument = false } = options;
+  const { filePath = '', content = '', preserveCurrentDocument = false } = options;
 
-    WindoesApp.WindowManager.open('notepad');
+  WindoesApp.WindowManager.open('notepad');
 
-    const textarea = notepadConfig.el.querySelector('#notepadText');
-    const titleEl = notepadConfig.el.querySelector('#notepadTitle');
+  const textarea = notepadConfig.el.querySelector('#notepadText');
+  const titleEl = notepadConfig.el.querySelector('#notepadTitle');
 
-    if (textarea && !preserveCurrentDocument) {
-        textarea.value = content;
+  if (textarea && !preserveCurrentDocument) {
+    textarea.value = content;
 
-        if (filePath) {
-            textarea.dataset.filePath = filePath;
-            if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
-        } else {
-            delete textarea.dataset.filePath;
-            if (titleEl) titleEl.textContent = 'Untitled - Notepad';
-        }
+    if (filePath) {
+      textarea.dataset.filePath = filePath;
+      if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
+    } else {
+      delete textarea.dataset.filePath;
+      if (titleEl) titleEl.textContent = 'Untitled - Notepad';
     }
+  }
 
-    closeStartMenuBoilerplate();
+  closeStartMenuBoilerplate();
 }
 
 function closeNotepad() {
-    WindoesApp.WindowManager.close('notepad');
+  WindoesApp.WindowManager.close('notepad');
 }
 
 // ══════════════════════════════════════════════
 // Recycle Bin
 // ══════════════════════════════════════════════
 WindoesApp.WindowManager.register('recycleBin', {
-    template: {
-        id: 'recycleBinWindow',
-        ariaLabel: 'Recycle Bin',
-        title: 'Recycle Bin',
-        titleIcon: 'titlelogo-recyclebin',
-        titlebarId: 'recycleBinTitlebar',
-        minimizeBtnId: 'recycleBinMinBtn',
-        maximizeBtn: true,
-        closeBtnId: 'recycleBinCloseBtn',
-        style: 'left: clamp(100px, 12vw, 180px); top: 24px; width: min(550px, calc(100vw - 100px)); height: min(380px, calc(100vh - 60px));',
-        menubar: ['File', 'Edit', 'View', 'Help'],
-        view: (
-            <div className="folder-view" style={{ alignItems: 'center', justifyContent: 'center', color: '#808080', fontSize: '11px' }}>
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <div style={{ fontSize: '14px', marginBottom: '8px' }}>Recycle Bin is empty.</div>
-                </div>
-            </div>
-        ),
-        viewStyle: 'overflow-y:auto;',
-        statusBar: <span className="status-left">0 object(s)</span>,
-    },
-    taskButton: { id: 'recycleBinTaskBtn', icon: 'task-icon-recyclebin', label: 'Recycle Bin' },
-    iframe: null,
-    iframeSrc: null,
-    hasChrome: true,
+  template: {
+    id: 'recycleBinWindow',
+    ariaLabel: 'Recycle Bin',
+    title: 'Recycle Bin',
+    titleIcon: 'titlelogo-recyclebin',
+    titlebarId: 'recycleBinTitlebar',
+    minimizeBtnId: 'recycleBinMinBtn',
+    maximizeBtn: true,
+    closeBtnId: 'recycleBinCloseBtn',
+    style:
+      'left: clamp(100px, 12vw, 180px); top: 24px; width: min(550px, calc(100vw - 100px)); height: min(380px, calc(100vh - 60px));',
+    menubar: ['File', 'Edit', 'View', 'Help'],
+    view: (
+      <div
+        className="folder-view"
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#808080',
+          fontSize: '11px',
+        }}
+      >
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontSize: '14px', marginBottom: '8px' }}>Recycle Bin is empty.</div>
+        </div>
+      </div>
+    ),
+    viewStyle: 'overflow-y:auto;',
+    statusBar: <span className="status-left">0 object(s)</span>,
+  },
+  taskButton: { id: 'recycleBinTaskBtn', icon: 'task-icon-recyclebin', label: 'Recycle Bin' },
+  iframe: null,
+  iframeSrc: null,
+  hasChrome: true,
 });
 
 function openRecycleBin() {
-    WindoesApp.WindowManager.open('recycleBin');
-    closeStartMenuBoilerplate();
-}
-
-function closeRecycleBin() {
-    WindoesApp.WindowManager.close('recycleBin');
+  WindoesApp.WindowManager.open('recycleBin');
+  closeStartMenuBoilerplate();
 }
 
 // Register on shared namespace
