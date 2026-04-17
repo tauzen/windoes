@@ -5,8 +5,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/run-tests.js",
-    "test:list": "node tests/run-tests.js --list",
+    "prepare": "husky",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "npm run lint && npm run test:unit && npm run test:integration",
+    "test:unit": "node --test tests/node/reducer.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/node/playwright-integration.test.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
     "test:ascii-runner": "cd windoes/public/applications/ascii-runner && node tests/test-ascii-runner.js",
     "test:minesweeper": "cd windoes/public/applications/minesweeper && node tests/test-minesweeper.js",
@@ -21,8 +25,18 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.25.1",
     "@vitejs/plugin-react": "^5.0.4",
+    "eslint": "^9.25.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
     "playwright": "^1.52.0",
+    "prettier": "^3.5.3",
     "vite": "^6.3.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs,json,md,css}": "prettier --write"
   }
 }
