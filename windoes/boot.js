@@ -2,6 +2,7 @@
 // Boot Sequence (state-driven)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { BOOT_MEMORY_TARGET_KB } from './constants.js';
 
 export function runBootSequence() {
     const bootMessages = WindoesApp.config.bootMessages || [
@@ -18,11 +19,10 @@ export function runBootSequence() {
 
     // Phase 1: BIOS POST
     let memCount = 0;
-    const memTarget = 262144; // 256 MB in KB
     const memInterval = setInterval(() => {
         memCount += 32768;
-        if (memCount >= memTarget) {
-            memCount = memTarget;
+        if (memCount >= BOOT_MEMORY_TARGET_KB) {
+            memCount = BOOT_MEMORY_TARGET_KB;
             clearInterval(memInterval);
             WindoesApp.state.dispatch({ type: 'BOOT_BIOS_PROGRESS', value: memCount.toLocaleString() });
             WindoesApp.state.dispatch({ type: 'BOOT_BIOS_STATUS', value: 'Press DEL to enter SETUP, ESC to skip memory test' });

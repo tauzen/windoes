@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
+import { TASKBAR_HEIGHT_PX } from '../constants.js';
 
 export default function StartMenu() {
     const bootDone = WindoesApp.state.use((s) => s.boot.done);
@@ -14,10 +15,17 @@ export default function StartMenu() {
     const [shutdownOpen, setShutdownOpen] = useState(false);
     const [shutdownOption, setShutdownOption] = useState('shutdown');
 
+    function closeOtherSubmenus(...keepRefs) {
+        const allRefs = [programsSubmenuRef, accessoriesSubmenuRef, gamesSubmenuRef];
+        const keep = new Set(keepRefs);
+        for (const ref of allRefs) {
+            if (keep.has(ref)) continue;
+            if (ref.current) ref.current.classList.remove('open');
+        }
+    }
+
     function closeSubmenus() {
-        if (programsSubmenuRef.current) programsSubmenuRef.current.classList.remove('open');
-        if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open');
-        if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+        closeOtherSubmenus();
     }
 
     function closeAllMenus() {
@@ -32,7 +40,6 @@ export default function StartMenu() {
         if (!submenu || !triggerEl) return;
 
         const rect = triggerEl.getBoundingClientRect();
-        const taskbarHeight = 30;
 
         submenu.style.visibility = 'hidden';
         submenu.style.display = 'block';
@@ -47,7 +54,7 @@ export default function StartMenu() {
         }
 
         let bottom = window.innerHeight - rect.top - rect.height;
-        const minBottom = taskbarHeight;
+        const minBottom = TASKBAR_HEIGHT_PX;
         const maxBottom = window.innerHeight - submenu.offsetHeight;
         bottom = Math.max(minBottom, Math.min(bottom, maxBottom));
         submenu.style.bottom = bottom + 'px';
@@ -59,13 +66,12 @@ export default function StartMenu() {
 
     function onProgramsEnter() {
         positionSubmenu(programsSubmenuRef.current, menuProgramsRef.current, null);
-        if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open');
-        if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+        closeOtherSubmenus(programsSubmenuRef);
     }
 
     function onSubAccessoriesEnter() {
         positionSubmenu(accessoriesSubmenuRef.current, subAccessoriesRef.current, programsSubmenuRef.current);
-        if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+        closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef);
     }
 
     function onSubAccGamesEnter() {
@@ -85,9 +91,7 @@ export default function StartMenu() {
         if (!startMenu || !accessoriesSubmenu) return;
 
         if (!startMenu.contains(e.relatedTarget) && !accessoriesSubmenu.contains(e.relatedTarget)) {
-            if (programsSubmenuRef.current) programsSubmenuRef.current.classList.remove('open');
-            if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open');
-            if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+            closeOtherSubmenus();
         }
     }
 
@@ -97,15 +101,14 @@ export default function StartMenu() {
         if (!programsSubmenu || !gamesSubmenu) return;
 
         if (!programsSubmenu.contains(e.relatedTarget) && !gamesSubmenu.contains(e.relatedTarget)) {
-            if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open');
-            if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+            closeOtherSubmenus(programsSubmenuRef);
         }
     }
 
     function onGamesLeave(e) {
         const accessoriesSubmenu = accessoriesSubmenuRef.current;
         if (accessoriesSubmenu && !accessoriesSubmenu.contains(e.relatedTarget)) {
-            if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open');
+            closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef);
         }
     }
 
@@ -218,20 +221,20 @@ export default function StartMenu() {
             <div ref={programsSubmenuRef} className="programs-submenu" id="programsSubmenu" onMouseLeave={onProgramsLeave}>
                 <div ref={subAccessoriesRef} className="submenu-item submenu-item-arrow" id="subAccessories" onMouseEnter={onSubAccessoriesEnter}><span className="submenu-icon submenu-icon-folder"></span>Accessories</div>
                 <div className="context-menu-sep"></div>
-                <div className="submenu-item" id="subIE" onMouseEnter={() => { if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open'); if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.open.internetExplorer())}><span className="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
-                <div className="submenu-item" id="subMSDOS" onMouseEnter={() => { if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open'); if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'MS-DOS Prompt', text: 'This program cannot be run in Windoes mode.', icon: 'error' }))}><span className="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
-                <div className="submenu-item" id="subOutlook" onMouseEnter={() => { if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open'); if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Outlook Express', text: 'No Internet mail server is configured.\n\nPlease check your mail settings in Internet Accounts.', icon: 'info' }))}><span className="submenu-icon submenu-icon-outlook"></span>Outlook Express</div>
-                <div className="submenu-item" id="subExplorer" onMouseEnter={() => { if (accessoriesSubmenuRef.current) accessoriesSubmenuRef.current.classList.remove('open'); if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.open.myComputer())}><span className="submenu-icon submenu-icon-explorer"></span>Windoes Explorer</div>
+                <div className="submenu-item" id="subIE" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)} onClick={() => runAction(() => WindoesApp.open.internetExplorer())}><span className="submenu-icon submenu-icon-ie"></span>Internet Explorer</div>
+                <div className="submenu-item" id="subMSDOS" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'MS-DOS Prompt', text: 'This program cannot be run in Windoes mode.', icon: 'error' }))}><span className="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt</div>
+                <div className="submenu-item" id="subOutlook" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Outlook Express', text: 'No Internet mail server is configured.\n\nPlease check your mail settings in Internet Accounts.', icon: 'info' }))}><span className="submenu-icon submenu-icon-outlook"></span>Outlook Express</div>
+                <div className="submenu-item" id="subExplorer" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)} onClick={() => runAction(() => WindoesApp.open.myComputer())}><span className="submenu-icon submenu-icon-explorer"></span>Windoes Explorer</div>
             </div>
 
             <div ref={accessoriesSubmenuRef} className="programs-submenu accessories-submenu" id="accessoriesSubmenu" onMouseLeave={onAccessoriesLeave}>
                 <div ref={subAccGamesRef} className="submenu-item submenu-item-arrow" id="subAccGames" onMouseEnter={onSubAccGamesEnter}><span className="submenu-icon submenu-icon-folder"></span>Games</div>
                 <div className="context-menu-sep"></div>
-                <div className="submenu-item" id="subAccCalculator" onMouseEnter={() => { if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Calculator is not available in this version of Windoes.', icon: 'info' }))}><span className="submenu-icon submenu-icon-calculator"></span>Calculator</div>
-                <div className="submenu-item" id="subAccImaging" onMouseEnter={() => { if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Windoes', text: 'This feature is not available in this version of Windoes.', icon: 'info' }))}><span className="submenu-icon submenu-icon-imaging"></span>Imaging</div>
-                <div className="submenu-item" id="subAccNotepad" onMouseEnter={() => { if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.open.notepad())}><span className="submenu-icon submenu-icon-notepad"></span>Notepad</div>
-                <div className="submenu-item" id="subAccPaint" onMouseEnter={() => { if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Paint', text: 'Not enough memory to open Paint.\n\nClose some programs and try again.', icon: 'error' }))}><span className="submenu-icon submenu-icon-paint"></span>Paint</div>
-                <div className="submenu-item" id="subAccWordPad" onMouseEnter={() => { if (gamesSubmenuRef.current) gamesSubmenuRef.current.classList.remove('open'); }} onClick={() => runAction(() => WindoesApp.open.notepad())}><span className="submenu-icon submenu-icon-wordpad"></span>WordPad</div>
+                <div className="submenu-item" id="subAccCalculator" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Calculator', text: 'Calculator is not available in this version of Windoes.', icon: 'info' }))}><span className="submenu-icon submenu-icon-calculator"></span>Calculator</div>
+                <div className="submenu-item" id="subAccImaging" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Windoes', text: 'This feature is not available in this version of Windoes.', icon: 'info' }))}><span className="submenu-icon submenu-icon-imaging"></span>Imaging</div>
+                <div className="submenu-item" id="subAccNotepad" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)} onClick={() => runAction(() => WindoesApp.open.notepad())}><span className="submenu-icon submenu-icon-notepad"></span>Notepad</div>
+                <div className="submenu-item" id="subAccPaint" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)} onClick={() => runAction(() => WindoesApp.bsod.showErrorDialog({ title: 'Paint', text: 'Not enough memory to open Paint.\n\nClose some programs and try again.', icon: 'error' }))}><span className="submenu-icon submenu-icon-paint"></span>Paint</div>
+                <div className="submenu-item" id="subAccWordPad" onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)} onClick={() => runAction(() => WindoesApp.open.notepad())}><span className="submenu-icon submenu-icon-wordpad"></span>WordPad</div>
             </div>
 
             <div ref={gamesSubmenuRef} className="programs-submenu games-submenu" id="gamesSubmenu" onMouseLeave={onGamesLeave}>

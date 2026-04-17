@@ -300,7 +300,6 @@ async function deleteSelected(selectedItemPath) {
     } catch (e) {
         WindoesApp.bsod.showErrorDialog({ title: 'Error Deleting File', text: `Cannot delete '${name}': ${e.message}`, icon: 'error' });
     }
-    selectedItemPath = null;
 }
 
 // ── Inline Rename ──────────────────────────────────────────────────────────

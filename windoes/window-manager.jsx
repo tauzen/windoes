@@ -5,11 +5,12 @@ import { Fragment } from 'react';
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
 import { renderInto } from './react-view.js';
+import { WINDOW_Z_BASE } from './constants.js';
 
 const WindowManager = {
     _stack: [],      // ordered bottom→top by z-index
     _windows: {},    // id → config
-    _baseZ: 10,
+    _baseZ: WINDOW_Z_BASE,
     _desktopEl: null,
     _taskAreaEl: null,
     _lastInteractionSeq: 0,

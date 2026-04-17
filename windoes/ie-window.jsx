@@ -2,6 +2,7 @@
 // IE Window
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
 // Register IE shell window with JSX-rendered chrome
 const ieConfig = WindoesApp.WindowManager.register('ie', {
@@ -75,7 +76,7 @@ function normalizeUrl(raw) {
     return 'https://' + trimmed;
 }
 
-function truncateTitle(url) {
+function formatBrowserTitle(url) {
     return url + ' - Microsoft Internet Explorer';
 }
 
@@ -92,7 +93,7 @@ function navigate(url, pushHistory = true) {
     }
 
     addressInput.value = finalUrl;
-    const title = truncateTitle(finalUrl);
+    const title = formatBrowserTitle(finalUrl);
     windowTitle.textContent = title;
 
     const shortTitle = title.length > 30 ? title.substring(0, 28) + '...' : title;
@@ -116,9 +117,7 @@ function body_loading(on) {
 
 function openInternetExplorer() {
     WindoesApp.WindowManager.open('ie');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    WindoesApp.sound.playClickSound();
+    closeStartMenuBoilerplate();
 
     if (!frame.src || frame.src === 'about:blank' || frame.src === '') {
         if (historyStack.length === 0) {

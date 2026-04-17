@@ -3,6 +3,8 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
+import { closeStartMenuBoilerplate } from './launch-helpers.js';
+import { VIEW_BORDER_PX } from './constants.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
     template: {
@@ -40,15 +42,8 @@ function openApp(title, url) {
     WindoesApp.WindowManager.get('app').iframeSrc = url;
     appFrame.src = url;
     WindoesApp.WindowManager.open('app');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
     WindoesApp.ui.setBodyLoading?.(true);
-    WindoesApp.sound.playClickSound();
-}
-
-function closeApp() {
-    WindoesApp.WindowManager.close('app');
+    closeStartMenuBoilerplate();
 }
 
 appFrame.addEventListener('load', () => {
@@ -90,14 +85,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
 
 function openWinamp() {
     WindoesApp.WindowManager.open('winamp');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
-    WindoesApp.sound.playClickSound();
-}
-
-function closeWinamp() {
-    WindoesApp.WindowManager.close('winamp');
+    closeStartMenuBoilerplate();
 }
 
 // ══════════════════════════════════════════════
@@ -123,14 +111,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
 
 function openMinesweeper() {
     WindoesApp.WindowManager.open('minesweeper');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
-    WindoesApp.sound.playClickSound();
-}
-
-function closeMinesweeper() {
-    WindoesApp.WindowManager.close('minesweeper');
+    closeStartMenuBoilerplate();
 }
 
 // ══════════════════════════════════════════════
@@ -156,14 +137,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
 
 function openSolitaire() {
     WindoesApp.WindowManager.open('solitaire');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
-    WindoesApp.sound.playClickSound();
-}
-
-function closeSolitaire() {
-    WindoesApp.WindowManager.close('solitaire');
+    closeStartMenuBoilerplate();
 }
 
 // Register on shared namespace
@@ -185,15 +159,13 @@ window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'minesweeper-resize') {
         const minesweeperWindow = minesweeperConfig.el;
         const titlebarHeight = minesweeperConfig.el.querySelector('.titlebar').offsetHeight;
-        const viewBorder = 4; // 2px inset border on .view
-        minesweeperWindow.style.width = (e.data.width + viewBorder) + 'px';
-        minesweeperWindow.style.height = (e.data.height + titlebarHeight + viewBorder) + 'px';
+        minesweeperWindow.style.width = (e.data.width + VIEW_BORDER_PX) + 'px';
+        minesweeperWindow.style.height = (e.data.height + titlebarHeight + VIEW_BORDER_PX) + 'px';
     }
     if (e.data && e.data.type === 'solitaire-resize') {
         const solitaireWindow = solitaireConfig.el;
         const titlebarHeight = solitaireConfig.el.querySelector('.titlebar').offsetHeight;
-        const viewBorder = 4;
-        solitaireWindow.style.width = (e.data.width + viewBorder) + 'px';
-        solitaireWindow.style.height = (e.data.height + titlebarHeight + viewBorder) + 'px';
+        solitaireWindow.style.width = (e.data.width + VIEW_BORDER_PX) + 'px';
+        solitaireWindow.style.height = (e.data.height + titlebarHeight + VIEW_BORDER_PX) + 'px';
     }
 });
