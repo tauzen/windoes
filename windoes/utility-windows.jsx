@@ -4,6 +4,7 @@
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
 import { initFS, navigateTo, goBack, goUp, render, setDomRefs, saveTextFile } from './fs-explorer.jsx';
+import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     template: {
@@ -74,9 +75,7 @@ async function ensureFS() {
 
 function openMyComputer() {
     WindoesApp.WindowManager.open('myComputer');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    WindoesApp.sound.playClickSound();
+    closeStartMenuBoilerplate();
 
     ensureFS().then(() => {
         navigateTo(null);
@@ -217,10 +216,7 @@ function openNotepad(options = {}) {
         }
     }
 
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    if (WindoesApp.startMenu.closeSubmenus) WindoesApp.startMenu.closeSubmenus();
-    WindoesApp.sound.playClickSound();
+    closeStartMenuBoilerplate();
 }
 
 function closeNotepad() {
@@ -260,9 +256,7 @@ WindoesApp.WindowManager.register('recycleBin', {
 
 function openRecycleBin() {
     WindoesApp.WindowManager.open('recycleBin');
-    if (WindoesApp.dom.startMenu) WindoesApp.dom.startMenu.classList.remove('open');
-    WindoesApp.dom.startButton.classList.remove('pressed');
-    WindoesApp.sound.playClickSound();
+    closeStartMenuBoilerplate();
 }
 
 function closeRecycleBin() {

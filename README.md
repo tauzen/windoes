@@ -11,8 +11,8 @@ https://tauzen.github.io/windoes/
 ## What is included
 
 - Boot flow + retro dialogs (`boot.js`, `bsod.jsx`, `utility-windows.jsx`)
-- Desktop shell and taskbar (`desktop.jsx`, `start-menu.jsx`, `window-manager.jsx`)
-- Windowed app launching (`app-windows.jsx`, `ie-window.jsx`, `run-dialog.jsx`)
+- Desktop shell and taskbar (`desktop.jsx`, `shell/StartMenu.jsx`, `window-manager.jsx`)
+- Windowed app launching (`app-windows.jsx`, `ie-window.jsx`, `shell/RunDialog.jsx`)
 - Virtual file system and explorer-style navigation (`virtual-fs.js`, `fs-explorer.jsx`)
 - Built-in applications under `windoes/public/applications/`:
   - ASCII Runner
@@ -30,7 +30,7 @@ windoes/
   react-view.js          React root mounting helper (renderInto)
   window-manager.jsx     shell window rendering + lifecycle
   desktop.jsx            desktop icon rendering/events
-  start-menu.jsx         Start menu rendering/events
+  shell/StartMenu.jsx    Start menu rendering/events
   simulator.config.js    app/window configuration
   public/
     icons/               desktop/start menu icon assets

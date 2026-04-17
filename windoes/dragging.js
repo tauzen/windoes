@@ -2,6 +2,7 @@
 // Window Dragging
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
+import { DRAG_MIN_VISIBLE_PX, TASKBAR_DRAG_RESERVE_PX } from './constants.js';
 
 export function makeDraggable(titlebarEl, windowEl) {
     let isDragging = false;
@@ -54,10 +55,8 @@ export function makeDraggable(titlebarEl, windowEl) {
         let newTop = origTop + dy;
 
         // Keep the window reachable
-        const minVisible = 60;
-        const taskbarHeight = 36;
-        newLeft = Math.max(-windowEl.offsetWidth + minVisible, Math.min(newLeft, window.innerWidth - minVisible));
-        newTop = Math.max(0, Math.min(newTop, window.innerHeight - taskbarHeight));
+        newLeft = Math.max(-windowEl.offsetWidth + DRAG_MIN_VISIBLE_PX, Math.min(newLeft, window.innerWidth - DRAG_MIN_VISIBLE_PX));
+        newTop = Math.max(0, Math.min(newTop, window.innerHeight - TASKBAR_DRAG_RESERVE_PX));
 
         WindoesApp.state.dispatch({
             type: 'DRAG_MOVE',
