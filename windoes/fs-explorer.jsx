@@ -129,6 +129,12 @@ function displayPath(path) {
   return path.replace(/^\//, '').replace(/\//g, '\\');
 }
 
+function resetNavigationState() {
+  currentPath = null;
+  historyStack = [];
+  historyIndex = -1;
+}
+
 function navigateTo(path, addToHistory = true) {
   if (addToHistory) {
     // Trim forward history when navigating from middle
@@ -454,4 +460,14 @@ async function saveTextFile(path, content) {
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export { initFS, navigateTo, goBack, goUp, render, setDomRefs, currentPath, saveTextFile };
+export {
+  initFS,
+  navigateTo,
+  goBack,
+  goUp,
+  render,
+  resetNavigationState,
+  setDomRefs,
+  currentPath,
+  saveTextFile,
+};

@@ -709,6 +709,31 @@ async function runTests() {
       afterDesktopReopenFocus.myComputerZ > afterDesktopReopenFocus.minesweeperZ,
       `My Computer is focused above Minesweeper after icon activate (${afterDesktopReopenFocus.myComputerZ} > ${afterDesktopReopenFocus.minesweeperZ})`
     );
+
+    // ── Test 19: My Computer reopen resets explorer navigation state ─────────
+    console.log('\nTest 19: My Computer reopen resets explorer navigation state');
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+
+    await page.evaluate(() => {
+      WindoesApp.WindowManager.close('myComputerWindow');
+    });
+    await page.waitForTimeout(250);
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(300);
+
+    const explorerReopenState = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+      backDisabled: !!document.getElementById('explorerBackBtn')?.disabled,
+    }));
+
+    assert(
+      explorerReopenState.address === 'My Computer',
+      `Reopened explorer starts at My Computer root (got: ${explorerReopenState.address})`
+    );
+    assert(explorerReopenState.backDisabled, 'Reopened explorer Back is disabled at root');
   } finally {
     await browser.close();
     server.close();

@@ -3,7 +3,15 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, goBack, goUp, setDomRefs, saveTextFile } from './fs-explorer.jsx';
+import {
+  initFS,
+  navigateTo,
+  goBack,
+  goUp,
+  resetNavigationState,
+  setDomRefs,
+  saveTextFile,
+} from './fs-explorer.jsx';
 import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
 const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
@@ -97,6 +105,7 @@ function openMyComputer() {
   closeStartMenuBoilerplate();
 
   ensureFS().then(() => {
+    resetNavigationState();
     navigateTo(null);
   });
 }
