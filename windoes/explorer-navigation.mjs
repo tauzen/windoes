@@ -2,6 +2,11 @@ function createExplorerNavigation() {
   let currentPath = null;
   let historyStack = [];
   let historyIndex = -1;
+  const listeners = new Set();
+
+  function emitChange() {
+    listeners.forEach((listener) => listener());
+  }
 
   function navigateTo(path, addToHistory = true) {
     if (addToHistory) {
@@ -13,6 +18,7 @@ function createExplorerNavigation() {
     }
 
     currentPath = path;
+    emitChange();
     return currentPath;
   }
 
@@ -21,6 +27,7 @@ function createExplorerNavigation() {
 
     historyIndex -= 1;
     currentPath = historyStack[historyIndex];
+    emitChange();
     return currentPath;
   }
 
@@ -40,6 +47,7 @@ function createExplorerNavigation() {
     currentPath = null;
     historyStack = [];
     historyIndex = -1;
+    emitChange();
   }
 
   function getState() {
@@ -49,12 +57,20 @@ function createExplorerNavigation() {
     };
   }
 
+  function subscribe(listener) {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }
+
   return {
     navigateTo,
     goBack,
     goUp,
     reset,
     getState,
+    subscribe,
   };
 }
 

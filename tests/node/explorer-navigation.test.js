@@ -70,3 +70,22 @@ test('explorer navigation goUp returns parent and then My Computer root', async 
   nav.goUp();
   assert.equal(nav.getState().path, null);
 });
+
+test('explorer navigation notifies subscribers on state changes', async () => {
+  const { createExplorerNavigation } = await loadNavigationModule();
+  const nav = createExplorerNavigation();
+
+  let notifications = 0;
+  const unsubscribe = nav.subscribe(() => {
+    notifications += 1;
+  });
+
+  nav.navigateTo(null);
+  nav.navigateTo('/C:');
+  nav.goBack();
+  nav.reset();
+  unsubscribe();
+  nav.navigateTo('/C:/Windows');
+
+  assert.equal(notifications, 4);
+});

@@ -128,6 +128,33 @@ function displayPath(path) {
   return path.replace(/^\//, '').replace(/\//g, '\\');
 }
 
+let navigationViewStateCache = {
+  address: displayPath(null),
+  canGoBack: false,
+};
+
+function getNavigationViewState() {
+  const { path, canGoBack } = navigation.getState();
+  const nextAddress = displayPath(path);
+
+  if (
+    navigationViewStateCache.address === nextAddress &&
+    navigationViewStateCache.canGoBack === canGoBack
+  ) {
+    return navigationViewStateCache;
+  }
+
+  navigationViewStateCache = {
+    address: nextAddress,
+    canGoBack,
+  };
+  return navigationViewStateCache;
+}
+
+function subscribeNavigationView(listener) {
+  return navigation.subscribe(listener);
+}
+
 function resetNavigationState() {
   navigation.reset();
 }
@@ -156,14 +183,11 @@ function goUp() {
 // ── Rendering ───────────────────────────────────────────────────────────────
 
 async function render() {
-  const { path: currentPath, canGoBack } = navigation.getState();
-  const { viewEl, addressEl, statusEl, titleSpanEl, backBtnEl } = getDomRefs();
-  if (!viewEl || !addressEl || !statusEl || !titleSpanEl) return;
+  const { path: currentPath } = navigation.getState();
+  const { viewEl, statusEl, titleSpanEl } = getDomRefs();
+  if (!viewEl || !statusEl || !titleSpanEl) return;
 
-  addressEl.value = displayPath(currentPath);
   titleSpanEl.textContent = currentPath === null ? 'My Computer' : basename(currentPath);
-
-  if (backBtnEl) backBtnEl.disabled = !canGoBack;
 
   if (currentPath === null) {
     renderMyComputerRoot();
@@ -448,4 +472,15 @@ async function saveTextFile(path, content) {
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export { initFS, navigateTo, goBack, goUp, render, resetNavigationState, setDomRefs, saveTextFile };
+export {
+  initFS,
+  navigateTo,
+  goBack,
+  goUp,
+  render,
+  resetNavigationState,
+  getNavigationViewState,
+  subscribeNavigationView,
+  setDomRefs,
+  saveTextFile,
+};

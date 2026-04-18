@@ -734,6 +734,41 @@ async function runTests() {
       `Reopened explorer starts at My Computer root (got: ${explorerReopenState.address})`
     );
     assert(explorerReopenState.backDisabled, 'Reopened explorer Back is disabled at root');
+
+    // ── Test 20: My Computer toolbar is componentized and keeps nav behavior ─
+    console.log(
+      '\nTest 20: My Computer toolbar component renders and navigation controls still work'
+    );
+
+    const myComputerToolbarComponentState = await page.evaluate(() => {
+      const marker = document.querySelector(
+        '#myComputerWindow [data-my-computer-component="true"]'
+      );
+      return {
+        markerExists: !!marker,
+      };
+    });
+
+    assert(
+      myComputerToolbarComponentState.markerExists,
+      'My Computer toolbar has componentized marker'
+    );
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+    await page.click('#explorerBackBtn');
+    await page.waitForTimeout(250);
+
+    const myComputerToolbarAfterBack = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+      backDisabled: !!document.getElementById('explorerBackBtn')?.disabled,
+    }));
+
+    assert(
+      myComputerToolbarAfterBack.address === 'My Computer',
+      `Toolbar Back returns to My Computer root (got: ${myComputerToolbarAfterBack.address})`
+    );
+    assert(myComputerToolbarAfterBack.backDisabled, 'Toolbar Back is disabled again at root');
   } finally {
     await browser.close();
     server.close();
