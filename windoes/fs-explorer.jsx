@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
+import { createExplorerNavigation } from './explorer-navigation.mjs';
 import { renderInto } from './react-view.js';
 
 const fs = new VirtualFS();
@@ -44,9 +45,7 @@ const MY_COMPUTER_ITEMS = [
 
 // ── State ───────────────────────────────────────────────────────────────────
 
-let currentPath = null; // null = My Computer root
-let historyStack = [];
-let historyIndex = -1;
+const navigation = createExplorerNavigation();
 let lastExplorerActionSeq = 0;
 
 // ── Explorer DOM resolver (no cached module-level element refs) ─────────────
@@ -130,54 +129,41 @@ function displayPath(path) {
 }
 
 function resetNavigationState() {
-  currentPath = null;
-  historyStack = [];
-  historyIndex = -1;
+  navigation.reset();
 }
 
 function navigateTo(path, addToHistory = true) {
-  if (addToHistory) {
-    // Trim forward history when navigating from middle
-    if (historyIndex < historyStack.length - 1) {
-      historyStack = historyStack.slice(0, historyIndex + 1);
-    }
-    historyStack.push(path);
-    historyIndex = historyStack.length - 1;
-  }
-  currentPath = path;
+  navigation.navigateTo(path, addToHistory);
   render();
 }
 
 function goBack() {
-  if (historyIndex > 0) {
-    historyIndex--;
-    currentPath = historyStack[historyIndex];
-    render();
-  }
+  const { canGoBack } = navigation.getState();
+  if (!canGoBack) return;
+
+  navigation.goBack();
+  render();
 }
 
 function goUp() {
+  const { path: currentPath } = navigation.getState();
   if (currentPath === null) return;
-  // /C: → My Computer root (null)
-  const slashCount = (currentPath.match(/\//g) || []).length;
-  if (slashCount <= 1) {
-    navigateTo(null);
-  } else {
-    const parent = currentPath.slice(0, currentPath.lastIndexOf('/'));
-    navigateTo(parent || '/');
-  }
+
+  navigation.goUp();
+  render();
 }
 
 // ── Rendering ───────────────────────────────────────────────────────────────
 
 async function render() {
+  const { path: currentPath, canGoBack } = navigation.getState();
   const { viewEl, addressEl, statusEl, titleSpanEl, backBtnEl } = getDomRefs();
   if (!viewEl || !addressEl || !statusEl || !titleSpanEl) return;
 
   addressEl.value = displayPath(currentPath);
   titleSpanEl.textContent = currentPath === null ? 'My Computer' : basename(currentPath);
 
-  if (backBtnEl) backBtnEl.disabled = historyIndex <= 0;
+  if (backBtnEl) backBtnEl.disabled = !canGoBack;
 
   if (currentPath === null) {
     renderMyComputerRoot();
@@ -281,6 +267,7 @@ function renderMyComputerRoot() {
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
 function wireContextMenu() {
+  const { path: currentPath } = navigation.getState();
   const { viewEl } = getDomRefs();
   if (!viewEl) return;
 
@@ -309,6 +296,7 @@ function wireContextMenu() {
 // ── Folder Operations ───────────────────────────────────────────────────────
 
 async function createNewFolder() {
+  const { path: currentPath } = navigation.getState();
   if (currentPath === null) return;
 
   // Find unique name
@@ -460,14 +448,4 @@ async function saveTextFile(path, content) {
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export {
-  initFS,
-  navigateTo,
-  goBack,
-  goUp,
-  render,
-  resetNavigationState,
-  setDomRefs,
-  currentPath,
-  saveTextFile,
-};
+export { initFS, navigateTo, goBack, goUp, render, resetNavigationState, setDomRefs, saveTextFile };
