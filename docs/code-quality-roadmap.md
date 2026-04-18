@@ -174,7 +174,7 @@ Set up the tooling we need before changing code.
 - [x] **B12** Render shutdown screen as a React component so it is torn down with the shell.
 - [x] **B9** Replace silent `catch(e) {}` blocks in `sound.js` with a single `debugLog`-gated warning; keep the UX quiet but not the logs.
 - [x] **B10** `fs-explorer.render()` should surface the error message into the status bar for the dev UI and log via `console.error`.
-- [ ] **C1–C5** Audit every top-level `setInterval`, `setTimeout`, and `addEventListener`. Add cleanup hooks. Where the module is truly singleton-per-tab, at minimum store timer ids so HMR can clear them.
+- [x] **C1–C5** Audit every top-level `setInterval`, `setTimeout`, and `addEventListener`. Add cleanup hooks. Where the module is truly singleton-per-tab, at minimum store timer ids so HMR can clear them.
 - [x] **B1 / F5** Move the taskbar clock into `Taskbar.jsx` with a `useEffect` interval and pause on `document.hidden`.
 
 **Exit criteria:** no new lint warnings; Playwright tests unchanged; new reducer tests for shutdown + URL validation pass.

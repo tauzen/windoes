@@ -50,6 +50,7 @@ const appFrame = appConfig.el.querySelector('#appFrame');
 const appWindowTitle = appConfig.el.querySelector('#appWindowTitle');
 const appStatusText = appConfig.el.querySelector('#appStatusText');
 const appTaskLabel = appConfig.taskBtn.querySelector('#appTaskLabel');
+const appWindowCleanups = [];
 
 function openApp(title, url) {
   appWindowTitle.textContent = title;
@@ -63,9 +64,14 @@ function openApp(title, url) {
   closeStartMenuBoilerplate();
 }
 
-appFrame.addEventListener('load', () => {
+function onAppFrameLoad() {
   appStatusText.textContent = 'Done';
   WindoesApp.ui.setBodyLoading?.(false);
+}
+
+appFrame.addEventListener('load', onAppFrameLoad);
+appWindowCleanups.push(() => {
+  appFrame.removeEventListener('load', onAppFrameLoad);
 });
 
 // ══════════════════════════════════════════════
@@ -104,8 +110,15 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
   setup(config) {
     const handle = config.el.querySelector('.headless-drag-handle');
     const closeBtn = config.el.querySelector('.headless-close-btn');
-    makeDraggable(handle, config.el);
-    closeBtn.addEventListener('click', () => WindoesApp.WindowManager.close('winamp'));
+    const disposeDrag = makeDraggable(handle, config.el);
+
+    const onCloseClick = () => WindoesApp.WindowManager.close('winamp');
+    closeBtn.addEventListener('click', onCloseClick);
+
+    return () => {
+      closeBtn.removeEventListener('click', onCloseClick);
+      if (typeof disposeDrag === 'function') disposeDrag();
+    };
   },
 });
 
@@ -235,5 +248,7 @@ window.addEventListener('message', onAppMessage);
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     window.removeEventListener('message', onAppMessage);
+    appWindowCleanups.forEach((cleanup) => cleanup());
+    appWindowCleanups.length = 0;
   });
 }

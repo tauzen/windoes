@@ -6,6 +6,15 @@ import { renderInto } from './react-view.js';
 
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const appEventType = isTouchDevice ? 'click' : 'dblclick';
+const listenerCleanups = [];
+
+function addManagedListener(element, eventName, handler, options) {
+  if (!element) return;
+  element.addEventListener(eventName, handler, options);
+  listenerCleanups.push(() => {
+    element.removeEventListener(eventName, handler, options);
+  });
+}
 
 // Build desktop icons
 const desktopIconDefs = [
@@ -45,11 +54,11 @@ const dedicatedHandlers = {
 Object.entries(dedicatedHandlers).forEach(([id, handler]) => {
   const el = document.getElementById(id);
   if (!el) return;
-  el.addEventListener(appEventType, handler);
+  addManagedListener(el, appEventType, handler);
 });
 
-// Quick launch IE
-document.getElementById('qlIE').addEventListener('click', WindoesApp.open.internetExplorer);
+const quickLaunchIe = document.getElementById('qlIE');
+addManagedListener(quickLaunchIe, 'click', WindoesApp.open.internetExplorer);
 
 // Experiment app icons — only wire openApp for non-dedicated icons
 const experimentApps = WindoesApp.config.experimentApps || [
@@ -60,20 +69,33 @@ experimentApps.forEach(({ id, title, url }) => {
   // Skip icons that have dedicated handlers (prevents duplicate windows)
   if (dedicatedHandlers[id]) return;
   const el = document.getElementById(id);
-  if (el) el.addEventListener(appEventType, () => WindoesApp.open.app(title, url));
+  if (el) {
+    addManagedListener(el, appEventType, () => WindoesApp.open.app(title, url));
+  }
 });
 
 // Desktop icon selection
-document.querySelectorAll('.icon').forEach((icon) => {
-  icon.addEventListener('click', () => {
-    document.querySelectorAll('.icon').forEach((i) => i.classList.remove('selected'));
+const desktopIconsEls = [...document.querySelectorAll('.icon')];
+desktopIconsEls.forEach((icon) => {
+  const onIconClick = () => {
+    desktopIconsEls.forEach((i) => i.classList.remove('selected'));
     icon.classList.add('selected');
-  });
+  };
+  addManagedListener(icon, 'click', onIconClick);
 });
 
 // Click desktop to deselect
-document.querySelector('.desktop').addEventListener('click', (e) => {
+const desktopSurface = document.querySelector('.desktop');
+const onDesktopClick = (e) => {
   if (e.target === e.currentTarget || e.target.classList.contains('desktop-icons')) {
-    document.querySelectorAll('.icon').forEach((i) => i.classList.remove('selected'));
+    desktopIconsEls.forEach((i) => i.classList.remove('selected'));
   }
-});
+};
+addManagedListener(desktopSurface, 'click', onDesktopClick);
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    listenerCleanups.forEach((cleanup) => cleanup());
+    listenerCleanups.length = 0;
+  });
+}

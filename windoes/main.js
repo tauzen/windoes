@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import ShellApp from './shell-app.jsx';
 
+let bootTimerId = null;
+
 async function bootstrap() {
   const appRoot = document.getElementById('app');
   if (!appRoot) {
@@ -23,7 +25,16 @@ async function bootstrap() {
   await import('./utility-windows.jsx');
   await import('./desktop.jsx');
 
-  setTimeout(runBootSequence, 300);
+  bootTimerId = window.setTimeout(runBootSequence, 300);
 }
 
 bootstrap();
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    if (bootTimerId) {
+      window.clearTimeout(bootTimerId);
+      bootTimerId = null;
+    }
+  });
+}
