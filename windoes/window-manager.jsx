@@ -6,6 +6,54 @@ import { makeDraggable } from './dragging.js';
 import { renderInto } from './react-view.js';
 import { WINDOW_Z_BASE } from './constants.js';
 
+function WindowTitlebar({ windowId, template }) {
+  const isActive = WindoesApp.state.use((s) => {
+    const win = s.windows?.byId?.[windowId];
+    return !!(win && win.focused && win.open && !win.minimized);
+  });
+
+  const hasMaxBtn = template.maximizeBtn || template.maximizeBtnId;
+
+  return (
+    <div
+      className={isActive ? 'titlebar' : 'titlebar inactive'}
+      {...(template.titlebarId ? { id: template.titlebarId } : {})}
+    >
+      <div className="title-left">
+        {(template.titleIcon || template.titleLogoClass) && (
+          <span
+            className={template.titleLogoClass || 'app-title-logo ' + (template.titleIcon || '')}
+            aria-hidden={true}
+          ></span>
+        )}
+        <span {...(template.titleSpanId ? { id: template.titleSpanId } : {})}>
+          {template.title}
+        </span>
+      </div>
+      <div className="window-controls">
+        {template.minimizeBtnId && (
+          <div className="ctrl-btn" id={template.minimizeBtnId}>
+            _
+          </div>
+        )}
+        {hasMaxBtn && (
+          <div
+            className="ctrl-btn ctrl-max"
+            {...(template.maximizeBtnId ? { id: template.maximizeBtnId } : {})}
+          >
+            □
+          </div>
+        )}
+        {template.closeBtnId && (
+          <button className="ctrl-btn" id={template.closeBtnId} aria-label="Close">
+            ×
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const WindowManager = {
   _windows: {}, // id → config registry
   _baseZ: WINDOW_Z_BASE,
@@ -41,8 +89,7 @@ const WindowManager = {
   /**
    * Build a window <section> element from a template config object.
    */
-  _buildWindowEl(tmpl) {
-    const hasMaxBtn = tmpl.maximizeBtn || tmpl.maximizeBtnId;
+  _buildWindowEl(tmpl, windowId) {
     const viewStyle = tmpl.viewStyle
       ? tmpl.viewStyle
           .split(';')
@@ -56,43 +103,7 @@ const WindowManager = {
           }, {})
       : undefined;
 
-    const content = [
-      <div
-        key="titlebar"
-        className="titlebar"
-        {...(tmpl.titlebarId ? { id: tmpl.titlebarId } : {})}
-      >
-        <div className="title-left">
-          {(tmpl.titleIcon || tmpl.titleLogoClass) && (
-            <span
-              className={tmpl.titleLogoClass || 'app-title-logo ' + (tmpl.titleIcon || '')}
-              aria-hidden={true}
-            ></span>
-          )}
-          <span {...(tmpl.titleSpanId ? { id: tmpl.titleSpanId } : {})}>{tmpl.title}</span>
-        </div>
-        <div className="window-controls">
-          {tmpl.minimizeBtnId && (
-            <div className="ctrl-btn" id={tmpl.minimizeBtnId}>
-              _
-            </div>
-          )}
-          {hasMaxBtn && (
-            <div
-              className="ctrl-btn ctrl-max"
-              {...(tmpl.maximizeBtnId ? { id: tmpl.maximizeBtnId } : {})}
-            >
-              □
-            </div>
-          )}
-          {tmpl.closeBtnId && (
-            <button className="ctrl-btn" id={tmpl.closeBtnId} aria-label="Close">
-              ×
-            </button>
-          )}
-        </div>
-      </div>,
-    ];
+    const content = [<WindowTitlebar key="titlebar" windowId={windowId} template={tmpl} />];
 
     if (tmpl.menubar) {
       content.push(
@@ -234,10 +245,6 @@ const WindowManager = {
         }
       }
 
-      const tb = win.el.querySelector('.titlebar');
-      const isActive = !!(state.focused && state.open && !state.minimized);
-      if (tb) tb.classList.toggle('inactive', !isActive);
-
       this._updateMaxBtn(win, !!state.maximized);
     }
 
@@ -284,10 +291,12 @@ const WindowManager = {
    * Register a window with the manager.
    */
   register(id, config) {
+    config.id = id;
+
     if (config.template) {
       config.el = config.headless
         ? this._buildHeadlessEl(config.template)
-        : this._buildWindowEl(config.template);
+        : this._buildWindowEl(config.template, id);
     }
 
     if (config.taskButton) {
@@ -297,8 +306,6 @@ const WindowManager = {
     if (config.iframeId && config.el) {
       config.iframe = config.el.querySelector('#' + config.iframeId);
     }
-
-    config.id = id;
     if (config.el) config.el.dataset.windowId = id;
     config._attached = false;
     config._lastState = null;

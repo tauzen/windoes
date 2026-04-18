@@ -187,7 +187,7 @@ Goal: make `WindoesApp.state` the single source of truth for window lifecycle an
 - [x] **A8** Either (a) move drag into the reducer and render window position declaratively (bind `style.left`/`style/top` via React), or (b) remove drag from the reducer entirely and keep it imperative. Pick one.
 - [x] **A9** Replace the sequence-number "interaction command" pattern with a typed event-emitter (`createEventBus` — 20 lines) or move the logic directly into React components.
 - [x] **A2** Remove `bootDone` getter/setter; replace call sites with explicit `state.boot.done` reads or `BOOT_FINISH` dispatches.
-- [ ] **F2** Fold titlebar active-class updates into a React subscription (`useWindoesState(s => s.windows.byId[id].focused)` per window).
+- [x] **F2** Fold titlebar active-class updates into a React subscription (`useWindoesState(s => s.windows.byId[id].focused)` per window).
 
 **Exit criteria:** grep `WindowManager._` shows only helper methods; reducer tests cover every window action; Playwright still green.
 
