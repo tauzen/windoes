@@ -56,6 +56,7 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
         <span className="status-right">My Computer</span>
       </>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
   iframe: null,

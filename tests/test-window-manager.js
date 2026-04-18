@@ -460,6 +460,77 @@ async function runTests() {
       'Notepad window keeps menubar chrome'
     );
     assert(ieNotepadWindowComponentShellState.notepad.hasView, 'Notepad window keeps view area');
+
+    // ── Test 14: Phase 4 window-component migration (slice 3) ──────────────
+    console.log('\nTest 14: My Computer + Minesweeper use shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.myComputer();
+      WindoesApp.open.minesweeper();
+    });
+    await page.waitForTimeout(300);
+
+    const myComputerMinesweeperWindowComponentShellState = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return {
+        myComputer: readShellState(myComputerWindow),
+        minesweeper: readShellState(minesweeperWindow),
+      };
+    });
+
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.exists,
+      'My Computer window exists'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.exists,
+      'Minesweeper window exists'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.usesSharedWindowComponent,
+      'My Computer window tagged as shared Window component'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.usesSharedWindowComponent,
+      'Minesweeper window tagged as shared Window component'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasTitlebar,
+      'My Computer window keeps titlebar chrome'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasMenubar,
+      'My Computer window keeps menubar chrome'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasView,
+      'My Computer window keeps view area'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.hasTitlebar,
+      'Minesweeper window keeps titlebar chrome'
+    );
+    assert(
+      !myComputerMinesweeperWindowComponentShellState.minesweeper.hasMenubar,
+      'Minesweeper window remains no-menubar (expected for this window type)'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.hasView,
+      'Minesweeper window keeps view area'
+    );
   } finally {
     await browser.close();
     server.close();

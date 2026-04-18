@@ -150,6 +150,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
         sandbox="allow-scripts allow-same-origin"
       ></iframe>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'minesweeperTaskBtn', icon: 'task-icon-minesweeper', label: 'Minesweeper' },
   iframeId: 'minesweeperFrame',
