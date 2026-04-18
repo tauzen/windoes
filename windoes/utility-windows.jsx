@@ -63,9 +63,21 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
   hasChrome: true,
 });
 
+const utilityWindowCleanups = [];
+
+function addManagedListener(element, eventName, handler, options) {
+  if (!element) return;
+  element.addEventListener(eventName, handler, options);
+  utilityWindowCleanups.push(() => {
+    element.removeEventListener(eventName, handler, options);
+  });
+}
+
 // Wire explorer navigation buttons
-myComputerConfig.el.querySelector('#explorerBackBtn').addEventListener('click', goBack);
-myComputerConfig.el.querySelector('#explorerUpBtn').addEventListener('click', goUp);
+const explorerBackBtn = myComputerConfig.el.querySelector('#explorerBackBtn');
+const explorerUpBtn = myComputerConfig.el.querySelector('#explorerUpBtn');
+addManagedListener(explorerBackBtn, 'click', goBack);
+addManagedListener(explorerUpBtn, 'click', goUp);
 
 // Give explorer module its DOM refs
 setDomRefs(myComputerConfig);
@@ -200,7 +212,7 @@ function handleNotepadStateActions() {
   processNotepadActionCommand(notepadState.actionCommand);
 }
 
-WindoesApp.state.subscribe(handleNotepadStateActions);
+const unsubscribeNotepadStateActions = WindoesApp.state.subscribe(handleNotepadStateActions);
 
 function openNotepad(options = {}) {
   const { filePath = '', content = '', preserveCurrentDocument = false } = options;
@@ -278,3 +290,11 @@ function openRecycleBin() {
 WindoesApp.open.myComputer = openMyComputer;
 WindoesApp.open.notepad = openNotepad;
 WindoesApp.open.recycleBin = openRecycleBin;
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    unsubscribeNotepadStateActions();
+    utilityWindowCleanups.forEach((cleanup) => cleanup());
+    utilityWindowCleanups.length = 0;
+  });
+}

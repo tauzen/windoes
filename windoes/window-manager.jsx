@@ -181,6 +181,21 @@ const WindowManager = {
     WindoesApp.state.dispatch(action);
   },
 
+  _trackListener(cleanups, element, eventName, handler, options) {
+    if (!element) return;
+    element.addEventListener(eventName, handler, options);
+    cleanups.push(() => {
+      element.removeEventListener(eventName, handler, options);
+    });
+  },
+
+  _runCleanupFns(cleanups) {
+    if (!Array.isArray(cleanups)) return;
+    for (const cleanup of cleanups) {
+      cleanup();
+    }
+  },
+
   _ensureAttached(win) {
     if (win._attached) return;
     const desktop = this._getDesktop();
@@ -313,29 +328,35 @@ const WindowManager = {
 
     this._dispatch({ type: 'WINDOW_REGISTER', id });
 
-    config.el.addEventListener('mousedown', () => this.bringToFront(id));
+    const cleanups = [];
+    config._cleanups = cleanups;
+
+    const onWindowMouseDown = () => this.bringToFront(id);
+    this._trackListener(cleanups, config.el, 'mousedown', onWindowMouseDown);
 
     if (config.template && config.template.closeBtnId) {
       const closeBtn = config.el.querySelector('#' + config.template.closeBtnId);
-      if (closeBtn) closeBtn.addEventListener('click', () => this.close(id));
+      const onCloseClick = () => this.close(id);
+      this._trackListener(cleanups, closeBtn, 'click', onCloseClick);
     }
 
     if (config.template && config.template.minimizeBtnId) {
       const minBtn = config.el.querySelector('#' + config.template.minimizeBtnId);
-      if (minBtn) minBtn.addEventListener('click', () => this.minimize(id));
+      const onMinClick = () => this.minimize(id);
+      this._trackListener(cleanups, minBtn, 'click', onMinClick);
     }
 
     if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
       const maxBtn = config.el.querySelector('.ctrl-max');
-      if (maxBtn) {
-        maxBtn.addEventListener('click', () => {
-          WindoesApp.events.windowInteraction.emit({ type: 'TOGGLE_MAXIMIZE', id });
-        });
-      }
+      const onMaxClick = () => {
+        WindoesApp.events.windowInteraction.emit({ type: 'TOGGLE_MAXIMIZE', id });
+      };
+      this._trackListener(cleanups, maxBtn, 'click', onMaxClick);
     }
 
     if (config.taskBtn) {
-      config.taskBtn.addEventListener('click', () => this.toggleFromTaskbar(id));
+      const onTaskbarClick = () => this.toggleFromTaskbar(id);
+      this._trackListener(cleanups, config.taskBtn, 'click', onTaskbarClick);
     }
 
     if (config.draggable !== false) {
@@ -344,17 +365,23 @@ const WindowManager = {
           ? config.el.querySelector('#' + config.template.titlebarId)
           : config.el.querySelector('.titlebar');
       if (titlebar) {
-        makeDraggable(titlebar, config.el);
+        const disposeDrag = makeDraggable(titlebar, config.el);
+        if (typeof disposeDrag === 'function') cleanups.push(disposeDrag);
+
         if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
-          titlebar.addEventListener('dblclick', (e) => {
+          const onTitlebarDoubleClick = (e) => {
             if (e.target.classList.contains('ctrl-btn')) return;
             WindoesApp.events.windowInteraction.emit({ type: 'TOGGLE_MAXIMIZE', id });
-          });
+          };
+          this._trackListener(cleanups, titlebar, 'dblclick', onTitlebarDoubleClick);
         }
       }
     }
 
-    if (config.setup) config.setup(config);
+    if (config.setup) {
+      const customCleanup = config.setup(config);
+      if (typeof customCleanup === 'function') cleanups.push(customCleanup);
+    }
 
     return config;
   },
@@ -439,6 +466,10 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     unsubscribeWindowManagerBridge();
     unsubscribeWindowInteraction();
+    Object.values(WindowManager._windows).forEach((win) => {
+      WindowManager._runCleanupFns(win?._cleanups);
+      win._cleanups = [];
+    });
   });
 }
 

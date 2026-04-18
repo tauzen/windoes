@@ -16,6 +16,10 @@ export function makeDraggable(titlebarEl, windowEl) {
   let origLeft;
   let origTop;
 
+  if (!titlebarEl || !windowEl) {
+    return () => {};
+  }
+
   function pointerDown(e) {
     // Ignore control-button clicks
     if (e.target.classList.contains('ctrl-btn')) return;
@@ -79,4 +83,18 @@ export function makeDraggable(titlebarEl, windowEl) {
   document.addEventListener('touchmove', pointerMove, { passive: false });
   document.addEventListener('touchend', pointerUp);
   document.addEventListener('touchcancel', pointerUp);
+
+  return () => {
+    titlebarEl.removeEventListener('mousedown', pointerDown);
+    document.removeEventListener('mousemove', pointerMove);
+    document.removeEventListener('mouseup', pointerUp);
+
+    titlebarEl.removeEventListener('touchstart', pointerDown);
+    document.removeEventListener('touchmove', pointerMove);
+    document.removeEventListener('touchend', pointerUp);
+    document.removeEventListener('touchcancel', pointerUp);
+
+    isDragging = false;
+    setDragOverlayActive(false);
+  };
 }
