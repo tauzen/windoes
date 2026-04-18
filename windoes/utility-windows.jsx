@@ -56,6 +56,7 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
         <span className="status-right">My Computer</span>
       </>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'myComputerTaskBtn', icon: 'task-icon-mycomputer', label: 'My Computer' },
   iframe: null,
@@ -119,6 +120,7 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
       'left: clamp(120px, 14vw, 200px); top: 30px; width: min(640px, calc(100vw - 100px)); height: min(440px, calc(100vh - 60px));',
     menubar: [{ id: 'notepadFileMenu', label: 'File' }, 'Edit', 'Search', 'Help'],
     view: <textarea className="notepad-textarea" id="notepadText" spellCheck={false}></textarea>,
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'notepadTaskBtn', icon: 'task-icon-notepad', label: 'Notepad' },
   iframe: null,

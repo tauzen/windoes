@@ -407,6 +407,208 @@ async function runTests() {
     assert(windowComponentShellState.recycleBin.hasTitlebar, 'Recycle Bin keeps titlebar chrome');
     assert(windowComponentShellState.recycleBin.hasMenubar, 'Recycle Bin keeps menubar chrome');
     assert(windowComponentShellState.recycleBin.hasView, 'Recycle Bin keeps view area');
+
+    // ── Test 13: Phase 4 window-component migration (slice 2) ──────────────
+    console.log('\nTest 13: IE + Notepad use shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.internetExplorer();
+      WindoesApp.open.notepad();
+    });
+    await page.waitForTimeout(300);
+
+    const ieNotepadWindowComponentShellState = await page.evaluate(() => {
+      const ieWindow = document.getElementById('ieWindow');
+      const notepadWindow = document.getElementById('notepadWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return {
+        ie: readShellState(ieWindow),
+        notepad: readShellState(notepadWindow),
+      };
+    });
+
+    assert(ieNotepadWindowComponentShellState.ie.exists, 'IE window exists');
+    assert(ieNotepadWindowComponentShellState.notepad.exists, 'Notepad window exists');
+    assert(
+      ieNotepadWindowComponentShellState.ie.usesSharedWindowComponent,
+      'IE window tagged as shared Window component'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.usesSharedWindowComponent,
+      'Notepad window tagged as shared Window component'
+    );
+    assert(ieNotepadWindowComponentShellState.ie.hasTitlebar, 'IE window keeps titlebar chrome');
+    assert(ieNotepadWindowComponentShellState.ie.hasMenubar, 'IE window keeps menubar chrome');
+    assert(ieNotepadWindowComponentShellState.ie.hasView, 'IE window keeps view area');
+    assert(
+      ieNotepadWindowComponentShellState.notepad.hasTitlebar,
+      'Notepad window keeps titlebar chrome'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.hasMenubar,
+      'Notepad window keeps menubar chrome'
+    );
+    assert(ieNotepadWindowComponentShellState.notepad.hasView, 'Notepad window keeps view area');
+
+    // ── Test 14: Phase 4 window-component migration (slice 3) ──────────────
+    console.log('\nTest 14: My Computer + Minesweeper use shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.myComputer();
+      WindoesApp.open.minesweeper();
+    });
+    await page.waitForTimeout(300);
+
+    const myComputerMinesweeperWindowComponentShellState = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return {
+        myComputer: readShellState(myComputerWindow),
+        minesweeper: readShellState(minesweeperWindow),
+      };
+    });
+
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.exists,
+      'My Computer window exists'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.exists,
+      'Minesweeper window exists'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.usesSharedWindowComponent,
+      'My Computer window tagged as shared Window component'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.usesSharedWindowComponent,
+      'Minesweeper window tagged as shared Window component'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasTitlebar,
+      'My Computer window keeps titlebar chrome'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasMenubar,
+      'My Computer window keeps menubar chrome'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.myComputer.hasView,
+      'My Computer window keeps view area'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.hasTitlebar,
+      'Minesweeper window keeps titlebar chrome'
+    );
+    assert(
+      !myComputerMinesweeperWindowComponentShellState.minesweeper.hasMenubar,
+      'Minesweeper window remains no-menubar (expected for this window type)'
+    );
+    assert(
+      myComputerMinesweeperWindowComponentShellState.minesweeper.hasView,
+      'Minesweeper window keeps view area'
+    );
+
+    // ── Test 15: Phase 4 window-component migration (slice 4) ──────────────
+    console.log('\nTest 15: Solitaire uses shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.solitaire();
+    });
+    await page.waitForTimeout(300);
+
+    const solitaireWindowComponentShellState = await page.evaluate(() => {
+      const solitaireWindow = document.getElementById('solitaireWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return readShellState(solitaireWindow);
+    });
+
+    assert(solitaireWindowComponentShellState.exists, 'Solitaire window exists');
+    assert(
+      solitaireWindowComponentShellState.usesSharedWindowComponent,
+      'Solitaire window tagged as shared Window component'
+    );
+    assert(
+      solitaireWindowComponentShellState.hasTitlebar,
+      'Solitaire window keeps titlebar chrome'
+    );
+    assert(
+      !solitaireWindowComponentShellState.hasMenubar,
+      'Solitaire window remains no-menubar (expected for this window type)'
+    );
+    assert(solitaireWindowComponentShellState.hasView, 'Solitaire window keeps view area');
+
+    // ── Test 16: Phase 4 window-component migration (slice 5: headless) ────
+    console.log('\nTest 16: Winamp headless window is marked as shared component migration');
+
+    await page.evaluate(() => {
+      WindoesApp.open.winamp();
+    });
+    await page.waitForTimeout(300);
+
+    const winampWindowComponentShellState = await page.evaluate(() => {
+      const winampWindow = document.getElementById('winampWindow');
+      if (!winampWindow) return { exists: false };
+
+      return {
+        exists: true,
+        usesSharedWindowComponent: winampWindow.dataset.windowComponent === 'true',
+        hasTitlebar: !!winampWindow.querySelector('.titlebar'),
+        hasMenubar: !!winampWindow.querySelector('.menubar'),
+        hasView: !!winampWindow.querySelector('#winampFrame'),
+        isHeadless: winampWindow.classList.contains('window-headless'),
+      };
+    });
+
+    assert(winampWindowComponentShellState.exists, 'Winamp window exists');
+    assert(
+      winampWindowComponentShellState.usesSharedWindowComponent,
+      'Winamp window tagged as shared Window migration component'
+    );
+    assert(winampWindowComponentShellState.isHeadless, 'Winamp remains headless');
+    assert(
+      !winampWindowComponentShellState.hasTitlebar,
+      'Winamp has no titlebar (headless expected)'
+    );
+    assert(
+      !winampWindowComponentShellState.hasMenubar,
+      'Winamp has no menubar (headless expected)'
+    );
+    assert(winampWindowComponentShellState.hasView, 'Winamp keeps iframe view');
   } finally {
     await browser.close();
     server.close();

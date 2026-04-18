@@ -102,6 +102,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         ></iframe>
       </>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
   iframeId: 'winampFrame',
@@ -150,6 +151,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
         sandbox="allow-scripts allow-same-origin"
       ></iframe>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'minesweeperTaskBtn', icon: 'task-icon-minesweeper', label: 'Minesweeper' },
   iframeId: 'minesweeperFrame',
@@ -184,6 +186,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
         sandbox="allow-scripts allow-same-origin"
       ></iframe>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'solitaireTaskBtn', icon: 'task-icon-solitaire', label: 'Solitaire' },
   iframeId: 'solitaireFrame',

@@ -115,6 +115,9 @@ const WindowManager = {
     section.id = tmpl.id;
     section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
     if (tmpl.style) section.style.cssText = tmpl.style;
+    if (tmpl.useSharedWindowComponent) {
+      section.dataset.windowComponent = 'true';
+    }
 
     renderInto(section, <>{tmpl.view || null}</>);
 
