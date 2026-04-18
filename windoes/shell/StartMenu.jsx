@@ -14,6 +14,7 @@ export default function StartMenu() {
 
   const shutdownOpen = WindoesApp.state.use((s) => s.dialogs.shutdownOpen);
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
+  const shellVisible = bootDone && !shutdownScreenVisible;
   const [shutdownOption, setShutdownOption] = useState('shutdown');
 
   function closeOtherSubmenus(...keepRefs) {
@@ -131,6 +132,21 @@ export default function StartMenu() {
     closeAllMenus();
   }
 
+  function showHelpDialog() {
+    WindoesApp.bsod.showErrorDialog({
+      title: 'Windoes Help',
+      text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.',
+      icon: 'info',
+    });
+  }
+
+  function openShutdownDialog(defaultOption = 'shutdown') {
+    closeAllMenus();
+    setShutdownOption(defaultOption);
+    WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_OPEN' });
+    WindoesApp.sound.playClickSound();
+  }
+
   useLayoutEffect(() => {
     const startMenuEl = startMenuRef.current;
     const startButton = WindoesApp.dom.startButton || document.getElementById('startButton');
@@ -184,7 +200,7 @@ export default function StartMenu() {
         className="start-menu"
         id="startMenu"
         aria-label="Start menu"
-        style={{ display: bootDone && !shutdownScreenVisible ? '' : 'none' }}
+        style={{ display: shellVisible ? '' : 'none' }}
         onMouseLeave={onStartMenuLeave}
       >
         <div className="start-rail">
@@ -213,15 +229,7 @@ export default function StartMenu() {
             className="menu-item"
             id="menuHelp"
             onMouseEnter={closeSubmenus}
-            onClick={() =>
-              runAction(() =>
-                WindoesApp.bsod.showErrorDialog({
-                  title: 'Windoes Help',
-                  text: 'Help is not available for this program.\n\nTry searching online at microsoft.com for help topics.',
-                  icon: 'info',
-                })
-              )
-            }
+            onClick={() => runAction(showHelpDialog)}
           >
             <span className="menu-icon menu-icon-help"></span>Help
           </div>
@@ -238,12 +246,7 @@ export default function StartMenu() {
             className="menu-item menu-shutdown"
             id="menuShutdown"
             onMouseEnter={closeSubmenus}
-            onClick={() => {
-              closeAllMenus();
-              setShutdownOption('shutdown');
-              WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_OPEN' });
-              WindoesApp.sound.playClickSound();
-            }}
+            onClick={() => openShutdownDialog('shutdown')}
           >
             <span className="menu-icon menu-icon-shutdown"></span>Shut Down...
           </div>
