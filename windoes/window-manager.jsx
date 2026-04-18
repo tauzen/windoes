@@ -54,6 +54,55 @@ function WindowTitlebar({ windowId, template }) {
   );
 }
 
+function parseInlineStyle(styleText) {
+  if (!styleText) return undefined;
+  return styleText
+    .split(';')
+    .filter(Boolean)
+    .reduce((acc, chunk) => {
+      const [rawKey, ...rawValue] = chunk.split(':');
+      if (!rawKey || rawValue.length === 0) return acc;
+      const key = rawKey.trim().replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+      acc[key] = rawValue.join(':').trim();
+      return acc;
+    }, {});
+}
+
+function Window({ windowId, template }) {
+  const viewStyle = parseInlineStyle(template.viewStyle);
+
+  return (
+    <>
+      <WindowTitlebar windowId={windowId} template={template} />
+
+      {template.menubar && (
+        <div className="menubar">
+          {template.menubar.map((item, index) => {
+            if (typeof item === 'string') {
+              return <span key={`menu-${index}`}>{item}</span>;
+            }
+            return (
+              <span key={`menu-${item.id || index}`} {...(item.id ? { id: item.id } : {})}>
+                {item.label}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {template.toolbar && <div>{template.toolbar}</div>}
+
+      {template.view !== undefined && (
+        <div className="view" {...(viewStyle ? { style: viewStyle } : {})}>
+          {template.view}
+        </div>
+      )}
+
+      {template.statusBar && <div className="status">{template.statusBar}</div>}
+    </>
+  );
+}
+
 const WindowManager = {
   _windows: {}, // id → config registry
   _baseZ: WINDOW_Z_BASE,
@@ -90,65 +139,16 @@ const WindowManager = {
    * Build a window <section> element from a template config object.
    */
   _buildWindowEl(tmpl, windowId) {
-    const viewStyle = tmpl.viewStyle
-      ? tmpl.viewStyle
-          .split(';')
-          .filter(Boolean)
-          .reduce((acc, chunk) => {
-            const [rawKey, ...rawValue] = chunk.split(':');
-            if (!rawKey || rawValue.length === 0) return acc;
-            const key = rawKey.trim().replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
-            acc[key] = rawValue.join(':').trim();
-            return acc;
-          }, {})
-      : undefined;
-
-    const content = [<WindowTitlebar key="titlebar" windowId={windowId} template={tmpl} />];
-
-    if (tmpl.menubar) {
-      content.push(
-        <div key="menubar" className="menubar">
-          {tmpl.menubar.map((item, index) => {
-            if (typeof item === 'string') {
-              return <span key={`menu-${index}`}>{item}</span>;
-            }
-            return (
-              <span key={`menu-${item.id || index}`} {...(item.id ? { id: item.id } : {})}>
-                {item.label}
-              </span>
-            );
-          })}
-        </div>
-      );
-    }
-
-    if (tmpl.toolbar) {
-      content.push(<div key="toolbar">{tmpl.toolbar}</div>);
-    }
-
-    if (tmpl.view !== undefined) {
-      content.push(
-        <div key="view" className="view" {...(viewStyle ? { style: viewStyle } : {})}>
-          {tmpl.view}
-        </div>
-      );
-    }
-
-    if (tmpl.statusBar) {
-      content.push(
-        <div key="status" className="status">
-          {tmpl.statusBar}
-        </div>
-      );
-    }
-
     const section = document.createElement('section');
     section.className = 'window hidden' + (tmpl.className ? ' ' + tmpl.className : '');
     section.id = tmpl.id;
     section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
     if (tmpl.style) section.style.cssText = tmpl.style;
+    if (tmpl.useSharedWindowComponent) {
+      section.dataset.windowComponent = 'true';
+    }
 
-    renderInto(section, <>{content}</>);
+    renderInto(section, <Window windowId={windowId} template={tmpl} />);
 
     return section;
   },

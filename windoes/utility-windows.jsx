@@ -274,6 +274,7 @@ WindoesApp.WindowManager.register('recycleBin', {
     ),
     viewStyle: 'overflow-y:auto;',
     statusBar: <span className="status-left">0 object(s)</span>,
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'recycleBinTaskBtn', icon: 'task-icon-recyclebin', label: 'Recycle Bin' },
   iframe: null,
