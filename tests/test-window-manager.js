@@ -609,6 +609,51 @@ async function runTests() {
       'Winamp has no menubar (headless expected)'
     );
     assert(winampWindowComponentShellState.hasView, 'Winamp keeps iframe view');
+
+    // ── Test 17: Explorer navigation still works after DOM refactor safety ───
+    console.log('\nTest 17: My Computer navigation + address/back/up remain functional');
+
+    await page.evaluate(() => {
+      WindoesApp.open.myComputer();
+    });
+    await page.waitForTimeout(300);
+
+    const explorerInitialState = await page.evaluate(() => {
+      const address = document.getElementById('explorerAddress')?.value || '';
+      return { address };
+    });
+
+    assert(
+      explorerInitialState.address === 'My Computer',
+      `Explorer starts at My Computer root (got: ${explorerInitialState.address})`
+    );
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+
+    const explorerAfterNavigate = await page.evaluate(() => {
+      const address = document.getElementById('explorerAddress')?.value || '';
+      const backDisabled = !!document.getElementById('explorerBackBtn')?.disabled;
+      return { address, backDisabled };
+    });
+
+    assert(
+      explorerAfterNavigate.address === 'C:',
+      `Explorer navigates into Local Disk (got: ${explorerAfterNavigate.address})`
+    );
+    assert(!explorerAfterNavigate.backDisabled, 'Explorer Back is enabled after navigation');
+
+    await page.click('#explorerUpBtn');
+    await page.waitForTimeout(250);
+
+    const explorerAfterUp = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+    }));
+
+    assert(
+      explorerAfterUp.address === 'My Computer',
+      `Explorer Up returns to My Computer root (got: ${explorerAfterUp.address})`
+    );
   } finally {
     await browser.close();
     server.close();

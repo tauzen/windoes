@@ -49,19 +49,26 @@ let historyStack = [];
 let historyIndex = -1;
 let lastExplorerActionSeq = 0;
 
-// ── Cached DOM refs (set after window registers) ────────────────────────────
-let viewEl = null;
-let addressEl = null;
-let statusEl = null;
-let titleSpanEl = null;
-let backBtnEl = null;
+// ── Explorer DOM resolver (no cached module-level element refs) ─────────────
+let explorerWindowId = null;
 
 function setDomRefs(cfg) {
-  viewEl = cfg.el.querySelector('.explorer-folder-view');
-  addressEl = cfg.el.querySelector('#explorerAddress');
-  statusEl = cfg.el.querySelector('.explorer-status-left');
-  titleSpanEl = cfg.el.querySelector('#explorerTitleSpan');
-  backBtnEl = cfg.el.querySelector('#explorerBackBtn');
+  explorerWindowId = cfg?.template?.id || cfg?.el?.id || null;
+}
+
+function getDomRefs() {
+  if (!explorerWindowId) return {};
+  const rootEl = document.getElementById(explorerWindowId);
+  if (!rootEl) return {};
+
+  return {
+    rootEl,
+    viewEl: rootEl.querySelector('.explorer-folder-view'),
+    addressEl: rootEl.querySelector('#explorerAddress'),
+    statusEl: rootEl.querySelector('.explorer-status-left'),
+    titleSpanEl: rootEl.querySelector('#explorerTitleSpan'),
+    backBtnEl: rootEl.querySelector('#explorerBackBtn'),
+  };
 }
 
 function handleExplorerStateActions() {
@@ -158,7 +165,8 @@ function goUp() {
 // ── Rendering ───────────────────────────────────────────────────────────────
 
 async function render() {
-  if (!viewEl) return;
+  const { viewEl, addressEl, statusEl, titleSpanEl, backBtnEl } = getDomRefs();
+  if (!viewEl || !addressEl || !statusEl || !titleSpanEl) return;
 
   addressEl.value = displayPath(currentPath);
   titleSpanEl.textContent = currentPath === null ? 'My Computer' : basename(currentPath);
@@ -229,6 +237,9 @@ async function render() {
 }
 
 function renderMyComputerRoot() {
+  const { viewEl, statusEl } = getDomRefs();
+  if (!viewEl || !statusEl) return;
+
   renderInto(
     viewEl,
     <>
@@ -264,6 +275,7 @@ function renderMyComputerRoot() {
 // ── Context Menu (right-click in folder view) ───────────────────────────────
 
 function wireContextMenu() {
+  const { viewEl } = getDomRefs();
   if (!viewEl) return;
 
   if (currentPath === null) {
@@ -347,6 +359,9 @@ async function deleteSelected(selectedItemPath) {
 
 function startInlineRename(selectedItemPath) {
   if (!selectedItemPath) return;
+
+  const { viewEl } = getDomRefs();
+  if (!viewEl) return;
 
   const itemEl = viewEl.querySelector(`.folder-item[data-path="${CSS.escape(selectedItemPath)}"]`);
   if (!itemEl) return;
