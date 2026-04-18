@@ -54,22 +54,8 @@ function WindowTitlebar({ windowId, template }) {
   );
 }
 
-function parseInlineStyle(styleText) {
-  if (!styleText) return undefined;
-  return styleText
-    .split(';')
-    .filter(Boolean)
-    .reduce((acc, chunk) => {
-      const [rawKey, ...rawValue] = chunk.split(':');
-      if (!rawKey || rawValue.length === 0) return acc;
-      const key = rawKey.trim().replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
-      acc[key] = rawValue.join(':').trim();
-      return acc;
-    }, {});
-}
-
 function Window({ windowId, template }) {
-  const viewStyle = parseInlineStyle(template.viewStyle);
+  const viewStyle = template.viewStyle;
 
   return (
     <>

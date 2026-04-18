@@ -49,7 +49,7 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
       </>
     ),
     view: <div className="folder-view explorer-folder-view"></div>,
-    viewStyle: 'overflow-y:auto;',
+    viewStyle: { overflowY: 'auto' },
     statusBar: (
       <>
         <span className="status-left explorer-status-left">0 object(s)</span>
@@ -272,7 +272,7 @@ WindoesApp.WindowManager.register('recycleBin', {
         </div>
       </div>
     ),
-    viewStyle: 'overflow-y:auto;',
+    viewStyle: { overflowY: 'auto' },
     statusBar: <span className="status-left">0 object(s)</span>,
     useSharedWindowComponent: true,
   },
