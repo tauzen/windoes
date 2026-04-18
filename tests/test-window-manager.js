@@ -360,6 +360,53 @@ async function runTests() {
       await page.click('#minesweeperCloseBtn');
       await page.waitForTimeout(200);
     }
+
+    // ── Test 12: Phase 4 window-component migration (slice 1) ──────────────
+    console.log('\nTest 12: App + Recycle Bin use shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.app('ASCII Runner', './applications/ascii-runner/index.html');
+      WindoesApp.open.recycleBin();
+    });
+    await page.waitForTimeout(300);
+
+    const windowComponentShellState = await page.evaluate(() => {
+      const appWindow = document.getElementById('appWindow');
+      const recycleBinWindow = document.getElementById('recycleBinWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return {
+        app: readShellState(appWindow),
+        recycleBin: readShellState(recycleBinWindow),
+      };
+    });
+
+    assert(windowComponentShellState.app.exists, 'App window exists');
+    assert(windowComponentShellState.recycleBin.exists, 'Recycle Bin window exists');
+    assert(
+      windowComponentShellState.app.usesSharedWindowComponent,
+      'App window tagged as shared Window component'
+    );
+    assert(
+      windowComponentShellState.recycleBin.usesSharedWindowComponent,
+      'Recycle Bin window tagged as shared Window component'
+    );
+    assert(windowComponentShellState.app.hasTitlebar, 'App window keeps titlebar chrome');
+    assert(windowComponentShellState.app.hasMenubar, 'App window keeps menubar chrome');
+    assert(windowComponentShellState.app.hasView, 'App window keeps view area');
+    assert(windowComponentShellState.recycleBin.hasTitlebar, 'Recycle Bin keeps titlebar chrome');
+    assert(windowComponentShellState.recycleBin.hasMenubar, 'Recycle Bin keeps menubar chrome');
+    assert(windowComponentShellState.recycleBin.hasView, 'Recycle Bin keeps view area');
   } finally {
     await browser.close();
     server.close();

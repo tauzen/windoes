@@ -34,6 +34,7 @@ const appConfig = WindoesApp.WindowManager.register('app', {
         Done
       </span>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: {
     id: 'appTaskButton',

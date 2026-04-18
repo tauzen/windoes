@@ -195,7 +195,7 @@ Goal: make `WindoesApp.state` the single source of truth for window lifecycle an
 
 Goal: turn the imperative window registrations into React components and delete `_buildWindowEl`.
 
-- [ ] **A5 / D3** Introduce a `<Window>` component that renders chrome (titlebar / menubar / toolbar / status). Convert each existing registration (IE, My Computer, Notepad, Recycle Bin, App, Winamp, Minesweeper, Solitaire) into a component that renders `<Window>` with app-specific children.
+- [ ] **A5 / D3** Introduce a `<Window>` component that renders chrome (titlebar / menubar / toolbar / status). Convert each existing registration (IE, My Computer, Notepad, Recycle Bin, App, Winamp, Minesweeper, Solitaire) into a component that renders `<Window>` with app-specific children. _Progress: shared `<Window>` introduced in `window-manager.jsx`; Recycle Bin + App migrated in slice 1._
 - [ ] **A1 / A7 / D7** Eliminate `desktop.jsx` + `fs-explorer.jsx`'s module-level DOM refs. `fs-explorer` becomes a `<MyComputer>` component using hooks (`useVirtualFs`, `useNavigationHistory`).
 - [ ] **D1 / I1 / I3** While rewriting, upgrade interactive elements to proper `<button>` / `[role=menuitem]` / `aria-expanded` / `aria-haspopup`.
 - [ ] **D2** Replace `flushSync` in `renderInto` with a regular React `setState`; keep a `flushSync` wrapper only for the tests that depend on synchronous DOM updates (or migrate those assertions to `waitFor`).
