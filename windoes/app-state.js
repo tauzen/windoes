@@ -4,6 +4,7 @@
 import { useSyncExternalStore } from 'react';
 import defaultConfig from './simulator.config.js';
 import { initialState, reduce } from './app-state-reducer.mjs';
+import { createEventBus } from './event-bus.js';
 
 // Allow runtime config override (used by tests via addInitScript)
 const runtimeOverride = window.WIN_ME_SIMULATOR_CONFIG;
@@ -66,6 +67,11 @@ const WindoesApp = {
     use: useWindoesState,
   },
 
+  // Typed event buses for imperative one-shot interactions.
+  events: {
+    windowInteraction: createEventBus(),
+  },
+
   // ── sound API (filled by sound.js) ────────
   sound: {},
 
@@ -80,17 +86,6 @@ const WindoesApp = {
   desktopContext: {},
   notepadDialogs: {},
 };
-
-Object.defineProperty(WindoesApp, 'bootDone', {
-  get() {
-    return state.boot.done;
-  },
-  set(value) {
-    if (value) {
-      dispatch({ type: 'BOOT_FINISH' });
-    }
-  },
-});
 
 // Keep on window for iframe communication
 window.WindoesApp = WindoesApp;
