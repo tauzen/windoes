@@ -550,9 +550,15 @@ const WindowManager = {
 WindoesApp.WindowManager = WindowManager;
 
 // Reducer-to-DOM compatibility bridge for interaction commands and drag state.
-WindoesApp.state.subscribe(() => {
+const unsubscribeWindowManagerBridge = WindoesApp.state.subscribe(() => {
   WindowManager._bridgeFromState();
 });
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    unsubscribeWindowManagerBridge();
+  });
+}
 
 // Legacy helper for any code still calling bringToFront(el)
 export function bringToFront(windowEl) {

@@ -12,7 +12,8 @@ export default function StartMenu() {
   const subAccessoriesRef = useRef(null);
   const subAccGamesRef = useRef(null);
 
-  const [shutdownOpen, setShutdownOpen] = useState(false);
+  const shutdownOpen = WindoesApp.state.use((s) => s.dialogs.shutdownOpen);
+  const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
   const [shutdownOption, setShutdownOption] = useState('shutdown');
 
   function closeOtherSubmenus(...keepRefs) {
@@ -117,30 +118,11 @@ export default function StartMenu() {
   }
 
   function performShutdown() {
-    setShutdownOpen(false);
-    document.body.style.background = '#000';
-    if (WindoesApp.dom.theDesktop) WindoesApp.dom.theDesktop.style.display = 'none';
-    if (WindoesApp.dom.theTaskbar) WindoesApp.dom.theTaskbar.style.display = 'none';
-    if (startMenuRef.current) startMenuRef.current.style.display = 'none';
-
-    const shutdownMsg = document.createElement('div');
-    shutdownMsg.style.cssText =
-      'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#FF8000;font-size:24px;font-family:"MS Sans Serif",sans-serif;background:#000;z-index:99998;';
-    shutdownMsg.style.textAlign = 'center';
-
-    const textWrap = document.createElement('div');
-    const line1 = document.createElement('div');
-    line1.textContent = "It's now safe to turn off";
-    const line2 = document.createElement('div');
-    line2.textContent = 'your computer.';
-    textWrap.appendChild(line1);
-    textWrap.appendChild(line2);
-    shutdownMsg.appendChild(textWrap);
-    document.body.appendChild(shutdownMsg);
+    WindoesApp.state.dispatch({ type: 'SHUTDOWN_SCREEN_SHOW' });
   }
 
   function performRestart() {
-    setShutdownOpen(false);
+    WindoesApp.state.dispatch({ type: 'SHUTDOWN_SCREEN_HIDE' });
     location.reload();
   }
 
@@ -202,7 +184,7 @@ export default function StartMenu() {
         className="start-menu"
         id="startMenu"
         aria-label="Start menu"
-        style={{ display: bootDone ? '' : 'none' }}
+        style={{ display: bootDone && !shutdownScreenVisible ? '' : 'none' }}
         onMouseLeave={onStartMenuLeave}
       >
         <div className="start-rail">
@@ -259,7 +241,7 @@ export default function StartMenu() {
             onClick={() => {
               closeAllMenus();
               setShutdownOption('shutdown');
-              setShutdownOpen(true);
+              WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_OPEN' });
               WindoesApp.sound.playClickSound();
             }}
           >
@@ -458,7 +440,7 @@ export default function StartMenu() {
               className="ctrl-btn"
               id="shutdownCloseBtn"
               aria-label="Close"
-              onClick={() => setShutdownOpen(false)}
+              onClick={() => WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_CLOSE' })}
             >
               ×
             </button>
@@ -517,7 +499,7 @@ export default function StartMenu() {
             <button
               className="dialog-btn"
               id="shutdownCancelBtn"
-              onClick={() => setShutdownOpen(false)}
+              onClick={() => WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_CLOSE' })}
             >
               Cancel
             </button>
@@ -537,6 +519,30 @@ export default function StartMenu() {
           </div>
         </div>
       </div>
+
+      {shutdownScreenVisible ? (
+        <div
+          id="shutdownScreen"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#FF8000',
+            fontSize: '24px',
+            fontFamily: '"MS Sans Serif", sans-serif',
+            background: '#000',
+            zIndex: 99998,
+            textAlign: 'center',
+          }}
+        >
+          <div>
+            <div>It's now safe to turn off</div>
+            <div>your computer.</div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

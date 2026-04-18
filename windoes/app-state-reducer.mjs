@@ -44,6 +44,7 @@ export const initialState = {
     runOpen: false,
     errorOpen: false,
     shutdownOpen: false,
+    shutdownScreenVisible: false,
     notepadSaveOpen: false,
     notepadUnsavedOpen: false,
   },
@@ -273,6 +274,42 @@ export function reduce(current, action) {
         notepad: {
           ...current.notepad,
           saveDialogOpen: false,
+        },
+      };
+    case 'SHUTDOWN_DIALOG_OPEN':
+      if (current.dialogs.shutdownOpen) return current;
+      return {
+        ...current,
+        dialogs: {
+          ...current.dialogs,
+          shutdownOpen: true,
+        },
+      };
+    case 'SHUTDOWN_DIALOG_CLOSE':
+      if (!current.dialogs.shutdownOpen) return current;
+      return {
+        ...current,
+        dialogs: {
+          ...current.dialogs,
+          shutdownOpen: false,
+        },
+      };
+    case 'SHUTDOWN_SCREEN_SHOW':
+      return {
+        ...current,
+        dialogs: {
+          ...current.dialogs,
+          shutdownOpen: false,
+          shutdownScreenVisible: true,
+        },
+      };
+    case 'SHUTDOWN_SCREEN_HIDE':
+      if (!current.dialogs.shutdownScreenVisible) return current;
+      return {
+        ...current,
+        dialogs: {
+          ...current.dialogs,
+          shutdownScreenVisible: false,
         },
       };
     case 'DRAG_START':

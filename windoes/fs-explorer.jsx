@@ -86,7 +86,13 @@ function handleExplorerStateActions() {
   }
 }
 
-WindoesApp.state.subscribe(handleExplorerStateActions);
+const unsubscribeExplorerActions = WindoesApp.state.subscribe(handleExplorerStateActions);
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    unsubscribeExplorerActions();
+  });
+}
 
 // ── Initialise VirtualFS ────────────────────────────────────────────────────
 
@@ -214,9 +220,11 @@ async function render() {
     });
 
     wireContextMenu();
-  } catch {
+  } catch (error) {
+    console.error('Failed to render explorer directory', { currentPath, error });
+    const message = error?.message || 'Unknown error';
     renderInto(viewEl, <div className="explorer-empty">Error reading directory.</div>);
-    statusEl.textContent = '0 object(s)';
+    statusEl.textContent = `Error: ${message}`;
   }
 }
 
