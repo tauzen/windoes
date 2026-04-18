@@ -16,7 +16,6 @@ function addManagedListener(element, eventName, handler, options) {
   });
 }
 
-// Build desktop icons
 const desktopIconDefs = [
   { id: 'iconMyComputer', className: 'icon-my-computer', label: 'My Computer' },
   { id: 'internetExplorerIcon', className: 'icon-ie', label: 'Internet Explorer' },
@@ -27,20 +26,6 @@ const desktopIconDefs = [
   { id: 'iconSolitaire', className: 'icon-solitaire', label: 'Solitaire' },
 ];
 
-const desktopIcons = document.getElementById('desktopIcons');
-renderInto(
-  desktopIcons,
-  <>
-    {desktopIconDefs.map((def) => (
-      <div key={def.id} className={'icon ' + def.className} id={def.id}>
-        <div className="icon-graphic"></div>
-        <span className="icon-label">{def.label}</span>
-      </div>
-    ))}
-  </>
-);
-
-// Dedicated icon handlers (these must use their own window, not openApp)
 const dedicatedHandlers = {
   iconMyComputer: WindoesApp.open.myComputer,
   internetExplorerIcon: WindoesApp.open.internetExplorer,
@@ -50,48 +35,87 @@ const dedicatedHandlers = {
   iconSolitaire: WindoesApp.open.solitaire,
 };
 
-// Wire up dedicated icon handlers
-Object.entries(dedicatedHandlers).forEach(([id, handler]) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  addManagedListener(el, appEventType, handler);
-});
-
-const quickLaunchIe = document.getElementById('qlIE');
-addManagedListener(quickLaunchIe, 'click', WindoesApp.open.internetExplorer);
-
-// Experiment app icons — only wire openApp for non-dedicated icons
 const experimentApps = WindoesApp.config.experimentApps || [
   { id: 'iconAsciiRunner', title: 'ASCII Runner', url: './applications/ascii-runner/index.html' },
 ];
+const experimentAppsById = new Map(experimentApps.map((app) => [app.id, app]));
 
-experimentApps.forEach(({ id, title, url }) => {
-  // Skip icons that have dedicated handlers (prevents duplicate windows)
-  if (dedicatedHandlers[id]) return;
-  const el = document.getElementById(id);
-  if (el) {
-    addManagedListener(el, appEventType, () => WindoesApp.open.app(title, url));
-  }
-});
+function getDesktopIconsContainer() {
+  return document.getElementById('desktopIcons');
+}
 
-// Desktop icon selection
-const desktopIconsEls = [...document.querySelectorAll('.icon')];
-desktopIconsEls.forEach((icon) => {
-  const onIconClick = () => {
-    desktopIconsEls.forEach((i) => i.classList.remove('selected'));
+function clearDesktopSelection() {
+  const desktopIcons = getDesktopIconsContainer();
+  if (!desktopIcons) return;
+  desktopIcons.querySelectorAll('.icon.selected').forEach((icon) => {
+    icon.classList.remove('selected');
+  });
+}
+
+function renderDesktopIcons() {
+  const desktopIcons = getDesktopIconsContainer();
+  if (!desktopIcons) return;
+
+  renderInto(
+    desktopIcons,
+    <>
+      {desktopIconDefs.map((def) => (
+        <div key={def.id} className={'icon ' + def.className} id={def.id}>
+          <div className="icon-graphic"></div>
+          <span className="icon-label">{def.label}</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function wireDesktopInteractions() {
+  const desktopIcons = getDesktopIconsContainer();
+
+  const onDesktopIconClick = (event) => {
+    const icon = event.target.closest('.icon');
+    if (!icon || !desktopIcons?.contains(icon)) return;
+
+    clearDesktopSelection();
     icon.classList.add('selected');
   };
-  addManagedListener(icon, 'click', onIconClick);
-});
+  addManagedListener(desktopIcons, 'click', onDesktopIconClick);
 
-// Click desktop to deselect
-const desktopSurface = document.querySelector('.desktop');
-const onDesktopClick = (e) => {
-  if (e.target === e.currentTarget || e.target.classList.contains('desktop-icons')) {
-    desktopIconsEls.forEach((i) => i.classList.remove('selected'));
-  }
-};
-addManagedListener(desktopSurface, 'click', onDesktopClick);
+  const onDesktopIconActivate = (event) => {
+    const icon = event.target.closest('.icon');
+    if (!icon || !desktopIcons?.contains(icon)) return;
+
+    const dedicatedHandler = dedicatedHandlers[icon.id];
+    if (dedicatedHandler) {
+      dedicatedHandler();
+      return;
+    }
+
+    const appDef = experimentAppsById.get(icon.id);
+    if (appDef) {
+      WindoesApp.open.app(appDef.title, appDef.url);
+    }
+  };
+  addManagedListener(desktopIcons, appEventType, onDesktopIconActivate);
+
+  const quickLaunchIe = document.getElementById('qlIE');
+  addManagedListener(quickLaunchIe, 'click', WindoesApp.open.internetExplorer);
+
+  const desktopSurface = document.querySelector('.desktop');
+  const onDesktopClick = (e) => {
+    if (e.target === e.currentTarget || e.target.classList.contains('desktop-icons')) {
+      clearDesktopSelection();
+    }
+  };
+  addManagedListener(desktopSurface, 'click', onDesktopClick);
+}
+
+function setupDesktop() {
+  renderDesktopIcons();
+  wireDesktopInteractions();
+}
+
+setupDesktop();
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {

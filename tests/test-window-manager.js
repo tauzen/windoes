@@ -654,6 +654,61 @@ async function runTests() {
       explorerAfterUp.address === 'My Computer',
       `Explorer Up returns to My Computer root (got: ${explorerAfterUp.address})`
     );
+
+    // ── Test 18: Desktop icon interactions survive icon DOM remount ─────────
+    console.log('\nTest 18: Desktop icon interactions survive icon DOM remount');
+
+    await page.evaluate(() => {
+      const desktopIcons = document.getElementById('desktopIcons');
+      if (!desktopIcons) return;
+      desktopIcons.innerHTML = desktopIcons.innerHTML;
+    });
+    await page.waitForTimeout(100);
+
+    await page.click('#iconMyComputer');
+    const selectedAfterRemount = await page.evaluate(() => {
+      return document.getElementById('iconMyComputer')?.classList.contains('selected') || false;
+    });
+    assert(selectedAfterRemount, 'My Computer icon can still be selected after icons DOM remount');
+
+    await page.evaluate(() => {
+      WindoesApp.open.minesweeper();
+    });
+    await page.waitForTimeout(250);
+
+    const beforeDesktopReopenFocus = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+      return {
+        myComputerZ: Number(myComputerWindow?.style?.zIndex || 0),
+        minesweeperZ: Number(minesweeperWindow?.style?.zIndex || 0),
+      };
+    });
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(300);
+
+    const afterDesktopReopenFocus = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+      return {
+        myComputerExists: !!myComputerWindow,
+        myComputerZ: Number(myComputerWindow?.style?.zIndex || 0),
+        minesweeperZ: Number(minesweeperWindow?.style?.zIndex || 0),
+      };
+    });
+    assert(
+      afterDesktopReopenFocus.myComputerExists,
+      'My Computer window exists after icon activate'
+    );
+    assert(
+      afterDesktopReopenFocus.myComputerZ > beforeDesktopReopenFocus.myComputerZ,
+      `My Computer z-index increases after icon activate (${beforeDesktopReopenFocus.myComputerZ} -> ${afterDesktopReopenFocus.myComputerZ})`
+    );
+    assert(
+      afterDesktopReopenFocus.myComputerZ > afterDesktopReopenFocus.minesweeperZ,
+      `My Computer is focused above Minesweeper after icon activate (${afterDesktopReopenFocus.myComputerZ} > ${afterDesktopReopenFocus.minesweeperZ})`
+    );
   } finally {
     await browser.close();
     server.close();
