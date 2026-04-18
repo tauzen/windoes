@@ -188,6 +188,37 @@ test('NOTEPAD_SAVE_DIALOG_CLOSE closes open dialog', async () => {
   assert.equal(next.notepad.saveDialogOpen, false);
 });
 
+test('SHUTDOWN_DIALOG_OPEN opens shutdown dialog', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), { type: 'SHUTDOWN_DIALOG_OPEN' });
+  assert.equal(next.dialogs.shutdownOpen, true);
+});
+
+test('SHUTDOWN_DIALOG_CLOSE closes shutdown dialog', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.dialogs.shutdownOpen = true;
+  const next = reduce(current, { type: 'SHUTDOWN_DIALOG_CLOSE' });
+  assert.equal(next.dialogs.shutdownOpen, false);
+});
+
+test('SHUTDOWN_SCREEN_SHOW closes dialog and marks shutdown screen visible', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.dialogs.shutdownOpen = true;
+  const next = reduce(current, { type: 'SHUTDOWN_SCREEN_SHOW' });
+  assert.equal(next.dialogs.shutdownOpen, false);
+  assert.equal(next.dialogs.shutdownScreenVisible, true);
+});
+
+test('SHUTDOWN_SCREEN_HIDE hides shutdown screen', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.dialogs.shutdownScreenVisible = true;
+  const next = reduce(current, { type: 'SHUTDOWN_SCREEN_HIDE' });
+  assert.equal(next.dialogs.shutdownScreenVisible, false);
+});
+
 test('DRAG_START initializes drag state', async () => {
   const { reduce } = await loadReducerModule();
   const next = reduce(await freshState(), {

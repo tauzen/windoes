@@ -14,6 +14,14 @@ const bsodMessages = WindoesApp.config.bsodMessages || [
   'MSGSRV32 caused a General Protection Fault in\nmodule USER.EXE at 0004:00003FFC.\n\n* Press any key to terminate the current application.\n* Press CTRL+ALT+DEL to restart your computer.\n\nPress any key to continue _',
 ];
 let bsodActive = false;
+let randomBsodTimerId = null;
+let randomErrorTimerId = null;
+
+function clearTimer(timerId) {
+  if (timerId) {
+    window.clearTimeout(timerId);
+  }
+}
 
 function triggerBSOD() {
   if (bsodActive) return;
@@ -29,17 +37,20 @@ function dismissBSOD() {
   scheduleRandomBSOD();
 }
 
-document.addEventListener('keydown', () => {
+function onKeyDown() {
   if (bsodActive) {
     dismissBSOD();
   }
-});
+}
+
+document.addEventListener('keydown', onKeyDown);
 bsod.addEventListener('click', dismissBSOD);
 
 function scheduleRandomBSOD() {
   // Random BSOD every 2-6 minutes
   const delay = (120 + Math.random() * 240) * 1000;
-  setTimeout(() => {
+  clearTimer(randomBsodTimerId);
+  randomBsodTimerId = window.setTimeout(() => {
     if (WindoesApp.bootDone && !bsodActive) triggerBSOD();
   }, delay);
 }
@@ -100,7 +111,8 @@ const randomErrors = WindoesApp.config.randomErrors || [
 
 function scheduleRandomError() {
   const delay = (60 + Math.random() * 180) * 1000;
-  setTimeout(() => {
+  clearTimer(randomErrorTimerId);
+  randomErrorTimerId = window.setTimeout(() => {
     const isErrorOpen = !!(
       typeof WindoesApp.errorDialog.isOpen === 'function' && WindoesApp.errorDialog.isOpen()
     );
@@ -110,6 +122,17 @@ function scheduleRandomError() {
     }
     scheduleRandomError();
   }, delay);
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    document.removeEventListener('keydown', onKeyDown);
+    bsod.removeEventListener('click', dismissBSOD);
+    clearTimer(randomBsodTimerId);
+    clearTimer(randomErrorTimerId);
+    randomBsodTimerId = null;
+    randomErrorTimerId = null;
+  });
 }
 
 // Register on shared namespace

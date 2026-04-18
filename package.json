@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "npm run lint && npm run test:unit && npm run test:integration",
-    "test:unit": "node --test tests/node/reducer.test.js",
+    "test:unit": "node --test tests/node/reducer.test.js tests/node/browser-url.test.js",
     "test:integration": "node --test --test-concurrency=1 tests/node/playwright-integration.test.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
     "test:ascii-runner": "cd windoes/public/applications/ascii-runner && node tests/test-ascii-runner.js",

@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { closeStartMenuBoilerplate } from './launch-helpers.js';
+import { normalizeBrowserUrl } from './browser-url.mjs';
 
 // Register IE shell window with JSX-rendered chrome
 const ieConfig = WindoesApp.WindowManager.register('ie', {
@@ -65,6 +66,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
         id="browserFrame"
         title="Internet Explorer content"
         referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin"
       ></iframe>
     ),
     statusBar: (
@@ -89,27 +91,19 @@ const frame = ieConfig.el.querySelector('#browserFrame');
 const addressInput = ieConfig.el.querySelector('#addressInput');
 const statusText = ieConfig.el.querySelector('#statusText');
 const windowTitle = ieConfig.el.querySelector('#windowTitle');
-const clock = document.getElementById('clock');
 const taskButtonLabel = ieConfig.taskBtn.querySelector('span:last-child');
 
 const historyStack = [];
 let historyIndex = -1;
 const homePage = 'https://example.com';
-
-function normalizeUrl(raw) {
-  const trimmed = raw.trim();
-  if (!trimmed) return homePage;
-  if (trimmed === 'about:blank') return trimmed;
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return 'https://' + trimmed;
-}
+let bodyLoadingTimeoutId = null;
 
 function formatBrowserTitle(url) {
   return url + ' - Microsoft Internet Explorer';
 }
 
 function navigate(url, pushHistory = true) {
-  const finalUrl = normalizeUrl(url);
+  const finalUrl = normalizeBrowserUrl(url, homePage);
   statusText.textContent = 'Opening page...';
   body_loading(true);
 
@@ -135,9 +129,17 @@ function navigate(url, pushHistory = true) {
 }
 
 function body_loading(on) {
+  if (bodyLoadingTimeoutId) {
+    window.clearTimeout(bodyLoadingTimeoutId);
+    bodyLoadingTimeoutId = null;
+  }
+
   if (on) {
     document.body.classList.add('loading');
-    setTimeout(() => document.body.classList.remove('loading'), 2000);
+    bodyLoadingTimeoutId = window.setTimeout(() => {
+      document.body.classList.remove('loading');
+      bodyLoadingTimeoutId = null;
+    }, 2000);
   } else {
     document.body.classList.remove('loading');
   }
@@ -154,40 +156,45 @@ function openInternetExplorer() {
   }
 }
 
-function updateClock() {
-  const now = new Date();
-  clock.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+function onGoClick() {
+  navigate(addressInput.value);
 }
 
-// Navigation buttons — query within the generated window element
-ieConfig.el.querySelector('#goBtn').addEventListener('click', () => navigate(addressInput.value));
-addressInput.addEventListener('keydown', (e) => {
+function onAddressKeyDown(e) {
   if (e.key === 'Enter') navigate(addressInput.value);
-});
+}
 
-ieConfig.el.querySelector('#homeBtn').addEventListener('click', () => navigate(homePage));
-ieConfig.el.querySelector('#refreshBtn').addEventListener('click', () => {
+function onHomeClick() {
+  navigate(homePage);
+}
+
+function onRefreshClick() {
   statusText.textContent = 'Refreshing...';
   if (addressInput.value && addressInput.value !== 'about:blank') {
     frame.src = addressInput.value;
   }
-});
-ieConfig.el.querySelector('#stopBtn').addEventListener('click', () => {
-  window.stop();
+}
+
+function onStopClick() {
+  try {
+    frame.contentWindow?.stop?.();
+  } catch {
+    // Ignore cross-origin stop errors.
+  }
   statusText.textContent = 'Stopped';
-});
+}
 
-ieConfig.el.querySelector('#searchBtn').addEventListener('click', () => {
+function onSearchClick() {
   navigate('https://www.google.com');
-});
+}
 
-ieConfig.el.querySelector('#favoritesBtn').addEventListener('click', () => {
+function onFavoritesClick() {
   alert(
     'Favorites\n\n\u2022 https://example.com\n\u2022 https://archive.org\n\u2022 https://wikipedia.org'
   );
-});
+}
 
-ieConfig.el.querySelector('#historyBtn').addEventListener('click', () => {
+function onHistoryClick() {
   if (historyStack.length === 0) {
     alert('History is empty.');
   } else {
@@ -196,29 +203,69 @@ ieConfig.el.querySelector('#historyBtn').addEventListener('click', () => {
         historyStack.map((u, i) => (i === historyIndex ? '\u25b6 ' : '  ') + u).join('\n')
     );
   }
-});
+}
 
-ieConfig.el.querySelector('#backBtn').addEventListener('click', () => {
+function onBackClick() {
   if (historyIndex > 0) {
     historyIndex -= 1;
     navigate(historyStack[historyIndex], false);
   }
-});
+}
 
-ieConfig.el.querySelector('#forwardBtn').addEventListener('click', () => {
+function onForwardClick() {
   if (historyIndex < historyStack.length - 1) {
     historyIndex += 1;
     navigate(historyStack[historyIndex], false);
   }
-});
+}
 
-frame.addEventListener('load', () => {
+function onFrameLoad() {
   statusText.textContent = 'Done';
   body_loading(false);
-});
+}
 
-setInterval(updateClock, 1000);
-updateClock();
+const goBtn = ieConfig.el.querySelector('#goBtn');
+const homeBtn = ieConfig.el.querySelector('#homeBtn');
+const refreshBtn = ieConfig.el.querySelector('#refreshBtn');
+const stopBtn = ieConfig.el.querySelector('#stopBtn');
+const searchBtn = ieConfig.el.querySelector('#searchBtn');
+const favoritesBtn = ieConfig.el.querySelector('#favoritesBtn');
+const historyBtn = ieConfig.el.querySelector('#historyBtn');
+const backBtn = ieConfig.el.querySelector('#backBtn');
+const forwardBtn = ieConfig.el.querySelector('#forwardBtn');
+
+goBtn.addEventListener('click', onGoClick);
+addressInput.addEventListener('keydown', onAddressKeyDown);
+homeBtn.addEventListener('click', onHomeClick);
+refreshBtn.addEventListener('click', onRefreshClick);
+stopBtn.addEventListener('click', onStopClick);
+searchBtn.addEventListener('click', onSearchClick);
+favoritesBtn.addEventListener('click', onFavoritesClick);
+historyBtn.addEventListener('click', onHistoryClick);
+backBtn.addEventListener('click', onBackClick);
+forwardBtn.addEventListener('click', onForwardClick);
+frame.addEventListener('load', onFrameLoad);
+
+function cleanupIEWindowListeners() {
+  goBtn.removeEventListener('click', onGoClick);
+  addressInput.removeEventListener('keydown', onAddressKeyDown);
+  homeBtn.removeEventListener('click', onHomeClick);
+  refreshBtn.removeEventListener('click', onRefreshClick);
+  stopBtn.removeEventListener('click', onStopClick);
+  searchBtn.removeEventListener('click', onSearchClick);
+  favoritesBtn.removeEventListener('click', onFavoritesClick);
+  historyBtn.removeEventListener('click', onHistoryClick);
+  backBtn.removeEventListener('click', onBackClick);
+  forwardBtn.removeEventListener('click', onForwardClick);
+  frame.removeEventListener('load', onFrameLoad);
+  body_loading(false);
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    cleanupIEWindowListeners();
+  });
+}
 
 // Register on shared namespace
 WindoesApp.open.internetExplorer = openInternetExplorer;

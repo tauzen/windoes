@@ -167,15 +167,15 @@ Set up the tooling we need before changing code.
 
 ### Phase 2 — Correctness & lifecycle fixes (1–2 days, medium risk)
 
-- [ ] **B4 / E2** Validate `event.origin` + `event.source` on every `window.addEventListener('message', …)` handler. Reject by default; allow only known iframe contentWindows.
-- [ ] **E1** Add `sandbox="allow-scripts allow-same-origin"` (tune per iframe) to every iframe.
-- [ ] **B13 / E4** Reject `javascript:` and `data:` URLs in `normalizeUrl` for the IE address bar.
-- [ ] **B11** Fix Stop button — target the iframe's contentWindow instead of the host.
-- [ ] **B12** Render shutdown screen as a React component so it is torn down with the shell.
-- [ ] **B9** Replace silent `catch(e) {}` blocks in `sound.js` with a single `debugLog`-gated warning; keep the UX quiet but not the logs.
-- [ ] **B10** `fs-explorer.render()` should surface the error message into the status bar for the dev UI and log via `console.error`.
+- [x] **B4 / E2** Validate `event.origin` + `event.source` on every `window.addEventListener('message', …)` handler. Reject by default; allow only known iframe contentWindows.
+- [x] **E1** Add `sandbox="allow-scripts allow-same-origin"` (tune per iframe) to every iframe.
+- [x] **B13 / E4** Reject `javascript:` and `data:` URLs in `normalizeUrl` for the IE address bar.
+- [x] **B11** Fix Stop button — target the iframe's contentWindow instead of the host.
+- [x] **B12** Render shutdown screen as a React component so it is torn down with the shell.
+- [x] **B9** Replace silent `catch(e) {}` blocks in `sound.js` with a single `debugLog`-gated warning; keep the UX quiet but not the logs.
+- [x] **B10** `fs-explorer.render()` should surface the error message into the status bar for the dev UI and log via `console.error`.
 - [ ] **C1–C5** Audit every top-level `setInterval`, `setTimeout`, and `addEventListener`. Add cleanup hooks. Where the module is truly singleton-per-tab, at minimum store timer ids so HMR can clear them.
-- [ ] **B1 / F5** Move the taskbar clock into `Taskbar.jsx` with a `useEffect` interval and pause on `document.hidden`.
+- [x] **B1 / F5** Move the taskbar clock into `Taskbar.jsx` with a `useEffect` interval and pause on `document.hidden`.
 
 **Exit criteria:** no new lint warnings; Playwright tests unchanged; new reducer tests for shutdown + URL validation pass.
 

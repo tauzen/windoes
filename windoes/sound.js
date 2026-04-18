@@ -5,6 +5,12 @@ import WindoesApp from './app-state.js';
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
+
+function debugLog(...args) {
+  if (!WindoesApp.config?.debugLog) return;
+  console.warn('[sound]', ...args);
+}
+
 function ensureAudio() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
@@ -23,7 +29,9 @@ function playBeep(freq, duration, type) {
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
-  } catch {}
+  } catch (error) {
+    debugLog('playBeep failed', error);
+  }
 }
 
 function playStartupSound() {
@@ -43,7 +51,9 @@ function playStartupSound() {
       osc.start(ctx.currentTime + i * 0.3);
       osc.stop(ctx.currentTime + i * 0.3 + 0.7);
     });
-  } catch {}
+  } catch (error) {
+    debugLog('playStartupSound failed', error);
+  }
 }
 
 function playErrorSound() {
