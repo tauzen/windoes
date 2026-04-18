@@ -185,6 +185,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
         sandbox="allow-scripts allow-same-origin"
       ></iframe>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'solitaireTaskBtn', icon: 'task-icon-solitaire', label: 'Solitaire' },
   iframeId: 'solitaireFrame',

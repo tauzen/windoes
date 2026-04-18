@@ -531,6 +531,46 @@ async function runTests() {
       myComputerMinesweeperWindowComponentShellState.minesweeper.hasView,
       'Minesweeper window keeps view area'
     );
+
+    // ── Test 15: Phase 4 window-component migration (slice 4) ──────────────
+    console.log('\nTest 15: Solitaire uses shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.solitaire();
+    });
+    await page.waitForTimeout(300);
+
+    const solitaireWindowComponentShellState = await page.evaluate(() => {
+      const solitaireWindow = document.getElementById('solitaireWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return readShellState(solitaireWindow);
+    });
+
+    assert(solitaireWindowComponentShellState.exists, 'Solitaire window exists');
+    assert(
+      solitaireWindowComponentShellState.usesSharedWindowComponent,
+      'Solitaire window tagged as shared Window component'
+    );
+    assert(
+      solitaireWindowComponentShellState.hasTitlebar,
+      'Solitaire window keeps titlebar chrome'
+    );
+    assert(
+      !solitaireWindowComponentShellState.hasMenubar,
+      'Solitaire window remains no-menubar (expected for this window type)'
+    );
+    assert(solitaireWindowComponentShellState.hasView, 'Solitaire window keeps view area');
   } finally {
     await browser.close();
     server.close();
