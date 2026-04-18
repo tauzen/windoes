@@ -79,6 +79,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
         </span>
       </>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'taskButton', icon: 'task-icon-ie', label: 'about:blank - Microsoft Int...' },
   iframe: null, // IE manages its own iframe/navigation

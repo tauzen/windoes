@@ -407,6 +407,59 @@ async function runTests() {
     assert(windowComponentShellState.recycleBin.hasTitlebar, 'Recycle Bin keeps titlebar chrome');
     assert(windowComponentShellState.recycleBin.hasMenubar, 'Recycle Bin keeps menubar chrome');
     assert(windowComponentShellState.recycleBin.hasView, 'Recycle Bin keeps view area');
+
+    // ── Test 13: Phase 4 window-component migration (slice 2) ──────────────
+    console.log('\nTest 13: IE + Notepad use shared Window component shell');
+
+    await page.evaluate(() => {
+      WindoesApp.open.internetExplorer();
+      WindoesApp.open.notepad();
+    });
+    await page.waitForTimeout(300);
+
+    const ieNotepadWindowComponentShellState = await page.evaluate(() => {
+      const ieWindow = document.getElementById('ieWindow');
+      const notepadWindow = document.getElementById('notepadWindow');
+
+      function readShellState(windowEl) {
+        if (!windowEl) return { exists: false };
+        return {
+          exists: true,
+          usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
+          hasTitlebar: !!windowEl.querySelector('.titlebar'),
+          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasView: !!windowEl.querySelector('.view'),
+        };
+      }
+
+      return {
+        ie: readShellState(ieWindow),
+        notepad: readShellState(notepadWindow),
+      };
+    });
+
+    assert(ieNotepadWindowComponentShellState.ie.exists, 'IE window exists');
+    assert(ieNotepadWindowComponentShellState.notepad.exists, 'Notepad window exists');
+    assert(
+      ieNotepadWindowComponentShellState.ie.usesSharedWindowComponent,
+      'IE window tagged as shared Window component'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.usesSharedWindowComponent,
+      'Notepad window tagged as shared Window component'
+    );
+    assert(ieNotepadWindowComponentShellState.ie.hasTitlebar, 'IE window keeps titlebar chrome');
+    assert(ieNotepadWindowComponentShellState.ie.hasMenubar, 'IE window keeps menubar chrome');
+    assert(ieNotepadWindowComponentShellState.ie.hasView, 'IE window keeps view area');
+    assert(
+      ieNotepadWindowComponentShellState.notepad.hasTitlebar,
+      'Notepad window keeps titlebar chrome'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.hasMenubar,
+      'Notepad window keeps menubar chrome'
+    );
+    assert(ieNotepadWindowComponentShellState.notepad.hasView, 'Notepad window keeps view area');
   } finally {
     await browser.close();
     server.close();
