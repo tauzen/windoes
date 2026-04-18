@@ -102,6 +102,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
         ></iframe>
       </>
     ),
+    useSharedWindowComponent: true,
   },
   taskButton: { id: 'winampTaskBtn', icon: 'task-icon-winamp', label: 'Winamp' },
   iframeId: 'winampFrame',

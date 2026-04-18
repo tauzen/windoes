@@ -571,6 +571,44 @@ async function runTests() {
       'Solitaire window remains no-menubar (expected for this window type)'
     );
     assert(solitaireWindowComponentShellState.hasView, 'Solitaire window keeps view area');
+
+    // ── Test 16: Phase 4 window-component migration (slice 5: headless) ────
+    console.log('\nTest 16: Winamp headless window is marked as shared component migration');
+
+    await page.evaluate(() => {
+      WindoesApp.open.winamp();
+    });
+    await page.waitForTimeout(300);
+
+    const winampWindowComponentShellState = await page.evaluate(() => {
+      const winampWindow = document.getElementById('winampWindow');
+      if (!winampWindow) return { exists: false };
+
+      return {
+        exists: true,
+        usesSharedWindowComponent: winampWindow.dataset.windowComponent === 'true',
+        hasTitlebar: !!winampWindow.querySelector('.titlebar'),
+        hasMenubar: !!winampWindow.querySelector('.menubar'),
+        hasView: !!winampWindow.querySelector('#winampFrame'),
+        isHeadless: winampWindow.classList.contains('window-headless'),
+      };
+    });
+
+    assert(winampWindowComponentShellState.exists, 'Winamp window exists');
+    assert(
+      winampWindowComponentShellState.usesSharedWindowComponent,
+      'Winamp window tagged as shared Window migration component'
+    );
+    assert(winampWindowComponentShellState.isHeadless, 'Winamp remains headless');
+    assert(
+      !winampWindowComponentShellState.hasTitlebar,
+      'Winamp has no titlebar (headless expected)'
+    );
+    assert(
+      !winampWindowComponentShellState.hasMenubar,
+      'Winamp has no menubar (headless expected)'
+    );
+    assert(winampWindowComponentShellState.hasView, 'Winamp keeps iframe view');
   } finally {
     await browser.close();
     server.close();
