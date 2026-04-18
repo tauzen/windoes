@@ -51,7 +51,7 @@ function scheduleRandomBSOD() {
   const delay = (120 + Math.random() * 240) * 1000;
   clearTimer(randomBsodTimerId);
   randomBsodTimerId = window.setTimeout(() => {
-    if (WindoesApp.bootDone && !bsodActive) triggerBSOD();
+    if (WindoesApp.state.get().boot.done && !bsodActive) triggerBSOD();
   }, delay);
 }
 
@@ -116,7 +116,7 @@ function scheduleRandomError() {
     const isErrorOpen = !!(
       typeof WindoesApp.errorDialog.isOpen === 'function' && WindoesApp.errorDialog.isOpen()
     );
-    if (WindoesApp.bootDone && !bsodActive && !isErrorOpen) {
+    if (WindoesApp.state.get().boot.done && !bsodActive && !isErrorOpen) {
       const err = randomErrors[Math.floor(Math.random() * randomErrors.length)];
       showErrorDialog(err);
     }

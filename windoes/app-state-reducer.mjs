@@ -8,7 +8,6 @@
  * @property {string[]=} stack
  * @property {string|null=} focusedId
  * @property {Record<string, unknown>=} byId
- * @property {Record<string, unknown>|null=} command
  * @property {number=} x
  * @property {number=} y
  * @property {string|null=} selectedPath
@@ -16,11 +15,7 @@
  * @property {number=} left
  * @property {number=} top
  * @property {string=} path
- * @property {string|null=} sourceId
- * @property {number=} startX
- * @property {number=} startY
- * @property {number=} origLeft
- * @property {number=} origTop
+ * @property {string=} id
  */
 
 export const initialState = {
@@ -52,8 +47,6 @@ export const initialState = {
     stack: [],
     focusedId: null,
     byId: {},
-    interactionCommand: null,
-    interactionCommandSeq: 0,
   },
   selection: {
     desktopIconId: null,
@@ -76,17 +69,86 @@ export const initialState = {
     saveDialogOpen: false,
     saveDialogPath: '/C:/My Documents/Untitled.txt',
   },
-  drag: {
-    active: false,
-    sourceId: null,
-    startX: null,
-    startY: null,
-    origLeft: null,
-    origTop: null,
-    currentLeft: null,
-    currentTop: null,
-  },
 };
+
+function defaultWindowState(id) {
+  return {
+    id,
+    open: false,
+    minimized: false,
+    maximized: false,
+    focused: false,
+    zIndex: 0,
+    taskbarVisible: false,
+  };
+}
+
+function upsertWindow(byId, id) {
+  return byId[id] ? { ...byId[id] } : defaultWindowState(id);
+}
+
+function recomputeWindowMeta(windows) {
+  const stack = windows.stack;
+  const focusedId = stack.length ? stack[stack.length - 1] : null;
+  const nextById = {};
+
+  Object.entries(windows.byId).forEach(([id, win]) => {
+    nextById[id] = {
+      ...win,
+      focused: false,
+      zIndex: 0,
+    };
+  });
+
+  stack.forEach((id, index) => {
+    if (!nextById[id]) {
+      nextById[id] = defaultWindowState(id);
+    }
+    nextById[id] = {
+      ...nextById[id],
+      focused: id === focusedId,
+      zIndex: index + 1,
+    };
+  });
+
+  return {
+    ...windows,
+    focusedId,
+    byId: nextById,
+  };
+}
+
+function withWindowState(current, id, mutate) {
+  if (!id) return current;
+
+  const windows = {
+    ...current.windows,
+    stack: current.windows.stack.slice(),
+    byId: { ...current.windows.byId },
+  };
+
+  const previous = windows.byId[id];
+  const win = upsertWindow(windows.byId, id);
+  windows.byId[id] = win;
+
+  mutate(windows, win, previous);
+
+  return {
+    ...current,
+    windows: recomputeWindowMeta(windows),
+  };
+}
+
+function moveWindowToTop(stack, id) {
+  const idx = stack.indexOf(id);
+  if (idx !== -1) stack.splice(idx, 1);
+  stack.push(id);
+}
+
+function removeWindowFromStack(stack, id) {
+  const idx = stack.indexOf(id);
+  if (idx !== -1) stack.splice(idx, 1);
+}
 
 /**
  * @param {typeof initialState} current
@@ -147,44 +209,58 @@ export function reduce(current, action) {
           done: true,
         },
       };
-    case 'WINDOW_STACK_SET': {
-      const stack = action.stack || [];
-      return {
-        ...current,
-        windows: {
-          ...current.windows,
-          stack,
-          focusedId: stack.length ? stack[stack.length - 1] : null,
-        },
-      };
-    }
-    case 'WINDOWS_STATE_SET': {
-      const stack = action.stack || [];
-      const focusedId =
-        action.focusedId !== undefined
-          ? action.focusedId
-          : stack.length
-            ? stack[stack.length - 1]
-            : null;
-      return {
-        ...current,
-        windows: {
-          ...current.windows,
-          stack,
-          focusedId,
-          byId: action.byId || {},
-        },
-      };
-    }
-    case 'WINDOW_INTERACTION_DISPATCH':
-      return {
-        ...current,
-        windows: {
-          ...current.windows,
-          interactionCommand: action.command || null,
-          interactionCommandSeq: (current.windows.interactionCommandSeq || 0) + 1,
-        },
-      };
+
+    case 'WINDOW_REGISTER':
+      return withWindowState(current, action.id, () => {});
+
+    case 'WINDOW_OPEN':
+      return withWindowState(current, action.id, (windows, win) => {
+        win.open = true;
+        win.minimized = false;
+        win.taskbarVisible = true;
+        moveWindowToTop(windows.stack, win.id);
+      });
+
+    case 'WINDOW_CLOSE':
+      return withWindowState(current, action.id, (windows, win) => {
+        win.open = false;
+        win.minimized = false;
+        win.maximized = false;
+        win.taskbarVisible = false;
+        removeWindowFromStack(windows.stack, win.id);
+      });
+
+    case 'WINDOW_MINIMIZE':
+      return withWindowState(current, action.id, (windows, win) => {
+        win.open = false;
+        win.minimized = true;
+        win.taskbarVisible = true;
+        removeWindowFromStack(windows.stack, win.id);
+      });
+
+    case 'WINDOW_RESTORE':
+      return withWindowState(current, action.id, (windows, win) => {
+        win.open = true;
+        win.minimized = false;
+        win.taskbarVisible = true;
+        moveWindowToTop(windows.stack, win.id);
+      });
+
+    case 'WINDOW_FOCUS':
+      return withWindowState(current, action.id, (windows, win, previous) => {
+        if (!previous || !previous.open || previous.minimized) return;
+        moveWindowToTop(windows.stack, win.id);
+      });
+
+    case 'WINDOW_MAXIMIZE_TOGGLE':
+      return withWindowState(current, action.id, (windows, win) => {
+        win.maximized = !win.maximized;
+        if (!win.minimized) {
+          win.open = true;
+          moveWindowToTop(windows.stack, win.id);
+        }
+      });
+
     case 'EXPLORER_CONTEXT_OPEN':
       return {
         ...current,
@@ -310,38 +386,6 @@ export function reduce(current, action) {
         dialogs: {
           ...current.dialogs,
           shutdownScreenVisible: false,
-        },
-      };
-    case 'DRAG_START':
-      return {
-        ...current,
-        drag: {
-          active: true,
-          sourceId: action.sourceId || null,
-          startX: action.startX,
-          startY: action.startY,
-          origLeft: action.origLeft,
-          origTop: action.origTop,
-          currentLeft: action.origLeft,
-          currentTop: action.origTop,
-        },
-      };
-    case 'DRAG_MOVE':
-      if (!current.drag.active || current.drag.sourceId !== action.sourceId) return current;
-      return {
-        ...current,
-        drag: {
-          ...current.drag,
-          currentLeft: action.left,
-          currentTop: action.top,
-        },
-      };
-    case 'DRAG_END':
-      if (!current.drag.active) return current;
-      return {
-        ...current,
-        drag: {
-          ...initialState.drag,
         },
       };
     default:

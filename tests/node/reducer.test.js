@@ -70,32 +70,81 @@ test('BOOT_FINISH marks boot as complete', async () => {
   assert.equal(next.boot.done, true);
 });
 
-test('WINDOW_STACK_SET updates stack and focused id', async () => {
+test('WINDOW_REGISTER creates default window state', async () => {
   const { reduce } = await loadReducerModule();
-  const next = reduce(await freshState(), { type: 'WINDOW_STACK_SET', stack: ['a', 'b'] });
-  assert.deepEqual(next.windows.stack, ['a', 'b']);
-  assert.equal(next.windows.focusedId, 'b');
+  const next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  assert.equal(next.windows.byId.a.open, false);
+  assert.equal(next.windows.byId.a.minimized, false);
+  assert.equal(next.windows.byId.a.maximized, false);
+  assert.equal(next.windows.byId.a.focused, false);
+  assert.equal(next.windows.byId.a.taskbarVisible, false);
 });
 
-test('WINDOWS_STATE_SET updates stack/byId with inferred focus', async () => {
+test('WINDOW_OPEN opens window, makes taskbar visible, and focuses it', async () => {
   const { reduce } = await loadReducerModule();
-  const byId = { a: { open: true } };
-  const next = reduce(await freshState(), { type: 'WINDOWS_STATE_SET', stack: ['a'], byId });
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
   assert.deepEqual(next.windows.stack, ['a']);
   assert.equal(next.windows.focusedId, 'a');
-  assert.deepEqual(next.windows.byId, byId);
+  assert.equal(next.windows.byId.a.open, true);
+  assert.equal(next.windows.byId.a.taskbarVisible, true);
+  assert.equal(next.windows.byId.a.focused, true);
 });
 
-test('WINDOW_INTERACTION_DISPATCH increments seq and stores command', async () => {
+test('WINDOW_MINIMIZE removes from stack and keeps taskbar visible', async () => {
   const { reduce } = await loadReducerModule();
-  const current = await freshState();
-  current.windows.interactionCommandSeq = 4;
-  const next = reduce(current, {
-    type: 'WINDOW_INTERACTION_DISPATCH',
-    command: { type: 'FOCUS', id: 'a' },
-  });
-  assert.equal(next.windows.interactionCommandSeq, 5);
-  assert.deepEqual(next.windows.interactionCommand, { type: 'FOCUS', id: 'a' });
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_MINIMIZE', id: 'a' });
+  assert.deepEqual(next.windows.stack, []);
+  assert.equal(next.windows.byId.a.open, false);
+  assert.equal(next.windows.byId.a.minimized, true);
+  assert.equal(next.windows.byId.a.taskbarVisible, true);
+});
+
+test('WINDOW_RESTORE reopens a minimized window and focuses it', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_MINIMIZE', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_RESTORE', id: 'a' });
+  assert.deepEqual(next.windows.stack, ['a']);
+  assert.equal(next.windows.byId.a.open, true);
+  assert.equal(next.windows.byId.a.minimized, false);
+  assert.equal(next.windows.byId.a.focused, true);
+});
+
+test('WINDOW_FOCUS reorders stack to focused topmost window', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_REGISTER', id: 'b' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'b' });
+  next = reduce(next, { type: 'WINDOW_FOCUS', id: 'a' });
+  assert.deepEqual(next.windows.stack, ['b', 'a']);
+  assert.equal(next.windows.focusedId, 'a');
+});
+
+test('WINDOW_MAXIMIZE_TOGGLE toggles maximized state', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_MAXIMIZE_TOGGLE', id: 'a' });
+  assert.equal(next.windows.byId.a.maximized, true);
+  next = reduce(next, { type: 'WINDOW_MAXIMIZE_TOGGLE', id: 'a' });
+  assert.equal(next.windows.byId.a.maximized, false);
+});
+
+test('WINDOW_CLOSE closes window and hides taskbar button', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'WINDOW_REGISTER', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_OPEN', id: 'a' });
+  next = reduce(next, { type: 'WINDOW_CLOSE', id: 'a' });
+  assert.deepEqual(next.windows.stack, []);
+  assert.equal(next.windows.focusedId, null);
+  assert.equal(next.windows.byId.a.open, false);
+  assert.equal(next.windows.byId.a.minimized, false);
+  assert.equal(next.windows.byId.a.taskbarVisible, false);
 });
 
 test('EXPLORER_CONTEXT_OPEN opens context menu and sets selection', async () => {
@@ -217,49 +266,6 @@ test('SHUTDOWN_SCREEN_HIDE hides shutdown screen', async () => {
   current.dialogs.shutdownScreenVisible = true;
   const next = reduce(current, { type: 'SHUTDOWN_SCREEN_HIDE' });
   assert.equal(next.dialogs.shutdownScreenVisible, false);
-});
-
-test('DRAG_START initializes drag state', async () => {
-  const { reduce } = await loadReducerModule();
-  const next = reduce(await freshState(), {
-    type: 'DRAG_START',
-    sourceId: 'w1',
-    startX: 10,
-    startY: 20,
-    origLeft: 30,
-    origTop: 40,
-  });
-  assert.equal(next.drag.active, true);
-  assert.equal(next.drag.sourceId, 'w1');
-  assert.equal(next.drag.currentLeft, 30);
-  assert.equal(next.drag.currentTop, 40);
-});
-
-test('DRAG_MOVE updates coordinates only for active matching source', async () => {
-  const { reduce } = await loadReducerModule();
-  const current = await freshState();
-  current.drag = {
-    active: true,
-    sourceId: 'w1',
-    startX: 10,
-    startY: 20,
-    origLeft: 30,
-    origTop: 40,
-    currentLeft: 30,
-    currentTop: 40,
-  };
-  const next = reduce(current, { type: 'DRAG_MOVE', sourceId: 'w1', left: 35, top: 45 });
-  assert.equal(next.drag.currentLeft, 35);
-  assert.equal(next.drag.currentTop, 45);
-});
-
-test('DRAG_END resets drag state', async () => {
-  const { initialState, reduce } = await loadReducerModule();
-  const current = await freshState();
-  current.drag.active = true;
-  current.drag.sourceId = 'w1';
-  const next = reduce(current, { type: 'DRAG_END' });
-  assert.deepEqual(next.drag, initialState.drag);
 });
 
 test('unknown action returns current state object', async () => {

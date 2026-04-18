@@ -6,14 +6,59 @@ import { makeDraggable } from './dragging.js';
 import { renderInto } from './react-view.js';
 import { WINDOW_Z_BASE } from './constants.js';
 
+function WindowTitlebar({ windowId, template }) {
+  const isActive = WindoesApp.state.use((s) => {
+    const win = s.windows?.byId?.[windowId];
+    return !!(win && win.focused && win.open && !win.minimized);
+  });
+
+  const hasMaxBtn = template.maximizeBtn || template.maximizeBtnId;
+
+  return (
+    <div
+      className={isActive ? 'titlebar' : 'titlebar inactive'}
+      {...(template.titlebarId ? { id: template.titlebarId } : {})}
+    >
+      <div className="title-left">
+        {(template.titleIcon || template.titleLogoClass) && (
+          <span
+            className={template.titleLogoClass || 'app-title-logo ' + (template.titleIcon || '')}
+            aria-hidden={true}
+          ></span>
+        )}
+        <span {...(template.titleSpanId ? { id: template.titleSpanId } : {})}>
+          {template.title}
+        </span>
+      </div>
+      <div className="window-controls">
+        {template.minimizeBtnId && (
+          <div className="ctrl-btn" id={template.minimizeBtnId}>
+            _
+          </div>
+        )}
+        {hasMaxBtn && (
+          <div
+            className="ctrl-btn ctrl-max"
+            {...(template.maximizeBtnId ? { id: template.maximizeBtnId } : {})}
+          >
+            □
+          </div>
+        )}
+        {template.closeBtnId && (
+          <button className="ctrl-btn" id={template.closeBtnId} aria-label="Close">
+            ×
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const WindowManager = {
-  _stack: [], // ordered bottom→top by z-index
-  _windows: {}, // id → config
+  _windows: {}, // id → config registry
   _baseZ: WINDOW_Z_BASE,
   _desktopEl: null,
   _taskAreaEl: null,
-  _lastInteractionSeq: 0,
-  _lastDragSnapshot: null,
 
   _getDesktop() {
     if (!this._desktopEl) this._desktopEl = document.getElementById('theDesktop');
@@ -23,31 +68,6 @@ const WindowManager = {
   _getTaskArea() {
     if (!this._taskAreaEl) this._taskAreaEl = document.getElementById('taskArea');
     return this._taskAreaEl;
-  },
-
-  _syncState() {
-    const stack = this._stack.slice();
-    const focusedId = stack.length ? stack[stack.length - 1] : null;
-    const byId = {};
-
-    Object.entries(this._windows).forEach(([id, win]) => {
-      byId[id] = {
-        id,
-        open: !!win.isOpen,
-        minimized: !!win.isMinimized,
-        maximized: !!win.isMaximized,
-        focused: id === focusedId,
-        zIndex: win.el ? Number.parseInt(win.el.style.zIndex || '0', 10) || 0 : 0,
-        taskbarVisible: !!(win.taskBtn && win.taskBtn.style.display !== 'none'),
-      };
-    });
-
-    WindoesApp.state.dispatch({
-      type: 'WINDOWS_STATE_SET',
-      stack,
-      focusedId,
-      byId,
-    });
   },
 
   /**
@@ -69,8 +89,7 @@ const WindowManager = {
   /**
    * Build a window <section> element from a template config object.
    */
-  _buildWindowEl(tmpl) {
-    const hasMaxBtn = tmpl.maximizeBtn || tmpl.maximizeBtnId;
+  _buildWindowEl(tmpl, windowId) {
     const viewStyle = tmpl.viewStyle
       ? tmpl.viewStyle
           .split(';')
@@ -84,43 +103,7 @@ const WindowManager = {
           }, {})
       : undefined;
 
-    const content = [
-      <div
-        key="titlebar"
-        className="titlebar"
-        {...(tmpl.titlebarId ? { id: tmpl.titlebarId } : {})}
-      >
-        <div className="title-left">
-          {(tmpl.titleIcon || tmpl.titleLogoClass) && (
-            <span
-              className={tmpl.titleLogoClass || 'app-title-logo ' + (tmpl.titleIcon || '')}
-              aria-hidden={true}
-            ></span>
-          )}
-          <span {...(tmpl.titleSpanId ? { id: tmpl.titleSpanId } : {})}>{tmpl.title}</span>
-        </div>
-        <div className="window-controls">
-          {tmpl.minimizeBtnId && (
-            <div className="ctrl-btn" id={tmpl.minimizeBtnId}>
-              _
-            </div>
-          )}
-          {hasMaxBtn && (
-            <div
-              className="ctrl-btn ctrl-max"
-              {...(tmpl.maximizeBtnId ? { id: tmpl.maximizeBtnId } : {})}
-            >
-              □
-            </div>
-          )}
-          {tmpl.closeBtnId && (
-            <button className="ctrl-btn" id={tmpl.closeBtnId} aria-label="Close">
-              ×
-            </button>
-          )}
-        </div>
-      </div>,
-    ];
+    const content = [<WindowTitlebar key="titlebar" windowId={windowId} template={tmpl} />];
 
     if (tmpl.menubar) {
       content.push(
@@ -190,135 +173,14 @@ const WindowManager = {
     return btn;
   },
 
-  /**
-   * Register a window with the manager.
-   */
-  register(id, config) {
-    // Build DOM from template if provided
-    if (config.template) {
-      config.el = config.headless
-        ? this._buildHeadlessEl(config.template)
-        : this._buildWindowEl(config.template);
-    }
-
-    // Build taskbar button if specified
-    if (config.taskButton) {
-      config.taskBtn = this._buildTaskBtn(config.taskButton);
-    }
-
-    // Resolve iframe reference from template
-    if (config.iframeId && config.el) {
-      config.iframe = config.el.querySelector('#' + config.iframeId);
-    }
-
-    config.id = id;
-    if (config.el) config.el.dataset.windowId = id;
-    config.isOpen = false;
-    config.isMinimized = false;
-    config.isMaximized = !!config.isMaximized;
-    config._attached = false;
-    this._windows[id] = config;
-
-    // Click anywhere on window → bring to front
-    config.el.addEventListener('mousedown', () => this.bringToFront(id));
-
-    // Auto-wire close button
-    if (config.template && config.template.closeBtnId) {
-      const closeBtn = config.el.querySelector('#' + config.template.closeBtnId);
-      if (closeBtn) closeBtn.addEventListener('click', () => this.close(id));
-    }
-
-    // Auto-wire minimize button
-    if (config.template && config.template.minimizeBtnId) {
-      const minBtn = config.el.querySelector('#' + config.template.minimizeBtnId);
-      if (minBtn) minBtn.addEventListener('click', () => this.minimize(id));
-    }
-
-    // Auto-wire maximize button
-    if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
-      const maxBtn = config.el.querySelector('.ctrl-max');
-      if (maxBtn) {
-        maxBtn.addEventListener('click', () => {
-          WindoesApp.state.dispatch({
-            type: 'WINDOW_INTERACTION_DISPATCH',
-            command: { type: 'TOGGLE_MAXIMIZE', id },
-          });
-        });
-      }
-    }
-
-    // Auto-wire taskbar toggle
-    if (config.taskBtn) {
-      config.taskBtn.addEventListener('click', () => this.toggleFromTaskbar(id));
-    }
-
-    // Auto-wire dragging
-    if (config.draggable !== false) {
-      const titlebar =
-        config.template && config.template.titlebarId
-          ? config.el.querySelector('#' + config.template.titlebarId)
-          : config.el.querySelector('.titlebar');
-      if (titlebar) {
-        makeDraggable(titlebar, config.el);
-        // Double-click titlebar to toggle maximize (if window has a maximize button)
-        if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
-          titlebar.addEventListener('dblclick', (e) => {
-            if (e.target.classList.contains('ctrl-btn')) return;
-            WindoesApp.state.dispatch({
-              type: 'WINDOW_INTERACTION_DISPATCH',
-              command: { type: 'TOGGLE_MAXIMIZE', id },
-            });
-          });
-        }
-      }
-    }
-
-    // Run setup callback for custom wiring
-    if (config.setup) config.setup(config);
-
-    return config;
+  _getWindowState(id) {
+    return WindoesApp.state.get().windows.byId[id] || null;
   },
 
-  /** Get a registered window config by id */
-  get(id) {
-    return this._windows[id];
+  _dispatch(action) {
+    WindoesApp.state.dispatch(action);
   },
 
-  /** Return the ordered stack (bottom→top) of open window ids */
-  getStack() {
-    return this._stack.slice();
-  },
-
-  /** Return the topmost (focused) window id, or null */
-  getFocused() {
-    return this._stack.length ? this._stack[this._stack.length - 1] : null;
-  },
-
-  /**
-   * Bring a window to the top of the stack and update z-indices.
-   */
-  bringToFront(id) {
-    const win = this._windows[id];
-    if (!win) return;
-
-    // Move to top of stack
-    const idx = this._stack.indexOf(id);
-    if (idx !== -1) this._stack.splice(idx, 1);
-    this._stack.push(id);
-    this._syncState();
-
-    // Reassign z-indices based on stack position
-    this._stack.forEach((wid, i) => {
-      this._windows[wid].el.style.zIndex = this._baseZ + i + 1;
-    });
-
-    // Update titlebars: active/inactive
-    this._updateTitlebars();
-  },
-
-  /**
-   * Attach window and taskbar button to the document (lazy, on first open).
-   */
   _ensureAttached(win) {
     if (win._attached) return;
     const desktop = this._getDesktop();
@@ -332,152 +194,89 @@ const WindowManager = {
     win._attached = true;
   },
 
-  /**
-   * Open (show) a window. If already open, just brings to front.
-   */
-  open(id) {
-    const win = this._windows[id];
-    if (!win) return;
+  _updateMaxBtn(win, maximized) {
+    const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
+    if (btn) btn.textContent = maximized ? '⧉' : '□';
+  },
 
-    // Lazy DOM attachment
-    this._ensureAttached(win);
+  _applyWindowState(win, state) {
+    if (!state) return;
 
-    // Load iframe if needed
-    if (win.iframe && win.iframeSrc) {
+    const prev = win._lastState || null;
+
+    if ((state.open || state.minimized || state.taskbarVisible) && !win._attached) {
+      this._ensureAttached(win);
+    }
+
+    if (win.iframe && win.iframeSrc && state.open && !prev?.open) {
       const currentSrc = win.iframe.getAttribute('src');
       if (!currentSrc || currentSrc === '' || currentSrc === 'about:blank') {
         win.iframe.src = win.iframeSrc;
       }
     }
 
-    win.el.classList.remove('hidden');
-    win.isOpen = true;
-    win.isMinimized = false;
+    if (win.el) {
+      if (state.open) {
+        win.el.classList.remove('hidden');
+      } else {
+        win.el.classList.add('hidden');
+      }
+
+      win.el.style.zIndex = String(this._baseZ + (state.zIndex || 0));
+
+      if (state.maximized && !prev?.maximized) {
+        win._savedStyle = {
+          left: win.el.style.left,
+          top: win.el.style.top,
+          width: win.el.style.width,
+          height: win.el.style.height,
+        };
+      }
+
+      if (state.maximized) {
+        win.el.classList.add('maximized');
+      } else {
+        win.el.classList.remove('maximized');
+        if (prev?.maximized && win._savedStyle) {
+          win.el.style.left = win._savedStyle.left;
+          win.el.style.top = win._savedStyle.top;
+          win.el.style.width = win._savedStyle.width;
+          win.el.style.height = win._savedStyle.height;
+        }
+      }
+
+      this._updateMaxBtn(win, !!state.maximized);
+    }
 
     if (win.taskBtn) {
-      win.taskBtn.style.display = 'flex';
+      win.taskBtn.style.display = state.taskbarVisible ? 'flex' : 'none';
+      const isActive = !!(state.focused && state.open && !state.minimized);
+      win.taskBtn.classList.toggle('active', isActive);
     }
 
-    this.bringToFront(id);
+    const becameOpen = !prev?.open && !!state.open;
+    if (becameOpen && win.onOpen) win.onOpen();
 
-    if (win.onOpen) win.onOpen();
-  },
-
-  /**
-   * Close a window fully (hide + clear iframe + hide taskbar button).
-   */
-  close(id) {
-    const win = this._windows[id];
-    if (!win) return;
-
-    if (win.isMaximized) {
-      win.isMaximized = false;
-      win.el.classList.remove('maximized');
-      this._updateMaxBtn(win);
+    const becameClosed = (prev?.open || prev?.minimized) && !state.open && !state.minimized;
+    if (becameClosed) {
+      if (win.iframe) {
+        win.iframe.removeAttribute('src');
+        win.iframe.src = 'about:blank';
+      }
+      if (win.onClose) win.onClose();
     }
 
-    win.el.classList.add('hidden');
-    win.isOpen = false;
-    win.isMinimized = false;
-
-    if (win.taskBtn) {
-      win.taskBtn.style.display = 'none';
-    }
-
-    // Clear iframe to stop media/scripts
-    if (win.iframe) {
-      win.iframe.removeAttribute('src');
-      win.iframe.src = 'about:blank';
-    }
-
-    // Remove from stack
-    const idx = this._stack.indexOf(id);
-    if (idx !== -1) this._stack.splice(idx, 1);
-    this._syncState();
-
-    this._updateTitlebars();
-
-    if (win.onClose) win.onClose();
+    win._lastState = { ...state };
   },
 
-  minimize(id) {
-    const win = this._windows[id];
-    if (!win) return;
-
-    win.el.classList.add('hidden');
-    win.isMinimized = true;
-
-    const idx = this._stack.indexOf(id);
-    if (idx !== -1) this._stack.splice(idx, 1);
-    this._syncState();
-
-    this._updateTitlebars();
+  _applyStateFromStore() {
+    const windowsState = WindoesApp.state.get().windows?.byId || {};
+    Object.entries(this._windows).forEach(([id, win]) => {
+      this._applyWindowState(win, windowsState[id] || null);
+    });
   },
 
-  restore(id) {
-    const win = this._windows[id];
-    if (!win) return;
-
-    win.el.classList.remove('hidden');
-    win.isMinimized = false;
-    this.bringToFront(id);
-  },
-
-  toggleFromTaskbar(id) {
-    const win = this._windows[id];
-    if (!win) return;
-
-    if (win.el.classList.contains('hidden')) {
-      this.restore(id);
-    } else {
-      this.minimize(id);
-    }
-  },
-
-  minimizeAll() {
-    const openIds = this._stack.slice();
-    openIds.forEach((id) => this.minimize(id));
-  },
-
-  maximize(id) {
-    const win = this._windows[id];
-    if (!win || win.isMaximized) return;
-    const el = win.el;
-    win._savedStyle = {
-      left: el.style.left,
-      top: el.style.top,
-      width: el.style.width,
-      height: el.style.height,
-    };
-    win.isMaximized = true;
-    el.classList.add('maximized');
-    this._updateMaxBtn(win);
-    this.bringToFront(id);
-  },
-
-  unmaximize(id) {
-    const win = this._windows[id];
-    if (!win || !win.isMaximized) return;
-    const el = win.el;
-    win.isMaximized = false;
-    el.classList.remove('maximized');
-    if (win._savedStyle) {
-      el.style.left = win._savedStyle.left;
-      el.style.top = win._savedStyle.top;
-      el.style.width = win._savedStyle.width;
-      el.style.height = win._savedStyle.height;
-    }
-    this._updateMaxBtn(win);
-    this.bringToFront(id);
-  },
-
-  toggleMaximize(id) {
-    const win = this._windows[id];
-    if (!win) return;
-    win.isMaximized ? this.unmaximize(id) : this.maximize(id);
-  },
-
-  _processInteractionCommand(command) {
+  _handleWindowInteraction(command) {
     if (!command || !command.type) return;
     if (command.type === 'TOGGLE_MAXIMIZE' && command.id) {
       this.toggleMaximize(command.id);
@@ -488,75 +287,158 @@ const WindowManager = {
     }
   },
 
-  _applyDragState(dragState) {
-    if (dragState && dragState.active && dragState.sourceId) {
-      const win = this._windows[dragState.sourceId];
-      if (win && win.el) {
-        if (Number.isFinite(dragState.currentLeft)) {
-          win.el.style.left = dragState.currentLeft + 'px';
-        }
-        if (Number.isFinite(dragState.currentTop)) {
-          win.el.style.top = dragState.currentTop + 'px';
+  /**
+   * Register a window with the manager.
+   */
+  register(id, config) {
+    config.id = id;
+
+    if (config.template) {
+      config.el = config.headless
+        ? this._buildHeadlessEl(config.template)
+        : this._buildWindowEl(config.template, id);
+    }
+
+    if (config.taskButton) {
+      config.taskBtn = this._buildTaskBtn(config.taskButton);
+    }
+
+    if (config.iframeId && config.el) {
+      config.iframe = config.el.querySelector('#' + config.iframeId);
+    }
+    if (config.el) config.el.dataset.windowId = id;
+    config._attached = false;
+    config._lastState = null;
+    this._windows[id] = config;
+
+    this._dispatch({ type: 'WINDOW_REGISTER', id });
+
+    config.el.addEventListener('mousedown', () => this.bringToFront(id));
+
+    if (config.template && config.template.closeBtnId) {
+      const closeBtn = config.el.querySelector('#' + config.template.closeBtnId);
+      if (closeBtn) closeBtn.addEventListener('click', () => this.close(id));
+    }
+
+    if (config.template && config.template.minimizeBtnId) {
+      const minBtn = config.el.querySelector('#' + config.template.minimizeBtnId);
+      if (minBtn) minBtn.addEventListener('click', () => this.minimize(id));
+    }
+
+    if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
+      const maxBtn = config.el.querySelector('.ctrl-max');
+      if (maxBtn) {
+        maxBtn.addEventListener('click', () => {
+          WindoesApp.events.windowInteraction.emit({ type: 'TOGGLE_MAXIMIZE', id });
+        });
+      }
+    }
+
+    if (config.taskBtn) {
+      config.taskBtn.addEventListener('click', () => this.toggleFromTaskbar(id));
+    }
+
+    if (config.draggable !== false) {
+      const titlebar =
+        config.template && config.template.titlebarId
+          ? config.el.querySelector('#' + config.template.titlebarId)
+          : config.el.querySelector('.titlebar');
+      if (titlebar) {
+        makeDraggable(titlebar, config.el);
+        if (config.template && (config.template.maximizeBtnId || config.template.maximizeBtn)) {
+          titlebar.addEventListener('dblclick', (e) => {
+            if (e.target.classList.contains('ctrl-btn')) return;
+            WindoesApp.events.windowInteraction.emit({ type: 'TOGGLE_MAXIMIZE', id });
+          });
         }
       }
     }
 
-    this._lastDragSnapshot = dragState;
+    if (config.setup) config.setup(config);
+
+    return config;
   },
 
-  _bridgeFromState() {
-    const state = WindoesApp.state.get();
-    const windowsState = state.windows || {};
-    const seq = windowsState.interactionCommandSeq || 0;
+  get(id) {
+    return this._windows[id];
+  },
 
-    if (seq > this._lastInteractionSeq) {
-      this._lastInteractionSeq = seq;
-      this._processInteractionCommand(windowsState.interactionCommand);
+  getStack() {
+    return WindoesApp.state.get().windows.stack.slice();
+  },
+
+  getFocused() {
+    return WindoesApp.state.get().windows.focusedId;
+  },
+
+  bringToFront(id) {
+    this._dispatch({ type: 'WINDOW_FOCUS', id });
+  },
+
+  open(id) {
+    this._dispatch({ type: 'WINDOW_OPEN', id });
+  },
+
+  close(id) {
+    this._dispatch({ type: 'WINDOW_CLOSE', id });
+  },
+
+  minimize(id) {
+    this._dispatch({ type: 'WINDOW_MINIMIZE', id });
+  },
+
+  restore(id) {
+    this._dispatch({ type: 'WINDOW_RESTORE', id });
+  },
+
+  toggleFromTaskbar(id) {
+    const state = this._getWindowState(id);
+    if (!state) return;
+
+    if (state.minimized || !state.open) {
+      this.restore(id);
+    } else {
+      this.minimize(id);
     }
-
-    this._applyDragState(state.drag || null);
   },
 
-  _updateMaxBtn(win) {
-    const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
-    if (btn) btn.textContent = win.isMaximized ? '⧉' : '□';
+  minimizeAll() {
+    const openIds = this.getStack();
+    openIds.forEach((id) => this.minimize(id));
   },
 
-  _updateTitlebars() {
-    const windowsState = WindoesApp.state.get().windows.byId || {};
-    Object.values(this._windows).forEach((win) => {
-      const tb = win.el.querySelector('.titlebar');
-      const winState = windowsState[win.id] || {};
-      const isActive = !!(winState.focused && winState.open && !winState.minimized);
-      if (tb) {
-        if (isActive) {
-          tb.classList.remove('inactive');
-        } else {
-          tb.classList.add('inactive');
-        }
-      }
-      if (win.taskBtn && win.taskBtn.style.display !== 'none') {
-        if (isActive) {
-          win.taskBtn.classList.add('active');
-        } else {
-          win.taskBtn.classList.remove('active');
-        }
-      }
-    });
+  maximize(id) {
+    const state = this._getWindowState(id);
+    if (!state || state.maximized) return;
+    this._dispatch({ type: 'WINDOW_MAXIMIZE_TOGGLE', id });
+  },
+
+  unmaximize(id) {
+    const state = this._getWindowState(id);
+    if (!state || !state.maximized) return;
+    this._dispatch({ type: 'WINDOW_MAXIMIZE_TOGGLE', id });
+  },
+
+  toggleMaximize(id) {
+    this._dispatch({ type: 'WINDOW_MAXIMIZE_TOGGLE', id });
   },
 };
 
 // Register on shared namespace
 WindoesApp.WindowManager = WindowManager;
 
-// Reducer-to-DOM compatibility bridge for interaction commands and drag state.
 const unsubscribeWindowManagerBridge = WindoesApp.state.subscribe(() => {
-  WindowManager._bridgeFromState();
+  WindowManager._applyStateFromStore();
+});
+
+const unsubscribeWindowInteraction = WindoesApp.events.windowInteraction.subscribe((command) => {
+  WindowManager._handleWindowInteraction(command);
 });
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     unsubscribeWindowManagerBridge();
+    unsubscribeWindowInteraction();
   });
 }
 
@@ -566,7 +448,7 @@ export function bringToFront(windowEl) {
   if (entry) {
     WindowManager.bringToFront(entry.id);
   } else {
-    const maxZ = WindowManager._baseZ + WindowManager._stack.length + 1;
+    const maxZ = WindowManager._baseZ + WindowManager.getStack().length + 1;
     windowEl.style.zIndex = maxZ;
   }
 }

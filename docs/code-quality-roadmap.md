@@ -183,11 +183,11 @@ Set up the tooling we need before changing code.
 
 Goal: make `WindoesApp.state` the single source of truth for window lifecycle and remove duplicated mutable state in `WindowManager`.
 
-- [ ] **A4** Collapse `WindowManager._stack` / `_windows[id].isOpen` / `.isMaximized` into reducer actions (`WINDOW_OPEN`, `WINDOW_CLOSE`, `WINDOW_MINIMIZE`, `WINDOW_RESTORE`, `WINDOW_MAXIMIZE_TOGGLE`, `WINDOW_FOCUS`). Keep `WindowManager` as a view layer that _reads_ state and applies DOM side effects.
-- [ ] **A8** Either (a) move drag into the reducer and render window position declaratively (bind `style.left`/`style.top` via React), or (b) remove drag from the reducer entirely and keep it imperative. Pick one.
-- [ ] **A9** Replace the sequence-number "interaction command" pattern with a typed event-emitter (`createEventBus` — 20 lines) or move the logic directly into React components.
-- [ ] **A2** Remove `bootDone` getter/setter; replace call sites with explicit `state.boot.done` reads or `BOOT_FINISH` dispatches.
-- [ ] **F2** Fold titlebar active-class updates into a React subscription (`useWindoesState(s => s.windows.byId[id].focused)` per window).
+- [x] **A4** Collapse `WindowManager._stack` / `_windows[id].isOpen` / `.isMaximized` into reducer actions (`WINDOW_OPEN`, `WINDOW_CLOSE`, `WINDOW_MINIMIZE`, `WINDOW_RESTORE`, `WINDOW_MAXIMIZE_TOGGLE`, `WINDOW_FOCUS`). Keep `WindowManager` as a view layer that _reads_ state and applies DOM side effects.
+- [x] **A8** Either (a) move drag into the reducer and render window position declaratively (bind `style.left`/`style/top` via React), or (b) remove drag from the reducer entirely and keep it imperative. Pick one.
+- [x] **A9** Replace the sequence-number "interaction command" pattern with a typed event-emitter (`createEventBus` — 20 lines) or move the logic directly into React components.
+- [x] **A2** Remove `bootDone` getter/setter; replace call sites with explicit `state.boot.done` reads or `BOOT_FINISH` dispatches.
+- [x] **F2** Fold titlebar active-class updates into a React subscription (`useWindoesState(s => s.windows.byId[id].focused)` per window).
 
 **Exit criteria:** grep `WindowManager._` shows only helper methods; reducer tests cover every window action; Playwright still green.
 
