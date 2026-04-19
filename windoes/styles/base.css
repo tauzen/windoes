@@ -1,0 +1,132 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  background: #008080;
+  overflow: hidden;
+  color: #000;
+  font-size: 11px;
+}
+
+/* ── Boot Screen ── */
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.boot-screen.hidden {
+  display: none;
+}
+
+.boot-bios {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #aaaaaa;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 20px;
+  white-space: pre-line;
+  z-index: 10000;
+}
+.boot-bios.hidden {
+  display: none;
+}
+
+.boot-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.boot-image {
+  width: 400px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.boot-subtitle {
+  color: #c0c0c0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.boot-progress-container {
+  width: 300px;
+  height: 20px;
+  background: #000;
+  border: 2px solid #333;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+.boot-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0040a0, #0070d0, #0040a0);
+  transition: width 0.3s;
+}
+
+.boot-status {
+  color: #808080;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+/* ── BSOD ── */
+.bsod {
+  position: fixed;
+  inset: 0;
+  background: #0000aa;
+  color: #fff;
+  font-family: 'Lucida Console', 'Courier New', monospace;
+  font-size: 14px;
+  padding: 40px;
+  z-index: 99999;
+  display: none;
+  cursor: default;
+  line-height: 1.6;
+}
+.bsod.active {
+  display: block;
+}
+.bsod-header {
+  background: #aaaaaa;
+  color: #0000aa;
+  display: inline;
+  padding: 0 8px;
+  font-weight: bold;
+}
+.bsod pre {
+  margin-top: 20px;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+#dragOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  cursor: move;
+}
+#dragOverlay.active {
+  display: block;
+}
+
+/* ── Loading cursor ── */
+body.loading,
+body.loading * {
+  cursor: wait !important;
+}

@@ -1,0 +1,306 @@
+/* ── Start Menu ── */
+.start-menu {
+  position: fixed;
+  left: 2px;
+  bottom: 30px;
+  width: 220px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  display: none;
+  z-index: 25;
+}
+
+.start-menu.open {
+  display: flex;
+  flex-direction: row;
+}
+
+.start-rail {
+  width: 22px;
+  background: linear-gradient(to top, #0a246a, #3a6ea5);
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.start-rail .rail-windoes {
+  color: #c0c0c0;
+}
+.start-rail strong {
+  color: #fff;
+}
+
+.menu-list {
+  flex: 1;
+  padding: 2px 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 5px 16px 5px 8px;
+  font-size: 11px;
+  cursor: default;
+  white-space: nowrap;
+  position: relative;
+}
+.menu-item:hover {
+  background: #000080;
+  color: #fff;
+}
+
+.menu-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.menu-icon-winupdate {
+  background-image: url('/icons/ie.png');
+}
+
+.menu-icon-programs {
+  background-image: url('/icons/folder.png');
+}
+.menu-icon-programs::before {
+  content: none;
+}
+
+.menu-icon-favorites {
+  background-image: url('/icons/folder.png');
+}
+
+.menu-icon-docs {
+  background-image: url('/icons/folder.png');
+}
+
+.menu-icon-settings {
+  background-image: url('/icons/printer.png');
+}
+.menu-icon-settings::before {
+  content: none;
+}
+
+.menu-icon-find {
+  background-image: url('/icons/folder-search.png');
+}
+.menu-icon-find::after {
+  content: none;
+}
+
+.menu-icon-help {
+  background-image: url('/icons/help.png');
+}
+
+.menu-icon-run {
+  background-image: url('/icons/display.png');
+}
+
+.menu-icon-shutdown {
+  background-image: url('/icons/display.png');
+}
+
+.menu-separator {
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #fff;
+  margin: 3px 4px;
+}
+
+.menu-item-arrow::after {
+  content: '\25b6';
+  font-size: 8px;
+  margin-left: auto;
+}
+
+.menu-shutdown {
+  border-top: 2px solid #808080;
+  padding-top: 4px;
+  margin-top: 2px;
+}
+
+/* ── Programs Submenu ── */
+.programs-submenu {
+  position: fixed;
+  left: 222px;
+  width: 200px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  display: none;
+  z-index: 26;
+  padding: 2px 0;
+}
+.programs-submenu.open {
+  display: block;
+}
+
+.accessories-submenu {
+  z-index: 27;
+}
+.games-submenu {
+  z-index: 28;
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 5px 16px 5px 8px;
+  font-size: 11px;
+  cursor: default;
+  white-space: nowrap;
+}
+.submenu-item:hover {
+  background: #000080;
+  color: #fff;
+}
+
+.submenu-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.submenu-item-arrow::after {
+  content: '\25b6';
+  font-size: 8px;
+  margin-left: auto;
+}
+
+.submenu-icon-ie {
+  background-image: url('/icons/ie.png');
+}
+.submenu-icon-notepad {
+  background-image: url('/icons/notepad.png');
+}
+.submenu-icon-minesweeper {
+  background-image: url('/icons/minesweeper.png');
+}
+.submenu-icon-solitaire {
+  background-image: url('/icons/cards.png');
+}
+.submenu-icon-ascii-runner {
+  background-image: url('/icons/display.png');
+}
+.submenu-icon-folder {
+  background-image: url('/icons/folder.png');
+}
+.submenu-icon-msdos {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='2' width='14' height='12' rx='1' fill='%23000'/%3E%3Ctext x='3' y='10' font-size='6' fill='%23C0C0C0' font-family='monospace'%3EC:%5C%3E%3C/text%3E%3C/svg%3E");
+}
+.submenu-icon-outlook {
+  background-image: url('/icons/email.png');
+}
+.submenu-icon-explorer {
+  background-image: url('/icons/folder.png');
+}
+.submenu-icon-addressbook {
+  background-image: url('/icons/network.png');
+}
+.submenu-icon-calculator {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='1' width='10' height='14' rx='1' fill='%23C0C0C0' stroke='%23808080'/%3E%3Crect x='4' y='2' width='8' height='4' fill='%2300807F'/%3E%3Crect x='4' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='7' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='10' y='7' width='2' height='2' fill='%23808080'/%3E%3Crect x='4' y='10' width='2' height='2' fill='%23808080'/%3E%3Crect x='7' y='10' width='2' height='2' fill='%23808080'/%3E%3Crect x='10' y='10' width='2' height='2' fill='%23808080'/%3E%3C/svg%3E");
+}
+.submenu-icon-imaging {
+  background-image: url('/icons/scanner.png');
+}
+.submenu-icon-paint {
+  background-image: url('/icons/paint.png');
+}
+.submenu-icon-wordpad {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='1' width='12' height='14' rx='1' fill='%23fff' stroke='%230000AA'/%3E%3Cline x1='4' y1='4' x2='12' y2='4' stroke='%230000AA' stroke-width='.7'/%3E%3Cline x1='4' y1='6.5' x2='12' y2='6.5' stroke='%230000AA' stroke-width='.7'/%3E%3Cline x1='4' y1='9' x2='10' y2='9' stroke='%230000AA' stroke-width='.7'/%3E%3C/svg%3E");
+}
+.submenu-icon-freecell {
+  background-image: url('/icons/cards.png');
+}
+.submenu-icon-hearts {
+  background-image: url('/icons/cards.png');
+}
+
+/* ── Right-click context menu ── */
+.context-menu {
+  position: fixed;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  min-width: 160px;
+  padding: 2px 0;
+  z-index: 30;
+  display: none;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+.context-menu.open {
+  display: block;
+}
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 4px 24px 4px 24px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 11px;
+  cursor: default;
+  white-space: nowrap;
+}
+.context-menu-item:hover {
+  background: #000080;
+  color: #fff;
+}
+.context-menu-item.disabled {
+  color: #808080;
+}
+.context-menu-item:disabled {
+  color: #808080;
+}
+.context-menu-item.disabled:hover {
+  background: transparent;
+  color: #808080;
+}
+.context-menu-item:disabled:hover {
+  background: transparent;
+  color: #808080;
+}
+.context-menu-sep {
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #fff;
+  margin: 3px 2px;
+}
+.context-menu-item .check-mark {
+  margin-left: -16px;
+  margin-right: 4px;
+}
