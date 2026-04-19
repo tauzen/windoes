@@ -113,12 +113,33 @@ function txDone(transaction) {
   });
 }
 
+function computeContentSize(content) {
+  if (typeof content === 'string') {
+    return new TextEncoder().encode(content).byteLength;
+  }
+  if (content instanceof ArrayBuffer) {
+    return content.byteLength;
+  }
+  if (ArrayBuffer.isView(content)) {
+    return content.byteLength;
+  }
+  if (typeof Blob !== 'undefined' && content instanceof Blob) {
+    return content.size;
+  }
+  throw new TypeError('writeFile content must be string, ArrayBuffer, ArrayBufferView, or Blob');
+}
+
 // ─── VirtualFS ───────────────────────────────────────────────────────────────
 
 export class VirtualFS {
   constructor(dbName = 'virtual-fs') {
     this._dbName = dbName;
     this._db = null;
+    this._readdirCache = new Map();
+  }
+
+  _invalidateReaddirCache() {
+    this._readdirCache.clear();
   }
 
   _ensureInit() {
@@ -137,6 +158,8 @@ export class VirtualFS {
       stores.directories.put({ path: '/', createdAt: new Date() });
     }
     await txDone(transaction);
+
+    this._invalidateReaddirCache();
 
     return this;
   }
@@ -166,14 +189,19 @@ export class VirtualFS {
 
     stores.directories.put({ path: norm, createdAt: new Date() });
     await txDone(transaction);
+    this._invalidateReaddirCache();
   }
 
+  /**
+   * @param {string} path
+   * @param {string|ArrayBuffer|ArrayBufferView|Blob} content
+   */
   async writeFile(path, content) {
     this._ensureInit();
     const norm = normalizePath(path);
     const parent = parentPath(norm);
 
-    const size = content instanceof ArrayBuffer ? content.byteLength : content.length;
+    const size = computeContentSize(content);
 
     const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
 
@@ -201,6 +229,7 @@ export class VirtualFS {
 
     stores.files.put(entry);
     await txDone(transaction);
+    this._invalidateReaddirCache();
   }
 
   async readFile(path) {
@@ -219,6 +248,11 @@ export class VirtualFS {
     this._ensureInit();
     const norm = normalizePath(path);
 
+    const cached = this._readdirCache.get(norm);
+    if (cached) {
+      return cached.map((entry) => ({ ...entry }));
+    }
+
     const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readonly');
 
     // Verify directory exists
@@ -227,17 +261,18 @@ export class VirtualFS {
 
     const prefix = norm === '/' ? '/' : norm + '/';
 
-    const allDirs = await req(stores.directories.getAll());
-    const allFiles = await req(stores.files.getAll());
+    const descendantRange = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const allDirs = await req(stores.directories.getAll(descendantRange));
+    const allFiles = await req(stores.files.getAll(descendantRange));
     await txDone(transaction);
 
-    const children = new Set();
+    const children = new Map();
 
     for (const d of allDirs) {
       if (d.path !== norm && d.path.startsWith(prefix)) {
         const rest = d.path.slice(prefix.length);
         if (!rest.includes('/')) {
-          children.add(rest);
+          children.set(rest, { name: rest, type: 'directory' });
         }
       }
     }
@@ -246,12 +281,16 @@ export class VirtualFS {
       if (f.path.startsWith(prefix)) {
         const rest = f.path.slice(prefix.length);
         if (!rest.includes('/')) {
-          children.add(rest);
+          if (!children.has(rest)) {
+            children.set(rest, { name: rest, type: 'file' });
+          }
         }
       }
     }
 
-    return [...children].sort();
+    const entries = Array.from(children.values()).sort((a, b) => a.name.localeCompare(b.name));
+    this._readdirCache.set(norm, entries);
+    return entries.map((entry) => ({ ...entry }));
   }
 
   async stat(path) {
@@ -303,6 +342,7 @@ export class VirtualFS {
     if (file) {
       stores.files.delete(norm);
       await txDone(transaction);
+      this._invalidateReaddirCache();
       return;
     }
 
@@ -311,8 +351,8 @@ export class VirtualFS {
     const allDirs = await req(stores.directories.getAll());
     const allFiles = await req(stores.files.getAll());
 
-    const childDirs = allDirs.filter(d => d.path.startsWith(prefix));
-    const childFiles = allFiles.filter(f => f.path.startsWith(prefix));
+    const childDirs = allDirs.filter((d) => d.path.startsWith(prefix));
+    const childFiles = allFiles.filter((f) => f.path.startsWith(prefix));
 
     if ((childDirs.length > 0 || childFiles.length > 0) && !recursive) {
       throw new DirectoryNotEmptyError(norm);
@@ -324,6 +364,7 @@ export class VirtualFS {
     for (const f of childFiles) stores.files.delete(f.path);
 
     await txDone(transaction);
+    this._invalidateReaddirCache();
   }
 
   async rename(oldPath, newPath) {
@@ -332,9 +373,14 @@ export class VirtualFS {
     const newNorm = normalizePath(newPath);
 
     if (oldNorm === '/') throw new Error('Cannot rename root directory');
+    if (newNorm.startsWith(oldNorm + '/')) {
+      throw new Error('Cannot rename a directory into its own descendant');
+    }
 
     const newParent = parentPath(newNorm);
 
+    // Single-transaction guarantee: all path rewrites happen inside one IndexedDB
+    // readwrite transaction so rename is atomic with respect to observers.
     const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
 
     // New parent must exist
@@ -358,6 +404,7 @@ export class VirtualFS {
       stores.files.delete(oldNorm);
       stores.files.put({ ...srcFile, path: newNorm });
       await txDone(transaction);
+      this._invalidateReaddirCache();
       return;
     }
 
@@ -387,6 +434,7 @@ export class VirtualFS {
     }
 
     await txDone(transaction);
+    this._invalidateReaddirCache();
   }
 
   async exists(path) {
