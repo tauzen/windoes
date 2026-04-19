@@ -25,12 +25,12 @@ const WindowManager = {
   _taskAreaEl: null,
 
   _getDesktop() {
-    if (!this._desktopEl) this._desktopEl = document.getElementById('theDesktop');
+    if (!this._desktopEl) this._desktopEl = document.querySelector('#theDesktop');
     return this._desktopEl;
   },
 
   _getTaskArea() {
-    if (!this._taskAreaEl) this._taskAreaEl = document.getElementById('taskArea');
+    if (!this._taskAreaEl) this._taskAreaEl = document.querySelector('#taskArea');
     return this._taskAreaEl;
   },
 

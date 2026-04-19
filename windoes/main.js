@@ -6,7 +6,7 @@ import ShellApp from './shell-app.jsx';
 let bootTimerId = null;
 
 async function bootstrap() {
-  const appRoot = document.getElementById('app');
+  const appRoot = document.querySelector('#app');
   if (!appRoot) {
     throw new Error('Missing #app root element');
   }

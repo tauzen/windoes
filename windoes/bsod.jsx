@@ -3,8 +3,8 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 
-const bsod = document.getElementById('bsod');
-const bsodText = document.getElementById('bsodText');
+const bsod = document.querySelector('#bsod');
+const bsodText = document.querySelector('#bsodText');
 
 const bsodMessages = WindoesApp.config.bsodMessages || [
   'An exception 0E has occurred at 0028:C0011E36 in VxD VMM(01) +\n00010E36. This was called from 0028:C001747B in VxD VMM(01) +\n0001647B. It may be possible to continue normally.\n\n* Press any key to attempt to continue.\n* Press CTRL+ALT+DEL to restart your computer. You will\n  lose any unsaved information in all applications.\n\nPress any key to continue _',

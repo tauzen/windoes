@@ -4,7 +4,7 @@
 import { DRAG_MIN_VISIBLE_PX, TASKBAR_DRAG_RESERVE_PX } from './constants.js';
 
 function setDragOverlayActive(active) {
-  const overlay = document.getElementById('dragOverlay');
+  const overlay = document.querySelector('#dragOverlay');
   if (!overlay) return;
   overlay.classList.toggle('active', active);
 }
