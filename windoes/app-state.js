@@ -60,6 +60,8 @@ const WindoesApp = {
   // Typed event buses for imperative one-shot interactions.
   events: {
     windowInteraction: createEventBus(),
+    explorerInteraction: createEventBus(),
+    notepadInteraction: createEventBus(),
   },
 
   // ── sound API (filled by sound.js) ────────

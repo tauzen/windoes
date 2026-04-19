@@ -48,7 +48,6 @@ const MY_COMPUTER_ITEMS = [
 ];
 
 let fsInitialized = false;
-let lastExplorerActionSeq = 0;
 
 let navigationViewStateCache = {
   address: 'My Computer',
@@ -174,6 +173,7 @@ async function refreshExplorerView() {
       items,
     });
   } catch (error) {
+    console.error('Explorer render failed', error);
     emitExplorerView({
       currentPath,
       title: basename(currentPath),
@@ -322,13 +322,7 @@ function renameSelected(selectedPath) {
   });
 }
 
-function handleExplorerStateActions() {
-  const explorerState = WindoesApp.state.get().explorer || {};
-  const seq = explorerState.actionSeq || 0;
-  if (seq <= lastExplorerActionSeq) return;
-
-  lastExplorerActionSeq = seq;
-  const command = explorerState.actionCommand || {};
+function handleExplorerInteraction(command = {}) {
   const selectedPath = command.selectedPath || null;
 
   if (command.type === 'new-folder') {
@@ -344,7 +338,8 @@ function handleExplorerStateActions() {
   }
 }
 
-const unsubscribeExplorerActions = WindoesApp.state.subscribe(handleExplorerStateActions);
+const unsubscribeExplorerActions =
+  WindoesApp.events.explorerInteraction.subscribe(handleExplorerInteraction);
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
