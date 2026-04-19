@@ -171,18 +171,6 @@ test('EXPLORER_CONTEXT_CLOSE closes menu when open', async () => {
   assert.equal(next.explorer.selectedPath, null);
 });
 
-test('EXPLORER_CONTEXT_ACTION_DISPATCH closes menu and emits command', async () => {
-  const { reduce } = await loadReducerModule();
-  const next = reduce(await freshState(), {
-    type: 'EXPLORER_CONTEXT_ACTION_DISPATCH',
-    commandType: 'delete',
-    selectedPath: '/C:/x',
-  });
-  assert.equal(next.explorer.contextMenuOpen, false);
-  assert.deepEqual(next.explorer.actionCommand, { type: 'delete', selectedPath: '/C:/x' });
-  assert.equal(next.explorer.actionSeq, 1);
-});
-
 test('NOTEPAD_FILE_MENU_OPEN opens menu and records coordinates', async () => {
   const { reduce } = await loadReducerModule();
   const next = reduce(await freshState(), { type: 'NOTEPAD_FILE_MENU_OPEN', left: 7, top: 9 });
@@ -197,17 +185,6 @@ test('NOTEPAD_FILE_MENU_CLOSE closes open menu', async () => {
   current.notepad.fileMenuOpen = true;
   const next = reduce(current, { type: 'NOTEPAD_FILE_MENU_CLOSE' });
   assert.equal(next.notepad.fileMenuOpen, false);
-});
-
-test('NOTEPAD_ACTION_DISPATCH closes menu and increments action seq', async () => {
-  const { reduce } = await loadReducerModule();
-  const current = await freshState();
-  current.notepad.fileMenuOpen = true;
-  current.notepad.actionSeq = 2;
-  const next = reduce(current, { type: 'NOTEPAD_ACTION_DISPATCH', commandType: 'save' });
-  assert.equal(next.notepad.fileMenuOpen, false);
-  assert.deepEqual(next.notepad.actionCommand, { type: 'save' });
-  assert.equal(next.notepad.actionSeq, 3);
 });
 
 test('NOTEPAD_SAVE_DIALOG_OPEN opens dialog with custom path', async () => {

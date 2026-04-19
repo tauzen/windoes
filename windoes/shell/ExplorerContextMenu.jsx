@@ -17,11 +17,11 @@ export default function ExplorerContextMenu() {
   }
 
   function runAction(actionType) {
-    WindoesApp.state.dispatch({
-      type: 'EXPLORER_CONTEXT_ACTION_DISPATCH',
-      commandType: actionType,
+    WindoesApp.events.explorerInteraction.emit({
+      type: actionType,
       selectedPath,
     });
+    closeMenu();
   }
 
   useEffect(() => {
@@ -43,34 +43,43 @@ export default function ExplorerContextMenu() {
       ref={menuRef}
       className={`context-menu explorer-ctx${isOpen ? ' open' : ''}`}
       id="explorerContextMenu"
+      role="menu"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
-      <div
+      <button
+        type="button"
+        role="menuitem"
         className="context-menu-item"
         data-action="new-folder"
         onClick={() => runAction('new-folder')}
       >
         New Folder
-      </div>
+      </button>
       <div className="context-menu-sep"></div>
-      <div
+      <button
+        type="button"
+        role="menuitem"
         className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
         data-action="rename"
+        disabled={!hasSelection}
         onClick={() => {
           if (hasSelection) runAction('rename');
         }}
       >
         Rename
-      </div>
-      <div
+      </button>
+      <button
+        type="button"
+        role="menuitem"
         className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
         data-action="delete"
+        disabled={!hasSelection}
         onClick={() => {
           if (hasSelection) runAction('delete');
         }}
       >
         Delete
-      </div>
+      </button>
     </div>
   );
 }
