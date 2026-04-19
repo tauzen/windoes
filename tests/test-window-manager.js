@@ -968,8 +968,29 @@ async function runTests() {
       'Games submenu has computed left/bottom style'
     );
 
-    await page.click('#startButton');
-    await page.waitForTimeout(120);
+    // ── Test 24: Launching from nested Start submenu closes all Start layers ─
+    console.log('\nTest 24: Start submenus fully close after launching Notepad');
+
+    await page.click('#subAccNotepad');
+    await page.waitForTimeout(150);
+
+    const startMenuLaunchState = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      programsOpen: document.getElementById('programsSubmenu')?.classList.contains('open') || false,
+      accessoriesOpen:
+        document.getElementById('accessoriesSubmenu')?.classList.contains('open') || false,
+      gamesOpen: document.getElementById('gamesSubmenu')?.classList.contains('open') || false,
+      notepadVisible: !document.getElementById('notepadWindow')?.classList.contains('hidden'),
+    }));
+
+    assert(startMenuLaunchState.notepadVisible, 'Notepad opens from Start submenu launch');
+    assert(!startMenuLaunchState.startMenuOpen, 'Start menu closes after launching Notepad');
+    assert(!startMenuLaunchState.programsOpen, 'Programs submenu closes after launching Notepad');
+    assert(
+      !startMenuLaunchState.accessoriesOpen,
+      'Accessories submenu closes after launching Notepad'
+    );
+    assert(!startMenuLaunchState.gamesOpen, 'Nested Games submenu closes after launching Notepad');
   } finally {
     await browser.close();
     server.close();

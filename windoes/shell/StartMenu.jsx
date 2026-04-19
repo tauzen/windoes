@@ -60,6 +60,11 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
   const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
 
   function closeOtherSubmenus(...keepKeys) {
+    if (!startMenuOpen) {
+      setSubmenuOpen({ programs: false, accessories: false, games: false });
+      return;
+    }
+
     const keep = new Set(keepKeys);
     setSubmenuOpen({
       programs: keep.has('programs'),
