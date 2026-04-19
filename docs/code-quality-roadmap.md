@@ -215,7 +215,7 @@ Goal: turn the imperative window registrations into React components and delete 
 
 ### Phase 6 — CSS & tooling (1–2 days, low risk)
 
-- [ ] **H5** Split `styles.css` into per-feature partials imported from `styles.css`, or migrate to CSS modules alongside components (align with the Phase 4 componentization).
+- [x] **H5** Split `styles.css` into per-feature partials imported from `styles.css` (implemented under `windoes/styles/*.css`).
 - [ ] **H1** Add `tsconfig.json` with `allowJs` / `checkJs` as a first TS step. Migrate `app-state.js` and `virtual-fs.js` to `.ts` — they have the highest type-leverage.
 - [ ] **G4** Adopt npm workspaces for embedded apps; remove `install:apps` and collapse duplicate `playwright` dev deps.
 - [ ] **H6** Add `CONTRIBUTING.md` (where to run what), `docs/architecture.md` (dataflow diagram), and keep a terse `CHANGELOG.md`.

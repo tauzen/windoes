@@ -1,0 +1,247 @@
+/* ── Taskbar ── */
+.taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 2px;
+  z-index: 20;
+}
+
+.start-btn {
+  height: 24px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  color: #000;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  padding: 0 6px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.start-btn:active,
+.start-btn.pressed {
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-bottom: 2px solid #fff;
+  border-right: 2px solid #fff;
+}
+
+/* Windoes flag */
+.start-flag {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  flex-shrink: 0;
+  transform: perspective(20px) rotateY(-5deg);
+}
+.start-flag .f1 {
+  background: #ff0000;
+}
+.start-flag .f2 {
+  background: #00b200;
+}
+.start-flag .f3 {
+  background: #0000ff;
+}
+.start-flag .f4 {
+  background: #ffff00;
+}
+
+/* Quick Launch */
+.quick-launch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  height: 24px;
+  border-left: 2px groove #c0c0c0;
+  margin-left: 2px;
+}
+
+.ql-btn {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.ql-btn:hover {
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #808080;
+  border-right: 1px solid #808080;
+}
+
+.ql-ie {
+  background: url('/icons/ie.png') center/contain no-repeat;
+}
+.ql-ie::before {
+  content: none;
+}
+
+.ql-desktop::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 10px;
+  background: #008080;
+  border: 1px solid #404040;
+}
+.ql-desktop::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 5px;
+  width: 10px;
+  height: 2px;
+  background: #404040;
+}
+
+.task-divider {
+  width: 2px;
+  height: 22px;
+  border-left: 2px groove #c0c0c0;
+  margin: 0 2px;
+}
+
+.task-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.task-button {
+  height: 22px;
+  background: #c0c0c0;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #808080;
+  border-right: 1px solid #808080;
+  min-width: 140px;
+  max-width: 180px;
+  text-align: left;
+  padding: 0 6px;
+  font-size: 11px;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  color: #000;
+  font-weight: bold;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.task-button.active {
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-bottom: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+
+.task-button .task-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  position: relative;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.task-button .task-icon::before {
+  content: none;
+}
+.task-icon-ie {
+  background-image: url('/icons/ie.png');
+}
+.task-icon-winamp {
+  background-image: url('/icons/winamp.png');
+}
+.task-icon-minesweeper {
+  background-image: url('/icons/minesweeper.png');
+}
+.task-icon-solitaire {
+  background-image: url('/icons/cards.png');
+}
+.task-icon-app {
+  background-image: url('/icons/display.png');
+}
+.task-icon-mycomputer {
+  background-image: url('/icons/my-computer.png');
+}
+.task-icon-notepad {
+  background-image: url('/icons/notepad.png');
+}
+.task-icon-recyclebin {
+  background-image: url('/icons/recycle-bin.png');
+}
+
+.tray {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px inset #c0c0c0;
+  font-size: 11px;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.tray-volume {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: default;
+}
+.tray-volume::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 5px;
+  height: 6px;
+  background: #000;
+}
+.tray-volume::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid #000;
+}
