@@ -3,21 +3,16 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import {
-  initFS,
-  navigateTo,
-  resetNavigationState,
-  setDomRefs,
-  saveTextFile,
-} from './fs-explorer.jsx';
+import { initFS, navigateTo, resetNavigationState, saveTextFile } from './fs-explorer.jsx';
+import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
 import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
-const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
+WindoesApp.WindowManager.register('myComputer', {
   template: {
     id: 'myComputerWindow',
     ariaLabel: 'My Computer',
-    title: 'My Computer',
+    title: <MyComputerTitleText />,
     titleIcon: 'titlelogo-mycomputer',
     titleSpanId: 'explorerTitleSpan',
     titlebarId: 'myComputerTitlebar',
@@ -28,11 +23,11 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
       'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
     menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
     toolbar: <MyComputerToolbar />,
-    view: <div className="folder-view explorer-folder-view"></div>,
+    view: <MyComputerView />,
     viewStyle: { overflowY: 'auto' },
     statusBar: (
       <>
-        <span className="status-left explorer-status-left">0 object(s)</span>
+        <MyComputerStatusLeft />
         <span className="status-right">My Computer</span>
       </>
     ),
@@ -43,9 +38,6 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
   iframeSrc: null,
   hasChrome: true,
 });
-
-// Give explorer module its DOM refs
-setDomRefs(myComputerConfig);
 
 let fsReady = false;
 let lastNotepadActionSeq = 0;

@@ -799,6 +799,25 @@ async function runTests() {
     }));
     assert(!startMenuAfterClose.startMenuOpen, 'Start button closes Start menu');
     assert(!startMenuAfterClose.startPressed, 'Start button pressed state clears when menu closes');
+
+    // ── Test 22: My Computer folder view is React-componentized ───────────────
+    console.log('\nTest 22: My Computer folder view component marker and nav still work');
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(250);
+
+    const myComputerViewComponentState = await page.evaluate(() => ({
+      hasViewMarker: !!document.querySelector(
+        '#myComputerWindow [data-my-computer-view-component="true"]'
+      ),
+      rootItemCount: document.querySelectorAll('#myComputerWindow .folder-item').length,
+    }));
+
+    assert(myComputerViewComponentState.hasViewMarker, 'My Computer view has component marker');
+    assert(
+      myComputerViewComponentState.rootItemCount >= 4,
+      `My Computer root view renders expected items (got ${myComputerViewComponentState.rootItemCount})`
+    );
   } finally {
     await browser.close();
     server.close();
