@@ -1,6 +1,12 @@
 {
   "name": "windoes",
   "private": true,
+  "workspaces": [
+    "windoes/public/applications/ascii-runner",
+    "windoes/public/applications/minesweeper",
+    "windoes/public/applications/solitaire",
+    "windoes/public/applications/winamp-player"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -8,17 +14,17 @@
     "prepare": "husky",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
     "test": "npm run lint && npm run test:unit && npm run test:integration",
     "test:unit": "node --test tests/node/reducer.test.js tests/node/browser-url.test.js tests/node/explorer-navigation.test.js",
     "test:integration": "node --test --test-concurrency=1 tests/node/playwright-integration.test.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
-    "test:ascii-runner": "cd windoes/public/applications/ascii-runner && node tests/test-ascii-runner.js",
-    "test:minesweeper": "cd windoes/public/applications/minesweeper && node tests/test-minesweeper.js",
-    "test:solitaire": "cd windoes/public/applications/solitaire && node tests/test-solitaire.js",
-    "test:winamp-player": "cd windoes/public/applications/winamp-player && node tests/test-winamp-player.js",
+    "test:ascii-runner": "npm run -w ./windoes/public/applications/ascii-runner test",
+    "test:minesweeper": "npm run -w ./windoes/public/applications/minesweeper test",
+    "test:solitaire": "npm run -w ./windoes/public/applications/solitaire test",
+    "test:winamp-player": "npm run -w ./windoes/public/applications/winamp-player test",
     "test:apps": "npm run test:ascii-runner && npm run test:minesweeper && npm run test:solitaire && npm run test:winamp-player",
-    "test:all": "npm test && npm run test:apps",
-    "install:apps": "cd windoes/public/applications/ascii-runner && npm install && cd ../minesweeper && npm install && cd ../solitaire && npm install && cd ../winamp-player && npm install"
+    "test:all": "npm run typecheck && npm test && npm run test:apps"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -34,6 +40,7 @@
     "lint-staged": "^15.5.0",
     "playwright": "^1.52.0",
     "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
     "vite": "^6.3.1"
   },
   "lint-staged": {

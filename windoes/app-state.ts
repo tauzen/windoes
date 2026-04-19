@@ -6,12 +6,23 @@ import defaultConfig from './simulator.config.js';
 import { initialState, reduce } from './app-state-reducer.mjs';
 import { createEventBus } from './event-bus.js';
 
+type Action = { type: string; [key: string]: unknown };
+type Listener = () => void;
+type State = typeof initialState;
+
+declare global {
+  interface Window {
+    WIN_ME_SIMULATOR_CONFIG?: Partial<typeof defaultConfig>;
+    WindoesApp: typeof WindoesApp;
+  }
+}
+
 // Allow runtime config override (used by tests via addInitScript)
 const runtimeOverride = window.WIN_ME_SIMULATOR_CONFIG;
 const config = runtimeOverride ? { ...defaultConfig, ...runtimeOverride } : defaultConfig;
 
-let state = initialState;
-const listeners = new Set();
+let state: State = initialState;
+const listeners = new Set<Listener>();
 
 function emit() {
   for (const listener of listeners) {
@@ -19,8 +30,8 @@ function emit() {
   }
 }
 
-function dispatch(action) {
-  const next = reduce(state, action);
+function dispatch(action: Action) {
+  const next = reduce(state, action as never);
   if (next !== state) {
     state = next;
     emit();
@@ -31,12 +42,12 @@ function getState() {
   return state;
 }
 
-function subscribe(listener) {
+function subscribe(listener: Listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
-function useWindoesState(selector = (s) => s) {
+function useWindoesState<T = State>(selector: (state: State) => T = (s) => s as T) {
   return useSyncExternalStore(
     subscribe,
     () => selector(state),

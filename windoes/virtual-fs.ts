@@ -1,7 +1,9 @@
 // ─── Custom Errors ───────────────────────────────────────────────────────────
 
 export class FileNotFoundError extends Error {
-  constructor(path) {
+  path: string;
+
+  constructor(path: string) {
     super(`No such file or directory: '${path}'`);
     this.name = 'FileNotFoundError';
     this.path = path;
@@ -9,7 +11,9 @@ export class FileNotFoundError extends Error {
 }
 
 export class FileExistsError extends Error {
-  constructor(path) {
+  path: string;
+
+  constructor(path: string) {
     super(`File or directory already exists: '${path}'`);
     this.name = 'FileExistsError';
     this.path = path;
@@ -17,7 +21,9 @@ export class FileExistsError extends Error {
 }
 
 export class NotADirectoryError extends Error {
-  constructor(path) {
+  path: string;
+
+  constructor(path: string) {
     super(`Not a directory: '${path}'`);
     this.name = 'NotADirectoryError';
     this.path = path;
@@ -25,7 +31,9 @@ export class NotADirectoryError extends Error {
 }
 
 export class DirectoryNotEmptyError extends Error {
-  constructor(path) {
+  path: string;
+
+  constructor(path: string) {
     super(`Directory not empty: '${path}'`);
     this.name = 'DirectoryNotEmptyError';
     this.path = path;
@@ -34,7 +42,7 @@ export class DirectoryNotEmptyError extends Error {
 
 // ─── Path Utilities ──────────────────────────────────────────────────────────
 
-export function normalizePath(path) {
+export function normalizePath(path: string) {
   if (typeof path !== 'string' || !path.startsWith('/')) {
     throw new Error(`Path must be absolute (start with '/'): '${path}'`);
   }
@@ -57,14 +65,14 @@ export function normalizePath(path) {
   return '/' + resolved.join('/');
 }
 
-export function parentPath(path) {
+export function parentPath(path: string) {
   const norm = normalizePath(path);
   if (norm === '/') return null;
   const idx = norm.lastIndexOf('/');
   return idx === 0 ? '/' : norm.slice(0, idx);
 }
 
-export function basename(path) {
+export function basename(path: string) {
   const norm = normalizePath(path);
   if (norm === '/') return '/';
   return norm.slice(norm.lastIndexOf('/') + 1);
@@ -72,7 +80,7 @@ export function basename(path) {
 
 // ─── IndexedDB Helper ────────────────────────────────────────────────────────
 
-function openDB(name) {
+function openDB(name: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, 1);
     request.onupgradeneeded = () => {
@@ -89,23 +97,25 @@ function openDB(name) {
   });
 }
 
-function tx(db, stores, mode) {
+type TxStoreMap = Record<string, IDBObjectStore>;
+
+function tx(db: IDBDatabase, stores: string[], mode: IDBTransactionMode) {
   const transaction = db.transaction(stores, mode);
-  const storeMap = {};
+  const storeMap: TxStoreMap = {};
   for (const name of stores) {
     storeMap[name] = transaction.objectStore(name);
   }
   return { transaction, stores: storeMap };
 }
 
-function req(idbRequest) {
+function req<T = unknown>(idbRequest: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     idbRequest.onsuccess = () => resolve(idbRequest.result);
     idbRequest.onerror = () => reject(idbRequest.error);
   });
 }
 
-function txDone(transaction) {
+function txDone(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
@@ -113,7 +123,7 @@ function txDone(transaction) {
   });
 }
 
-function computeContentSize(content) {
+function computeContentSize(content: string | ArrayBuffer | ArrayBufferView | Blob) {
   if (typeof content === 'string') {
     return new TextEncoder().encode(content).byteLength;
   }
@@ -132,6 +142,10 @@ function computeContentSize(content) {
 // ─── VirtualFS ───────────────────────────────────────────────────────────────
 
 export class VirtualFS {
+  _dbName: string;
+  _db: IDBDatabase | null;
+  _readdirCache: Map<string, Array<{ name: string; type: 'file' | 'directory' }>>;
+
   constructor(dbName = 'virtual-fs') {
     this._dbName = dbName;
     this._db = null;
@@ -164,7 +178,7 @@ export class VirtualFS {
     return this;
   }
 
-  async mkdir(path) {
+  async mkdir(path: string) {
     this._ensureInit();
     const norm = normalizePath(path);
 
@@ -196,7 +210,7 @@ export class VirtualFS {
    * @param {string} path
    * @param {string|ArrayBuffer|ArrayBufferView|Blob} content
    */
-  async writeFile(path, content) {
+  async writeFile(path: string, content: string | ArrayBuffer | ArrayBufferView | Blob) {
     this._ensureInit();
     const norm = normalizePath(path);
     const parent = parentPath(norm);
@@ -232,7 +246,7 @@ export class VirtualFS {
     this._invalidateReaddirCache();
   }
 
-  async readFile(path) {
+  async readFile(path: string) {
     this._ensureInit();
     const norm = normalizePath(path);
 
@@ -244,7 +258,7 @@ export class VirtualFS {
     return file.content;
   }
 
-  async readdir(path) {
+  async readdir(path: string) {
     this._ensureInit();
     const norm = normalizePath(path);
 
@@ -293,7 +307,7 @@ export class VirtualFS {
     return entries.map((entry) => ({ ...entry }));
   }
 
-  async stat(path) {
+  async stat(path: string) {
     this._ensureInit();
     const norm = normalizePath(path);
 
@@ -324,7 +338,7 @@ export class VirtualFS {
     throw new FileNotFoundError(norm);
   }
 
-  async rm(path, { recursive = false } = {}) {
+  async rm(path: string, { recursive = false }: { recursive?: boolean } = {}) {
     this._ensureInit();
     const norm = normalizePath(path);
 
@@ -367,7 +381,7 @@ export class VirtualFS {
     this._invalidateReaddirCache();
   }
 
-  async rename(oldPath, newPath) {
+  async rename(oldPath: string, newPath: string) {
     this._ensureInit();
     const oldNorm = normalizePath(oldPath);
     const newNorm = normalizePath(newPath);
@@ -437,7 +451,7 @@ export class VirtualFS {
     this._invalidateReaddirCache();
   }
 
-  async exists(path) {
+  async exists(path: string) {
     this._ensureInit();
     const norm = normalizePath(path);
 
