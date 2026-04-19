@@ -769,6 +769,36 @@ async function runTests() {
       `Toolbar Back returns to My Computer root (got: ${myComputerToolbarAfterBack.address})`
     );
     assert(myComputerToolbarAfterBack.backDisabled, 'Toolbar Back is disabled again at root');
+
+    // ── Test 21: Shell removes global DOM bridge and keeps Start menu behavior ─
+    console.log('\nTest 21: Start menu works without WindoesApp.dom bridge');
+
+    const shellBridgeState = await page.evaluate(() => ({
+      hasDomBridge: Object.prototype.hasOwnProperty.call(WindoesApp, 'dom'),
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+    }));
+    assert(!shellBridgeState.hasDomBridge, 'WindoesApp.dom bridge is removed');
+    assert(!shellBridgeState.startMenuOpen, 'Start menu starts closed');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+
+    const startMenuAfterOpen = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      startPressed: document.getElementById('startButton')?.classList.contains('pressed') || false,
+    }));
+    assert(startMenuAfterOpen.startMenuOpen, 'Start button opens Start menu');
+    assert(startMenuAfterOpen.startPressed, 'Start button pressed state follows Start menu open');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+
+    const startMenuAfterClose = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      startPressed: document.getElementById('startButton')?.classList.contains('pressed') || false,
+    }));
+    assert(!startMenuAfterClose.startMenuOpen, 'Start button closes Start menu');
+    assert(!startMenuAfterClose.startPressed, 'Start button pressed state clears when menu closes');
   } finally {
     await browser.close();
     server.close();

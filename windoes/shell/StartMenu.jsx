@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
 
-export default function StartMenu() {
+export default function StartMenu({ startButtonRef }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const startMenuRef = useRef(null);
   const programsSubmenuRef = useRef(null);
@@ -32,7 +32,7 @@ export default function StartMenu() {
 
   function closeAllMenus() {
     const startMenu = startMenuRef.current;
-    const startButton = WindoesApp.dom.startButton;
+    const startButton = startButtonRef?.current;
     if (startMenu) startMenu.classList.remove('open');
     if (startButton) startButton.classList.remove('pressed');
     closeSubmenus();
@@ -149,12 +149,12 @@ export default function StartMenu() {
 
   useLayoutEffect(() => {
     const startMenuEl = startMenuRef.current;
-    const startButton = WindoesApp.dom.startButton || document.getElementById('startButton');
+    const startButton = startButtonRef?.current;
     if (!startMenuEl || !startButton) return undefined;
 
-    WindoesApp.dom.startMenu = startMenuEl;
-
     WindoesApp.startMenu.closeSubmenus = closeSubmenus;
+    WindoesApp.startMenu.closeAll = closeAllMenus;
+    WindoesApp.startMenu.isOpen = () => startMenuEl.classList.contains('open');
 
     function toggleStartMenu() {
       startMenuEl.classList.toggle('open');
@@ -188,10 +188,12 @@ export default function StartMenu() {
 
     return () => {
       delete WindoesApp.startMenu.closeSubmenus;
+      delete WindoesApp.startMenu.closeAll;
+      delete WindoesApp.startMenu.isOpen;
       delete WindoesApp.startMenu.toggle;
       document.removeEventListener('click', onDocumentClick);
     };
-  }, []);
+  }, [startButtonRef]);
 
   return (
     <>

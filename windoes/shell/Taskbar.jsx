@@ -58,18 +58,7 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
         className="start-btn"
         id="startButton"
         onClick={() => {
-          if (typeof WindoesApp.startMenu.toggle === 'function') {
-            WindoesApp.startMenu.toggle();
-            return;
-          }
-
-          // Fallback during first-mount timing before StartMenu bridge is registered.
-          const startMenu = WindoesApp.dom.startMenu;
-          const startButton = WindoesApp.dom.startButton;
-          if (!startMenu || !startButton) return;
-          startMenu.classList.toggle('open');
-          startButton.classList.toggle('pressed', startMenu.classList.contains('open'));
-          WindoesApp.sound.playClickSound();
+          WindoesApp.startMenu.toggle?.();
         }}
       >
         <span className="start-flag">
@@ -81,7 +70,12 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
         Start
       </button>
       <div className="quick-launch">
-        <span className="ql-btn ql-ie" id="qlIE" title="Launch Internet Explorer"></span>
+        <span
+          className="ql-btn ql-ie"
+          id="qlIE"
+          title="Launch Internet Explorer"
+          onClick={() => WindoesApp.open.internetExplorer()}
+        ></span>
         <span
           className="ql-btn ql-desktop"
           title="Show Desktop"

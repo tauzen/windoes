@@ -23,7 +23,6 @@ async function bootstrap() {
   await import('./ie-window.jsx');
   await import('./app-windows.jsx');
   await import('./utility-windows.jsx');
-  await import('./desktop.jsx');
 
   bootTimerId = window.setTimeout(runBootSequence, 300);
 }
