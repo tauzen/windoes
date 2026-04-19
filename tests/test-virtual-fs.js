@@ -155,17 +155,32 @@ async function runTests() {
     // ── readdir ───────────────────────────────────────────────────────
 
     const rootEntries = await fs.readdir('/');
-    check(rootEntries.includes('docs'), 'readdir lists directories');
+    check(
+      rootEntries.some((entry) => entry.name === 'docs' && entry.type === 'directory'),
+      'readdir lists directories with type'
+    );
 
     const docsEntries = await fs.readdir('/docs');
-    check(docsEntries.includes('hello.txt'), 'readdir lists files');
-    check(docsEntries.includes('sub'), 'readdir lists subdirectories');
-    check(docsEntries.includes('binary.dat'), 'readdir lists binary files');
+    check(
+      docsEntries.some((entry) => entry.name === 'hello.txt' && entry.type === 'file'),
+      'readdir lists files with type'
+    );
+    check(
+      docsEntries.some((entry) => entry.name === 'sub' && entry.type === 'directory'),
+      'readdir lists subdirectories with type'
+    );
+    check(
+      docsEntries.some((entry) => entry.name === 'binary.dat' && entry.type === 'file'),
+      'readdir lists binary files with type'
+    );
 
     // Should not list nested descendants
     await fs.writeFile('/docs/sub/deep.txt', 'deep');
     const docsEntries2 = await fs.readdir('/docs');
-    check(!docsEntries2.includes('deep.txt'), 'readdir does not list nested children');
+    check(
+      !docsEntries2.some((entry) => entry.name === 'deep.txt'),
+      'readdir does not list nested children'
+    );
 
     await expectError(
       () => fs.readdir('/nope'),
@@ -240,6 +255,45 @@ async function runTests() {
       'rename throws if new parent missing'
     );
 
+    await expectError(
+      () => fs.rename('/files', '/files/sub/files-again'),
+      'Error',
+      'rename rejects moving directory into its own child'
+    );
+
+    // Concurrent writeFile: last writer wins, operation stays consistent
+    const concurrentWrites = await Promise.allSettled([
+      fs.writeFile('/files/concurrent.txt', 'v1'),
+      fs.writeFile('/files/concurrent.txt', 'v2'),
+      fs.writeFile('/files/concurrent.txt', 'v3'),
+      fs.writeFile('/files/concurrent.txt', 'v4'),
+    ]);
+    check(
+      concurrentWrites.every((result) => result.status === 'fulfilled'),
+      'concurrent writeFile operations all succeed'
+    );
+    const concurrentContent = await fs.readFile('/files/concurrent.txt');
+    check(
+      ['v1', 'v2', 'v3', 'v4'].includes(concurrentContent),
+      'concurrent writeFile leaves one valid final payload'
+    );
+
+    // Race: recursive delete in parallel with rename should leave consistent state
+    await fs.mkdir('/race');
+    await fs.mkdir('/race/sub');
+    await fs.writeFile('/race/sub/file.txt', 'r');
+    const raceResults = await Promise.allSettled([
+      fs.rename('/race', '/race-renamed'),
+      fs.rm('/race', { recursive: true }),
+    ]);
+    check(
+      raceResults.some((result) => result.status === 'fulfilled'),
+      'rename/rm race has at least one successful operation'
+    );
+    const raceOldExists = await fs.exists('/race');
+    const raceNewExists = await fs.exists('/race-renamed');
+    check(!(raceOldExists && raceNewExists), 'rename/rm race leaves only one root path visible');
+
     // ── rm ────────────────────────────────────────────────────────────
 
     // Remove file
@@ -292,7 +346,10 @@ async function runTests() {
     await fs2.mkdir('/docs');
     await fs2.writeFile('/docs/hello.txt', 'world');
     const r1 = await fs2.readdir('/');
-    check(JSON.stringify(r1) === JSON.stringify(['docs']), 'scenario: readdir / = [docs]');
+    check(
+      JSON.stringify(r1) === JSON.stringify([{ name: 'docs', type: 'directory' }]),
+      'scenario: readdir / = [{name:"docs",type:"directory"}]'
+    );
     const r2 = await fs2.readFile('/docs/hello.txt');
     check(r2 === 'world', 'scenario: readFile hello.txt = world');
     await fs2.rename('/docs', '/files');

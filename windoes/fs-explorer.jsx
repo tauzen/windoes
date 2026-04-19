@@ -151,18 +151,17 @@ async function refreshExplorerView() {
   }
 
   try {
-    const names = await fs.readdir(currentPath);
+    const entries = await fs.readdir(currentPath);
     const items = [];
 
-    for (const name of names) {
-      const childPath = currentPath + '/' + name;
-      const stat = await fs.stat(childPath);
+    for (const entry of entries) {
+      const childPath = currentPath + '/' + entry.name;
       items.push({
         key: childPath,
-        label: name,
+        label: entry.name,
         path: childPath,
-        type: stat.type,
-        icon: stat.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file',
+        type: entry.type,
+        icon: entry.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file',
       });
     }
 
