@@ -24,7 +24,8 @@
     "test:solitaire": "npm run -w ./windoes/public/applications/solitaire test",
     "test:winamp-player": "npm run -w ./windoes/public/applications/winamp-player test",
     "test:apps": "npm run test:ascii-runner && npm run test:minesweeper && npm run test:solitaire && npm run test:winamp-player",
-    "test:all": "npm run typecheck && npm test && npm run test:apps"
+    "test:all": "npm run typecheck && npm test && npm run test:apps",
+    "install:apps": "npm install --workspaces --if-present"
   },
   "dependencies": {
     "react": "^18.2.0",
