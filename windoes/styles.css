@@ -1507,7 +1507,13 @@ iframe {
   display: block;
 }
 .context-menu-item {
+  display: block;
+  width: 100%;
   padding: 4px 24px 4px 24px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
   font-size: 11px;
   cursor: default;
   white-space: nowrap;
@@ -1519,7 +1525,14 @@ iframe {
 .context-menu-item.disabled {
   color: #808080;
 }
+.context-menu-item:disabled {
+  color: #808080;
+}
 .context-menu-item.disabled:hover {
+  background: transparent;
+  color: #808080;
+}
+.context-menu-item:disabled:hover {
   background: transparent;
   color: #808080;
 }
