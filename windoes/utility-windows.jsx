@@ -3,14 +3,16 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, goBack, goUp, setDomRefs, saveTextFile } from './fs-explorer.jsx';
+import { initFS, navigateTo, resetNavigationState, saveTextFile } from './fs-explorer.jsx';
+import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
+import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { closeStartMenuBoilerplate } from './launch-helpers.js';
 
-const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
+WindoesApp.WindowManager.register('myComputer', {
   template: {
     id: 'myComputerWindow',
     ariaLabel: 'My Computer',
-    title: 'My Computer',
+    title: <MyComputerTitleText />,
     titleIcon: 'titlelogo-mycomputer',
     titleSpanId: 'explorerTitleSpan',
     titlebarId: 'myComputerTitlebar',
@@ -20,39 +22,12 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
     style:
       'left: clamp(80px, 10vw, 140px); top: 20px; width: min(600px, calc(100vw - 100px)); height: min(420px, calc(100vh - 60px));',
     menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
-    toolbar: (
-      <>
-        <div className="toolbar explorer-toolbar">
-          <div className="toolbar-grip"></div>
-          <button className="tb-btn" id="explorerBackBtn" disabled>
-            <span className="tb-icon tb-icon-back"></span>
-            Back
-          </button>
-          <button className="tb-btn" id="explorerUpBtn">
-            <span className="tb-icon tb-icon-up"></span>
-            Up
-          </button>
-        </div>
-        <div className="address-row">
-          <div className="toolbar-grip"></div>
-          <label htmlFor="explorerAddress">Address</label>
-          <div className="address-input-wrap">
-            <span className="address-icon address-icon-folder" aria-hidden="true"></span>
-            <input
-              id="explorerAddress"
-              defaultValue="My Computer"
-              aria-label="Address bar"
-              readOnly
-            />
-          </div>
-        </div>
-      </>
-    ),
-    view: <div className="folder-view explorer-folder-view"></div>,
+    toolbar: <MyComputerToolbar />,
+    view: <MyComputerView />,
     viewStyle: { overflowY: 'auto' },
     statusBar: (
       <>
-        <span className="status-left explorer-status-left">0 object(s)</span>
+        <MyComputerStatusLeft />
         <span className="status-right">My Computer</span>
       </>
     ),
@@ -63,25 +38,6 @@ const myComputerConfig = WindoesApp.WindowManager.register('myComputer', {
   iframeSrc: null,
   hasChrome: true,
 });
-
-const utilityWindowCleanups = [];
-
-function addManagedListener(element, eventName, handler, options) {
-  if (!element) return;
-  element.addEventListener(eventName, handler, options);
-  utilityWindowCleanups.push(() => {
-    element.removeEventListener(eventName, handler, options);
-  });
-}
-
-// Wire explorer navigation buttons
-const explorerBackBtn = myComputerConfig.el.querySelector('#explorerBackBtn');
-const explorerUpBtn = myComputerConfig.el.querySelector('#explorerUpBtn');
-addManagedListener(explorerBackBtn, 'click', goBack);
-addManagedListener(explorerUpBtn, 'click', goUp);
-
-// Give explorer module its DOM refs
-setDomRefs(myComputerConfig);
 
 let fsReady = false;
 let lastNotepadActionSeq = 0;
@@ -97,6 +53,7 @@ function openMyComputer() {
   closeStartMenuBoilerplate();
 
   ensureFS().then(() => {
+    resetNavigationState();
     navigateTo(null);
   });
 }
@@ -297,7 +254,5 @@ WindoesApp.open.recycleBin = openRecycleBin;
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     unsubscribeNotepadStateActions();
-    utilityWindowCleanups.forEach((cleanup) => cleanup());
-    utilityWindowCleanups.length = 0;
   });
 }

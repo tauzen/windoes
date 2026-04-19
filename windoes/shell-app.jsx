@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import WindoesApp from './app-state.js';
+import { useRef, useState } from 'react';
 import { RenderRegistryPortals } from './react-view.js';
 import BootScreens from './shell/BootScreens.jsx';
 import Desktop from './shell/Desktop.jsx';
@@ -13,29 +12,33 @@ import ExplorerContextMenu from './shell/ExplorerContextMenu.jsx';
 import DragOverlay from './shell/DragOverlay.jsx';
 
 export default function ShellApp() {
-    const startButtonRef = useRef(null);
-    const desktopRef = useRef(null);
-    const taskbarRef = useRef(null);
+  const startButtonRef = useRef(null);
+  const desktopRef = useRef(null);
+  const taskbarRef = useRef(null);
+  const [startMenuOpen, setStartMenuOpen] = useState(false);
 
-    useEffect(() => {
-        WindoesApp.dom.startButton = startButtonRef.current;
-        WindoesApp.dom.theDesktop = desktopRef.current;
-        WindoesApp.dom.theTaskbar = taskbarRef.current;
-    }, []);
-
-    return (
-        <>
-            <BootScreens />
-            <Desktop desktopRef={desktopRef} />
-            <Taskbar taskbarRef={taskbarRef} startButtonRef={startButtonRef} />
-            <StartMenu />
-            <DesktopContextMenu />
-            <RunDialog />
-            <ErrorDialog />
-            <NotepadDialogs />
-            <ExplorerContextMenu />
-            <DragOverlay />
-            <RenderRegistryPortals />
-        </>
-    );
+  return (
+    <>
+      <BootScreens />
+      <Desktop desktopRef={desktopRef} />
+      <Taskbar
+        taskbarRef={taskbarRef}
+        startButtonRef={startButtonRef}
+        startMenuOpen={startMenuOpen}
+        setStartMenuOpen={setStartMenuOpen}
+      />
+      <StartMenu
+        startButtonRef={startButtonRef}
+        startMenuOpen={startMenuOpen}
+        setStartMenuOpen={setStartMenuOpen}
+      />
+      <DesktopContextMenu />
+      <RunDialog />
+      <ErrorDialog />
+      <NotepadDialogs />
+      <ExplorerContextMenu />
+      <DragOverlay />
+      <RenderRegistryPortals />
+    </>
+  );
 }

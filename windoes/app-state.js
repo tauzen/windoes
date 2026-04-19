@@ -48,16 +48,6 @@ const WindoesApp = {
   // ── shared config ──────────────────────────
   config,
 
-  // DOM refs populated by shell-app.jsx.
-  // Compatibility-only escape hatch during React migration.
-  // Migration target: pass refs through React components/hooks instead of global DOM refs.
-  dom: {
-    startButton: null,
-    startMenu: null,
-    theDesktop: null,
-    theTaskbar: null,
-  },
-
   // Canonical shell state store.
   // Allowed imperative API long-term: get/dispatch/subscribe/use
   state: {

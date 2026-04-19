@@ -6,7 +6,7 @@ import ShellApp from './shell-app.jsx';
 let bootTimerId = null;
 
 async function bootstrap() {
-  const appRoot = document.getElementById('app');
+  const appRoot = document.querySelector('#app');
   if (!appRoot) {
     throw new Error('Missing #app root element');
   }
@@ -23,7 +23,6 @@ async function bootstrap() {
   await import('./ie-window.jsx');
   await import('./app-windows.jsx');
   await import('./utility-windows.jsx');
-  await import('./desktop.jsx');
 
   bootTimerId = window.setTimeout(runBootSequence, 300);
 }

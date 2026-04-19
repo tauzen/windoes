@@ -1,30 +1,34 @@
 // ══════════════════════════════════════════════
-// Filesystem Explorer — bridges VirtualFS with
-// My Computer window for browsing, creating and
-// removing folders.
+// Filesystem Explorer state/model (React-owned view)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
-import { renderInto } from './react-view.js';
+import { createExplorerNavigation } from './explorer-navigation.mjs';
 
 const fs = new VirtualFS();
-
-// ── Windows 98 default folder tree ──────────────────────────────────────────
+const navigation = createExplorerNavigation();
 
 const DEFAULT_DIRS = ['/C:', '/C:/My Documents'];
 
-// Special top-level items shown in "My Computer" root view
 const MY_COMPUTER_ITEMS = [
   {
-    label: '3\u00BD Floppy (A:)',
+    id: 'floppy-a',
+    label: '3½ Floppy (A:)',
     icon: 'drive-icon-floppy',
     action: 'error',
     errorTitle: 'A:\\',
     errorText: 'A:\\ is not accessible.\n\nThe device is not ready.',
     errorIcon: 'error',
   },
-  { label: 'Local Disk (C:)', icon: 'drive-icon-hdd', action: 'navigate', path: '/C:' },
   {
+    id: 'disk-c',
+    label: 'Local Disk (C:)',
+    icon: 'drive-icon-hdd',
+    action: 'navigate',
+    path: '/C:',
+  },
+  {
+    id: 'cdrom-d',
     label: 'CD-ROM (D:)',
     icon: 'drive-icon-cdrom',
     action: 'error',
@@ -33,6 +37,7 @@ const MY_COMPUTER_ITEMS = [
     errorIcon: 'error',
   },
   {
+    id: 'control-panel',
     label: 'Control Panel',
     icon: 'folder-icon-cp',
     action: 'error',
@@ -42,34 +47,287 @@ const MY_COMPUTER_ITEMS = [
   },
 ];
 
-// ── State ───────────────────────────────────────────────────────────────────
-
-let currentPath = null; // null = My Computer root
-let historyStack = [];
-let historyIndex = -1;
+let fsInitialized = false;
 let lastExplorerActionSeq = 0;
 
-// ── Cached DOM refs (set after window registers) ────────────────────────────
-let viewEl = null;
-let addressEl = null;
-let statusEl = null;
-let titleSpanEl = null;
-let backBtnEl = null;
+let navigationViewStateCache = {
+  address: 'My Computer',
+  canGoBack: false,
+};
 
-function setDomRefs(cfg) {
-  viewEl = cfg.el.querySelector('.explorer-folder-view');
-  addressEl = cfg.el.querySelector('#explorerAddress');
-  statusEl = cfg.el.querySelector('.explorer-status-left');
-  titleSpanEl = cfg.el.querySelector('#explorerTitleSpan');
-  backBtnEl = cfg.el.querySelector('#explorerBackBtn');
+let explorerViewState = {
+  currentPath: null,
+  title: 'My Computer',
+  statusText: '0 object(s)',
+  items: [],
+};
+
+const explorerViewListeners = new Set();
+
+function emitExplorerView(nextState) {
+  explorerViewState = nextState;
+  explorerViewListeners.forEach((listener) => listener());
+}
+
+function subscribeExplorerView(listener) {
+  explorerViewListeners.add(listener);
+  return () => {
+    explorerViewListeners.delete(listener);
+  };
+}
+
+function getExplorerViewState() {
+  return explorerViewState;
+}
+
+function displayPath(path) {
+  if (path === null) return 'My Computer';
+  return path.replace(/^\//, '').replace(/\//g, '\\');
+}
+
+function getNavigationViewState() {
+  const { path, canGoBack } = navigation.getState();
+  const nextAddress = displayPath(path);
+
+  if (
+    navigationViewStateCache.address === nextAddress &&
+    navigationViewStateCache.canGoBack === canGoBack
+  ) {
+    return navigationViewStateCache;
+  }
+
+  navigationViewStateCache = {
+    address: nextAddress,
+    canGoBack,
+  };
+  return navigationViewStateCache;
+}
+
+function subscribeNavigationView(listener) {
+  return navigation.subscribe(listener);
+}
+
+async function initFS() {
+  if (fsInitialized) return;
+
+  await fs.init();
+  for (const dir of DEFAULT_DIRS) {
+    if (!(await fs.exists(dir))) {
+      await fs.mkdir(dir);
+    }
+  }
+
+  if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
+    await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
+  }
+
+  fsInitialized = true;
+}
+
+function readRootItems() {
+  return MY_COMPUTER_ITEMS.map((item) => ({
+    key: item.id,
+    label: item.label,
+    icon: item.icon,
+    type: 'root-item',
+    action: item.action,
+    path: item.path || null,
+    errorTitle: item.errorTitle || null,
+    errorText: item.errorText || null,
+    errorIcon: item.errorIcon || 'info',
+  }));
+}
+
+async function refreshExplorerView() {
+  const { path: currentPath } = navigation.getState();
+
+  if (currentPath === null) {
+    emitExplorerView({
+      currentPath: null,
+      title: 'My Computer',
+      statusText: `${MY_COMPUTER_ITEMS.length} object(s)`,
+      items: readRootItems(),
+    });
+    return;
+  }
+
+  try {
+    const names = await fs.readdir(currentPath);
+    const items = [];
+
+    for (const name of names) {
+      const childPath = currentPath + '/' + name;
+      const stat = await fs.stat(childPath);
+      items.push({
+        key: childPath,
+        label: name,
+        path: childPath,
+        type: stat.type,
+        icon: stat.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file',
+      });
+    }
+
+    emitExplorerView({
+      currentPath,
+      title: basename(currentPath),
+      statusText: `${items.length} object(s)`,
+      items,
+    });
+  } catch (error) {
+    emitExplorerView({
+      currentPath,
+      title: basename(currentPath),
+      statusText: `Error: ${error?.message || 'Unknown error'}`,
+      items: [],
+    });
+  }
+}
+
+function navigateTo(path, addToHistory = true) {
+  navigation.navigateTo(path, addToHistory);
+  refreshExplorerView();
+}
+
+function goBack() {
+  if (!navigation.getState().canGoBack) return;
+  navigation.goBack();
+  refreshExplorerView();
+}
+
+function goUp() {
+  if (navigation.getState().path === null) return;
+  navigation.goUp();
+  refreshExplorerView();
+}
+
+function resetNavigationState() {
+  navigation.reset();
+  refreshExplorerView();
+}
+
+function openExplorerContextMenu(event) {
+  const { path: currentPath } = navigation.getState();
+  if (currentPath === null) {
+    WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const itemEl = event.target.closest('.folder-item');
+  const selectedPath = itemEl ? itemEl.dataset.path : null;
+
+  WindoesApp.state.dispatch({
+    type: 'EXPLORER_CONTEXT_OPEN',
+    x: event.clientX,
+    y: event.clientY,
+    selectedPath,
+  });
+}
+
+async function openFileInNotepad(path) {
+  try {
+    const content = await fs.readFile(path);
+    WindoesApp.open.notepad({ filePath: path, content });
+  } catch (error) {
+    WindoesApp.bsod.showErrorDialog({
+      title: 'Error',
+      text: `Cannot open file: ${error.message}`,
+      icon: 'error',
+    });
+  }
+}
+
+function activateExplorerItem(item) {
+  if (!item) return;
+
+  if (item.type === 'root-item') {
+    if (item.action === 'navigate' && item.path) {
+      navigateTo(item.path);
+      return;
+    }
+
+    if (item.action === 'error') {
+      WindoesApp.bsod.showErrorDialog({
+        title: item.errorTitle,
+        text: item.errorText,
+        icon: item.errorIcon,
+      });
+    }
+    return;
+  }
+
+  if (item.type === 'directory') {
+    navigateTo(item.path);
+    return;
+  }
+
+  openFileInNotepad(item.path);
+}
+
+async function createNewFolder() {
+  const { path: currentPath } = navigation.getState();
+  if (currentPath === null) return;
+
+  let name = 'New Folder';
+  let counter = 1;
+  while (await fs.exists(currentPath + '/' + name)) {
+    counter += 1;
+    name = `New Folder (${counter})`;
+  }
+
+  try {
+    await fs.mkdir(currentPath + '/' + name);
+    WindoesApp.sound.playClickSound();
+    await refreshExplorerView();
+  } catch (error) {
+    WindoesApp.bsod.showErrorDialog({
+      title: 'Error',
+      text: `Cannot create folder: ${error.message}`,
+      icon: 'error',
+    });
+  }
+}
+
+async function deleteSelected(selectedPath) {
+  if (!selectedPath) return;
+  const name = basename(selectedPath);
+
+  try {
+    const stat = await fs.stat(selectedPath);
+    if (stat.type === 'directory') {
+      await fs.rm(selectedPath, { recursive: true });
+    } else {
+      await fs.rm(selectedPath);
+    }
+    WindoesApp.sound.playClickSound();
+    await refreshExplorerView();
+  } catch (error) {
+    WindoesApp.bsod.showErrorDialog({
+      title: 'Error Deleting File',
+      text: `Cannot delete '${name}': ${error.message}`,
+      icon: 'error',
+    });
+  }
+}
+
+function renameSelected(selectedPath) {
+  if (!selectedPath) return;
+
+  WindoesApp.bsod.showErrorDialog({
+    title: 'Rename',
+    text: 'Inline rename will be reintroduced in the React explorer view.',
+    icon: 'info',
+  });
 }
 
 function handleExplorerStateActions() {
   const explorerState = WindoesApp.state.get().explorer || {};
   const seq = explorerState.actionSeq || 0;
   if (seq <= lastExplorerActionSeq) return;
-  lastExplorerActionSeq = seq;
 
+  lastExplorerActionSeq = seq;
   const command = explorerState.actionCommand || {};
   const selectedPath = command.selectedPath || null;
 
@@ -78,7 +336,7 @@ function handleExplorerStateActions() {
     return;
   }
   if (command.type === 'rename') {
-    startInlineRename(selectedPath);
+    renameSelected(selectedPath);
     return;
   }
   if (command.type === 'delete') {
@@ -94,349 +352,22 @@ if (import.meta.hot) {
   });
 }
 
-// ── Initialise VirtualFS ────────────────────────────────────────────────────
-
-let fsInitialized = false;
-
-async function initFS() {
-  if (fsInitialized) return;
-
-  await fs.init();
-  for (const dir of DEFAULT_DIRS) {
-    if (!(await fs.exists(dir))) {
-      await fs.mkdir(dir);
-    }
-  }
-  if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
-    await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
-  }
-
-  fsInitialized = true;
-}
-
-// ── Navigation ──────────────────────────────────────────────────────────────
-
-function displayPath(path) {
-  if (path === null) return 'My Computer';
-  // Convert /C:/Windows → C:\\Windows
-  return path.replace(/^\//, '').replace(/\//g, '\\');
-}
-
-function navigateTo(path, addToHistory = true) {
-  if (addToHistory) {
-    // Trim forward history when navigating from middle
-    if (historyIndex < historyStack.length - 1) {
-      historyStack = historyStack.slice(0, historyIndex + 1);
-    }
-    historyStack.push(path);
-    historyIndex = historyStack.length - 1;
-  }
-  currentPath = path;
-  render();
-}
-
-function goBack() {
-  if (historyIndex > 0) {
-    historyIndex--;
-    currentPath = historyStack[historyIndex];
-    render();
-  }
-}
-
-function goUp() {
-  if (currentPath === null) return;
-  // /C: → My Computer root (null)
-  const slashCount = (currentPath.match(/\//g) || []).length;
-  if (slashCount <= 1) {
-    navigateTo(null);
-  } else {
-    const parent = currentPath.slice(0, currentPath.lastIndexOf('/'));
-    navigateTo(parent || '/');
-  }
-}
-
-// ── Rendering ───────────────────────────────────────────────────────────────
-
-async function render() {
-  if (!viewEl) return;
-
-  addressEl.value = displayPath(currentPath);
-  titleSpanEl.textContent = currentPath === null ? 'My Computer' : basename(currentPath);
-
-  if (backBtnEl) backBtnEl.disabled = historyIndex <= 0;
-
-  if (currentPath === null) {
-    renderMyComputerRoot();
-    return;
-  }
-
-  try {
-    const entries = await fs.readdir(currentPath);
-    const items = [];
-
-    for (const name of entries) {
-      const childPath = currentPath + '/' + name;
-      const stat = await fs.stat(childPath);
-      items.push({ name, path: childPath, type: stat.type });
-    }
-
-    renderInto(
-      viewEl,
-      items.length === 0 ? (
-        <div className="explorer-empty">This folder is empty.</div>
-      ) : (
-        <>
-          {items.map((item) => {
-            const iconClass = item.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file';
-            return (
-              <div
-                key={item.path}
-                className="folder-item"
-                data-path={item.path}
-                data-type={item.type}
-              >
-                <div className={`folder-item-icon ${iconClass}`}></div>
-                <div>{item.name}</div>
-              </div>
-            );
-          })}
-        </>
-      )
-    );
-    statusEl.textContent = `${items.length} object(s)`;
-
-    // Wire double-click handlers
-    viewEl.querySelectorAll('.folder-item').forEach((el) => {
-      el.addEventListener('dblclick', () => {
-        const type = el.dataset.type;
-        const path = el.dataset.path;
-        if (type === 'directory') {
-          navigateTo(path);
-        } else {
-          // Open file in notepad
-          openFileInNotepad(path);
-        }
-      });
-    });
-
-    wireContextMenu();
-  } catch (error) {
-    console.error('Failed to render explorer directory', { currentPath, error });
-    const message = error?.message || 'Unknown error';
-    renderInto(viewEl, <div className="explorer-empty">Error reading directory.</div>);
-    statusEl.textContent = `Error: ${message}`;
-  }
-}
-
-function renderMyComputerRoot() {
-  renderInto(
-    viewEl,
-    <>
-      {MY_COMPUTER_ITEMS.map((item, index) => (
-        <div key={`${item.label}-${index}`} className="folder-item" data-mc-idx={index}>
-          <div className={`folder-item-icon ${item.icon}`}></div>
-          <div>{item.label}</div>
-        </div>
-      ))}
-    </>
-  );
-  statusEl.textContent = `${MY_COMPUTER_ITEMS.length} object(s)`;
-
-  viewEl.querySelectorAll('.folder-item').forEach((el) => {
-    el.addEventListener('dblclick', () => {
-      const idx = parseInt(el.dataset.mcIdx, 10);
-      const item = MY_COMPUTER_ITEMS[idx];
-      if (item.action === 'navigate') {
-        navigateTo(item.path);
-      } else if (item.action === 'error') {
-        WindoesApp.bsod.showErrorDialog({
-          title: item.errorTitle,
-          text: item.errorText,
-          icon: item.errorIcon,
-        });
-      }
-    });
-  });
-
-  wireContextMenu();
-}
-
-// ── Context Menu (right-click in folder view) ───────────────────────────────
-
-function wireContextMenu() {
-  if (!viewEl) return;
-
-  if (currentPath === null) {
-    viewEl.oncontextmenu = null;
-    WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
-    return;
-  }
-
-  viewEl.oncontextmenu = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const itemEl = e.target.closest('.folder-item');
-    const selectedItemPath = itemEl ? itemEl.dataset.path : null;
-
-    WindoesApp.state.dispatch({
-      type: 'EXPLORER_CONTEXT_OPEN',
-      x: e.clientX,
-      y: e.clientY,
-      selectedPath: selectedItemPath,
-    });
-  };
-}
-
-// ── Folder Operations ───────────────────────────────────────────────────────
-
-async function createNewFolder() {
-  if (currentPath === null) return;
-
-  // Find unique name
-  let name = 'New Folder';
-  let counter = 1;
-  while (await fs.exists(currentPath + '/' + name)) {
-    counter++;
-    name = `New Folder (${counter})`;
-  }
-
-  const createdPath = currentPath + '/' + name;
-
-  try {
-    await fs.mkdir(createdPath);
-    WindoesApp.sound.playClickSound();
-
-    // Immediately start inline rename on the newly created folder
-    const selectedItemPath = createdPath;
-    await render();
-    startInlineRename(selectedItemPath);
-  } catch (e) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error',
-      text: `Cannot create folder: ${e.message}`,
-      icon: 'error',
-    });
-  }
-}
-
-async function deleteSelected(selectedItemPath) {
-  if (!selectedItemPath) return;
-
-  const name = basename(selectedItemPath);
-
-  try {
-    const stat = await fs.stat(selectedItemPath);
-    if (stat.type === 'directory') {
-      await fs.rm(selectedItemPath, { recursive: true });
-    } else {
-      await fs.rm(selectedItemPath);
-    }
-    WindoesApp.sound.playClickSound();
-    await render();
-  } catch (e) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error Deleting File',
-      text: `Cannot delete '${name}': ${e.message}`,
-      icon: 'error',
-    });
-  }
-}
-
-// ── Inline Rename ──────────────────────────────────────────────────────────
-
-function startInlineRename(selectedItemPath) {
-  if (!selectedItemPath) return;
-
-  const itemEl = viewEl.querySelector(`.folder-item[data-path="${CSS.escape(selectedItemPath)}"]`);
-  if (!itemEl) return;
-
-  const pathToRename = selectedItemPath;
-  const oldName = basename(pathToRename);
-
-  // Replace the name label with an input
-  const labelEl = itemEl.querySelector('div:last-child');
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'folder-rename-input';
-  input.value = oldName;
-  labelEl.replaceWith(input);
-
-  input.focus();
-  // Select name without extension for files
-  const dotIndex = oldName.lastIndexOf('.');
-  if (dotIndex > 0 && itemEl.dataset.type === 'file') {
-    input.setSelectionRange(0, dotIndex);
-  } else {
-    input.select();
-  }
-
-  let committed = false;
-
-  async function commitRename() {
-    if (committed) return;
-    committed = true;
-
-    const newName = input.value.trim();
-    if (!newName || newName === oldName) {
-      await render();
-      return;
-    }
-
-    const parentDir = pathToRename.slice(0, pathToRename.lastIndexOf('/'));
-    const newPath = parentDir + '/' + newName;
-
-    try {
-      await fs.rename(pathToRename, newPath);
-      WindoesApp.sound.playClickSound();
-    } catch (e) {
-      WindoesApp.bsod.showErrorDialog({
-        title: 'Error Renaming',
-        text: `Cannot rename '${oldName}': ${e.message}`,
-        icon: 'error',
-      });
-    }
-    await render();
-  }
-
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      commitRename();
-    } else if (e.key === 'Escape') {
-      committed = true;
-      render();
-    }
-  });
-
-  input.addEventListener('blur', () => {
-    commitRename();
-  });
-
-  // Prevent double-click on input from navigating
-  input.addEventListener('dblclick', (e) => e.stopPropagation());
-}
-
-// ── File opener ─────────────────────────────────────────────────────────────
-
-async function openFileInNotepad(path) {
-  try {
-    const content = await fs.readFile(path);
-    WindoesApp.open.notepad({ filePath: path, content });
-  } catch (e) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error',
-      text: `Cannot open file: ${e.message}`,
-      icon: 'error',
-    });
-  }
-}
-
 async function saveTextFile(path, content) {
   await initFS();
   await fs.writeFile(path, content);
 }
 
-// ── Public API ──────────────────────────────────────────────────────────────
-
-export { initFS, navigateTo, goBack, goUp, render, setDomRefs, currentPath, saveTextFile };
+export {
+  activateExplorerItem,
+  getExplorerViewState,
+  getNavigationViewState,
+  goBack,
+  goUp,
+  initFS,
+  navigateTo,
+  openExplorerContextMenu,
+  resetNavigationState,
+  saveTextFile,
+  subscribeExplorerView,
+  subscribeNavigationView,
+};

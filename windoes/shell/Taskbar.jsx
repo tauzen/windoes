@@ -5,7 +5,7 @@ function formatClock(now) {
   return now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export default function Taskbar({ taskbarRef, startButtonRef }) {
+export default function Taskbar({ taskbarRef, startButtonRef, startMenuOpen, setStartMenuOpen }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
   const [clockText, setClockText] = useState(() => formatClock(new Date()));
@@ -55,20 +55,17 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
     >
       <button
         ref={startButtonRef}
-        className="start-btn"
+        className={`start-btn${startMenuOpen ? ' pressed' : ''}`}
         id="startButton"
+        aria-haspopup="menu"
+        aria-controls="startMenu"
+        aria-expanded={startMenuOpen ? 'true' : 'false'}
         onClick={() => {
           if (typeof WindoesApp.startMenu.toggle === 'function') {
             WindoesApp.startMenu.toggle();
             return;
           }
-
-          // Fallback during first-mount timing before StartMenu bridge is registered.
-          const startMenu = WindoesApp.dom.startMenu;
-          const startButton = WindoesApp.dom.startButton;
-          if (!startMenu || !startButton) return;
-          startMenu.classList.toggle('open');
-          startButton.classList.toggle('pressed', startMenu.classList.contains('open'));
+          setStartMenuOpen((open) => !open);
           WindoesApp.sound.playClickSound();
         }}
       >
@@ -80,23 +77,33 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
         </span>
         Start
       </button>
-      <div className="quick-launch">
-        <span className="ql-btn ql-ie" id="qlIE" title="Launch Internet Explorer"></span>
-        <span
+      <div className="quick-launch" role="group" aria-label="Quick launch">
+        <button
+          type="button"
+          className="ql-btn ql-ie"
+          id="qlIE"
+          title="Launch Internet Explorer"
+          aria-label="Launch Internet Explorer"
+          onClick={() => WindoesApp.open.internetExplorer()}
+        ></button>
+        <button
+          type="button"
           className="ql-btn ql-desktop"
           title="Show Desktop"
+          aria-label="Show Desktop"
           onClick={() => WindoesApp.desktopContext?.onShowDesktopClick?.()}
-        ></span>
+        ></button>
       </div>
       <div className="task-divider"></div>
       <div className="task-area" id="taskArea"></div>
       <div className="tray">
-        <span
+        <button
+          type="button"
           className="tray-volume"
           aria-label="Volume"
           id="trayVolume"
           onClick={() => WindoesApp.desktopContext?.onTrayVolumeClick?.()}
-        ></span>
+        ></button>
         <span
           id="clock"
           onMouseEnter={(e) => WindoesApp.desktopContext?.onClockEnter?.(e)}

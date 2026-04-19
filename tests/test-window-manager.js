@@ -376,11 +376,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -423,11 +429,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -450,6 +462,18 @@ async function runTests() {
     );
     assert(ieNotepadWindowComponentShellState.ie.hasTitlebar, 'IE window keeps titlebar chrome');
     assert(ieNotepadWindowComponentShellState.ie.hasMenubar, 'IE window keeps menubar chrome');
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarRole === 'menubar',
+      'IE menubar exposes role="menubar"'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarHasLabel,
+      'IE menubar exposes an accessible label'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarItemsAreMenuitems,
+      'IE menubar items expose role="menuitem"'
+    );
     assert(ieNotepadWindowComponentShellState.ie.hasView, 'IE window keeps view area');
     assert(
       ieNotepadWindowComponentShellState.notepad.hasTitlebar,
@@ -458,6 +482,18 @@ async function runTests() {
     assert(
       ieNotepadWindowComponentShellState.notepad.hasMenubar,
       'Notepad window keeps menubar chrome'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarRole === 'menubar',
+      'Notepad menubar exposes role="menubar"'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarHasLabel,
+      'Notepad menubar exposes an accessible label'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarItemsAreMenuitems,
+      'Notepad menubar items expose role="menuitem"'
     );
     assert(ieNotepadWindowComponentShellState.notepad.hasView, 'Notepad window keeps view area');
 
@@ -476,11 +512,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -545,11 +587,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -609,6 +657,340 @@ async function runTests() {
       'Winamp has no menubar (headless expected)'
     );
     assert(winampWindowComponentShellState.hasView, 'Winamp keeps iframe view');
+
+    // ── Test 17: Explorer navigation still works after DOM refactor safety ───
+    console.log('\nTest 17: My Computer navigation + address/back/up remain functional');
+
+    await page.evaluate(() => {
+      WindoesApp.open.myComputer();
+    });
+    await page.waitForTimeout(300);
+
+    const explorerInitialState = await page.evaluate(() => {
+      const address = document.getElementById('explorerAddress')?.value || '';
+      return { address };
+    });
+
+    assert(
+      explorerInitialState.address === 'My Computer',
+      `Explorer starts at My Computer root (got: ${explorerInitialState.address})`
+    );
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+
+    const explorerAfterNavigate = await page.evaluate(() => {
+      const address = document.getElementById('explorerAddress')?.value || '';
+      const backDisabled = !!document.getElementById('explorerBackBtn')?.disabled;
+      return { address, backDisabled };
+    });
+
+    assert(
+      explorerAfterNavigate.address === 'C:',
+      `Explorer navigates into Local Disk (got: ${explorerAfterNavigate.address})`
+    );
+    assert(!explorerAfterNavigate.backDisabled, 'Explorer Back is enabled after navigation');
+
+    await page.click('#explorerUpBtn');
+    await page.waitForTimeout(250);
+
+    const explorerAfterUp = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+    }));
+
+    assert(
+      explorerAfterUp.address === 'My Computer',
+      `Explorer Up returns to My Computer root (got: ${explorerAfterUp.address})`
+    );
+
+    // ── Test 18: Desktop icon interactions survive icon DOM remount ─────────
+    console.log('\nTest 18: Desktop icon interactions survive icon DOM remount');
+
+    await page.evaluate(() => {
+      const desktopIcons = document.getElementById('desktopIcons');
+      if (!desktopIcons) return;
+      desktopIcons.innerHTML = desktopIcons.innerHTML;
+    });
+    await page.waitForTimeout(100);
+
+    await page.click('#iconMyComputer');
+    const selectedAfterRemount = await page.evaluate(() => {
+      return document.getElementById('iconMyComputer')?.classList.contains('selected') || false;
+    });
+    assert(selectedAfterRemount, 'My Computer icon can still be selected after icons DOM remount');
+
+    await page.evaluate(() => {
+      WindoesApp.open.minesweeper();
+    });
+    await page.waitForTimeout(250);
+
+    const beforeDesktopReopenFocus = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+      return {
+        myComputerZ: Number(myComputerWindow?.style?.zIndex || 0),
+        minesweeperZ: Number(minesweeperWindow?.style?.zIndex || 0),
+      };
+    });
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(300);
+
+    const afterDesktopReopenFocus = await page.evaluate(() => {
+      const myComputerWindow = document.getElementById('myComputerWindow');
+      const minesweeperWindow = document.getElementById('minesweeperWindow');
+      return {
+        myComputerExists: !!myComputerWindow,
+        myComputerZ: Number(myComputerWindow?.style?.zIndex || 0),
+        minesweeperZ: Number(minesweeperWindow?.style?.zIndex || 0),
+      };
+    });
+    assert(
+      afterDesktopReopenFocus.myComputerExists,
+      'My Computer window exists after icon activate'
+    );
+    assert(
+      afterDesktopReopenFocus.myComputerZ > beforeDesktopReopenFocus.myComputerZ,
+      `My Computer z-index increases after icon activate (${beforeDesktopReopenFocus.myComputerZ} -> ${afterDesktopReopenFocus.myComputerZ})`
+    );
+    assert(
+      afterDesktopReopenFocus.myComputerZ > afterDesktopReopenFocus.minesweeperZ,
+      `My Computer is focused above Minesweeper after icon activate (${afterDesktopReopenFocus.myComputerZ} > ${afterDesktopReopenFocus.minesweeperZ})`
+    );
+
+    // ── Test 19: My Computer reopen resets explorer navigation state ─────────
+    console.log('\nTest 19: My Computer reopen resets explorer navigation state');
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+
+    await page.evaluate(() => {
+      WindoesApp.WindowManager.close('myComputerWindow');
+    });
+    await page.waitForTimeout(250);
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(300);
+
+    const explorerReopenState = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+      backDisabled: !!document.getElementById('explorerBackBtn')?.disabled,
+    }));
+
+    assert(
+      explorerReopenState.address === 'My Computer',
+      `Reopened explorer starts at My Computer root (got: ${explorerReopenState.address})`
+    );
+    assert(explorerReopenState.backDisabled, 'Reopened explorer Back is disabled at root');
+
+    // ── Test 20: My Computer toolbar is componentized and keeps nav behavior ─
+    console.log(
+      '\nTest 20: My Computer toolbar component renders and navigation controls still work'
+    );
+
+    const myComputerToolbarComponentState = await page.evaluate(() => {
+      const marker = document.querySelector(
+        '#myComputerWindow [data-my-computer-component="true"]'
+      );
+      return {
+        markerExists: !!marker,
+      };
+    });
+
+    assert(
+      myComputerToolbarComponentState.markerExists,
+      'My Computer toolbar has componentized marker'
+    );
+
+    await page.dblclick('#myComputerWindow .folder-item:has-text("Local Disk (C:)")');
+    await page.waitForTimeout(250);
+    await page.click('#explorerBackBtn');
+    await page.waitForTimeout(250);
+
+    const myComputerToolbarAfterBack = await page.evaluate(() => ({
+      address: document.getElementById('explorerAddress')?.value || '',
+      backDisabled: !!document.getElementById('explorerBackBtn')?.disabled,
+    }));
+
+    assert(
+      myComputerToolbarAfterBack.address === 'My Computer',
+      `Toolbar Back returns to My Computer root (got: ${myComputerToolbarAfterBack.address})`
+    );
+    assert(myComputerToolbarAfterBack.backDisabled, 'Toolbar Back is disabled again at root');
+
+    // ── Test 21: Shell removes global DOM bridge and keeps Start menu behavior ─
+    console.log('\nTest 21: Start menu works without WindoesApp.dom bridge');
+
+    const shellBridgeState = await page.evaluate(() => ({
+      hasDomBridge: Object.prototype.hasOwnProperty.call(WindoesApp, 'dom'),
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+    }));
+    assert(!shellBridgeState.hasDomBridge, 'WindoesApp.dom bridge is removed');
+    assert(!shellBridgeState.startMenuOpen, 'Start menu starts closed');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+
+    const startMenuAfterOpen = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      startPressed: document.getElementById('startButton')?.classList.contains('pressed') || false,
+    }));
+    assert(startMenuAfterOpen.startMenuOpen, 'Start button opens Start menu');
+    assert(startMenuAfterOpen.startPressed, 'Start button pressed state follows Start menu open');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+
+    const startMenuAfterClose = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      startPressed: document.getElementById('startButton')?.classList.contains('pressed') || false,
+    }));
+    assert(!startMenuAfterClose.startMenuOpen, 'Start button closes Start menu');
+    assert(!startMenuAfterClose.startPressed, 'Start button pressed state clears when menu closes');
+
+    // ── Test 22: My Computer folder view is React-componentized ───────────────
+    console.log('\nTest 22: My Computer folder view component marker and nav still work');
+
+    await page.dblclick('#iconMyComputer');
+    await page.waitForTimeout(250);
+
+    const myComputerViewComponentState = await page.evaluate(() => ({
+      hasViewMarker: !!document.querySelector(
+        '#myComputerWindow [data-my-computer-view-component="true"]'
+      ),
+      rootItemCount: document.querySelectorAll('#myComputerWindow .folder-item').length,
+    }));
+
+    assert(myComputerViewComponentState.hasViewMarker, 'My Computer view has component marker');
+    assert(
+      myComputerViewComponentState.rootItemCount >= 4,
+      `My Computer root view renders expected items (got ${myComputerViewComponentState.rootItemCount})`
+    );
+
+    // ── Test 23: Start menu accessibility semantics + declarative submenu positioning ─
+    console.log('\nTest 23: Start menu accessibility semantics and submenu positioning state');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+    await page.hover('#menuPrograms');
+    await page.waitForTimeout(120);
+    await page.hover('#subAccessories');
+    await page.waitForTimeout(120);
+    await page.hover('#subAccGames');
+    await page.waitForTimeout(120);
+
+    const startMenuAccessibilityState = await page.evaluate(() => {
+      const startButton = document.getElementById('startButton');
+      const startMenu = document.getElementById('startMenu');
+      const menuPrograms = document.getElementById('menuPrograms');
+      const programsSubmenu = document.getElementById('programsSubmenu');
+      const accessoriesSubmenu = document.getElementById('accessoriesSubmenu');
+      const gamesSubmenu = document.getElementById('gamesSubmenu');
+      const subAccessories = document.getElementById('subAccessories');
+      const subAccGames = document.getElementById('subAccGames');
+
+      return {
+        startButtonHasPopup: startButton?.getAttribute('aria-haspopup') === 'menu',
+        startButtonControls: startButton?.getAttribute('aria-controls') === 'startMenu',
+        startButtonExpanded: startButton?.getAttribute('aria-expanded') === 'true',
+        startMenuRole: startMenu?.getAttribute('role') === 'menu',
+        menuProgramsRole: menuPrograms?.getAttribute('role') === 'menuitem',
+        menuProgramsHasPopup: menuPrograms?.getAttribute('aria-haspopup') === 'menu',
+        menuProgramsExpanded: menuPrograms?.getAttribute('aria-expanded') === 'true',
+        subAccessoriesRole: subAccessories?.getAttribute('role') === 'menuitem',
+        subAccessoriesHasPopup: subAccessories?.getAttribute('aria-haspopup') === 'menu',
+        subAccessoriesExpanded: subAccessories?.getAttribute('aria-expanded') === 'true',
+        subAccGamesExpanded: subAccGames?.getAttribute('aria-expanded') === 'true',
+        programsSubmenuRole: programsSubmenu?.getAttribute('role') === 'menu',
+        accessoriesSubmenuRole: accessoriesSubmenu?.getAttribute('role') === 'menu',
+        gamesSubmenuRole: gamesSubmenu?.getAttribute('role') === 'menu',
+        programsBottomSet: !!programsSubmenu?.style?.bottom,
+        accessoriesPositionSet:
+          !!accessoriesSubmenu?.style?.bottom && !!accessoriesSubmenu?.style?.left,
+        gamesPositionSet: !!gamesSubmenu?.style?.bottom && !!gamesSubmenu?.style?.left,
+      };
+    });
+
+    assert(
+      startMenuAccessibilityState.startButtonHasPopup,
+      'Start button exposes aria-haspopup=menu'
+    );
+    assert(
+      startMenuAccessibilityState.startButtonControls,
+      'Start button controls start menu by id'
+    );
+    assert(
+      startMenuAccessibilityState.startButtonExpanded,
+      'Start button aria-expanded tracks open state'
+    );
+    assert(startMenuAccessibilityState.startMenuRole, 'Start menu uses role="menu"');
+    assert(startMenuAccessibilityState.menuProgramsRole, 'Programs trigger uses role="menuitem"');
+    assert(
+      startMenuAccessibilityState.menuProgramsHasPopup,
+      'Programs trigger exposes aria-haspopup'
+    );
+    assert(
+      startMenuAccessibilityState.menuProgramsExpanded,
+      'Programs trigger aria-expanded is true when open'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesRole,
+      'Accessories trigger uses role="menuitem"'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesHasPopup,
+      'Accessories trigger exposes aria-haspopup'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesExpanded,
+      'Accessories trigger aria-expanded is true when submenu open'
+    );
+    assert(
+      startMenuAccessibilityState.subAccGamesExpanded,
+      'Games trigger aria-expanded is true when open'
+    );
+    assert(startMenuAccessibilityState.programsSubmenuRole, 'Programs submenu uses role="menu"');
+    assert(
+      startMenuAccessibilityState.accessoriesSubmenuRole,
+      'Accessories submenu uses role="menu"'
+    );
+    assert(startMenuAccessibilityState.gamesSubmenuRole, 'Games submenu uses role="menu"');
+    assert(
+      startMenuAccessibilityState.programsBottomSet,
+      'Programs submenu has computed bottom style'
+    );
+    assert(
+      startMenuAccessibilityState.accessoriesPositionSet,
+      'Accessories submenu has computed left/bottom style'
+    );
+    assert(
+      startMenuAccessibilityState.gamesPositionSet,
+      'Games submenu has computed left/bottom style'
+    );
+
+    // ── Test 24: Launching from nested Start submenu closes all Start layers ─
+    console.log('\nTest 24: Start submenus fully close after launching Notepad');
+
+    await page.click('#subAccNotepad');
+    await page.waitForTimeout(150);
+
+    const startMenuLaunchState = await page.evaluate(() => ({
+      startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
+      programsOpen: document.getElementById('programsSubmenu')?.classList.contains('open') || false,
+      accessoriesOpen:
+        document.getElementById('accessoriesSubmenu')?.classList.contains('open') || false,
+      gamesOpen: document.getElementById('gamesSubmenu')?.classList.contains('open') || false,
+      notepadVisible: !document.getElementById('notepadWindow')?.classList.contains('hidden'),
+    }));
+
+    assert(startMenuLaunchState.notepadVisible, 'Notepad opens from Start submenu launch');
+    assert(!startMenuLaunchState.startMenuOpen, 'Start menu closes after launching Notepad');
+    assert(!startMenuLaunchState.programsOpen, 'Programs submenu closes after launching Notepad');
+    assert(
+      !startMenuLaunchState.accessoriesOpen,
+      'Accessories submenu closes after launching Notepad'
+    );
+    assert(!startMenuLaunchState.gamesOpen, 'Nested Games submenu closes after launching Notepad');
   } finally {
     await browser.close();
     server.close();

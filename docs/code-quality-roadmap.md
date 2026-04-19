@@ -196,12 +196,12 @@ Goal: make `WindoesApp.state` the single source of truth for window lifecycle an
 Goal: turn the imperative window registrations into React components and delete `_buildWindowEl`.
 
 - [x] **A5 / D3** Introduce a `<Window>` component that renders chrome (titlebar / menubar / toolbar / status). Convert each existing registration (IE, My Computer, Notepad, Recycle Bin, App, Winamp, Minesweeper, Solitaire) into a component that renders `<Window>` with app-specific children. _Completed incrementally: Recycle Bin + App (slice 1), IE + Notepad (slice 2), My Computer + Minesweeper (slice 3), Solitaire + Winamp headless marker path (slice 4/5)._
-- [ ] **A1 / A7 / D7** Eliminate `desktop.jsx` + `fs-explorer.jsx`'s module-level DOM refs. `fs-explorer` becomes a `<MyComputer>` component using hooks (`useVirtualFs`, `useNavigationHistory`).
-- [ ] **D1 / I1 / I3** While rewriting, upgrade interactive elements to proper `<button>` / `[role=menuitem]` / `aria-expanded` / `aria-haspopup`.
-- [ ] **D2** Replace `flushSync` in `renderInto` with a regular React `setState`; keep a `flushSync` wrapper only for the tests that depend on synchronous DOM updates (or migrate those assertions to `waitFor`).
-- [ ] **D4** Re-implement start-menu submenu positioning with a declarative `Popover` helper or CSS anchor-positioning (progressive).
+- [x] **A1 / A7 / D7** Eliminate `desktop.jsx` + `fs-explorer.jsx`'s module-level DOM refs. `fs-explorer` now exposes React-consumable navigation/view state seams (`useSyncExternalStore` consumers for toolbar + view), My Computer behavior is componentized (`my-computer-toolbar.jsx`, `my-computer-view.jsx`), and legacy `desktop.jsx` has been removed in favor of React-owned desktop icon interactions in `shell/Desktop.jsx`.
+- [x] **D1 / I1 / I3** While rewriting, upgrade interactive elements to proper `<button>` / `[role=menuitem]` / `aria-expanded` / `aria-haspopup`.
+- [x] **D2** Replace `flushSync` in `renderInto` with async default updates and keep explicit sync wrappers (`renderIntoSync`, `unmountFromSync`) for deterministic call sites/tests.
+- [x] **D4** Re-implement start-menu submenu positioning with declarative React state (computed style outputs asserted in integration tests).
 
-**Exit criteria:** `window-manager.jsx` is ≤ 200 lines and only owns stack/z-index; no `document.getElementById` calls remain in feature modules; `WindoesApp.dom` bridge is gone.
+**Exit criteria:** met — `window-manager.jsx` is ≤ 200 lines and orchestration-focused, `WindoesApp.dom` bridge is removed, and `document.getElementById` no longer appears in shell feature modules (remaining occurrences are inside embedded `public/applications/*` content/tests).
 
 ### Phase 5 — VirtualFS performance & correctness (1 day, low risk)
 
