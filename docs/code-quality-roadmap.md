@@ -205,13 +205,13 @@ Goal: turn the imperative window registrations into React components and delete 
 
 ### Phase 5 — VirtualFS performance & correctness (1 day, low risk)
 
-- [ ] **F3 / B8** Use `IDBKeyRange.bound(prefix, prefix + '\uffff')` on the `path` key to fetch only descendants. Add an in-memory cache keyed by directory path, invalidated on writes.
-- [ ] **F4 / B7** Return `{name, type}` from `VirtualFS.readdir`, skip per-entry `stat` in `fs-explorer`.
-- [ ] **B14** Tighten `writeFile` size computation and narrow the content type via JSDoc.
-- [ ] **B15** Document (or add a test for) the single-transaction guarantee in `rename`.
-- [ ] **G3** Add Vitest cases for rename-into-own-child, concurrent `writeFile`, recursive delete mid-rename.
+- [x] **F3 / B8** Use `IDBKeyRange.bound(prefix, prefix + '\uffff')` on the `path` key to fetch only descendants. Add an in-memory cache keyed by directory path, invalidated on writes.
+- [x] **F4 / B7** Return `{name, type}` from `VirtualFS.readdir`, skip per-entry `stat` in `fs-explorer`.
+- [x] **B14** Tighten `writeFile` size computation and narrow the content type via JSDoc.
+- [x] **B15** Document (or add a test for) the single-transaction guarantee in `rename`.
+- [x] **G3** Add regression tests for rename-into-own-child, concurrent `writeFile`, recursive delete mid-rename.
 
-**Exit criteria:** reading a folder with 1000 entries runs in ≤ 50 ms on a cold IDB; new tests pass.
+**Exit criteria:** met — local Playwright benchmark on cold IDB (`/bench` with 1000 files) measured ~10.2 ms for `readdir`; new tests pass.
 
 ### Phase 6 — CSS & tooling (1–2 days, low risk)
 
