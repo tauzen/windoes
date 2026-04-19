@@ -11,7 +11,6 @@
  * @property {number=} x
  * @property {number=} y
  * @property {string|null=} selectedPath
- * @property {string|null=} commandType
  * @property {number=} left
  * @property {number=} top
  * @property {string=} path
@@ -57,15 +56,11 @@ export const initialState = {
     contextMenuX: 0,
     contextMenuY: 0,
     selectedPath: null,
-    actionCommand: null,
-    actionSeq: 0,
   },
   notepad: {
     fileMenuOpen: false,
     fileMenuLeft: 0,
     fileMenuTop: 0,
-    actionCommand: null,
-    actionSeq: 0,
     saveDialogOpen: false,
     saveDialogPath: '/C:/My Documents/Untitled.txt',
   },
@@ -282,20 +277,7 @@ export function reduce(current, action) {
           selectedPath: null,
         },
       };
-    case 'EXPLORER_CONTEXT_ACTION_DISPATCH':
-      return {
-        ...current,
-        explorer: {
-          ...current.explorer,
-          contextMenuOpen: false,
-          actionCommand: {
-            type: action.commandType || null,
-            selectedPath: action.selectedPath || null,
-          },
-          actionSeq: (current.explorer.actionSeq || 0) + 1,
-          selectedPath: null,
-        },
-      };
+
     case 'NOTEPAD_FILE_MENU_OPEN':
       return {
         ...current,
@@ -315,16 +297,7 @@ export function reduce(current, action) {
           fileMenuOpen: false,
         },
       };
-    case 'NOTEPAD_ACTION_DISPATCH':
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          fileMenuOpen: false,
-          actionCommand: { type: action.commandType || null },
-          actionSeq: (current.notepad.actionSeq || 0) + 1,
-        },
-      };
+
     case 'NOTEPAD_SAVE_DIALOG_OPEN':
       return {
         ...current,

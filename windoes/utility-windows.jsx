@@ -40,7 +40,6 @@ WindoesApp.WindowManager.register('myComputer', {
 });
 
 let fsReady = false;
-let lastNotepadActionSeq = 0;
 
 async function ensureFS() {
   if (fsReady) return;
@@ -142,7 +141,7 @@ function newNotepadDocument() {
   WindoesApp.sound.playClickSound();
 }
 
-function processNotepadActionCommand(command) {
+function processNotepadInteraction(command) {
   if (!command || !command.type) return;
 
   if (command.type === 'new') {
@@ -162,16 +161,8 @@ function processNotepadActionCommand(command) {
   }
 }
 
-function handleNotepadStateActions() {
-  const notepadState = WindoesApp.state.get().notepad || {};
-  const seq = notepadState.actionSeq || 0;
-  if (seq <= lastNotepadActionSeq) return;
-
-  lastNotepadActionSeq = seq;
-  processNotepadActionCommand(notepadState.actionCommand);
-}
-
-const unsubscribeNotepadStateActions = WindoesApp.state.subscribe(handleNotepadStateActions);
+const unsubscribeNotepadInteraction =
+  WindoesApp.events.notepadInteraction.subscribe(processNotepadInteraction);
 
 function openNotepad(options = {}) {
   const { filePath = '', content = '', preserveCurrentDocument = false } = options;
@@ -253,6 +244,6 @@ WindoesApp.open.recycleBin = openRecycleBin;
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    unsubscribeNotepadStateActions();
+    unsubscribeNotepadInteraction();
   });
 }
