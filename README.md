@@ -13,7 +13,7 @@ https://tauzen.github.io/windoes/
 - Boot flow + retro dialogs (`boot.js`, `bsod.jsx`, `utility-windows.jsx`)
 - Desktop shell and taskbar (`desktop.jsx`, `shell/StartMenu.jsx`, `window-manager.jsx`)
 - Windowed app launching (`app-windows.jsx`, `ie-window.jsx`, `shell/RunDialog.jsx`)
-- Virtual file system and explorer-style navigation (`virtual-fs.js`, `fs-explorer.jsx`)
+- Virtual file system and explorer-style navigation (`virtual-fs.ts`, `fs-explorer.jsx`)
 - Built-in applications under `windoes/public/applications/`:
   - ASCII Runner
   - Minesweeper
@@ -66,7 +66,6 @@ Install dependencies:
 
 ```bash
 npm ci
-npm run install:apps
 ```
 
 Start the dev server:
@@ -110,7 +109,7 @@ npm run test:all
 
 - Create a feature branch from `main`
 - Keep commits focused and descriptive
-- Run `npm run test:all` before opening a PR
+- Run `npm run test:all` before opening a PR (`npm run typecheck` + simulator + embedded app tests)
 
 ### Note about deploy-key automation
 

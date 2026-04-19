@@ -213,14 +213,14 @@ Goal: turn the imperative window registrations into React components and delete 
 
 **Exit criteria:** met — local Playwright benchmark on cold IDB (`/bench` with 1000 files) measured ~10.2 ms for `readdir`; new tests pass.
 
-### Phase 6 — CSS & tooling (1–2 days, low risk)
+### Phase 6 — CSS & tooling (1–2 days, low risk) ✅ Done
 
 - [x] **H5** Split `styles.css` into per-feature partials imported from `styles.css` (implemented under `windoes/styles/*.css`).
-- [ ] **H1** Add `tsconfig.json` with `allowJs` / `checkJs` as a first TS step. Migrate `app-state.js` and `virtual-fs.js` to `.ts` — they have the highest type-leverage.
-- [ ] **G4** Adopt npm workspaces for embedded apps; remove `install:apps` and collapse duplicate `playwright` dev deps.
-- [ ] **H6** Add `CONTRIBUTING.md` (where to run what), `docs/architecture.md` (dataflow diagram), and keep a terse `CHANGELOG.md`.
+- [x] **H1** Add `tsconfig.json` with `allowJs` / `checkJs` as a first TS step. Migrate `app-state.js` and `virtual-fs.js` to `.ts` — they have the highest type-leverage.
+- [x] **G4** Adopt npm workspaces for embedded apps; remove `install:apps` and collapse duplicate `playwright` dev deps.
+- [x] **H6** Add `CONTRIBUTING.md` (where to run what), `docs/architecture.md` (dataflow diagram), and keep a terse `CHANGELOG.md`.
 
-**Exit criteria:** `npm install` at the root installs everything; `tsc --noEmit` passes on migrated files.
+**Exit criteria:** met — root `npm install` installs workspace dependencies and `npm run typecheck` (`tsc --noEmit`) passes on migrated files.
 
 ### Phase 7 — Accessibility pass (1 day, low risk)
 
