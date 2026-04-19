@@ -64,7 +64,7 @@ function WindowShell({ windowId, template }) {
       <WindowTitlebar windowId={windowId} template={template} />
 
       {template.menubar && (
-        <div className="menubar" role="menubar">
+        <div className="menubar" role="menubar" aria-label={`${template.title} menu`}>
           {template.menubar.map((item, index) => {
             if (typeof item === 'string') {
               return (

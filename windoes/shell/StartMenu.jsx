@@ -2,7 +2,43 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
 
-export default function StartMenu({ startButtonRef }) {
+const DEFAULT_SUBMENU_STYLES = {
+  programs: {},
+  accessories: {},
+  games: {},
+};
+
+function areStylesEqual(a = {}, b = {}) {
+  return a.left === b.left && a.bottom === b.bottom;
+}
+
+function calcSubmenuStyle({ submenuEl, triggerEl, parentSubmenuEl }) {
+  if (!submenuEl || !triggerEl) return null;
+
+  const triggerRect = triggerEl.getBoundingClientRect();
+  const submenuRect = submenuEl.getBoundingClientRect();
+
+  let left;
+  if (parentSubmenuEl) {
+    const parentRect = parentSubmenuEl.getBoundingClientRect();
+    left = parentRect.right;
+    if (left + submenuRect.width > window.innerWidth) {
+      left = parentRect.left - submenuRect.width;
+    }
+  }
+
+  let bottom = window.innerHeight - triggerRect.top - triggerRect.height;
+  const minBottom = TASKBAR_HEIGHT_PX;
+  const maxBottom = Math.max(minBottom, window.innerHeight - submenuRect.height);
+  bottom = Math.max(minBottom, Math.min(bottom, maxBottom));
+
+  return {
+    ...(typeof left === 'number' ? { left: `${left}px` } : {}),
+    bottom: `${bottom}px`,
+  };
+}
+
+export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuOpen }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const startMenuRef = useRef(null);
   const programsSubmenuRef = useRef(null);
@@ -16,14 +52,20 @@ export default function StartMenu({ startButtonRef }) {
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
   const shellVisible = bootDone && !shutdownScreenVisible;
   const [shutdownOption, setShutdownOption] = useState('shutdown');
+  const [submenuOpen, setSubmenuOpen] = useState({
+    programs: false,
+    accessories: false,
+    games: false,
+  });
+  const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
 
-  function closeOtherSubmenus(...keepRefs) {
-    const allRefs = [programsSubmenuRef, accessoriesSubmenuRef, gamesSubmenuRef];
-    const keep = new Set(keepRefs);
-    for (const ref of allRefs) {
-      if (keep.has(ref)) continue;
-      if (ref.current) ref.current.classList.remove('open');
-    }
+  function closeOtherSubmenus(...keepKeys) {
+    const keep = new Set(keepKeys);
+    setSubmenuOpen({
+      programs: keep.has('programs'),
+      accessories: keep.has('accessories'),
+      games: keep.has('games'),
+    });
   }
 
   function closeSubmenus() {
@@ -31,57 +73,20 @@ export default function StartMenu({ startButtonRef }) {
   }
 
   function closeAllMenus() {
-    const startMenu = startMenuRef.current;
-    const startButton = startButtonRef?.current;
-    if (startMenu) startMenu.classList.remove('open');
-    if (startButton) startButton.classList.remove('pressed');
+    setStartMenuOpen(false);
     closeSubmenus();
   }
 
-  function positionSubmenu(submenu, triggerEl, parentSubmenu) {
-    if (!submenu || !triggerEl) return;
-
-    const rect = triggerEl.getBoundingClientRect();
-
-    submenu.style.visibility = 'hidden';
-    submenu.style.display = 'block';
-
-    if (parentSubmenu) {
-      const parentRect = parentSubmenu.getBoundingClientRect();
-      let left = parentRect.right;
-      if (left + submenu.offsetWidth > window.innerWidth) {
-        left = parentRect.left - submenu.offsetWidth;
-      }
-      submenu.style.left = left + 'px';
-    }
-
-    let bottom = window.innerHeight - rect.top - rect.height;
-    const minBottom = TASKBAR_HEIGHT_PX;
-    const maxBottom = window.innerHeight - submenu.offsetHeight;
-    bottom = Math.max(minBottom, Math.min(bottom, maxBottom));
-    submenu.style.bottom = bottom + 'px';
-
-    submenu.style.visibility = '';
-    submenu.style.display = '';
-    submenu.classList.add('open');
-  }
-
   function onProgramsEnter() {
-    positionSubmenu(programsSubmenuRef.current, menuProgramsRef.current, null);
-    closeOtherSubmenus(programsSubmenuRef);
+    closeOtherSubmenus('programs');
   }
 
   function onSubAccessoriesEnter() {
-    positionSubmenu(
-      accessoriesSubmenuRef.current,
-      subAccessoriesRef.current,
-      programsSubmenuRef.current
-    );
-    closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef);
+    closeOtherSubmenus('programs', 'accessories');
   }
 
   function onSubAccGamesEnter() {
-    positionSubmenu(gamesSubmenuRef.current, subAccGamesRef.current, accessoriesSubmenuRef.current);
+    closeOtherSubmenus('programs', 'accessories', 'games');
   }
 
   function onStartMenuLeave(e) {
@@ -97,7 +102,7 @@ export default function StartMenu({ startButtonRef }) {
     if (!startMenu || !accessoriesSubmenu) return;
 
     if (!startMenu.contains(e.relatedTarget) && !accessoriesSubmenu.contains(e.relatedTarget)) {
-      closeOtherSubmenus();
+      closeSubmenus();
     }
   }
 
@@ -107,14 +112,14 @@ export default function StartMenu({ startButtonRef }) {
     if (!programsSubmenu || !gamesSubmenu) return;
 
     if (!programsSubmenu.contains(e.relatedTarget) && !gamesSubmenu.contains(e.relatedTarget)) {
-      closeOtherSubmenus(programsSubmenuRef);
+      closeOtherSubmenus('programs');
     }
   }
 
   function onGamesLeave(e) {
     const accessoriesSubmenu = accessoriesSubmenuRef.current;
     if (accessoriesSubmenu && !accessoriesSubmenu.contains(e.relatedTarget)) {
-      closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef);
+      closeOtherSubmenus('programs', 'accessories');
     }
   }
 
@@ -148,24 +153,79 @@ export default function StartMenu({ startButtonRef }) {
   }
 
   useLayoutEffect(() => {
+    if (!startMenuOpen) {
+      setSubmenuOpen({ programs: false, accessories: false, games: false });
+    }
+  }, [startMenuOpen]);
+
+  useLayoutEffect(() => {
+    let nextStyles = submenuStyles;
+
+    if (submenuOpen.programs) {
+      const style = calcSubmenuStyle({
+        submenuEl: programsSubmenuRef.current,
+        triggerEl: menuProgramsRef.current,
+      });
+      if (style && !areStylesEqual(submenuStyles.programs, style)) {
+        nextStyles = { ...nextStyles, programs: style };
+      }
+    }
+
+    if (submenuOpen.accessories) {
+      const style = calcSubmenuStyle({
+        submenuEl: accessoriesSubmenuRef.current,
+        triggerEl: subAccessoriesRef.current,
+        parentSubmenuEl: programsSubmenuRef.current,
+      });
+      if (style && !areStylesEqual(submenuStyles.accessories, style)) {
+        nextStyles = { ...nextStyles, accessories: style };
+      }
+    }
+
+    if (submenuOpen.games) {
+      const style = calcSubmenuStyle({
+        submenuEl: gamesSubmenuRef.current,
+        triggerEl: subAccGamesRef.current,
+        parentSubmenuEl: accessoriesSubmenuRef.current,
+      });
+      if (style && !areStylesEqual(submenuStyles.games, style)) {
+        nextStyles = { ...nextStyles, games: style };
+      }
+    }
+
+    if (nextStyles !== submenuStyles) {
+      setSubmenuStyles(nextStyles);
+    }
+  }, [startMenuOpen, submenuOpen, submenuStyles]);
+
+  useLayoutEffect(() => {
+    WindoesApp.startMenu.closeSubmenus = closeSubmenus;
+    WindoesApp.startMenu.closeAll = closeAllMenus;
+    WindoesApp.startMenu.isOpen = () => !!startMenuOpen;
+
+    WindoesApp.startMenu.toggle = () => {
+      setStartMenuOpen((open) => {
+        const nextOpen = !open;
+        if (!nextOpen) {
+          closeSubmenus();
+        }
+        WindoesApp.sound.playClickSound();
+        return nextOpen;
+      });
+    };
+
+    return () => {
+      delete WindoesApp.startMenu.closeSubmenus;
+      delete WindoesApp.startMenu.closeAll;
+      delete WindoesApp.startMenu.isOpen;
+      delete WindoesApp.startMenu.toggle;
+    };
+  }, [setStartMenuOpen, startMenuOpen]);
+
+  useLayoutEffect(() => {
     const startMenuEl = startMenuRef.current;
     const startButton = startButtonRef?.current;
     if (!startMenuEl || !startButton) return undefined;
-
-    WindoesApp.startMenu.closeSubmenus = closeSubmenus;
-    WindoesApp.startMenu.closeAll = closeAllMenus;
-    WindoesApp.startMenu.isOpen = () => startMenuEl.classList.contains('open');
-
-    function toggleStartMenu() {
-      startMenuEl.classList.toggle('open');
-      startButton.classList.toggle('pressed', startMenuEl.classList.contains('open'));
-      if (!startMenuEl.classList.contains('open')) {
-        closeSubmenus();
-      }
-      WindoesApp.sound.playClickSound();
-    }
-
-    WindoesApp.startMenu.toggle = toggleStartMenu;
 
     function onDocumentClick(e) {
       const programsSubmenu = programsSubmenuRef.current;
@@ -187,101 +247,123 @@ export default function StartMenu({ startButtonRef }) {
     document.addEventListener('click', onDocumentClick);
 
     return () => {
-      delete WindoesApp.startMenu.closeSubmenus;
-      delete WindoesApp.startMenu.closeAll;
-      delete WindoesApp.startMenu.isOpen;
-      delete WindoesApp.startMenu.toggle;
       document.removeEventListener('click', onDocumentClick);
     };
-  }, [startButtonRef]);
+  }, [startButtonRef, setStartMenuOpen]);
 
   return (
     <>
       <div
         ref={startMenuRef}
-        className="start-menu"
+        className={`start-menu${startMenuOpen ? ' open' : ''}`}
         id="startMenu"
+        role="menu"
         aria-label="Start menu"
         style={{ display: shellVisible ? '' : 'none' }}
         onMouseLeave={onStartMenuLeave}
       >
-        <div className="start-rail">
+        <div className="start-rail" aria-hidden={true}>
           <span className="rail-windoes">Windoes</span>
           <strong>XD</strong>
         </div>
-        <div className="menu-list">
-          <div
+        <div className="menu-list" role="none">
+          <button
+            type="button"
+            role="menuitem"
             className="menu-item"
             id="menuWindoesUpdate"
             onMouseEnter={closeSubmenus}
             onClick={() => runAction(() => WindoesApp.open.internetExplorer())}
           >
-            <span className="menu-icon menu-icon-winupdate"></span>Windoes Update
-          </div>
-          <div className="menu-separator"></div>
-          <div
+            <span className="menu-icon menu-icon-winupdate" aria-hidden={true}></span>Windoes Update
+          </button>
+          <div className="menu-separator" role="separator"></div>
+          <button
             ref={menuProgramsRef}
+            type="button"
+            role="menuitem"
             className="menu-item menu-item-arrow"
             id="menuPrograms"
+            aria-haspopup="menu"
+            aria-controls="programsSubmenu"
+            aria-expanded={submenuOpen.programs ? 'true' : 'false'}
             onMouseEnter={onProgramsEnter}
           >
-            <span className="menu-icon menu-icon-programs"></span>Programs
-          </div>
-          <div
+            <span className="menu-icon menu-icon-programs" aria-hidden={true}></span>Programs
+          </button>
+          <button
+            type="button"
+            role="menuitem"
             className="menu-item"
             id="menuHelp"
             onMouseEnter={closeSubmenus}
             onClick={() => runAction(showHelpDialog)}
           >
-            <span className="menu-icon menu-icon-help"></span>Help
-          </div>
-          <div
+            <span className="menu-icon menu-icon-help" aria-hidden={true}></span>Help
+          </button>
+          <button
+            type="button"
+            role="menuitem"
             className="menu-item"
             id="menuRun"
             onMouseEnter={closeSubmenus}
             onClick={() => runAction(() => WindoesApp.runDialog.open?.())}
           >
-            <span className="menu-icon menu-icon-run"></span>Run...
-          </div>
-          <div className="menu-separator"></div>
-          <div
+            <span className="menu-icon menu-icon-run" aria-hidden={true}></span>Run...
+          </button>
+          <div className="menu-separator" role="separator"></div>
+          <button
+            type="button"
+            role="menuitem"
             className="menu-item menu-shutdown"
             id="menuShutdown"
             onMouseEnter={closeSubmenus}
             onClick={() => openShutdownDialog('shutdown')}
           >
-            <span className="menu-icon menu-icon-shutdown"></span>Shut Down...
-          </div>
+            <span className="menu-icon menu-icon-shutdown" aria-hidden={true}></span>Shut Down...
+          </button>
         </div>
       </div>
 
       <div
         ref={programsSubmenuRef}
-        className="programs-submenu"
+        className={`programs-submenu${submenuOpen.programs ? ' open' : ''}`}
         id="programsSubmenu"
+        role="menu"
+        aria-label="Programs"
+        style={submenuStyles.programs}
         onMouseLeave={onProgramsLeave}
       >
-        <div
+        <button
           ref={subAccessoriesRef}
+          type="button"
+          role="menuitem"
           className="submenu-item submenu-item-arrow"
           id="subAccessories"
+          aria-haspopup="menu"
+          aria-controls="accessoriesSubmenu"
+          aria-expanded={submenuOpen.accessories ? 'true' : 'false'}
           onMouseEnter={onSubAccessoriesEnter}
         >
-          <span className="submenu-icon submenu-icon-folder"></span>Accessories
-        </div>
-        <div className="context-menu-sep"></div>
-        <div
+          <span className="submenu-icon submenu-icon-folder" aria-hidden={true}></span>Accessories
+        </button>
+        <div className="context-menu-sep" role="separator"></div>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subIE"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs')}
           onClick={() => runAction(() => WindoesApp.open.internetExplorer())}
         >
-          <span className="submenu-icon submenu-icon-ie"></span>Internet Explorer
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-ie" aria-hidden={true}></span>Internet Explorer
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subMSDOS"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -292,12 +374,14 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-msdos"></span>MS-DOS Prompt
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-msdos" aria-hidden={true}></span>MS-DOS Prompt
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subOutlook"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -308,37 +392,51 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-outlook"></span>Outlook Express
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-outlook" aria-hidden={true}></span>Outlook
+          Express
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subExplorer"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs')}
           onClick={() => runAction(() => WindoesApp.open.myComputer())}
         >
-          <span className="submenu-icon submenu-icon-explorer"></span>Windoes Explorer
-        </div>
+          <span className="submenu-icon submenu-icon-explorer" aria-hidden={true}></span>Windoes
+          Explorer
+        </button>
       </div>
 
       <div
         ref={accessoriesSubmenuRef}
-        className="programs-submenu accessories-submenu"
+        className={`programs-submenu accessories-submenu${submenuOpen.accessories ? ' open' : ''}`}
         id="accessoriesSubmenu"
+        role="menu"
+        aria-label="Accessories"
+        style={submenuStyles.accessories}
         onMouseLeave={onAccessoriesLeave}
       >
-        <div
+        <button
           ref={subAccGamesRef}
+          type="button"
+          role="menuitem"
           className="submenu-item submenu-item-arrow"
           id="subAccGames"
+          aria-haspopup="menu"
+          aria-controls="gamesSubmenu"
+          aria-expanded={submenuOpen.games ? 'true' : 'false'}
           onMouseEnter={onSubAccGamesEnter}
         >
-          <span className="submenu-icon submenu-icon-folder"></span>Games
-        </div>
-        <div className="context-menu-sep"></div>
-        <div
+          <span className="submenu-icon submenu-icon-folder" aria-hidden={true}></span>Games
+        </button>
+        <div className="context-menu-sep" role="separator"></div>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subAccCalculator"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -349,12 +447,15 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-calculator"></span>Calculator
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-calculator" aria-hidden={true}></span>
+          Calculator
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subAccImaging"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -365,20 +466,24 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-imaging"></span>Imaging
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-imaging" aria-hidden={true}></span>Imaging
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subAccNotepad"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
           onClick={() => runAction(() => WindoesApp.open.notepad())}
         >
-          <span className="submenu-icon submenu-icon-notepad"></span>Notepad
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-notepad" aria-hidden={true}></span>Notepad
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subAccPaint"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -389,25 +494,32 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-paint"></span>Paint
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-paint" aria-hidden={true}></span>Paint
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subAccWordPad"
-          onMouseEnter={() => closeOtherSubmenus(programsSubmenuRef, accessoriesSubmenuRef)}
+          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
           onClick={() => runAction(() => WindoesApp.open.notepad())}
         >
-          <span className="submenu-icon submenu-icon-wordpad"></span>WordPad
-        </div>
+          <span className="submenu-icon submenu-icon-wordpad" aria-hidden={true}></span>WordPad
+        </button>
       </div>
 
       <div
         ref={gamesSubmenuRef}
-        className="programs-submenu games-submenu"
+        className={`programs-submenu games-submenu${submenuOpen.games ? ' open' : ''}`}
         id="gamesSubmenu"
+        role="menu"
+        aria-label="Games"
+        style={submenuStyles.games}
         onMouseLeave={onGamesLeave}
       >
-        <div
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subGameAsciiRunner"
           onClick={() =>
@@ -416,22 +528,28 @@ export default function StartMenu({ startButtonRef }) {
             )
           }
         >
-          <span className="submenu-icon submenu-icon-ascii-runner"></span>ASCII Runner
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-ascii-runner" aria-hidden={true}></span>ASCII
+          Runner
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subGameMinesweeper"
           onClick={() => runAction(() => WindoesApp.open.minesweeper())}
         >
-          <span className="submenu-icon submenu-icon-minesweeper"></span>Minesweeper
-        </div>
-        <div
+          <span className="submenu-icon submenu-icon-minesweeper" aria-hidden={true}></span>
+          Minesweeper
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           className="submenu-item"
           id="subGameSolitaire"
           onClick={() => runAction(() => WindoesApp.open.solitaire())}
         >
-          <span className="submenu-icon submenu-icon-solitaire"></span>Solitaire
-        </div>
+          <span className="submenu-icon submenu-icon-solitaire" aria-hidden={true}></span>Solitaire
+        </button>
       </div>
 
       <div

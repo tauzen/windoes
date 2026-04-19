@@ -376,11 +376,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -423,11 +429,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -450,6 +462,18 @@ async function runTests() {
     );
     assert(ieNotepadWindowComponentShellState.ie.hasTitlebar, 'IE window keeps titlebar chrome');
     assert(ieNotepadWindowComponentShellState.ie.hasMenubar, 'IE window keeps menubar chrome');
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarRole === 'menubar',
+      'IE menubar exposes role="menubar"'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarHasLabel,
+      'IE menubar exposes an accessible label'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.ie.menubarItemsAreMenuitems,
+      'IE menubar items expose role="menuitem"'
+    );
     assert(ieNotepadWindowComponentShellState.ie.hasView, 'IE window keeps view area');
     assert(
       ieNotepadWindowComponentShellState.notepad.hasTitlebar,
@@ -458,6 +482,18 @@ async function runTests() {
     assert(
       ieNotepadWindowComponentShellState.notepad.hasMenubar,
       'Notepad window keeps menubar chrome'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarRole === 'menubar',
+      'Notepad menubar exposes role="menubar"'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarHasLabel,
+      'Notepad menubar exposes an accessible label'
+    );
+    assert(
+      ieNotepadWindowComponentShellState.notepad.menubarItemsAreMenuitems,
+      'Notepad menubar items expose role="menuitem"'
     );
     assert(ieNotepadWindowComponentShellState.notepad.hasView, 'Notepad window keeps view area');
 
@@ -476,11 +512,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -545,11 +587,17 @@ async function runTests() {
 
       function readShellState(windowEl) {
         if (!windowEl) return { exists: false };
+        const menubar = windowEl.querySelector('.menubar');
         return {
           exists: true,
           usesSharedWindowComponent: windowEl.dataset.windowComponent === 'true',
           hasTitlebar: !!windowEl.querySelector('.titlebar'),
-          hasMenubar: !!windowEl.querySelector('.menubar'),
+          hasMenubar: !!menubar,
+          menubarRole: menubar?.getAttribute('role') || '',
+          menubarHasLabel: !!menubar?.getAttribute('aria-label'),
+          menubarItemsAreMenuitems: [...windowEl.querySelectorAll('.menubar .menubar-item')].every(
+            (item) => item.getAttribute('role') === 'menuitem'
+          ),
           hasView: !!windowEl.querySelector('.view'),
         };
       }
@@ -818,6 +866,110 @@ async function runTests() {
       myComputerViewComponentState.rootItemCount >= 4,
       `My Computer root view renders expected items (got ${myComputerViewComponentState.rootItemCount})`
     );
+
+    // ── Test 23: Start menu accessibility semantics + declarative submenu positioning ─
+    console.log('\nTest 23: Start menu accessibility semantics and submenu positioning state');
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
+    await page.hover('#menuPrograms');
+    await page.waitForTimeout(120);
+    await page.hover('#subAccessories');
+    await page.waitForTimeout(120);
+    await page.hover('#subAccGames');
+    await page.waitForTimeout(120);
+
+    const startMenuAccessibilityState = await page.evaluate(() => {
+      const startButton = document.getElementById('startButton');
+      const startMenu = document.getElementById('startMenu');
+      const menuPrograms = document.getElementById('menuPrograms');
+      const programsSubmenu = document.getElementById('programsSubmenu');
+      const accessoriesSubmenu = document.getElementById('accessoriesSubmenu');
+      const gamesSubmenu = document.getElementById('gamesSubmenu');
+      const subAccessories = document.getElementById('subAccessories');
+      const subAccGames = document.getElementById('subAccGames');
+
+      return {
+        startButtonHasPopup: startButton?.getAttribute('aria-haspopup') === 'menu',
+        startButtonControls: startButton?.getAttribute('aria-controls') === 'startMenu',
+        startButtonExpanded: startButton?.getAttribute('aria-expanded') === 'true',
+        startMenuRole: startMenu?.getAttribute('role') === 'menu',
+        menuProgramsRole: menuPrograms?.getAttribute('role') === 'menuitem',
+        menuProgramsHasPopup: menuPrograms?.getAttribute('aria-haspopup') === 'menu',
+        menuProgramsExpanded: menuPrograms?.getAttribute('aria-expanded') === 'true',
+        subAccessoriesRole: subAccessories?.getAttribute('role') === 'menuitem',
+        subAccessoriesHasPopup: subAccessories?.getAttribute('aria-haspopup') === 'menu',
+        subAccessoriesExpanded: subAccessories?.getAttribute('aria-expanded') === 'true',
+        subAccGamesExpanded: subAccGames?.getAttribute('aria-expanded') === 'true',
+        programsSubmenuRole: programsSubmenu?.getAttribute('role') === 'menu',
+        accessoriesSubmenuRole: accessoriesSubmenu?.getAttribute('role') === 'menu',
+        gamesSubmenuRole: gamesSubmenu?.getAttribute('role') === 'menu',
+        programsBottomSet: !!programsSubmenu?.style?.bottom,
+        accessoriesPositionSet:
+          !!accessoriesSubmenu?.style?.bottom && !!accessoriesSubmenu?.style?.left,
+        gamesPositionSet: !!gamesSubmenu?.style?.bottom && !!gamesSubmenu?.style?.left,
+      };
+    });
+
+    assert(
+      startMenuAccessibilityState.startButtonHasPopup,
+      'Start button exposes aria-haspopup=menu'
+    );
+    assert(
+      startMenuAccessibilityState.startButtonControls,
+      'Start button controls start menu by id'
+    );
+    assert(
+      startMenuAccessibilityState.startButtonExpanded,
+      'Start button aria-expanded tracks open state'
+    );
+    assert(startMenuAccessibilityState.startMenuRole, 'Start menu uses role="menu"');
+    assert(startMenuAccessibilityState.menuProgramsRole, 'Programs trigger uses role="menuitem"');
+    assert(
+      startMenuAccessibilityState.menuProgramsHasPopup,
+      'Programs trigger exposes aria-haspopup'
+    );
+    assert(
+      startMenuAccessibilityState.menuProgramsExpanded,
+      'Programs trigger aria-expanded is true when open'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesRole,
+      'Accessories trigger uses role="menuitem"'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesHasPopup,
+      'Accessories trigger exposes aria-haspopup'
+    );
+    assert(
+      startMenuAccessibilityState.subAccessoriesExpanded,
+      'Accessories trigger aria-expanded is true when submenu open'
+    );
+    assert(
+      startMenuAccessibilityState.subAccGamesExpanded,
+      'Games trigger aria-expanded is true when open'
+    );
+    assert(startMenuAccessibilityState.programsSubmenuRole, 'Programs submenu uses role="menu"');
+    assert(
+      startMenuAccessibilityState.accessoriesSubmenuRole,
+      'Accessories submenu uses role="menu"'
+    );
+    assert(startMenuAccessibilityState.gamesSubmenuRole, 'Games submenu uses role="menu"');
+    assert(
+      startMenuAccessibilityState.programsBottomSet,
+      'Programs submenu has computed bottom style'
+    );
+    assert(
+      startMenuAccessibilityState.accessoriesPositionSet,
+      'Accessories submenu has computed left/bottom style'
+    );
+    assert(
+      startMenuAccessibilityState.gamesPositionSet,
+      'Games submenu has computed left/bottom style'
+    );
+
+    await page.click('#startButton');
+    await page.waitForTimeout(120);
   } finally {
     await browser.close();
     server.close();

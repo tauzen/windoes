@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { RenderRegistryPortals } from './react-view.js';
 import BootScreens from './shell/BootScreens.jsx';
 import Desktop from './shell/Desktop.jsx';
@@ -15,13 +15,23 @@ export default function ShellApp() {
   const startButtonRef = useRef(null);
   const desktopRef = useRef(null);
   const taskbarRef = useRef(null);
+  const [startMenuOpen, setStartMenuOpen] = useState(false);
 
   return (
     <>
       <BootScreens />
       <Desktop desktopRef={desktopRef} />
-      <Taskbar taskbarRef={taskbarRef} startButtonRef={startButtonRef} />
-      <StartMenu startButtonRef={startButtonRef} />
+      <Taskbar
+        taskbarRef={taskbarRef}
+        startButtonRef={startButtonRef}
+        startMenuOpen={startMenuOpen}
+        setStartMenuOpen={setStartMenuOpen}
+      />
+      <StartMenu
+        startButtonRef={startButtonRef}
+        startMenuOpen={startMenuOpen}
+        setStartMenuOpen={setStartMenuOpen}
+      />
       <DesktopContextMenu />
       <RunDialog />
       <ErrorDialog />
