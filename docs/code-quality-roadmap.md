@@ -228,7 +228,7 @@ Goal: turn the imperative window registrations into React components and delete 
 - [ ] **I2** Implement focus trap + focus restore in each dialog (`RunDialog`, `ErrorDialog`, `NotepadDialogs`, shutdown dialog).
 - [ ] **I3** `aria-expanded`, `aria-haspopup`, `aria-controls` on Start button + top-level menubars.
 - [ ] **I4** Decorative icons get `aria-hidden="true"`.
-- [ ] **E3** Replace `alert()` in IE favorites/history with the existing error-dialog component.
+- [x] **E3** Replace `alert()` in IE favorites/history with the existing error-dialog component.
 - [ ] Run axe-core (`@axe-core/playwright`) in CI and fail on violations.
 
 **Exit criteria:** axe-core reports 0 serious / critical violations on the booted shell.

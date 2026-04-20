@@ -55,6 +55,12 @@ async function runTests() {
   const browser = await launchBrowser();
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
+  let nativeAlertCount = 0;
+
+  page.on('dialog', async (dialog) => {
+    nativeAlertCount += 1;
+    await dialog.dismiss();
+  });
 
   try {
     // ── Test 1: Winamp open → close → reopen loads iframe correctly ───────
@@ -991,6 +997,58 @@ async function runTests() {
       'Accessories submenu closes after launching Notepad'
     );
     assert(!startMenuLaunchState.gamesOpen, 'Nested Games submenu closes after launching Notepad');
+
+    // ── Test 25: IE Favorites/History use Windoes error dialog (no native alert) ─
+    console.log('\nTest 25: IE Favorites/History avoid native alert and use error dialog');
+
+    await page.evaluate(() => WindoesApp.open.internetExplorer());
+    await page.waitForTimeout(150);
+
+    const alertCountBefore = nativeAlertCount;
+
+    await page.click('#favoritesBtn');
+    await page.waitForTimeout(150);
+
+    const favoritesDialogState = await page.evaluate(() => {
+      const dialog = document.getElementById('errorDialog');
+      return {
+        open: dialog?.classList.contains('active') || false,
+        title: document.getElementById('errorDialogTitle')?.textContent || '',
+      };
+    });
+
+    assert(nativeAlertCount === alertCountBefore, 'Favorites action does not trigger native alert');
+    assert(favoritesDialogState.open, 'Favorites action opens Windoes dialog');
+    assert(
+      favoritesDialogState.title.includes('Favorites'),
+      `Favorites dialog title is descriptive (got: ${favoritesDialogState.title})`
+    );
+
+    await page.click('#errorOkBtn');
+    await page.waitForTimeout(100);
+
+    const alertCountAfterFavorites = nativeAlertCount;
+
+    await page.click('#historyBtn');
+    await page.waitForTimeout(150);
+
+    const historyDialogState = await page.evaluate(() => {
+      const dialog = document.getElementById('errorDialog');
+      return {
+        open: dialog?.classList.contains('active') || false,
+        title: document.getElementById('errorDialogTitle')?.textContent || '',
+      };
+    });
+
+    assert(
+      nativeAlertCount === alertCountAfterFavorites,
+      'History action does not trigger native alert'
+    );
+    assert(historyDialogState.open, 'History action opens Windoes dialog');
+    assert(
+      historyDialogState.title.includes('History'),
+      `History dialog title is descriptive (got: ${historyDialogState.title})`
+    );
   } finally {
     await browser.close();
     server.close();

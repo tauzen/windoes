@@ -190,19 +190,28 @@ function onSearchClick() {
 }
 
 function onFavoritesClick() {
-  alert(
-    'Favorites\n\n\u2022 https://example.com\n\u2022 https://archive.org\n\u2022 https://wikipedia.org'
-  );
+  WindoesApp.bsod.showErrorDialog({
+    title: 'Favorites',
+    text: 'Favorites\n\n• https://example.com\n• https://archive.org\n• https://wikipedia.org',
+    icon: 'info',
+  });
 }
 
 function onHistoryClick() {
   if (historyStack.length === 0) {
-    alert('History is empty.');
+    WindoesApp.bsod.showErrorDialog({
+      title: 'History',
+      text: 'History is empty.',
+      icon: 'info',
+    });
   } else {
-    alert(
-      'History\n\n' +
-        historyStack.map((u, i) => (i === historyIndex ? '\u25b6 ' : '  ') + u).join('\n')
-    );
+    WindoesApp.bsod.showErrorDialog({
+      title: 'History',
+      text:
+        'History\n\n' +
+        historyStack.map((u, i) => (i === historyIndex ? '▶ ' : '  ') + u).join('\n'),
+      icon: 'info',
+    });
   }
 }
 
