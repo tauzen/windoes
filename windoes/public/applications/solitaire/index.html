@@ -1274,9 +1274,8 @@
                 return true;
             }
 
-            function step() {
-                if (endingRafId === null) return;
-                if (!current && !startNextCard()) return;
+            function tick() {
+                if (!current && !startNextCard()) return false;
 
                 // Trail clone at current position (no listeners, lower z so
                 // the live card stays on top of its own trail).
@@ -1303,7 +1302,15 @@
                     current.el.remove();
                     current = null;
                 }
+                return true;
+            }
 
+            function step() {
+                if (endingRafId === null) return;
+                // Two physics ticks per frame = 2x speed, same trajectory.
+                if (!tick()) return;
+                if (endingRafId === null) return;
+                if (!tick()) return;
                 endingRafId = requestAnimationFrame(step);
             }
 
