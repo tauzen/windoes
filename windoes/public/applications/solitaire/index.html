@@ -1211,13 +1211,135 @@
                 gameWon = true;
                 clearInterval(timerInterval);
                 timerInterval = null;
-
-                let m = Math.floor(timer / 60);
-                let s = timer % 60;
-                document.getElementById('winStats').textContent =
-                    'Score: ' + score + '  |  Time: ' + m + ':' + (s < 10 ? '0' : '') + s + '  |  Moves: ' + moves;
-                document.getElementById('winOverlay').classList.add('show');
+                clearSelection();
+                startEndingAnimation();
             }
+        }
+
+        function showWinOverlay() {
+            let m = Math.floor(timer / 60);
+            let s = timer % 60;
+            document.getElementById('winStats').textContent =
+                'Score: ' + score + '  |  Time: ' + m + ':' + (s < 10 ? '0' : '') + s + '  |  Moves: ' + moves;
+            document.getElementById('winOverlay').classList.add('show');
+        }
+
+        // ===== ENDING ANIMATION =====
+        // Classic Windows Solitaire bouncing-cards animation: pops the top card
+        // off each foundation in rotation and shoots it off with gravity,
+        // leaving a trail of clones behind as it bounces off the bottom edge.
+        let endingRafId = null;
+
+        function startEndingAnimation() {
+            const GAME_W = 680;
+            const GAME_H = 460;
+            const GROUND = GAME_H - CARD_H;
+            const GRAVITY = 0.35;
+            const BOUNCE = 0.82;
+            const MIN_BOUNCE_VY = 6;
+
+            let current = null;
+            let x = 0, y = 0, vx = 0, vy = 0;
+            let cursor = 0;
+
+            function pickNext() {
+                for (let i = 0; i < 4; i++) {
+                    const fi = (cursor + i) % 4;
+                    if (foundations[fi].length > 0) {
+                        cursor = (fi + 1) % 4;
+                        return { card: foundations[fi].pop(), fi };
+                    }
+                }
+                return null;
+            }
+
+            function startNextCard() {
+                const next = pickNext();
+                if (!next) {
+                    endingRafId = null;
+                    gameArea.removeEventListener('click', skipHandler);
+                    setTimeout(showWinOverlay, 700);
+                    return false;
+                }
+                current = next.card;
+                x = FOUNDATION_X_START + next.fi * FOUNDATION_SPACING;
+                y = FOUNDATION_Y;
+                vx = (2 + Math.random() * 3) * (Math.random() < 0.5 ? -1 : 1);
+                vy = -(2 + Math.random() * 4);
+                current.faceUp = true;
+                updateCardElement(current);
+                current.el.style.zIndex = 30000;
+                current.el.style.left = x + 'px';
+                current.el.style.top = y + 'px';
+                return true;
+            }
+
+            function step() {
+                if (endingRafId === null) return;
+                if (!current && !startNextCard()) return;
+
+                // Trail clone at current position (no listeners, lower z so
+                // the live card stays on top of its own trail).
+                const trail = current.el.cloneNode(true);
+                trail.style.pointerEvents = 'none';
+                trail.style.zIndex = 25000;
+                trail.classList.add('ending-trail');
+                gameArea.appendChild(trail);
+
+                vy += GRAVITY;
+                x += vx;
+                y += vy;
+
+                if (y >= GROUND) {
+                    y = GROUND;
+                    vy = -vy * BOUNCE;
+                    if (Math.abs(vy) < MIN_BOUNCE_VY) vy = -MIN_BOUNCE_VY;
+                }
+
+                current.el.style.left = x + 'px';
+                current.el.style.top = y + 'px';
+
+                if (x < -CARD_W - 10 || x > GAME_W + 10) {
+                    current.el.remove();
+                    current = null;
+                }
+
+                endingRafId = requestAnimationFrame(step);
+            }
+
+            function skipHandler() {
+                if (endingRafId !== null) {
+                    cancelAnimationFrame(endingRafId);
+                    endingRafId = null;
+                    gameArea.removeEventListener('click', skipHandler);
+                    showWinOverlay();
+                }
+            }
+            gameArea.addEventListener('click', skipHandler);
+
+            endingRafId = requestAnimationFrame(step);
+        }
+
+        // ===== INSPECT MODE =====
+        // Visit /applications/solitaire/index.html?autowin (or ?ending) to
+        // skip straight to the ending animation.
+        function triggerAutoWin() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            gameArea.querySelectorAll('.card').forEach(e => e.remove());
+            stock = [];
+            waste = [];
+            tableau = [[], [], [], [], [], [], []];
+            foundations = [[], [], [], []];
+            for (let fi = 0; fi < 4; fi++) {
+                for (let r = 0; r < 13; r++) {
+                    const card = { suit: SUITS[fi], rank: r, faceUp: true, el: null };
+                    foundations[fi].push(card);
+                    createCardElement(card);
+                }
+            }
+            positionCards();
+            checkWin();
         }
 
         // ===== MENU =====
@@ -1291,6 +1413,11 @@
         // ===== INIT =====
         sendResize();
         newGame();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('autowin') || urlParams.has('ending')) {
+            triggerAutoWin();
+        }
 
     })();
     </script>
