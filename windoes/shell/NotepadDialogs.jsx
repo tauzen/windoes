@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import WindoesApp from '../app-state.js';
+import { useDialogFocus } from './dialog-focus.js';
 
 export default function NotepadDialogs() {
   const savePathInputRef = useRef(null);
+  const saveDialogRef = useRef(null);
   const resolverRef = useRef(null);
   const notepadState = WindoesApp.state.use((s) => s.notepad || {});
 
@@ -54,16 +56,16 @@ export default function NotepadDialogs() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isSaveDialogOpen) return;
-
-    requestAnimationFrame(() => {
-      const input = savePathInputRef.current;
-      if (!input) return;
-      input.focus();
-      input.select();
-    });
-  }, [isSaveDialogOpen]);
+  useDialogFocus({
+    isOpen: isSaveDialogOpen,
+    dialogRef: saveDialogRef,
+    initialFocusRef: savePathInputRef,
+    onInitialFocus: (el) => {
+      if (typeof el.select === 'function') {
+        el.select();
+      }
+    },
+  });
 
   useEffect(() => {
     function onDocumentClick(e) {
@@ -139,7 +141,7 @@ export default function NotepadDialogs() {
         className={`dialog-overlay notepad-save-dialog${isSaveDialogOpen ? ' active' : ''}`}
         id="notepadSaveDialog"
       >
-        <div className="dialog-box" style={{ minWidth: '420px' }}>
+        <div ref={saveDialogRef} className="dialog-box" style={{ minWidth: '420px' }}>
           <div className="dialog-titlebar">
             <span>Save As</span>
             <button

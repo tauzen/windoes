@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
+import { useDialogFocus } from './dialog-focus.js';
 
 export default function RunDialog() {
   const runInputRef = useRef(null);
+  const dialogBoxRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [runValue, setRunValue] = useState('');
 
@@ -63,16 +65,15 @@ export default function RunDialog() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const input = runInputRef.current;
-    if (!input) return;
-    requestAnimationFrame(() => input.focus());
-  }, [isOpen]);
+  useDialogFocus({
+    isOpen,
+    dialogRef: dialogBoxRef,
+    initialFocusRef: runInputRef,
+  });
 
   return (
     <div className={`dialog-overlay run-dialog${isOpen ? ' active' : ''}`} id="runDialog">
-      <div className="dialog-box" style={{ minWidth: '380px' }}>
+      <div ref={dialogBoxRef} className="dialog-box" style={{ minWidth: '380px' }}>
         <div className="dialog-titlebar">
           <span>Run</span>
           <button className="ctrl-btn" id="runCloseBtn" aria-label="Close" onClick={closeDialog}>
