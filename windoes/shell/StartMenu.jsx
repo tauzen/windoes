@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
+import { useDialogFocus } from './dialog-focus.js';
 
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
@@ -47,6 +48,8 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
   const menuProgramsRef = useRef(null);
   const subAccessoriesRef = useRef(null);
   const subAccGamesRef = useRef(null);
+  const shutdownDialogRef = useRef(null);
+  const shutdownOkBtnRef = useRef(null);
 
   const shutdownOpen = WindoesApp.state.use((s) => s.dialogs.shutdownOpen);
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
@@ -255,6 +258,12 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
       document.removeEventListener('click', onDocumentClick);
     };
   }, [startButtonRef, setStartMenuOpen]);
+
+  useDialogFocus({
+    isOpen: shutdownOpen,
+    dialogRef: shutdownDialogRef,
+    initialFocusRef: shutdownOkBtnRef,
+  });
 
   return (
     <>
@@ -561,7 +570,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
         className={`dialog-overlay shutdown-dialog${shutdownOpen ? ' active' : ''}`}
         id="shutdownDialog"
       >
-        <div className="dialog-box">
+        <div ref={shutdownDialogRef} className="dialog-box">
           <div className="dialog-titlebar">
             <span>Shut Down Windows</span>
             <button
@@ -618,6 +627,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           </div>
           <div className="dialog-buttons">
             <button
+              ref={shutdownOkBtnRef}
               className="dialog-btn"
               id="shutdownOkBtn"
               onClick={() => (shutdownOption === 'shutdown' ? performShutdown() : performRestart())}

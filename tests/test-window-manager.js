@@ -1049,6 +1049,150 @@ async function runTests() {
       historyDialogState.title.includes('History'),
       `History dialog title is descriptive (got: ${historyDialogState.title})`
     );
+
+    await page.click('#errorOkBtn');
+    await page.waitForTimeout(100);
+
+    // ── Test 26: Dialog focus trap + focus restore across Run/Error/Notepad/Shutdown ─
+    console.log('\nTest 26: Dialogs trap Tab focus and restore opener focus on close');
+
+    // Run dialog: focus starts on input, Tab loops within controls, close restores opener
+    await page.evaluate(() => {
+      const startButton = document.getElementById('startButton');
+      startButton?.focus();
+      WindoesApp.runDialog.open();
+    });
+    await page.waitForTimeout(120);
+
+    const runDialogFocusState = await page.evaluate(() => ({
+      activeId: document.activeElement?.id || '',
+      isOpen: document.getElementById('runDialog')?.classList.contains('active') || false,
+    }));
+    assert(runDialogFocusState.isOpen, 'Run dialog opens');
+    assert(runDialogFocusState.activeId === 'runInput', 'Run dialog initially focuses input');
+
+    await page.keyboard.press('Tab'); // runOkBtn
+    await page.keyboard.press('Tab'); // runCancelBtn
+    await page.keyboard.press('Tab'); // Browse...
+    await page.keyboard.press('Tab'); // close button
+    await page.keyboard.press('Tab'); // loops back to input
+
+    const runLoopFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(runLoopFocusId === 'runInput', 'Run dialog traps Tab and loops back to first focusable');
+
+    await page.click('#runCancelBtn');
+    await page.waitForTimeout(100);
+
+    const runRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(runRestoreFocusId === 'startButton', 'Run dialog close restores focus to opener');
+
+    // Error dialog: open via IE Favorites and ensure focus restores to favorites button
+    await page.click('#favoritesBtn');
+    await page.waitForTimeout(120);
+
+    const errorDialogOpenState = await page.evaluate(() => ({
+      activeId: document.activeElement?.id || '',
+      isOpen: document.getElementById('errorDialog')?.classList.contains('active') || false,
+    }));
+    assert(errorDialogOpenState.isOpen, 'Error dialog opens');
+    assert(
+      errorDialogOpenState.activeId === 'errorOkBtn',
+      'Error dialog initially focuses OK button'
+    );
+
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+
+    const errorLoopFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(errorLoopFocusId === 'errorOkBtn', 'Error dialog traps Tab focus within dialog');
+
+    await page.click('#errorOkBtn');
+    await page.waitForTimeout(100);
+
+    const errorRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(errorRestoreFocusId === 'favoritesBtn', 'Error dialog close restores focus to opener');
+
+    // Notepad Save dialog: open from focused file menu and close restores focus
+    await page.evaluate(() => {
+      const fileMenu = document.getElementById('notepadFileMenu');
+      fileMenu?.focus();
+      WindoesApp.state.dispatch({
+        type: 'NOTEPAD_SAVE_DIALOG_OPEN',
+        path: '/C:/My Documents/Untitled.txt',
+      });
+    });
+    await page.waitForTimeout(120);
+
+    const saveDialogOpenState = await page.evaluate(() => ({
+      activeId: document.activeElement?.id || '',
+      isOpen: document.getElementById('notepadSaveDialog')?.classList.contains('active') || false,
+    }));
+    assert(saveDialogOpenState.isOpen, 'Notepad Save dialog opens');
+    assert(
+      saveDialogOpenState.activeId === 'notepadSavePathInput',
+      'Save dialog initially focuses path input'
+    );
+
+    await page.keyboard.press('Tab'); // Save
+    await page.keyboard.press('Tab'); // Cancel
+    await page.keyboard.press('Tab'); // Close
+    await page.keyboard.press('Tab'); // loops back to input
+
+    const saveLoopFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(saveLoopFocusId === 'notepadSavePathInput', 'Save dialog traps Tab and loops focus');
+
+    await page.click('#notepadSaveCancelBtn');
+    await page.waitForTimeout(100);
+
+    const saveRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(saveRestoreFocusId === 'notepadFileMenu', 'Save dialog close restores focus to opener');
+
+    // Shutdown dialog: opener focus restored and focus trapped among controls
+    await page.evaluate(() => {
+      const startButton = document.getElementById('startButton');
+      startButton?.focus();
+      WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_OPEN' });
+    });
+    await page.waitForTimeout(120);
+
+    const shutdownOpenState = await page.evaluate(() => ({
+      activeId: document.activeElement?.id || '',
+      isOpen: document.getElementById('shutdownDialog')?.classList.contains('active') || false,
+    }));
+    assert(shutdownOpenState.isOpen, 'Shutdown dialog opens');
+    assert(
+      shutdownOpenState.activeId === 'shutdownOkBtn',
+      'Shutdown dialog initially focuses OK button'
+    );
+
+    await page.keyboard.press('Shift+Tab');
+
+    const shutdownShiftTabState = await page.evaluate(() => {
+      const active = document.activeElement;
+      const dialog = document.querySelector('#shutdownDialog .dialog-box');
+      return {
+        activeId: active?.id || '',
+        withinDialog: !!(active && dialog && dialog.contains(active)),
+      };
+    });
+    assert(
+      shutdownShiftTabState.withinDialog && shutdownShiftTabState.activeId !== 'shutdownOkBtn',
+      'Shutdown dialog keeps Shift+Tab focus trapped within dialog'
+    );
+
+    await page.keyboard.press('Tab');
+
+    const shutdownLoopFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(shutdownLoopFocusId === 'shutdownOkBtn', 'Shutdown dialog traps Tab and loops focus');
+
+    await page.click('#shutdownCancelBtn');
+    await page.waitForTimeout(120);
+
+    const shutdownRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
+    assert(
+      shutdownRestoreFocusId === 'startButton',
+      'Shutdown dialog close restores focus to opener'
+    );
   } finally {
     await browser.close();
     server.close();
