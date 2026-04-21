@@ -1193,6 +1193,35 @@ async function runTests() {
       shutdownRestoreFocusId === 'startButton',
       'Shutdown dialog close restores focus to opener'
     );
+
+    // ── Test 27: Decorative shell icons are aria-hidden ─
+    console.log('\nTest 27: Decorative shell icons are hidden from assistive tech');
+
+    const decorativeIconState = await page.evaluate(() => {
+      const selectors = {
+        desktopIconGraphic: '.desktop-icons .icon .icon-graphic',
+        runDialogIcon: '#runDialog .dialog-icon',
+        errorDialogIcon: '#errorDialogIcon',
+        notepadSaveDialogIcon: '#notepadSaveDialog .dialog-icon',
+        titlebarLogo: '#ieWindow .title-logo',
+        taskbarWindowIcon: '#taskButton .task-icon',
+      };
+
+      const state = {};
+      for (const [key, selector] of Object.entries(selectors)) {
+        const el = document.querySelector(selector);
+        state[key] = {
+          exists: !!el,
+          ariaHidden: el?.getAttribute('aria-hidden') === 'true',
+        };
+      }
+      return state;
+    });
+
+    for (const [key, info] of Object.entries(decorativeIconState)) {
+      assert(info.exists, `${key} exists`);
+      assert(info.ariaHidden, `${key} has aria-hidden="true"`);
+    }
   } finally {
     await browser.close();
     server.close();

@@ -50,7 +50,11 @@ export default function ErrorDialog() {
           </button>
         </div>
         <div className="dialog-body">
-          <div className={`dialog-icon dialog-icon-${icon}`} id="errorDialogIcon"></div>
+          <div
+            className={`dialog-icon dialog-icon-${icon}`}
+            id="errorDialogIcon"
+            aria-hidden={true}
+          ></div>
           <div className="dialog-text" id="errorDialogText">
             {text}
           </div>

@@ -96,7 +96,7 @@ export default function Desktop({ desktopRef }) {
       <div className="desktop-icons" id="desktopIcons" ref={iconsRef}>
         {desktopIconDefs.map((def) => (
           <div key={def.id} className={'icon ' + def.className} id={def.id}>
-            <div className="icon-graphic"></div>
+            <div className="icon-graphic" aria-hidden={true}></div>
             <span className="icon-label">{def.label}</span>
           </div>
         ))}
