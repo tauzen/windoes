@@ -571,6 +571,98 @@
             return html;
         }
 
+        // ===== CANVAS CARD SPRITE =====
+        // Renders a face-up card to a 65x90 canvas matching the DOM layout.
+        // Used by the ending animation to leave trails without spawning
+        // thousands of DOM nodes.
+        function drawRoundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function createCardSprite(card) {
+            const canvas = document.createElement('canvas');
+            canvas.width = CARD_W;
+            canvas.height = CARD_H;
+            const ctx = canvas.getContext('2d');
+            const sym = SUIT_SYMBOLS[card.suit];
+            const rn = RANKS[card.rank];
+            const red = isRed(card.suit);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+            drawRoundedRect(ctx, 1, 1, CARD_W - 1, CARD_H - 1, 4);
+            ctx.fill();
+
+            // White face with border
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            drawRoundedRect(ctx, 0.5, 0.5, CARD_W - 2, CARD_H - 2, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = red ? '#cc0000' : '#000';
+
+            // Top-left corner
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 13px Georgia, "Times New Roman", serif';
+            ctx.fillText(rn, 4, 4);
+            ctx.font = '11px Georgia, "Times New Roman", serif';
+            ctx.fillText(sym, 4, 18);
+
+            // Bottom-right corner (rotated 180)
+            ctx.save();
+            ctx.translate(CARD_W - 4, CARD_H - 4);
+            ctx.rotate(Math.PI);
+            ctx.font = 'bold 13px Georgia, "Times New Roman", serif';
+            ctx.fillText(rn, 0, 0);
+            ctx.font = '11px Georgia, "Times New Roman", serif';
+            ctx.fillText(sym, 0, 14);
+            ctx.restore();
+
+            // Center
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (card.rank === 0) {
+                ctx.font = '24px Georgia, "Times New Roman", serif';
+                ctx.fillText(sym, CARD_W / 2, CARD_H / 2);
+            } else if (card.rank >= 10) {
+                ctx.font = '24px Georgia, "Times New Roman", serif';
+                ctx.fillText(rn, CARD_W / 2, CARD_H / 2);
+            } else {
+                const positions = PIP_LAYOUTS[card.rank + 1];
+                const areaX = 4, areaY = 16;
+                const areaW = CARD_W - 8, areaH = CARD_H - 32;
+                ctx.font = '12px Georgia, "Times New Roman", serif';
+                for (const p of positions) {
+                    const px = areaX + areaW * p[0] / 100;
+                    const py = areaY + areaH * p[1] / 100;
+                    if (p[2]) {
+                        ctx.save();
+                        ctx.translate(px, py);
+                        ctx.rotate(Math.PI);
+                        ctx.fillText(sym, 0, 0);
+                        ctx.restore();
+                    } else {
+                        ctx.fillText(sym, px, py);
+                    }
+                }
+            }
+
+            return canvas;
+        }
+
         // ===== CARD ELEMENT =====
         function createCardElement(card) {
             let el = document.createElement('div');
@@ -698,8 +790,10 @@
 
             document.getElementById('winOverlay').classList.remove('show');
 
-            // Remove old cards
+            // Remove old cards and any ending-animation trail canvas
             gameArea.querySelectorAll('.card').forEach(e => e.remove());
+            const oldTrail = gameArea.querySelector('.ending-canvas');
+            if (oldTrail) oldTrail.remove();
 
             let deck = shuffle(createDeck());
 
@@ -1227,7 +1321,7 @@
         // ===== ENDING ANIMATION =====
         // Classic Windows Solitaire bouncing-cards animation: pops the top card
         // off each foundation in rotation and shoots it off with gravity,
-        // leaving a trail of clones behind as it bounces off the bottom edge.
+        // stamping its sprite onto a single trail canvas each tick.
         let endingRafId = null;
 
         function startEndingAnimation() {
@@ -1238,7 +1332,20 @@
             const BOUNCE = 0.82;
             const MIN_BOUNCE_VY = 6;
 
+            // Single trail canvas: O(1) paint cost regardless of trail length.
+            let trailCanvas = gameArea.querySelector('.ending-canvas');
+            if (trailCanvas) trailCanvas.remove();
+            trailCanvas = document.createElement('canvas');
+            trailCanvas.className = 'ending-canvas';
+            trailCanvas.width = GAME_W;
+            trailCanvas.height = GAME_H;
+            trailCanvas.style.cssText =
+                'position:absolute;top:0;left:0;pointer-events:none;z-index:25000;';
+            gameArea.appendChild(trailCanvas);
+            const trailCtx = trailCanvas.getContext('2d');
+
             let current = null;
+            let currentSprite = null;
             let x = 0, y = 0, vx = 0, vy = 0;
             let cursor = 0;
 
@@ -1262,6 +1369,7 @@
                     return false;
                 }
                 current = next.card;
+                currentSprite = createCardSprite(current);
                 x = FOUNDATION_X_START + next.fi * FOUNDATION_SPACING;
                 y = FOUNDATION_Y;
                 vx = (2 + Math.random() * 3) * (Math.random() < 0.5 ? -1 : 1);
@@ -1274,17 +1382,11 @@
                 return true;
             }
 
-            function step() {
-                if (endingRafId === null) return;
-                if (!current && !startNextCard()) return;
+            function tick() {
+                if (!current && !startNextCard()) return false;
 
-                // Trail clone at current position (no listeners, lower z so
-                // the live card stays on top of its own trail).
-                const trail = current.el.cloneNode(true);
-                trail.style.pointerEvents = 'none';
-                trail.style.zIndex = 25000;
-                trail.classList.add('ending-trail');
-                gameArea.appendChild(trail);
+                // Stamp the sprite onto the trail canvas at the current pos.
+                trailCtx.drawImage(currentSprite, Math.round(x), Math.round(y));
 
                 vy += GRAVITY;
                 x += vx;
@@ -1302,8 +1404,17 @@
                 if (x < -CARD_W - 10 || x > GAME_W + 10) {
                     current.el.remove();
                     current = null;
+                    currentSprite = null;
                 }
+                return true;
+            }
 
+            function step() {
+                if (endingRafId === null) return;
+                // Two physics ticks per frame = 2x speed, same trajectory.
+                if (!tick()) return;
+                if (endingRafId === null) return;
+                if (!tick()) return;
                 endingRafId = requestAnimationFrame(step);
             }
 
