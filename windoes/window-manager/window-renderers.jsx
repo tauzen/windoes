@@ -146,7 +146,7 @@ export function buildTaskBtn(cfg) {
   renderIntoSync(
     btn,
     <>
-      <span className={`task-icon ${cfg.icon}`}></span>
+      <span className={`task-icon ${cfg.icon}`} aria-hidden={true}></span>
       <span {...(cfg.labelId ? { id: cfg.labelId } : {})}>{cfg.label}</span>
     </>
   );

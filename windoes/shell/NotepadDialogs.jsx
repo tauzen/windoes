@@ -154,7 +154,7 @@ export default function NotepadDialogs() {
             </button>
           </div>
           <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-info"></div>
+            <div className="dialog-icon dialog-icon-info" aria-hidden={true}></div>
             <div className="notepad-save-fields">
               <div className="dialog-text">Choose where to save this text document.</div>
               <div className="notepad-save-row">

@@ -84,6 +84,7 @@ export default function RunDialog() {
           <div className="run-icon-area">
             <div
               className="dialog-icon"
+              aria-hidden={true}
               style={{ background: '#C0C0C0', border: '2px solid #808080', borderRadius: '2px' }}
             >
               <div
