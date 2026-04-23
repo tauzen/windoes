@@ -224,7 +224,7 @@ Goal: turn the imperative window registrations into React components and delete 
 
 ### Phase 7 — Accessibility pass (1 day, low risk)
 
-- [ ] **I1 / D1** Verify all menu items are `<button>` or `[role=menuitem]`.
+- [x] **I1 / D1** Verify all menu items are `<button>` or `[role=menuitem]` (covered by integration Test 28 in `tests/test-window-manager.js`).
 - [x] **I2** Implement focus trap + focus restore in each dialog (`RunDialog`, `ErrorDialog`, `NotepadDialogs`, shutdown dialog).
 - [x] **I3** `aria-expanded`, `aria-haspopup`, `aria-controls` on Start button + top-level menubars.
 - [x] **I4** Decorative icons get `aria-hidden="true"`.
