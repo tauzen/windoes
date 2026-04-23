@@ -2,7 +2,7 @@
 // IE Window
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { closeStartMenuBoilerplate } from './launch-helpers.js';
+import { openWindowBoilerplate } from './launch-helpers.js';
 import { normalizeBrowserUrl } from './browser-url.mjs';
 
 // Register IE shell window with JSX-rendered chrome
@@ -147,8 +147,7 @@ function body_loading(on) {
 }
 
 function openInternetExplorer() {
-  WindoesApp.WindowManager.open('ie');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('ie');
 
   if (!frame.src || frame.src === 'about:blank' || frame.src === '') {
     if (historyStack.length === 0) {

@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
-import { closeStartMenuBoilerplate } from './launch-helpers.js';
+import { openWindowBoilerplate } from './launch-helpers.js';
 import { VIEW_BORDER_PX } from './constants.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
@@ -60,9 +60,8 @@ function openApp(title, url) {
   // Set dynamic iframe src before opening
   WindoesApp.WindowManager.get('app').iframeSrc = url;
   appFrame.src = url;
-  WindoesApp.WindowManager.open('app');
+  openWindowBoilerplate('app');
   WindoesApp.ui.setBodyLoading?.(true);
-  closeStartMenuBoilerplate();
 }
 
 function onAppFrameLoad() {
@@ -125,8 +124,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
 });
 
 function openWinamp() {
-  WindoesApp.WindowManager.open('winamp');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('winamp');
 }
 
 // ══════════════════════════════════════════════
@@ -160,8 +158,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
 });
 
 function openMinesweeper() {
-  WindoesApp.WindowManager.open('minesweeper');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('minesweeper');
 }
 
 // ══════════════════════════════════════════════
@@ -195,8 +192,17 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
 });
 
 function openSolitaire() {
-  WindoesApp.WindowManager.open('solitaire');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('solitaire');
+}
+
+function resizeWindowFromIframe(config, width, height) {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return;
+  }
+
+  const titlebarHeight = config.el.querySelector('.titlebar')?.offsetHeight || 0;
+  config.el.style.width = width + VIEW_BORDER_PX + 'px';
+  config.el.style.height = height + titlebarHeight + VIEW_BORDER_PX + 'px';
 }
 
 const winampFrame = winampConfig.el.querySelector('#winampFrame');
@@ -227,16 +233,10 @@ function onAppMessage(e) {
     winampWindow.style.height = e.data.height + 'px';
   }
   if (e.data.type === 'minesweeper-resize') {
-    const minesweeperWindow = minesweeperConfig.el;
-    const titlebarHeight = minesweeperConfig.el.querySelector('.titlebar').offsetHeight;
-    minesweeperWindow.style.width = e.data.width + VIEW_BORDER_PX + 'px';
-    minesweeperWindow.style.height = e.data.height + titlebarHeight + VIEW_BORDER_PX + 'px';
+    resizeWindowFromIframe(minesweeperConfig, e.data.width, e.data.height);
   }
   if (e.data.type === 'solitaire-resize') {
-    const solitaireWindow = solitaireConfig.el;
-    const titlebarHeight = solitaireConfig.el.querySelector('.titlebar').offsetHeight;
-    solitaireWindow.style.width = e.data.width + VIEW_BORDER_PX + 'px';
-    solitaireWindow.style.height = e.data.height + titlebarHeight + VIEW_BORDER_PX + 'px';
+    resizeWindowFromIframe(solitaireConfig, e.data.width, e.data.height);
   }
 }
 
