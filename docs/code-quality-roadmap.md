@@ -229,7 +229,7 @@ Goal: turn the imperative window registrations into React components and delete 
 - [ ] **I3** `aria-expanded`, `aria-haspopup`, `aria-controls` on Start button + top-level menubars.
 - [x] **I4** Decorative icons get `aria-hidden="true"`.
 - [x] **E3** Replace `alert()` in IE favorites/history with the existing error-dialog component.
-- [ ] Run axe-core (`@axe-core/playwright`) in CI and fail on violations.
+- [x] Run axe-core (`@axe-core/playwright`) in CI and fail on serious/critical violations (wired via `tests/test-axe-accessibility.js` in `test:integration`).
 
 **Exit criteria:** axe-core reports 0 serious / critical violations on the booted shell.
 
