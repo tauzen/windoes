@@ -145,6 +145,26 @@ function removeWindowFromStack(stack, id) {
   if (idx !== -1) stack.splice(idx, 1);
 }
 
+function withNotepad(current, nextNotepad) {
+  return {
+    ...current,
+    notepad: {
+      ...current.notepad,
+      ...nextNotepad,
+    },
+  };
+}
+
+function withDialogs(current, nextDialogs) {
+  return {
+    ...current,
+    dialogs: {
+      ...current.dialogs,
+      ...nextDialogs,
+    },
+  };
+}
+
 /**
  * @param {typeof initialState} current
  * @param {WindoesAction} action
@@ -279,88 +299,40 @@ export function reduce(current, action) {
       };
 
     case 'NOTEPAD_FILE_MENU_OPEN':
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          fileMenuOpen: true,
-          fileMenuLeft: Number.isFinite(action.left) ? action.left : current.notepad.fileMenuLeft,
-          fileMenuTop: Number.isFinite(action.top) ? action.top : current.notepad.fileMenuTop,
-        },
-      };
+      return withNotepad(current, {
+        fileMenuOpen: true,
+        fileMenuLeft: Number.isFinite(action.left) ? action.left : current.notepad.fileMenuLeft,
+        fileMenuTop: Number.isFinite(action.top) ? action.top : current.notepad.fileMenuTop,
+      });
     case 'NOTEPAD_FILE_MENU_CLOSE':
       if (!current.notepad.fileMenuOpen) return current;
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          fileMenuOpen: false,
-        },
-      };
+      return withNotepad(current, { fileMenuOpen: false });
 
     case 'NOTEPAD_SAVE_DIALOG_OPEN':
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          saveDialogOpen: true,
-          saveDialogPath:
-            action.path || current.notepad.saveDialogPath || '/C:/My Documents/Untitled.txt',
-        },
-      };
+      return withNotepad(current, {
+        saveDialogOpen: true,
+        saveDialogPath:
+          action.path || current.notepad.saveDialogPath || '/C:/My Documents/Untitled.txt',
+      });
     case 'NOTEPAD_SAVE_DIALOG_SET_PATH':
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          saveDialogPath: action.path,
-        },
-      };
+      return withNotepad(current, { saveDialogPath: action.path });
     case 'NOTEPAD_SAVE_DIALOG_CLOSE':
       if (!current.notepad.saveDialogOpen) return current;
-      return {
-        ...current,
-        notepad: {
-          ...current.notepad,
-          saveDialogOpen: false,
-        },
-      };
+      return withNotepad(current, { saveDialogOpen: false });
     case 'SHUTDOWN_DIALOG_OPEN':
       if (current.dialogs.shutdownOpen) return current;
-      return {
-        ...current,
-        dialogs: {
-          ...current.dialogs,
-          shutdownOpen: true,
-        },
-      };
+      return withDialogs(current, { shutdownOpen: true });
     case 'SHUTDOWN_DIALOG_CLOSE':
       if (!current.dialogs.shutdownOpen) return current;
-      return {
-        ...current,
-        dialogs: {
-          ...current.dialogs,
-          shutdownOpen: false,
-        },
-      };
+      return withDialogs(current, { shutdownOpen: false });
     case 'SHUTDOWN_SCREEN_SHOW':
-      return {
-        ...current,
-        dialogs: {
-          ...current.dialogs,
-          shutdownOpen: false,
-          shutdownScreenVisible: true,
-        },
-      };
+      return withDialogs(current, {
+        shutdownOpen: false,
+        shutdownScreenVisible: true,
+      });
     case 'SHUTDOWN_SCREEN_HIDE':
       if (!current.dialogs.shutdownScreenVisible) return current;
-      return {
-        ...current,
-        dialogs: {
-          ...current.dialogs,
-          shutdownScreenVisible: false,
-        },
-      };
+      return withDialogs(current, { shutdownScreenVisible: false });
     default:
       return current;
   }
