@@ -58,6 +58,7 @@ function WindowTitlebar({ windowId, template }) {
 
 function WindowShell({ windowId, template }) {
   const viewStyle = template.viewStyle;
+  const notepadFileMenuOpen = WindoesApp.state.use((s) => !!s.notepad?.fileMenuOpen);
 
   return (
     <>
@@ -85,6 +86,13 @@ function WindowShell({ windowId, template }) {
                 role="menuitem"
                 className="menubar-item"
                 {...(item.id ? { id: item.id } : {})}
+                {...(item.id === 'notepadFileMenu' ? { 'aria-haspopup': 'menu' } : {})}
+                {...(item.id === 'notepadFileMenu'
+                  ? { 'aria-controls': 'notepadFileDropdown' }
+                  : {})}
+                {...(item.id === 'notepadFileMenu'
+                  ? { 'aria-expanded': notepadFileMenuOpen ? 'true' : 'false' }
+                  : {})}
               >
                 {item.label}
               </button>

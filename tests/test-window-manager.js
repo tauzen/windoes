@@ -1222,6 +1222,57 @@ async function runTests() {
       assert(info.exists, `${key} exists`);
       assert(info.ariaHidden, `${key} has aria-hidden="true"`);
     }
+
+    // ── Test 28: Menu items are semantic controls (button or role=menuitem) ─
+    console.log('\nTest 28: Menu items use semantic controls for accessibility');
+
+    const menuSemanticsState = await page.evaluate(() => {
+      const selectors = {
+        startMenuItems: '.start-menu .menu-item, .start-menu .submenu-item',
+        desktopContextItems: '#contextMenu .context-menu-item',
+        explorerContextItems: '#explorerContextMenu .context-menu-item',
+        notepadFileItems: '#notepadFileDropdown .context-menu-item',
+        menubarItems: '.window .menubar .menubar-item',
+      };
+
+      const result = {};
+      for (const [key, selector] of Object.entries(selectors)) {
+        const nodes = [...document.querySelectorAll(selector)];
+        result[key] = {
+          count: nodes.length,
+          allSemantic: nodes.every((node) => {
+            const isButton = node.tagName === 'BUTTON';
+            const hasMenuitemRole = node.getAttribute('role') === 'menuitem';
+            return isButton || hasMenuitemRole;
+          }),
+          nonSemanticExamples: nodes
+            .filter((node) => {
+              const isButton = node.tagName === 'BUTTON';
+              const hasMenuitemRole = node.getAttribute('role') === 'menuitem';
+              return !(isButton || hasMenuitemRole);
+            })
+            .slice(0, 3)
+            .map(
+              (node) =>
+                `${node.tagName.toLowerCase()}#${node.id || '(no-id)'}.${node.className || ''}`
+            ),
+        };
+      }
+
+      return result;
+    });
+
+    for (const [key, info] of Object.entries(menuSemanticsState)) {
+      assert(info.count > 0, `${key} exposes at least one menu item (got ${info.count})`);
+      assert(
+        info.allSemantic,
+        `${key} menu items are semantic controls${
+          info.nonSemanticExamples.length
+            ? ` (non-semantic: ${info.nonSemanticExamples.join(', ')})`
+            : ''
+        }`
+      );
+    }
   } finally {
     await browser.close();
     server.close();
