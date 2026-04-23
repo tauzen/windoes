@@ -1,13 +1,5 @@
-export function createEventBus() {
-  const listeners = new Set();
+import { createListenerSet } from './listener-set.mjs';
 
-  return {
-    emit(payload) {
-      listeners.forEach((listener) => listener(payload));
-    },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-  };
+export function createEventBus() {
+  return createListenerSet();
 }
