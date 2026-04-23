@@ -7,21 +7,12 @@
 
 const path = require('path');
 const { launchBrowser, startStaticServer } = require('./launch-browser');
+const { createAssertTracker } = require('./helpers/test-harness');
 
 const WINDOES_DIR = path.resolve(__dirname, '..', 'windoes');
 
-let passed = 0;
-let failed = 0;
-
-function assert(condition, message) {
-  if (condition) {
-    console.log(`  PASS: ${message}`);
-    passed++;
-  } else {
-    console.error(`  FAIL: ${message}`);
-    failed++;
-  }
-}
+const tracker = createAssertTracker();
+const { assert } = tracker;
 
 async function runTests() {
   console.log('=== VirtualFS Tests ===\n');
@@ -367,7 +358,7 @@ async function runTests() {
     assert(r.pass, r.msg);
   }
 
-  console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+  const { failed } = tracker.getCounts();
 
   await browser.close();
   server.close();

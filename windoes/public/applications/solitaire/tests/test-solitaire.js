@@ -12,171 +12,150 @@
 
 const path = require('path');
 const { launchBrowser } = require('../../../../../tests/launch-browser');
+const { createAssertTracker } = require('../../../../../tests/helpers/test-harness');
 
 const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
-let passed = 0;
-let failed = 0;
-
-function assert(condition, message) {
-    if (condition) {
-        console.log(`  PASS: ${message}`);
-        passed++;
-    } else {
-        console.error(`  FAIL: ${message}`);
-        failed++;
-    }
-}
+const tracker = createAssertTracker();
+const { assert } = tracker;
 
 async function runTests() {
-    const browser = await launchBrowser();
-    const ctx = await browser.newContext();
-    const page = await ctx.newPage();
+  const browser = await launchBrowser();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
 
-    // ── Test 1: Page loads with core UI elements ─────────────────────────
-    console.log('\nTest 1: Page loads with core UI elements');
-    await page.goto(FILE_URL);
-    await page.waitForTimeout(500);
+  // ── Test 1: Page loads with core UI elements ─────────────────────────
+  console.log('\nTest 1: Page loads with core UI elements');
+  await page.goto(FILE_URL);
+  await page.waitForTimeout(500);
 
-    const elements = await page.evaluate(() => ({
-        window: !!document.getElementById('window'),
-        gameArea: !!document.getElementById('gameArea'),
-        statusScore: !!document.getElementById('statusScore'),
-        statusMoves: !!document.getElementById('statusMoves'),
-        statusTime: !!document.getElementById('statusTime'),
-        winOverlay: !!document.getElementById('winOverlay'),
-        menuGame: !!document.getElementById('menu-game'),
-    }));
+  const elements = await page.evaluate(() => ({
+    window: !!document.getElementById('window'),
+    gameArea: !!document.getElementById('gameArea'),
+    statusScore: !!document.getElementById('statusScore'),
+    statusMoves: !!document.getElementById('statusMoves'),
+    statusTime: !!document.getElementById('statusTime'),
+    winOverlay: !!document.getElementById('winOverlay'),
+    menuGame: !!document.getElementById('menu-game'),
+  }));
 
-    assert(elements.window, 'Window element exists');
-    assert(elements.gameArea, 'Game area exists');
-    assert(elements.statusScore, 'Score status exists');
-    assert(elements.statusMoves, 'Moves status exists');
-    assert(elements.statusTime, 'Time status exists');
-    assert(elements.winOverlay, 'Win overlay exists');
-    assert(elements.menuGame, 'Game menu exists');
+  assert(elements.window, 'Window element exists');
+  assert(elements.gameArea, 'Game area exists');
+  assert(elements.statusScore, 'Score status exists');
+  assert(elements.statusMoves, 'Moves status exists');
+  assert(elements.statusTime, 'Time status exists');
+  assert(elements.winOverlay, 'Win overlay exists');
+  assert(elements.menuGame, 'Game menu exists');
 
-    // ── Test 2: Cards are dealt on initial load ──────────────────────────
-    console.log('\nTest 2: Cards are dealt on initial load');
+  // ── Test 2: Cards are dealt on initial load ──────────────────────────
+  console.log('\nTest 2: Cards are dealt on initial load');
 
-    const cardCount = await page.evaluate(() =>
-        document.querySelectorAll('.card').length
-    );
-    assert(cardCount === 52, `52 cards dealt (got: ${cardCount})`);
+  const cardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+  assert(cardCount === 52, `52 cards dealt (got: ${cardCount})`);
 
-    // ── Test 3: Tableau has face-up cards ────────────────────────────────
-    console.log('\nTest 3: Tableau has face-up cards');
+  // ── Test 3: Tableau has face-up cards ────────────────────────────────
+  console.log('\nTest 3: Tableau has face-up cards');
 
-    const faceUpCount = await page.evaluate(() =>
-        document.querySelectorAll('.card .card-face').length
-    );
-    assert(faceUpCount >= 7, `At least 7 face-up cards on tableau (got: ${faceUpCount})`);
+  const faceUpCount = await page.evaluate(
+    () => document.querySelectorAll('.card .card-face').length
+  );
+  assert(faceUpCount >= 7, `At least 7 face-up cards on tableau (got: ${faceUpCount})`);
 
-    const faceDownCount = await page.evaluate(() =>
-        document.querySelectorAll('.card .card-back').length
-    );
-    assert(faceDownCount > 0, `Some face-down cards exist (got: ${faceDownCount})`);
+  const faceDownCount = await page.evaluate(
+    () => document.querySelectorAll('.card .card-back').length
+  );
+  assert(faceDownCount > 0, `Some face-down cards exist (got: ${faceDownCount})`);
 
-    // ── Test 4: Status bar starts at zero ────────────────────────────────
-    console.log('\nTest 4: Status bar shows initial values');
+  // ── Test 4: Status bar starts at zero ────────────────────────────────
+  console.log('\nTest 4: Status bar shows initial values');
 
-    const statusScore = await page.evaluate(() =>
-        document.getElementById('statusScore').textContent
-    );
-    assert(statusScore.includes('0'), `Score starts at 0 (got: ${statusScore})`);
+  const statusScore = await page.evaluate(() => document.getElementById('statusScore').textContent);
+  assert(statusScore.includes('0'), `Score starts at 0 (got: ${statusScore})`);
 
-    const statusMoves = await page.evaluate(() =>
-        document.getElementById('statusMoves').textContent
-    );
-    assert(statusMoves.includes('0'), `Moves starts at 0 (got: ${statusMoves})`);
+  const statusMoves = await page.evaluate(() => document.getElementById('statusMoves').textContent);
+  assert(statusMoves.includes('0'), `Moves starts at 0 (got: ${statusMoves})`);
 
-    // ── Test 5: Stock pile exists and is clickable ───────────────────────
-    console.log('\nTest 5: Stock pile click deals to waste');
+  // ── Test 5: Stock pile exists and is clickable ───────────────────────
+  console.log('\nTest 5: Stock pile click deals to waste');
 
-    // Find a card-back in the stock area (top-left region)
-    const stockClicked = await page.evaluate(() => {
-        // Stock pile cards are positioned at the top-left
-        const cards = [...document.querySelectorAll('.card')];
-        const stockCards = cards.filter(c => {
-            const left = parseInt(c.style.left);
-            const top = parseInt(c.style.top);
-            return left < 80 && top < 20;
-        });
-        if (stockCards.length > 0) {
-            stockCards[stockCards.length - 1].click();
-            return true;
-        }
-        return false;
+  // Find a card-back in the stock area (top-left region)
+  const stockClicked = await page.evaluate(() => {
+    // Stock pile cards are positioned at the top-left
+    const cards = [...document.querySelectorAll('.card')];
+    const stockCards = cards.filter((c) => {
+      const left = parseInt(c.style.left);
+      const top = parseInt(c.style.top);
+      return left < 80 && top < 20;
     });
-
-    if (stockClicked) {
-        await page.waitForTimeout(200);
-        const movesAfterClick = await page.evaluate(() =>
-            document.getElementById('statusMoves').textContent
-        );
-        assert(movesAfterClick.includes('1'), `Moves incremented after stock click (got: ${movesAfterClick})`);
-    } else {
-        assert(true, 'Stock pile click skipped (no stock cards positioned as expected)');
+    if (stockCards.length > 0) {
+      stockCards[stockCards.length - 1].click();
+      return true;
     }
+    return false;
+  });
 
-    // ── Test 6: Win overlay is hidden during play ────────────────────────
-    console.log('\nTest 6: Win overlay is hidden during play');
-
-    const winHidden = await page.evaluate(() =>
-        !document.getElementById('winOverlay').classList.contains('show')
+  if (stockClicked) {
+    await page.waitForTimeout(200);
+    const movesAfterClick = await page.evaluate(
+      () => document.getElementById('statusMoves').textContent
     );
-    assert(winHidden, 'Win overlay is not shown during play');
-
-    // ── Test 7: New game via menu resets the board ───────────────────────
-    console.log('\nTest 7: New game resets the board');
-
-    await page.click('#menu-game');
-    await page.waitForTimeout(100);
-    await page.click('#menu-new-game');
-    await page.waitForTimeout(500);
-
-    const cardCountAfterNew = await page.evaluate(() =>
-        document.querySelectorAll('.card').length
+    assert(
+      movesAfterClick.includes('1'),
+      `Moves incremented after stock click (got: ${movesAfterClick})`
     );
-    assert(cardCountAfterNew === 52, `52 cards after new game (got: ${cardCountAfterNew})`);
+  } else {
+    assert(true, 'Stock pile click skipped (no stock cards positioned as expected)');
+  }
 
-    const scoreAfterNew = await page.evaluate(() =>
-        document.getElementById('statusScore').textContent
-    );
-    assert(scoreAfterNew.includes('0'), `Score reset to 0 after new game (got: ${scoreAfterNew})`);
+  // ── Test 6: Win overlay is hidden during play ────────────────────────
+  console.log('\nTest 6: Win overlay is hidden during play');
 
-    const movesAfterNew = await page.evaluate(() =>
-        document.getElementById('statusMoves').textContent
-    );
-    assert(movesAfterNew.includes('0'), `Moves reset to 0 after new game (got: ${movesAfterNew})`);
+  const winHidden = await page.evaluate(
+    () => !document.getElementById('winOverlay').classList.contains('show')
+  );
+  assert(winHidden, 'Win overlay is not shown during play');
 
-    // ── Test 8: Menu dropdown system works ───────────────────────────────
-    console.log('\nTest 8: Menu dropdown system works');
+  // ── Test 7: New game via menu resets the board ───────────────────────
+  console.log('\nTest 7: New game resets the board');
 
-    const menuItems = await page.evaluate(() => ({
-        newGame: !!document.getElementById('menu-new-game'),
-        undo: !!document.getElementById('menu-undo'),
-        about: !!document.getElementById('menu-about'),
-    }));
+  await page.click('#menu-game');
+  await page.waitForTimeout(100);
+  await page.click('#menu-new-game');
+  await page.waitForTimeout(500);
 
-    assert(menuItems.newGame, 'New Game menu item exists');
-    assert(menuItems.undo, 'Undo menu item exists');
-    assert(menuItems.about, 'About menu item exists');
+  const cardCountAfterNew = await page.evaluate(() => document.querySelectorAll('.card').length);
+  assert(cardCountAfterNew === 52, `52 cards after new game (got: ${cardCountAfterNew})`);
 
-    await browser.close();
+  const scoreAfterNew = await page.evaluate(
+    () => document.getElementById('statusScore').textContent
+  );
+  assert(scoreAfterNew.includes('0'), `Score reset to 0 after new game (got: ${scoreAfterNew})`);
 
-    // ── Summary ──────────────────────────────────────────────────────────
-    console.log(`\n${'='.repeat(50)}`);
-    console.log(`Results: ${passed} passed, ${failed} failed`);
-    if (failed > 0) {
-        console.error('TESTS FAILED');
-        process.exit(1);
-    } else {
-        console.log('ALL TESTS PASSED');
-    }
+  const movesAfterNew = await page.evaluate(
+    () => document.getElementById('statusMoves').textContent
+  );
+  assert(movesAfterNew.includes('0'), `Moves reset to 0 after new game (got: ${movesAfterNew})`);
+
+  // ── Test 8: Menu dropdown system works ───────────────────────────────
+  console.log('\nTest 8: Menu dropdown system works');
+
+  const menuItems = await page.evaluate(() => ({
+    newGame: !!document.getElementById('menu-new-game'),
+    undo: !!document.getElementById('menu-undo'),
+    about: !!document.getElementById('menu-about'),
+  }));
+
+  assert(menuItems.newGame, 'New Game menu item exists');
+  assert(menuItems.undo, 'Undo menu item exists');
+  assert(menuItems.about, 'About menu item exists');
+
+  await browser.close();
+
+  // ── Summary ──────────────────────────────────────────────────────────
+  tracker.exitWithSummary();
 }
 
-runTests().catch(err => {
-    console.error('Test runner error:', err);
-    process.exit(1);
+runTests().catch((err) => {
+  console.error('Test runner error:', err);
+  process.exit(1);
 });

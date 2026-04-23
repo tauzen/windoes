@@ -1,21 +1,9 @@
 const path = require('path');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { launchBrowser, startStaticServer } = require('./launch-browser');
+const { waitForBoot } = require('./helpers/test-harness');
 
 const WINDOES_DIR = path.resolve(__dirname, '..', 'windoes');
-const BOOT_TIMEOUT = 10000;
-
-async function waitForBoot(page, baseUrl) {
-  await page.goto(baseUrl + '/index.html');
-  await page.waitForFunction(
-    () => {
-      const desktop = document.querySelector('#theDesktop');
-      return desktop && desktop.style.display !== 'none';
-    },
-    { timeout: BOOT_TIMEOUT }
-  );
-  await page.waitForTimeout(200);
-}
 
 function formatViolation(violation) {
   const nodeTargets = violation.nodes
