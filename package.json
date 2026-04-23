@@ -18,6 +18,7 @@
     "test": "npm run lint && npm run test:unit && npm run test:integration",
     "test:unit": "node --test tests/node/reducer.test.js tests/node/browser-url.test.js tests/node/explorer-navigation.test.js",
     "test:integration": "node --test --test-concurrency=1 tests/node/playwright-integration.test.js",
+    "test:a11y": "node tests/test-axe-accessibility.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
     "test:ascii-runner": "npm run -w ./windoes/public/applications/ascii-runner test",
     "test:minesweeper": "npm run -w ./windoes/public/applications/minesweeper test",
@@ -32,6 +33,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.2",
     "@eslint/js": "^9.25.1",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.25.1",

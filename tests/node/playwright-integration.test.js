@@ -13,6 +13,7 @@ const integrationScripts = [
   'test-notepad-save.js',
   'test-notepad-file-menu.js',
   'test-virtual-fs.js',
+  'test-axe-accessibility.js',
 ];
 
 for (const script of integrationScripts) {
