@@ -1,8 +1,9 @@
 import React, { useSyncExternalStore } from 'react';
 import { createPortal, flushSync } from 'react-dom';
+import { createListenerSet } from './listener-set.mjs';
 
 const renderRegistry = new Map();
-const listeners = new Set();
+const listenerSet = createListenerSet();
 const containerKeys = new WeakMap();
 let nextKey = 1;
 let version = 0;
@@ -18,16 +19,11 @@ function rebuildSnapshot() {
 function emit() {
   version += 1;
   rebuildSnapshot();
-  for (const listener of listeners) {
-    listener();
-  }
+  listenerSet.emit();
 }
 
 function subscribe(listener) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  return listenerSet.subscribe(listener);
 }
 
 function getSnapshot() {

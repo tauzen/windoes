@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
+import { useOutsideClick } from './outside-click.js';
 
 export default function DesktopContextMenu() {
+  const menuRef = useRef(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [clockTooltip, setClockTooltip] = useState({ open: false, text: '', x: 0, y: 0 });
@@ -80,20 +82,16 @@ export default function DesktopContextMenu() {
     };
   }, []);
 
-  useEffect(() => {
-    function onDocumentClick(e) {
-      if (!e.target.closest('#contextMenu')) {
-        setIsContextMenuOpen(false);
-      }
-    }
-
-    document.addEventListener('click', onDocumentClick);
-    return () => document.removeEventListener('click', onDocumentClick);
-  }, []);
+  useOutsideClick({
+    enabled: isContextMenuOpen,
+    getElements: () => [menuRef.current],
+    onOutsideClick: () => setIsContextMenuOpen(false),
+  });
 
   return (
     <>
       <div
+        ref={menuRef}
         className={`context-menu${isContextMenuOpen ? ' open' : ''}`}
         id="contextMenu"
         role="menu"

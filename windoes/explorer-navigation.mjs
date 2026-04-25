@@ -1,11 +1,13 @@
+import { createListenerSet } from './listener-set.mjs';
+
 function createExplorerNavigation() {
   let currentPath = null;
   let historyStack = [];
   let historyIndex = -1;
-  const listeners = new Set();
+  const listenerSet = createListenerSet();
 
   function emitChange() {
-    listeners.forEach((listener) => listener());
+    listenerSet.emit();
   }
 
   function navigateTo(path, addToHistory = true) {
@@ -58,10 +60,7 @@ function createExplorerNavigation() {
   }
 
   function subscribe(listener) {
-    listeners.add(listener);
-    return () => {
-      listeners.delete(listener);
-    };
+    return listenerSet.subscribe(listener);
   }
 
   return {

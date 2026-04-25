@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
 import { useDialogFocus } from './dialog-focus.js';
+import { useOutsideClick } from './outside-click.js';
 
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
@@ -230,34 +231,22 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
     };
   }, [setStartMenuOpen, startMenuOpen]);
 
-  useLayoutEffect(() => {
-    const startMenuEl = startMenuRef.current;
-    const startButton = startButtonRef?.current;
-    if (!startMenuEl || !startButton) return undefined;
+  const getStartMenuElements = useCallback(
+    () => [
+      startButtonRef?.current,
+      startMenuRef.current,
+      programsSubmenuRef.current,
+      accessoriesSubmenuRef.current,
+      gamesSubmenuRef.current,
+    ],
+    [startButtonRef]
+  );
 
-    function onDocumentClick(e) {
-      const programsSubmenu = programsSubmenuRef.current;
-      const accessoriesSubmenu = accessoriesSubmenuRef.current;
-      const gamesSubmenu = gamesSubmenuRef.current;
-      if (!programsSubmenu || !accessoriesSubmenu || !gamesSubmenu) return;
-
-      if (
-        !startButton.contains(e.target) &&
-        !startMenuEl.contains(e.target) &&
-        !programsSubmenu.contains(e.target) &&
-        !accessoriesSubmenu.contains(e.target) &&
-        !gamesSubmenu.contains(e.target)
-      ) {
-        closeAllMenus();
-      }
-    }
-
-    document.addEventListener('click', onDocumentClick);
-
-    return () => {
-      document.removeEventListener('click', onDocumentClick);
-    };
-  }, [startButtonRef, setStartMenuOpen]);
+  useOutsideClick({
+    enabled: startMenuOpen,
+    getElements: getStartMenuElements,
+    onOutsideClick: closeAllMenus,
+  });
 
   useDialogFocus({
     isOpen: shutdownOpen,

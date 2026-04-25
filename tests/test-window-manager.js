@@ -13,34 +13,12 @@
 
 const path = require('path');
 const { launchBrowser, startStaticServer } = require('./launch-browser');
+const { createAssertTracker, waitForBoot } = require('./helpers/test-harness');
 
 const WINDOES_DIR = path.resolve(__dirname, '..', 'windoes');
-const BOOT_TIMEOUT = 10000;
 
-let passed = 0;
-let failed = 0;
-
-function assert(condition, message) {
-  if (condition) {
-    console.log(`  PASS: ${message}`);
-    passed++;
-  } else {
-    console.error(`  FAIL: ${message}`);
-    failed++;
-  }
-}
-
-async function waitForBoot(page, baseUrl) {
-  await page.goto(baseUrl + '/index.html');
-  await page.waitForFunction(
-    () => {
-      const desktop = document.getElementById('theDesktop');
-      return desktop && desktop.style.display !== 'none';
-    },
-    { timeout: BOOT_TIMEOUT }
-  );
-  await page.waitForTimeout(200);
-}
+const tracker = createAssertTracker();
+const { assert } = tracker;
 
 async function getVisibleWindows(page) {
   return page.evaluate(() =>
@@ -1279,14 +1257,7 @@ async function runTests() {
   }
 
   // ── Summary ───────────────────────────────────────────────────────────
-  console.log(`\n${'='.repeat(50)}`);
-  console.log(`Results: ${passed} passed, ${failed} failed`);
-  if (failed > 0) {
-    console.error('TESTS FAILED');
-    process.exit(1);
-  } else {
-    console.log('ALL TESTS PASSED');
-  }
+  tracker.exitWithSummary();
 }
 
 runTests().catch((err) => {

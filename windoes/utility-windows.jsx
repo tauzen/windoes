@@ -6,7 +6,7 @@ import { basename } from './virtual-fs.js';
 import { initFS, navigateTo, resetNavigationState, saveTextFile } from './fs-explorer.jsx';
 import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
 import MyComputerToolbar from './my-computer-toolbar.jsx';
-import { closeStartMenuBoilerplate } from './launch-helpers.js';
+import { openWindowBoilerplate } from './launch-helpers.js';
 
 WindoesApp.WindowManager.register('myComputer', {
   template: {
@@ -48,8 +48,7 @@ async function ensureFS() {
 }
 
 function openMyComputer() {
-  WindoesApp.WindowManager.open('myComputer');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('myComputer');
 
   ensureFS().then(() => {
     resetNavigationState();
@@ -167,7 +166,7 @@ const unsubscribeNotepadInteraction =
 function openNotepad(options = {}) {
   const { filePath = '', content = '', preserveCurrentDocument = false } = options;
 
-  WindoesApp.WindowManager.open('notepad');
+  openWindowBoilerplate('notepad');
 
   const textarea = notepadConfig.el.querySelector('#notepadText');
   const titleEl = notepadConfig.el.querySelector('#notepadTitle');
@@ -183,8 +182,6 @@ function openNotepad(options = {}) {
       if (titleEl) titleEl.textContent = 'Untitled - Notepad';
     }
   }
-
-  closeStartMenuBoilerplate();
 }
 
 function closeNotepad() {
@@ -233,8 +230,7 @@ WindoesApp.WindowManager.register('recycleBin', {
 });
 
 function openRecycleBin() {
-  WindoesApp.WindowManager.open('recycleBin');
-  closeStartMenuBoilerplate();
+  openWindowBoilerplate('recycleBin');
 }
 
 // Register on shared namespace

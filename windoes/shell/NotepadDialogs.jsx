@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import WindoesApp from '../app-state.js';
 import { useDialogFocus } from './dialog-focus.js';
+import { useOutsideClick } from './outside-click.js';
 
 export default function NotepadDialogs() {
   const savePathInputRef = useRef(null);
   const saveDialogRef = useRef(null);
+  const fileDropdownRef = useRef(null);
   const resolverRef = useRef(null);
   const notepadState = WindoesApp.state.use((s) => s.notepad || {});
 
@@ -91,10 +93,6 @@ export default function NotepadDialogs() {
         dispatchNotepadAction(action);
         return;
       }
-
-      if (isFileMenuOpen && !e.target.closest('#notepadFileDropdown')) {
-        WindoesApp.state.dispatch({ type: 'NOTEPAD_FILE_MENU_CLOSE' });
-      }
     }
 
     function onDocumentKeyDown(e) {
@@ -134,6 +132,14 @@ export default function NotepadDialogs() {
       document.removeEventListener('keydown', onDocumentKeyDown);
     };
   }, [isFileMenuOpen]);
+
+  useOutsideClick({
+    enabled: isFileMenuOpen,
+    getElements: () => [fileDropdownRef.current, document.getElementById('notepadFileMenu')],
+    onOutsideClick: () => {
+      WindoesApp.state.dispatch({ type: 'NOTEPAD_FILE_MENU_CLOSE' });
+    },
+  });
 
   return (
     <>
@@ -206,6 +212,7 @@ export default function NotepadDialogs() {
       </div>
 
       <div
+        ref={fileDropdownRef}
         className={`context-menu notepad-file-menu${isFileMenuOpen ? ' open' : ''}`}
         id="notepadFileDropdown"
         role="menu"

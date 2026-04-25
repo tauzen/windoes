@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import WindoesApp from '../app-state.js';
+import { useOutsideClick } from './outside-click.js';
 
 export default function ExplorerContextMenu() {
   const menuRef = useRef(null);
@@ -24,19 +25,11 @@ export default function ExplorerContextMenu() {
     closeMenu();
   }
 
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    function onDocumentClick(e) {
-      const menu = menuRef.current;
-      if (!menu || !menu.contains(e.target)) {
-        closeMenu();
-      }
-    }
-
-    document.addEventListener('click', onDocumentClick);
-    return () => document.removeEventListener('click', onDocumentClick);
-  }, [isOpen]);
+  useOutsideClick({
+    enabled: isOpen,
+    getElements: () => [menuRef.current],
+    onOutsideClick: closeMenu,
+  });
 
   return (
     <div

@@ -12,3 +12,9 @@ export function closeStartMenuBoilerplate() {
   }
   WindoesApp.sound.playClickSound();
 }
+
+// Open a window and apply the standard launch side-effects used by app launchers.
+export function openWindowBoilerplate(windowId) {
+  WindoesApp.WindowManager.open(windowId);
+  closeStartMenuBoilerplate();
+}
