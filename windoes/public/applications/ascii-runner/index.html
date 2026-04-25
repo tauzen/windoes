@@ -1,46 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a1a2e">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1a1a2e" />
     <title>ASCII Runner</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <!-- Orientation overlay for portrait mode on mobile -->
     <div id="orientation-overlay">
-        <div class="rotate-icon">[~]</div>
-        <h2>ROTATE YOUR DEVICE</h2>
-        <p>This game is best played in landscape mode</p>
+      <div class="rotate-icon">[~]</div>
+      <h2>ROTATE YOUR DEVICE</h2>
+      <p>This game is best played in landscape mode</p>
     </div>
 
     <div id="game-container">
-        <div id="score">SCORE: <span id="score-value">0</span></div>
-        <canvas id="game"></canvas>
-        <div id="start-screen">
-            <h1>ASCII RUNNER</h1>
-            <p>TAP TO START</p>
-            <p class="controls">TAP = JUMP | TAP AGAIN = DOUBLE JUMP</p>
-            <p class="controls">COLLECT $ FOR BONUS | AVOID /\ SPIKES</p>
-            <p class="fullscreen-hint">ENTERS FULLSCREEN ON MOBILE</p>
-        </div>
-        <div id="game-over" class="hidden">
-            <h1>GAME OVER</h1>
-            <p>SCORE: <span id="final-score">0</span></p>
-            <p>TAP OR PRESS SPACE TO RESTART</p>
-        </div>
+      <div id="score">SCORE: <span id="score-value">0</span></div>
+      <canvas id="game"></canvas>
+      <div id="start-screen">
+        <h1>ASCII RUNNER</h1>
+        <p>TAP TO START</p>
+        <p class="controls">TAP = JUMP | TAP AGAIN = DOUBLE JUMP</p>
+        <p class="controls">COLLECT $ FOR BONUS | AVOID /\ SPIKES</p>
+        <p class="fullscreen-hint">ENTERS FULLSCREEN ON MOBILE</p>
+      </div>
+      <div id="game-over" class="hidden">
+        <h1>GAME OVER</h1>
+        <p>SCORE: <span id="final-score">0</span></p>
+        <p>TAP OR PRESS SPACE TO RESTART</p>
+      </div>
     </div>
 
     <!-- Mobile touch controls -->
     <div id="mobile-controls">
-        <button id="jump-btn" type="button">JUMP</button>
+      <button id="jump-btn" type="button">JUMP</button>
     </div>
 
     <div id="version">v.1.0.0</div>
     <script src="game.js"></script>
-</body>
+  </body>
 </html>

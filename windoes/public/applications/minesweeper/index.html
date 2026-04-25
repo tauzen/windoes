@@ -1,862 +1,965 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Minesweeper</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            background: #008080;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
-            font-size: 11px;
-        }
+      body {
+        background: #008080;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+        font-size: 11px;
+      }
 
-        /* ===== WINDOW ===== */
-        .window {
-            background: #c0c0c0;
-            border: 2px solid;
-            border-color: #dfdfdf #404040 #404040 #dfdfdf;
-            box-shadow: 1px 1px 0 #000;
-            user-select: none;
-        }
+      /* ===== WINDOW ===== */
+      .window {
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 1px 1px 0 #000;
+        user-select: none;
+      }
 
-        /* ===== TITLE BAR ===== */
-        .title-bar {
-            background: linear-gradient(to right, #000080 0%, #1084d0 100%);
-            color: white;
-            padding: 2px 4px 2px 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 20px;
-        }
+      /* ===== TITLE BAR ===== */
+      .title-bar {
+        background: linear-gradient(to right, #000080 0%, #1084d0 100%);
+        color: white;
+        padding: 2px 4px 2px 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 20px;
+      }
 
-        .title-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
+      .title-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: bold;
+      }
 
-        .title-icon {
-            width: 14px;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
+      .title-icon {
+        width: 14px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
 
-        .title-bar-buttons {
-            display: flex;
-            gap: 2px;
-        }
+      .title-bar-buttons {
+        display: flex;
+        gap: 2px;
+      }
 
-        .title-btn {
-            width: 16px;
-            height: 14px;
-            background: #c0c0c0;
-            border: 1px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            font-weight: bold;
-            color: #000;
-            cursor: pointer;
-            line-height: 1;
-            padding-bottom: 2px;
-        }
+      .title-btn {
+        width: 16px;
+        height: 14px;
+        background: #c0c0c0;
+        border: 1px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        font-weight: bold;
+        color: #000;
+        cursor: pointer;
+        line-height: 1;
+        padding-bottom: 2px;
+      }
 
-        .title-btn:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
+      .title-btn:active {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
 
-        /* ===== MENU BAR ===== */
-        .menu-bar {
-            background: #c0c0c0;
-            display: flex;
-            padding: 2px 2px 0;
-            border-bottom: 1px solid #808080;
-            position: relative;
-        }
+      /* ===== MENU BAR ===== */
+      .menu-bar {
+        background: #c0c0c0;
+        display: flex;
+        padding: 2px 2px 0;
+        border-bottom: 1px solid #808080;
+        position: relative;
+      }
 
-        .menu-item {
-            padding: 2px 6px 3px;
-            cursor: default;
-            position: relative;
-        }
+      .menu-item {
+        padding: 2px 6px 3px;
+        cursor: default;
+        position: relative;
+      }
 
-        .menu-item:hover, .menu-item.open {
-            background: #000080;
-            color: white;
-        }
+      .menu-item:hover,
+      .menu-item.open {
+        background: #000080;
+        color: white;
+      }
 
-        .menu-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #c0c0c0;
-            color: black;
-            border: 1px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            box-shadow: 2px 2px 0 #404040;
-            z-index: 1000;
-            min-width: 160px;
-            padding: 2px 0;
-        }
+      .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #c0c0c0;
+        color: black;
+        border: 1px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        box-shadow: 2px 2px 0 #404040;
+        z-index: 1000;
+        min-width: 160px;
+        padding: 2px 0;
+      }
 
-        .menu-item.open .menu-dropdown {
-            display: block;
-        }
+      .menu-item.open .menu-dropdown {
+        display: block;
+      }
 
-        .menu-opt {
-            padding: 2px 12px 2px 20px;
-            cursor: default;
-            position: relative;
-            white-space: nowrap;
-        }
+      .menu-opt {
+        padding: 2px 12px 2px 20px;
+        cursor: default;
+        position: relative;
+        white-space: nowrap;
+      }
 
-        .menu-opt:hover {
-            background: #000080;
-            color: white;
-        }
+      .menu-opt:hover {
+        background: #000080;
+        color: white;
+      }
 
-        .menu-opt.checked::before {
-            content: '✓';
-            position: absolute;
-            left: 6px;
-        }
+      .menu-opt.checked::before {
+        content: '✓';
+        position: absolute;
+        left: 6px;
+      }
 
-        .menu-opt.checked:hover::before {
-            color: white;
-        }
+      .menu-opt.checked:hover::before {
+        color: white;
+      }
 
-        .menu-sep {
-            border: none;
-            border-top: 1px solid #808080;
-            border-bottom: 1px solid #ffffff;
-            margin: 2px 2px;
-        }
+      .menu-sep {
+        border: none;
+        border-top: 1px solid #808080;
+        border-bottom: 1px solid #ffffff;
+        margin: 2px 2px;
+      }
 
-        /* ===== GAME PANEL ===== */
-        .game-panel {
-            padding: 6px;
-        }
+      /* ===== GAME PANEL ===== */
+      .game-panel {
+        padding: 6px;
+      }
 
-        /* ===== INFO BAR ===== */
-        .info-bar {
-            border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            background: #c0c0c0;
-            padding: 4px 6px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
+      /* ===== INFO BAR ===== */
+      .info-bar {
+        border: 2px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        background: #c0c0c0;
+        padding: 4px 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
 
-        /* ===== LED DISPLAY ===== */
-        .led-display {
-            background: #000;
-            border: 2px solid;
-            border-color: #808080 #dfdfdf #dfdfdf #808080;
-            width: 41px;
-            height: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+      /* ===== LED DISPLAY ===== */
+      .led-display {
+        background: #000;
+        border: 2px solid;
+        border-color: #808080 #dfdfdf #dfdfdf #808080;
+        width: 41px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
 
-        .led-canvas {
-            display: block;
-        }
+      .led-canvas {
+        display: block;
+      }
 
-        /* ===== FACE BUTTON ===== */
-        .face-btn {
-            width: 26px;
-            height: 26px;
-            background: #c0c0c0;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            outline: none;
-        }
+      /* ===== FACE BUTTON ===== */
+      .face-btn {
+        width: 26px;
+        height: 26px;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        outline: none;
+      }
 
-        .face-btn:active, .face-btn.pressed {
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
+      .face-btn:active,
+      .face-btn.pressed {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
 
-        .face-canvas {
-            display: block;
-        }
+      .face-canvas {
+        display: block;
+      }
 
-        /* ===== BOARD CONTAINER ===== */
-        .board-wrap {
-            border: 3px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            line-height: 0;
-            display: inline-block;
-        }
+      /* ===== BOARD CONTAINER ===== */
+      .board-wrap {
+        border: 3px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        line-height: 0;
+        display: inline-block;
+      }
 
-        /* ===== BOARD CELLS ===== */
-        .board {
-            display: grid;
-            gap: 0;
-            line-height: 0;
-        }
+      /* ===== BOARD CELLS ===== */
+      .board {
+        display: grid;
+        gap: 0;
+        line-height: 0;
+      }
 
-        .cell {
-            width: 16px;
-            height: 16px;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            background: #c0c0c0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: bold;
-            font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
-            line-height: 1;
-            outline: none;
-            position: relative;
-        }
+      .cell {
+        width: 16px;
+        height: 16px;
+        border: 2px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        background: #c0c0c0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: bold;
+        font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+        line-height: 1;
+        outline: none;
+        position: relative;
+      }
 
-        .cell.revealed {
-            border: 1px solid #808080;
-            cursor: default;
-        }
+      .cell.revealed {
+        border: 1px solid #808080;
+        cursor: default;
+      }
 
-        .cell.pressed-look {
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
+      .cell.pressed-look {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
 
-        /* Number colors - exact Win Me colors */
-        .n1 { color: #0000ff; }
-        .n2 { color: #008000; }
-        .n3 { color: #ff0000; }
-        .n4 { color: #000080; }
-        .n5 { color: #800000; }
-        .n6 { color: #008080; }
-        .n7 { color: #000000; }
-        .n8 { color: #808080; }
+      /* Number colors - exact Win Me colors */
+      .n1 {
+        color: #0000ff;
+      }
+      .n2 {
+        color: #008000;
+      }
+      .n3 {
+        color: #ff0000;
+      }
+      .n4 {
+        color: #000080;
+      }
+      .n5 {
+        color: #800000;
+      }
+      .n6 {
+        color: #008080;
+      }
+      .n7 {
+        color: #000000;
+      }
+      .n8 {
+        color: #808080;
+      }
 
-        /* ===== CUSTOM DIALOG ===== */
-        .dialog-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
+      /* ===== CUSTOM DIALOG ===== */
+      .dialog-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .dialog-overlay.visible {
-            display: flex;
-        }
+      .dialog-overlay.visible {
+        display: flex;
+      }
 
-        .dialog {
-            background: #c0c0c0;
-            border: 2px solid;
-            border-color: #dfdfdf #404040 #404040 #dfdfdf;
-            box-shadow: 2px 2px 0 #000;
-            min-width: 200px;
-        }
+      .dialog {
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 2px 2px 0 #000;
+        min-width: 200px;
+      }
 
-        .dialog-title {
-            background: linear-gradient(to right, #000080, #1084d0);
-            color: white;
-            padding: 2px 4px;
-            font-size: 11px;
-            font-weight: bold;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+      .dialog-title {
+        background: linear-gradient(to right, #000080, #1084d0);
+        color: white;
+        padding: 2px 4px;
+        font-size: 11px;
+        font-weight: bold;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-        .dialog-body {
-            padding: 14px 16px 10px;
-            font-size: 11px;
-        }
+      .dialog-body {
+        padding: 14px 16px 10px;
+        font-size: 11px;
+      }
 
-        .dialog-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            gap: 8px;
-        }
+      .dialog-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        gap: 8px;
+      }
 
-        .dialog-row label {
-            width: 80px;
-        }
+      .dialog-row label {
+        width: 80px;
+      }
 
-        .dialog-input {
-            width: 60px;
-            border: 1px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
-            padding: 2px 4px;
-            font-size: 11px;
-            background: white;
-            inset: inset 1px 1px 0 #404040;
-        }
+      .dialog-input {
+        width: 60px;
+        border: 1px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        padding: 2px 4px;
+        font-size: 11px;
+        background: white;
+        inset: inset 1px 1px 0 #404040;
+      }
 
-        .dialog-btns {
-            display: flex;
-            justify-content: flex-end;
-            gap: 6px;
-            padding: 6px 16px 12px;
-        }
+      .dialog-btns {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 6px 16px 12px;
+      }
 
-        .dialog-btn {
-            padding: 3px 12px;
-            font-size: 11px;
-            font-family: inherit;
-            background: #c0c0c0;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            cursor: pointer;
-            min-width: 60px;
-        }
+      .dialog-btn {
+        padding: 3px 12px;
+        font-size: 11px;
+        font-family: inherit;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        cursor: pointer;
+        min-width: 60px;
+      }
 
-        .dialog-btn:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
+      .dialog-btn:active {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
 
-        /* ===== BEST TIMES DIALOG ===== */
-        .best-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            gap: 20px;
-        }
+      /* ===== BEST TIMES DIALOG ===== */
+      .best-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        gap: 20px;
+      }
 
-        .best-row span:last-child {
-            font-weight: bold;
-        }
+      .best-row span:last-child {
+        font-weight: bold;
+      }
 
-        .best-name {
-            color: #000080;
-        }
+      .best-name {
+        color: #000080;
+      }
     </style>
-</head>
-<body>
-
-<div class="window" id="window">
-    <!-- Title Bar -->
-    <div class="title-bar">
+  </head>
+  <body>
+    <div class="window" id="window">
+      <!-- Title Bar -->
+      <div class="title-bar">
         <div class="title-bar-left">
-            <div class="title-icon">💣</div>
-            Minesweeper
+          <div class="title-icon">💣</div>
+          Minesweeper
         </div>
         <div class="title-bar-buttons">
-            <div class="title-btn" title="Minimize">_</div>
-            <div class="title-btn" title="Maximize">□</div>
-            <div class="title-btn" title="Close" id="closeBtn">✕</div>
+          <div class="title-btn" title="Minimize">_</div>
+          <div class="title-btn" title="Maximize">□</div>
+          <div class="title-btn" title="Close" id="closeBtn">✕</div>
         </div>
-    </div>
+      </div>
 
-    <!-- Menu Bar -->
-    <div class="menu-bar" id="menuBar">
+      <!-- Menu Bar -->
+      <div class="menu-bar" id="menuBar">
         <div class="menu-item" id="gameMenu">
-            Game
-            <div class="menu-dropdown">
-                <div class="menu-opt" id="menuNew">New    F2</div>
-                <div class="menu-sep"></div>
-                <div class="menu-opt" id="menuBeginner">Beginner</div>
-                <div class="menu-opt" id="menuIntermediate">Intermediate</div>
-                <div class="menu-opt" id="menuExpert">Expert</div>
-                <div class="menu-opt" id="menuCustom">Custom...</div>
-                <div class="menu-sep"></div>
-                <div class="menu-opt" id="menuMarks">Marks (?)</div>
-                <div class="menu-sep"></div>
-                <div class="menu-opt" id="menuBestTimes">Best Times...</div>
-            </div>
+          Game
+          <div class="menu-dropdown">
+            <div class="menu-opt" id="menuNew">New F2</div>
+            <div class="menu-sep"></div>
+            <div class="menu-opt" id="menuBeginner">Beginner</div>
+            <div class="menu-opt" id="menuIntermediate">Intermediate</div>
+            <div class="menu-opt" id="menuExpert">Expert</div>
+            <div class="menu-opt" id="menuCustom">Custom...</div>
+            <div class="menu-sep"></div>
+            <div class="menu-opt" id="menuMarks">Marks (?)</div>
+            <div class="menu-sep"></div>
+            <div class="menu-opt" id="menuBestTimes">Best Times...</div>
+          </div>
         </div>
         <div class="menu-item" id="helpMenu">
-            Help
-            <div class="menu-dropdown">
-                <div class="menu-opt" id="menuAbout">About Minesweeper...</div>
-            </div>
+          Help
+          <div class="menu-dropdown">
+            <div class="menu-opt" id="menuAbout">About Minesweeper...</div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Game Panel -->
-    <div class="game-panel">
+      <!-- Game Panel -->
+      <div class="game-panel">
         <div class="info-bar">
-            <div class="led-display">
-                <canvas class="led-canvas" id="mineCanvas" width="39" height="23"></canvas>
-            </div>
-            <button class="face-btn" id="faceBtn">
-                <canvas class="face-canvas" id="faceCanvas" width="22" height="22"></canvas>
-            </button>
-            <div class="led-display">
-                <canvas class="led-canvas" id="timerCanvas" width="39" height="23"></canvas>
-            </div>
+          <div class="led-display">
+            <canvas class="led-canvas" id="mineCanvas" width="39" height="23"></canvas>
+          </div>
+          <button class="face-btn" id="faceBtn">
+            <canvas class="face-canvas" id="faceCanvas" width="22" height="22"></canvas>
+          </button>
+          <div class="led-display">
+            <canvas class="led-canvas" id="timerCanvas" width="39" height="23"></canvas>
+          </div>
         </div>
         <div class="board-wrap">
-            <div class="board" id="board"></div>
+          <div class="board" id="board"></div>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- Custom Dialog -->
-<div class="dialog-overlay" id="customDialog">
-    <div class="dialog">
+    <!-- Custom Dialog -->
+    <div class="dialog-overlay" id="customDialog">
+      <div class="dialog">
         <div class="dialog-title">
-            <span>Custom Field</span>
-            <div class="title-btn" id="customClose">✕</div>
+          <span>Custom Field</span>
+          <div class="title-btn" id="customClose">✕</div>
         </div>
         <div class="dialog-body">
-            <div class="dialog-row">
-                <label>Height:</label>
-                <input type="number" class="dialog-input" id="customRows" min="9" max="24" value="16">
-            </div>
-            <div class="dialog-row">
-                <label>Width:</label>
-                <input type="number" class="dialog-input" id="customCols" min="9" max="30" value="16">
-            </div>
-            <div class="dialog-row">
-                <label>Mines:</label>
-                <input type="number" class="dialog-input" id="customMines" min="10" max="667" value="40">
-            </div>
+          <div class="dialog-row">
+            <label>Height:</label>
+            <input type="number" class="dialog-input" id="customRows" min="9" max="24" value="16" />
+          </div>
+          <div class="dialog-row">
+            <label>Width:</label>
+            <input type="number" class="dialog-input" id="customCols" min="9" max="30" value="16" />
+          </div>
+          <div class="dialog-row">
+            <label>Mines:</label>
+            <input
+              type="number"
+              class="dialog-input"
+              id="customMines"
+              min="10"
+              max="667"
+              value="40"
+            />
+          </div>
         </div>
         <div class="dialog-btns">
-            <button class="dialog-btn" id="customOk">OK</button>
-            <button class="dialog-btn" id="customCancel">Cancel</button>
+          <button class="dialog-btn" id="customOk">OK</button>
+          <button class="dialog-btn" id="customCancel">Cancel</button>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- Best Times Dialog -->
-<div class="dialog-overlay" id="bestDialog">
-    <div class="dialog">
+    <!-- Best Times Dialog -->
+    <div class="dialog-overlay" id="bestDialog">
+      <div class="dialog">
         <div class="dialog-title">
-            <span>Fastest Mine Sweepers</span>
-            <div class="title-btn" id="bestClose">✕</div>
+          <span>Fastest Mine Sweepers</span>
+          <div class="title-btn" id="bestClose">✕</div>
         </div>
         <div class="dialog-body">
-            <div class="best-row">
-                <span>Beginner:</span>
-                <span id="bestBegTime">999</span>
-                <span id="bestBegName" class="best-name">Anonymous</span>
-            </div>
-            <div class="best-row">
-                <span>Intermediate:</span>
-                <span id="bestIntTime">999</span>
-                <span id="bestIntName" class="best-name">Anonymous</span>
-            </div>
-            <div class="best-row">
-                <span>Expert:</span>
-                <span id="bestExpTime">999</span>
-                <span id="bestExpName" class="best-name">Anonymous</span>
-            </div>
+          <div class="best-row">
+            <span>Beginner:</span>
+            <span id="bestBegTime">999</span>
+            <span id="bestBegName" class="best-name">Anonymous</span>
+          </div>
+          <div class="best-row">
+            <span>Intermediate:</span>
+            <span id="bestIntTime">999</span>
+            <span id="bestIntName" class="best-name">Anonymous</span>
+          </div>
+          <div class="best-row">
+            <span>Expert:</span>
+            <span id="bestExpTime">999</span>
+            <span id="bestExpName" class="best-name">Anonymous</span>
+          </div>
         </div>
         <div class="dialog-btns">
-            <button class="dialog-btn" id="bestReset">Reset Scores</button>
-            <button class="dialog-btn" id="bestOk">OK</button>
+          <button class="dialog-btn" id="bestReset">Reset Scores</button>
+          <button class="dialog-btn" id="bestOk">OK</button>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- About Dialog -->
-<div class="dialog-overlay" id="aboutDialog">
-    <div class="dialog">
+    <!-- About Dialog -->
+    <div class="dialog-overlay" id="aboutDialog">
+      <div class="dialog">
         <div class="dialog-title">
-            <span>About Minesweeper</span>
-            <div class="title-btn" id="aboutClose">✕</div>
+          <span>About Minesweeper</span>
+          <div class="title-btn" id="aboutClose">✕</div>
         </div>
-        <div class="dialog-body" style="text-align:center; padding: 20px 40px;">
-            <div style="font-size:32px; margin-bottom:8px;">💣</div>
-            <div style="font-weight:bold; margin-bottom:4px;">Minesweeper</div>
-            <div style="margin-bottom:4px;">Version 4.1</div>
-            <div style="margin-bottom:12px; color:#444;">For Microsoft Windoes XD</div>
-            <div style="font-size:10px; color:#666;">Copyright © 1991-2000 Microsoft Corp.</div>
+        <div class="dialog-body" style="text-align: center; padding: 20px 40px">
+          <div style="font-size: 32px; margin-bottom: 8px">💣</div>
+          <div style="font-weight: bold; margin-bottom: 4px">Minesweeper</div>
+          <div style="margin-bottom: 4px">Version 4.1</div>
+          <div style="margin-bottom: 12px; color: #444">For Microsoft Windoes XD</div>
+          <div style="font-size: 10px; color: #666">Copyright © 1991-2000 Microsoft Corp.</div>
         </div>
         <div class="dialog-btns">
-            <button class="dialog-btn" id="aboutOk">OK</button>
+          <button class="dialog-btn" id="aboutOk">OK</button>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- Win Name Dialog -->
-<div class="dialog-overlay" id="winDialog">
-    <div class="dialog">
+    <!-- Win Name Dialog -->
+    <div class="dialog-overlay" id="winDialog">
+      <div class="dialog">
         <div class="dialog-title">
-            <span>Congratulations!</span>
+          <span>Congratulations!</span>
         </div>
         <div class="dialog-body">
-            <div style="margin-bottom:12px;" id="winMsg">You have the fastest time for Beginner level. Please enter your name.</div>
-            <input type="text" class="dialog-input" id="winName" style="width:180px;" value="Anonymous">
+          <div style="margin-bottom: 12px" id="winMsg">
+            You have the fastest time for Beginner level. Please enter your name.
+          </div>
+          <input
+            type="text"
+            class="dialog-input"
+            id="winName"
+            style="width: 180px"
+            value="Anonymous"
+          />
         </div>
         <div class="dialog-btns">
-            <button class="dialog-btn" id="winOk">OK</button>
+          <button class="dialog-btn" id="winOk">OK</button>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-// ============================================================
-// GAME STATE
-// ============================================================
-const DIFFS = {
-    beginner:     { rows: 9,  cols: 9,  mines: 10 },
-    intermediate: { rows: 16, cols: 16, mines: 40 },
-    expert:       { rows: 16, cols: 30, mines: 99 }
-};
+    <script>
+      // ============================================================
+      // GAME STATE
+      // ============================================================
+      const DIFFS = {
+        beginner: { rows: 9, cols: 9, mines: 10 },
+        intermediate: { rows: 16, cols: 16, mines: 40 },
+        expert: { rows: 16, cols: 30, mines: 99 },
+      };
 
-let state = {
-    diff: 'beginner',
-    rows: 9, cols: 9, mines: 10,
-    board: [],       // 2D array of cell objects
-    gamePhase: 'idle',  // idle | playing | won | lost
-    firstClick: true,
-    flagCount: 0,
-    timerVal: 0,
-    timerInterval: null,
-    useMarks: true,
-    mouseDown: false,
-    pressedCell: null
-};
+      let state = {
+        diff: 'beginner',
+        rows: 9,
+        cols: 9,
+        mines: 10,
+        board: [], // 2D array of cell objects
+        gamePhase: 'idle', // idle | playing | won | lost
+        firstClick: true,
+        flagCount: 0,
+        timerVal: 0,
+        timerInterval: null,
+        useMarks: true,
+        mouseDown: false,
+        pressedCell: null,
+      };
 
-// Best times storage
-function loadBestTimes() {
-    try {
-        return JSON.parse(localStorage.getItem('ms_best') || '{}');
-    } catch { return {}; }
-}
-function saveBestTimes(bt) {
-    localStorage.setItem('ms_best', JSON.stringify(bt));
-}
+      // Best times storage
+      function loadBestTimes() {
+        try {
+          return JSON.parse(localStorage.getItem('ms_best') || '{}');
+        } catch {
+          return {};
+        }
+      }
+      function saveBestTimes(bt) {
+        localStorage.setItem('ms_best', JSON.stringify(bt));
+      }
 
-// ============================================================
-// 7-SEGMENT LED RENDERING
-// ============================================================
-// Segment map for digits 0-9 and '-'
-// Segments: a=top, b=top-right, c=bot-right, d=bottom, e=bot-left, f=top-left, g=middle
-const SEG_MAP = {
-    '0': [1,1,1,1,1,1,0],
-    '1': [0,1,1,0,0,0,0],
-    '2': [1,1,0,1,1,0,1],
-    '3': [1,1,1,1,0,0,1],
-    '4': [0,1,1,0,0,1,1],
-    '5': [1,0,1,1,0,1,1],
-    '6': [1,0,1,1,1,1,1],
-    '7': [1,1,1,0,0,0,0],
-    '8': [1,1,1,1,1,1,1],
-    '9': [1,1,1,1,0,1,1],
-    '-': [0,0,0,0,0,0,1]
-};
+      // ============================================================
+      // 7-SEGMENT LED RENDERING
+      // ============================================================
+      // Segment map for digits 0-9 and '-'
+      // Segments: a=top, b=top-right, c=bot-right, d=bottom, e=bot-left, f=top-left, g=middle
+      const SEG_MAP = {
+        0: [1, 1, 1, 1, 1, 1, 0],
+        1: [0, 1, 1, 0, 0, 0, 0],
+        2: [1, 1, 0, 1, 1, 0, 1],
+        3: [1, 1, 1, 1, 0, 0, 1],
+        4: [0, 1, 1, 0, 0, 1, 1],
+        5: [1, 0, 1, 1, 0, 1, 1],
+        6: [1, 0, 1, 1, 1, 1, 1],
+        7: [1, 1, 1, 0, 0, 0, 0],
+        8: [1, 1, 1, 1, 1, 1, 1],
+        9: [1, 1, 1, 1, 0, 1, 1],
+        '-': [0, 0, 0, 0, 0, 0, 1],
+      };
 
-function drawSegDigit(ctx, ch, x, y, w, h) {
-    const ON  = '#ff2200';
-    const OFF = '#3d0800';
-    const sw  = 2;  // segment width
-    const gap = 1;  // gap between segments and border
+      function drawSegDigit(ctx, ch, x, y, w, h) {
+        const ON = '#ff2200';
+        const OFF = '#3d0800';
+        const sw = 2; // segment width
+        const gap = 1; // gap between segments and border
 
-    const segs = SEG_MAP[ch] || [0,0,0,0,0,0,0];
-    const [a,b,c,d,e,f,g] = segs;
+        const segs = SEG_MAP[ch] || [0, 0, 0, 0, 0, 0, 0];
+        const [a, b, c, d, e, f, g] = segs;
 
-    const x1 = x + gap + sw;
-    const x2 = x + w - gap - sw;
-    const y1 = y + gap;
-    const y2 = y + h/2;
-    const y3 = y + h - gap;
+        const x1 = x + gap + sw;
+        const x2 = x + w - gap - sw;
+        const y1 = y + gap;
+        const y2 = y + h / 2;
+        const y3 = y + h - gap;
 
-    const drawSeg = (on, pts) => {
-        ctx.fillStyle = on ? ON : OFF;
+        const drawSeg = (on, pts) => {
+          ctx.fillStyle = on ? ON : OFF;
+          ctx.beginPath();
+          ctx.moveTo(...pts[0]);
+          for (let i = 1; i < pts.length; i++) ctx.lineTo(...pts[i]);
+          ctx.closePath();
+          ctx.fill();
+        };
+
+        // a - top horizontal
+        drawSeg(a, [
+          [x1, y1],
+          [x2, y1],
+          [x2 - sw / 2, y1 + sw],
+          [x1 + sw / 2, y1 + sw],
+        ]);
+        // b - top-right vertical
+        drawSeg(b, [
+          [x2, y1 + gap],
+          [x2, y2 - gap],
+          [x2 - sw, y2 - gap - sw / 2],
+          [x2 - sw, y1 + gap + sw / 2],
+        ]);
+        // c - bot-right vertical
+        drawSeg(c, [
+          [x2, y2 + gap],
+          [x2, y3 - gap],
+          [x2 - sw, y3 - gap - sw / 2],
+          [x2 - sw, y2 + gap + sw / 2],
+        ]);
+        // d - bottom horizontal
+        drawSeg(d, [
+          [x1, y3],
+          [x2, y3],
+          [x2 - sw / 2, y3 - sw],
+          [x1 + sw / 2, y3 - sw],
+        ]);
+        // e - bot-left vertical
+        drawSeg(e, [
+          [x + gap, y2 + gap],
+          [x + gap, y3 - gap],
+          [x + gap + sw, y3 - gap - sw / 2],
+          [x + gap + sw, y2 + gap + sw / 2],
+        ]);
+        // f - top-left vertical
+        drawSeg(f, [
+          [x + gap, y1 + gap],
+          [x + gap, y2 - gap],
+          [x + gap + sw, y2 - gap - sw / 2],
+          [x + gap + sw, y1 + gap + sw / 2],
+        ]);
+        // g - middle horizontal
+        drawSeg(g, [
+          [x1, y2 - sw / 2],
+          [x2, y2 - sw / 2],
+          [x2 - sw / 2, y2 + sw / 2],
+          [x1 + sw / 2, y2 + sw / 2],
+        ]);
+      }
+
+      function renderLED(canvas, value, minDigits = 3) {
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width,
+          H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, W, H);
+
+        let str = String(Math.abs(Math.min(999, Math.max(-99, value))));
+        if (value < 0) {
+          str = '-' + str;
+          if (str.length < minDigits) str = str.padStart(minDigits, '-');
+        } else {
+          str = str.padStart(minDigits, '0');
+        }
+        str = str.slice(-minDigits); // clamp to 3 chars
+
+        const dw = Math.floor((W - 2) / minDigits);
+        const dh = H - 2;
+        for (let i = 0; i < minDigits; i++) {
+          drawSegDigit(ctx, str[i] || '0', 1 + i * dw, 1, dw, dh);
+        }
+      }
+
+      // ============================================================
+      // FACE DRAWING
+      // ============================================================
+      const FACE_STATES = {
+        smile: { eyes: 'open', mouth: 'smile', glasses: false, x: false },
+        wow: { eyes: 'open', mouth: 'wow', glasses: false, x: false },
+        cool: { eyes: 'open', mouth: 'smile', glasses: true, x: false },
+        dead: { eyes: 'open', mouth: 'frown', glasses: false, x: true },
+      };
+
+      function drawFace(canvas, faceType) {
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width,
+          H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const cx = W / 2,
+          cy = H / 2,
+          r = W / 2 - 1;
+
+        // Face circle
         ctx.beginPath();
-        ctx.moveTo(...pts[0]);
-        for (let i = 1; i < pts.length; i++) ctx.lineTo(...pts[i]);
-        ctx.closePath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffff00';
         ctx.fill();
-    };
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-    // a - top horizontal
-    drawSeg(a, [[x1,y1],[x2,y1],[x2-sw/2,y1+sw],[x1+sw/2,y1+sw]]);
-    // b - top-right vertical
-    drawSeg(b, [[x2,y1+gap],[x2,y2-gap],[x2-sw,y2-gap-sw/2],[x2-sw,y1+gap+sw/2]]);
-    // c - bot-right vertical
-    drawSeg(c, [[x2,y2+gap],[x2,y3-gap],[x2-sw,y3-gap-sw/2],[x2-sw,y2+gap+sw/2]]);
-    // d - bottom horizontal
-    drawSeg(d, [[x1,y3],[x2,y3],[x2-sw/2,y3-sw],[x1+sw/2,y3-sw]]);
-    // e - bot-left vertical
-    drawSeg(e, [[x+gap,y2+gap],[x+gap,y3-gap],[x+gap+sw,y3-gap-sw/2],[x+gap+sw,y2+gap+sw/2]]);
-    // f - top-left vertical
-    drawSeg(f, [[x+gap,y1+gap],[x+gap,y2-gap],[x+gap+sw,y2-gap-sw/2],[x+gap+sw,y1+gap+sw/2]]);
-    // g - middle horizontal
-    drawSeg(g, [[x1,y2-sw/2],[x2,y2-sw/2],[x2-sw/2,y2+sw/2],[x1+sw/2,y2+sw/2]]);
-}
+        const f = FACE_STATES[faceType] || FACE_STATES.smile;
 
-function renderLED(canvas, value, minDigits = 3) {
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, W, H);
-
-    let str = String(Math.abs(Math.min(999, Math.max(-99, value))));
-    if (value < 0) {
-        str = '-' + str;
-        if (str.length < minDigits) str = str.padStart(minDigits, '-');
-    } else {
-        str = str.padStart(minDigits, '0');
-    }
-    str = str.slice(-minDigits); // clamp to 3 chars
-
-    const dw = Math.floor((W - 2) / minDigits);
-    const dh = H - 2;
-    for (let i = 0; i < minDigits; i++) {
-        drawSegDigit(ctx, str[i] || '0', 1 + i * dw, 1, dw, dh);
-    }
-}
-
-// ============================================================
-// FACE DRAWING
-// ============================================================
-const FACE_STATES = {
-    smile:    { eyes: 'open', mouth: 'smile', glasses: false, x: false },
-    wow:      { eyes: 'open', mouth: 'wow',   glasses: false, x: false },
-    cool:     { eyes: 'open', mouth: 'smile', glasses: true,  x: false },
-    dead:     { eyes: 'open', mouth: 'frown', glasses: false, x: true  }
-};
-
-function drawFace(canvas, faceType) {
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    const cx = W / 2, cy = H / 2, r = W / 2 - 1;
-
-    // Face circle
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffff00';
-    ctx.fill();
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    const f = FACE_STATES[faceType] || FACE_STATES.smile;
-
-    // Eyes
-    if (f.x) {
-        // X eyes
-        const drawX = (ex, ey) => {
+        // Eyes
+        if (f.x) {
+          // X eyes
+          const drawX = (ex, ey) => {
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(ex - 2, ey - 2); ctx.lineTo(ex + 2, ey + 2);
-            ctx.moveTo(ex + 2, ey - 2); ctx.lineTo(ex - 2, ey + 2);
+            ctx.moveTo(ex - 2, ey - 2);
+            ctx.lineTo(ex + 2, ey + 2);
+            ctx.moveTo(ex + 2, ey - 2);
+            ctx.lineTo(ex - 2, ey + 2);
             ctx.stroke();
-        };
-        drawX(cx - 3.5, cy - 2.5);
-        drawX(cx + 3.5, cy - 2.5);
-    } else if (f.glasses) {
-        // Cool sunglasses
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.roundRect(cx - 7, cy - 4.5, 5.5, 4, 1);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.roundRect(cx + 1.5, cy - 4.5, 5.5, 4, 1);
-        ctx.fill();
-        // Bridge
-        ctx.beginPath();
-        ctx.moveTo(cx - 1.5, cy - 2.5); ctx.lineTo(cx + 1.5, cy - 2.5);
-        ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-        ctx.stroke();
-        // Sides
-        ctx.beginPath();
-        ctx.moveTo(cx - 7, cy - 2.5); ctx.lineTo(cx - 8.5, cy - 1);
-        ctx.moveTo(cx + 7, cy - 2.5); ctx.lineTo(cx + 8.5, cy - 1);
-        ctx.stroke();
-    } else {
-        // Normal eyes
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(cx - 3.5, cy - 2.5, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(cx + 3.5, cy - 2.5, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
+          };
+          drawX(cx - 3.5, cy - 2.5);
+          drawX(cx + 3.5, cy - 2.5);
+        } else if (f.glasses) {
+          // Cool sunglasses
+          ctx.fillStyle = '#000';
+          ctx.beginPath();
+          ctx.roundRect(cx - 7, cy - 4.5, 5.5, 4, 1);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.roundRect(cx + 1.5, cy - 4.5, 5.5, 4, 1);
+          ctx.fill();
+          // Bridge
+          ctx.beginPath();
+          ctx.moveTo(cx - 1.5, cy - 2.5);
+          ctx.lineTo(cx + 1.5, cy - 2.5);
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          // Sides
+          ctx.beginPath();
+          ctx.moveTo(cx - 7, cy - 2.5);
+          ctx.lineTo(cx - 8.5, cy - 1);
+          ctx.moveTo(cx + 7, cy - 2.5);
+          ctx.lineTo(cx + 8.5, cy - 1);
+          ctx.stroke();
+        } else {
+          // Normal eyes
+          ctx.fillStyle = '#000';
+          ctx.beginPath();
+          ctx.arc(cx - 3.5, cy - 2.5, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(cx + 3.5, cy - 2.5, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-    // Mouth
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
-    if (f.mouth === 'smile') {
-        ctx.beginPath();
-        ctx.arc(cx, cy + 0.5, 4.5, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-    } else if (f.mouth === 'wow') {
-        ctx.beginPath();
-        ctx.arc(cx, cy + 3, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#000';
-        ctx.fill();
-    } else if (f.mouth === 'frown') {
-        ctx.beginPath();
-        ctx.arc(cx, cy + 6, 4.5, Math.PI + 0.2, -0.2);
-        ctx.stroke();
-    }
-}
+        // Mouth
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        if (f.mouth === 'smile') {
+          ctx.beginPath();
+          ctx.arc(cx, cy + 0.5, 4.5, 0.2, Math.PI - 0.2);
+          ctx.stroke();
+        } else if (f.mouth === 'wow') {
+          ctx.beginPath();
+          ctx.arc(cx, cy + 3, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#000';
+          ctx.fill();
+        } else if (f.mouth === 'frown') {
+          ctx.beginPath();
+          ctx.arc(cx, cy + 6, 4.5, Math.PI + 0.2, -0.2);
+          ctx.stroke();
+        }
+      }
 
-// ============================================================
-// MINE & FLAG SPRITES (drawn on cells)
-// ============================================================
-function createMineCanvas(exploded) {
-    const c = document.createElement('canvas');
-    c.width = 12; c.height = 12;
-    const ctx = c.getContext('2d');
-    if (exploded) {
+      // ============================================================
+      // MINE & FLAG SPRITES (drawn on cells)
+      // ============================================================
+      function createMineCanvas(exploded) {
+        const c = document.createElement('canvas');
+        c.width = 12;
+        c.height = 12;
+        const ctx = c.getContext('2d');
+        if (exploded) {
+          ctx.fillStyle = '#ff0000';
+          ctx.fillRect(0, 0, 12, 12);
+        }
+        // Mine body
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(6, 6, 4, 0, Math.PI * 2);
+        ctx.fill();
+        // Spikes
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        const spikes = [
+          [6, 1],
+          [6, 11],
+          [1, 6],
+          [11, 6],
+          [2, 2],
+          [10, 10],
+          [10, 2],
+          [2, 10],
+        ];
+        spikes.forEach(([ex, ey]) => {
+          ctx.beginPath();
+          ctx.moveTo(6, 6);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+        });
+        // Shine
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(4.5, 4, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        return c;
+      }
+
+      function createFlagCanvas() {
+        const c = document.createElement('canvas');
+        c.width = 12;
+        c.height = 12;
+        const ctx = c.getContext('2d');
+        // Pole
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(6, 10);
+        ctx.lineTo(6, 2);
+        ctx.stroke();
+        // Base
+        ctx.beginPath();
+        ctx.moveTo(3, 10);
+        ctx.lineTo(9, 10);
+        ctx.stroke();
+        // Flag
         ctx.fillStyle = '#ff0000';
-        ctx.fillRect(0, 0, 12, 12);
-    }
-    // Mine body
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(6, 6, 4, 0, Math.PI * 2);
-    ctx.fill();
-    // Spikes
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
-    const spikes = [[6,1],[6,11],[1,6],[11,6],[2,2],[10,10],[10,2],[2,10]];
-    spikes.forEach(([ex, ey]) => {
         ctx.beginPath();
-        ctx.moveTo(6, 6);
-        ctx.lineTo(ex, ey);
+        ctx.moveTo(6, 2);
+        ctx.lineTo(10, 4.5);
+        ctx.lineTo(6, 7);
+        ctx.closePath();
+        ctx.fill();
+        return c;
+      }
+
+      function createWrongFlagCanvas() {
+        const c = document.createElement('canvas');
+        c.width = 12;
+        c.height = 12;
+        const ctx = c.getContext('2d');
+        // Draw mine first (dimmed)
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(6, 6, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // Red X
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(1, 1);
+        ctx.lineTo(11, 11);
+        ctx.moveTo(11, 1);
+        ctx.lineTo(1, 11);
         ctx.stroke();
-    });
-    // Shine
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(4.5, 4, 1.2, 0, Math.PI * 2);
-    ctx.fill();
-    return c;
-}
+        return c;
+      }
 
-function createFlagCanvas() {
-    const c = document.createElement('canvas');
-    c.width = 12; c.height = 12;
-    const ctx = c.getContext('2d');
-    // Pole
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(6, 10); ctx.lineTo(6, 2);
-    ctx.stroke();
-    // Base
-    ctx.beginPath();
-    ctx.moveTo(3, 10); ctx.lineTo(9, 10);
-    ctx.stroke();
-    // Flag
-    ctx.fillStyle = '#ff0000';
-    ctx.beginPath();
-    ctx.moveTo(6, 2); ctx.lineTo(10, 4.5); ctx.lineTo(6, 7);
-    ctx.closePath();
-    ctx.fill();
-    return c;
-}
+      // Cache canvases
+      const MINE_CANVAS = createMineCanvas(false);
+      const MINE_EXPLODED_CANVAS = createMineCanvas(true);
+      const FLAG_CANVAS = createFlagCanvas();
+      const WRONG_FLAG_CANVAS = createWrongFlagCanvas();
 
-function createWrongFlagCanvas() {
-    const c = document.createElement('canvas');
-    c.width = 12; c.height = 12;
-    const ctx = c.getContext('2d');
-    // Draw mine first (dimmed)
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(6, 6, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    // Red X
-    ctx.strokeStyle = '#ff0000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(1, 1); ctx.lineTo(11, 11);
-    ctx.moveTo(11, 1); ctx.lineTo(1, 11);
-    ctx.stroke();
-    return c;
-}
+      function drawCellContent(cellEl, cellData, isTriggered) {
+        // Clear previous content
+        cellEl.innerHTML = '';
+        cellEl.className = 'cell';
+        cellEl.removeAttribute('data-num');
 
-// Cache canvases
-const MINE_CANVAS = createMineCanvas(false);
-const MINE_EXPLODED_CANVAS = createMineCanvas(true);
-const FLAG_CANVAS = createFlagCanvas();
-const WRONG_FLAG_CANVAS = createWrongFlagCanvas();
-
-function drawCellContent(cellEl, cellData, isTriggered) {
-    // Clear previous content
-    cellEl.innerHTML = '';
-    cellEl.className = 'cell';
-    cellEl.removeAttribute('data-num');
-
-    if (!cellData.revealed) {
-        if (cellData.wrongFlag) {
+        if (!cellData.revealed) {
+          if (cellData.wrongFlag) {
             const img = WRONG_FLAG_CANVAS.cloneNode();
             WRONG_FLAG_CANVAS.getContext('2d'); // ensure drawn
             copyCanvas(WRONG_FLAG_CANVAS, img);
             cellEl.appendChild(img);
             cellEl.classList.add('revealed');
-        } else if (cellData.flagged) {
+          } else if (cellData.flagged) {
             const img = FLAG_CANVAS.cloneNode();
             copyCanvas(FLAG_CANVAS, img);
             cellEl.appendChild(img);
-        } else if (cellData.questioned) {
+          } else if (cellData.questioned) {
             cellEl.textContent = '?';
             cellEl.style.color = '#000';
+          }
+          return;
         }
-        return;
-    }
 
-    cellEl.classList.add('revealed');
+        cellEl.classList.add('revealed');
 
-    if (cellData.mine) {
-        const src = isTriggered ? MINE_EXPLODED_CANVAS : MINE_CANVAS;
-        const img = src.cloneNode();
-        copyCanvas(src, img);
-        cellEl.appendChild(img);
-        if (isTriggered) cellEl.style.background = '#ff0000';
-    } else if (cellData.adjacentMines > 0) {
-        cellEl.textContent = cellData.adjacentMines;
-        cellEl.setAttribute('data-num', cellData.adjacentMines);
-        cellEl.classList.add('n' + cellData.adjacentMines);
-    }
-}
+        if (cellData.mine) {
+          const src = isTriggered ? MINE_EXPLODED_CANVAS : MINE_CANVAS;
+          const img = src.cloneNode();
+          copyCanvas(src, img);
+          cellEl.appendChild(img);
+          if (isTriggered) cellEl.style.background = '#ff0000';
+        } else if (cellData.adjacentMines > 0) {
+          cellEl.textContent = cellData.adjacentMines;
+          cellEl.setAttribute('data-num', cellData.adjacentMines);
+          cellEl.classList.add('n' + cellData.adjacentMines);
+        }
+      }
 
-function copyCanvas(src, dst) {
-    dst.width = src.width;
-    dst.height = src.height;
-    dst.getContext('2d').drawImage(src, 0, 0);
-}
+      function copyCanvas(src, dst) {
+        dst.width = src.width;
+        dst.height = src.height;
+        dst.getContext('2d').drawImage(src, 0, 0);
+      }
 
-// ============================================================
-// BOARD RENDERING
-// ============================================================
-function renderBoard() {
-    const boardEl = document.getElementById('board');
-    boardEl.style.gridTemplateColumns = `repeat(${state.cols}, 16px)`;
-    boardEl.innerHTML = '';
+      // ============================================================
+      // BOARD RENDERING
+      // ============================================================
+      function renderBoard() {
+        const boardEl = document.getElementById('board');
+        boardEl.style.gridTemplateColumns = `repeat(${state.cols}, 16px)`;
+        boardEl.innerHTML = '';
 
-    for (let r = 0; r < state.rows; r++) {
-        for (let c = 0; c < state.cols; c++) {
+        for (let r = 0; r < state.rows; r++) {
+          for (let c = 0; c < state.cols; c++) {
             const cell = document.createElement('div');
             cell.dataset.r = r;
             cell.dataset.c = c;
@@ -866,574 +969,588 @@ function renderBoard() {
             cell.addEventListener('contextmenu', onCellRightClick);
             cell.addEventListener('mouseenter', onCellEnter);
             boardEl.appendChild(cell);
+          }
         }
-    }
-    updateAllCells();
-}
+        updateAllCells();
+      }
 
-function updateAllCells(triggeredR, triggeredC) {
-    const boardEl = document.getElementById('board');
-    const cells = boardEl.querySelectorAll('.cell');
-    cells.forEach(cellEl => {
-        const r = parseInt(cellEl.dataset.r);
-        const c = parseInt(cellEl.dataset.c);
-        const isTriggered = (r === triggeredR && c === triggeredC);
-        drawCellContent(cellEl, state.board[r][c], isTriggered);
-    });
-}
+      function updateAllCells(triggeredR, triggeredC) {
+        const boardEl = document.getElementById('board');
+        const cells = boardEl.querySelectorAll('.cell');
+        cells.forEach((cellEl) => {
+          const r = parseInt(cellEl.dataset.r);
+          const c = parseInt(cellEl.dataset.c);
+          const isTriggered = r === triggeredR && c === triggeredC;
+          drawCellContent(cellEl, state.board[r][c], isTriggered);
+        });
+      }
 
-function updateCell(r, c, triggeredR, triggeredC) {
-    const boardEl = document.getElementById('board');
-    const cellEl = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-    if (cellEl) {
-        const isTriggered = (r === triggeredR && c === triggeredC);
-        drawCellContent(cellEl, state.board[r][c], isTriggered);
-    }
-}
+      function updateCell(r, c, triggeredR, triggeredC) {
+        const boardEl = document.getElementById('board');
+        const cellEl = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+        if (cellEl) {
+          const isTriggered = r === triggeredR && c === triggeredC;
+          drawCellContent(cellEl, state.board[r][c], isTriggered);
+        }
+      }
 
-// ============================================================
-// GAME LOGIC
-// ============================================================
-function initGame(rows, cols, mines, diffName) {
-    clearInterval(state.timerInterval);
-    state.rows = rows;
-    state.cols = cols;
-    state.mines = mines;
-    state.diff = diffName || 'custom';
-    state.board = [];
-    state.gamePhase = 'idle';
-    state.firstClick = true;
-    state.flagCount = 0;
-    state.timerVal = 0;
-    state.pressedCell = null;
-    state.triggeredMine = null;
+      // ============================================================
+      // GAME LOGIC
+      // ============================================================
+      function initGame(rows, cols, mines, diffName) {
+        clearInterval(state.timerInterval);
+        state.rows = rows;
+        state.cols = cols;
+        state.mines = mines;
+        state.diff = diffName || 'custom';
+        state.board = [];
+        state.gamePhase = 'idle';
+        state.firstClick = true;
+        state.flagCount = 0;
+        state.timerVal = 0;
+        state.pressedCell = null;
+        state.triggeredMine = null;
 
-    for (let r = 0; r < rows; r++) {
-        state.board.push([]);
-        for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          state.board.push([]);
+          for (let c = 0; c < cols; c++) {
             state.board[r].push({
-                mine: false,
-                revealed: false,
-                flagged: false,
-                questioned: false,
-                wrongFlag: false,
-                adjacentMines: 0
+              mine: false,
+              revealed: false,
+              flagged: false,
+              questioned: false,
+              wrongFlag: false,
+              adjacentMines: 0,
             });
+          }
         }
-    }
 
-    renderBoard();
-    renderLED(document.getElementById('mineCanvas'), mines);
-    renderLED(document.getElementById('timerCanvas'), 0);
-    updateDifficultyCheck();
-    drawFace(document.getElementById('faceCanvas'), 'smile');
-    notifyParentSize();
-}
+        renderBoard();
+        renderLED(document.getElementById('mineCanvas'), mines);
+        renderLED(document.getElementById('timerCanvas'), 0);
+        updateDifficultyCheck();
+        drawFace(document.getElementById('faceCanvas'), 'smile');
+        notifyParentSize();
+      }
 
-function placeMines(safeR, safeC) {
-    const { rows, cols, mines } = state;
-    let placed = 0;
-    while (placed < mines) {
-        const r = Math.floor(Math.random() * rows);
-        const c = Math.floor(Math.random() * cols);
-        if (!state.board[r][c].mine &&
-            !(Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1)) {
+      function placeMines(safeR, safeC) {
+        const { rows, cols, mines } = state;
+        let placed = 0;
+        while (placed < mines) {
+          const r = Math.floor(Math.random() * rows);
+          const c = Math.floor(Math.random() * cols);
+          if (!state.board[r][c].mine && !(Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1)) {
             state.board[r][c].mine = true;
             placed++;
+          }
         }
-    }
-    // Count adjacents
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+        // Count adjacents
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
             if (!state.board[r][c].mine) {
-                state.board[r][c].adjacentMines = countAdj(r, c);
+              state.board[r][c].adjacentMines = countAdj(r, c);
             }
+          }
         }
-    }
-}
+      }
 
-function countAdj(r, c) {
-    let cnt = 0;
-    for (let dr = -1; dr <= 1; dr++)
-        for (let dc = -1; dc <= 1; dc++) {
+      function countAdj(r, c) {
+        let cnt = 0;
+        for (let dr = -1; dr <= 1; dr++)
+          for (let dc = -1; dc <= 1; dc++) {
             if (dr === 0 && dc === 0) continue;
-            const nr = r + dr, nc = c + dc;
+            const nr = r + dr,
+              nc = c + dc;
             if (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols)
-                if (state.board[nr][nc].mine) cnt++;
-        }
-    return cnt;
-}
+              if (state.board[nr][nc].mine) cnt++;
+          }
+        return cnt;
+      }
 
-function getNeighbors(r, c) {
-    const result = [];
-    for (let dr = -1; dr <= 1; dr++)
-        for (let dc = -1; dc <= 1; dc++) {
+      function getNeighbors(r, c) {
+        const result = [];
+        for (let dr = -1; dr <= 1; dr++)
+          for (let dc = -1; dc <= 1; dc++) {
             if (dr === 0 && dc === 0) continue;
-            const nr = r + dr, nc = c + dc;
-            if (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols)
-                result.push([nr, nc]);
-        }
-    return result;
-}
+            const nr = r + dr,
+              nc = c + dc;
+            if (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols) result.push([nr, nc]);
+          }
+        return result;
+      }
 
-function revealCell(r, c) {
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
-    const cell = state.board[r][c];
-    if (cell.revealed || cell.flagged) return;
-
-    if (state.firstClick) {
-        state.firstClick = false;
-        placeMines(r, c);
-        state.gamePhase = 'playing';
-        startTimer();
-    }
-
-    if (cell.mine) {
-        cell.revealed = true;
-        state.gamePhase = 'lost';
-        state.triggeredMine = [r, c];
-        stopTimer();
-        revealAllMines(r, c);
-        drawFace(document.getElementById('faceCanvas'), 'dead');
-        return;
-    }
-
-    floodReveal(r, c);
-    checkWin();
-}
-
-function floodReveal(startR, startC) {
-    const stack = [[startR, startC]];
-    while (stack.length > 0) {
-        const [r, c] = stack.pop();
+      function revealCell(r, c) {
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
         const cell = state.board[r][c];
-        if (cell.revealed || cell.flagged || cell.mine) continue;
-        cell.revealed = true;
-        if (cell.adjacentMines === 0) {
-            getNeighbors(r, c).forEach(([nr, nc]) => {
-                if (!state.board[nr][nc].revealed) stack.push([nr, nc]);
-            });
+        if (cell.revealed || cell.flagged) return;
+
+        if (state.firstClick) {
+          state.firstClick = false;
+          placeMines(r, c);
+          state.gamePhase = 'playing';
+          startTimer();
         }
-    }
-}
 
-function toggleFlag(r, c) {
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
-    const cell = state.board[r][c];
-    if (cell.revealed) return;
+        if (cell.mine) {
+          cell.revealed = true;
+          state.gamePhase = 'lost';
+          state.triggeredMine = [r, c];
+          stopTimer();
+          revealAllMines(r, c);
+          drawFace(document.getElementById('faceCanvas'), 'dead');
+          return;
+        }
 
-    if (!cell.flagged && !cell.questioned) {
-        cell.flagged = true;
-        state.flagCount++;
-    } else if (cell.flagged) {
-        cell.flagged = false;
-        state.flagCount--;
-        if (state.useMarks !== false) cell.questioned = true;
-    } else if (cell.questioned) {
-        cell.questioned = false;
-    }
+        floodReveal(r, c);
+        checkWin();
+      }
 
-    renderLED(document.getElementById('mineCanvas'), state.mines - state.flagCount);
-    updateCell(r, c);
-}
+      function floodReveal(startR, startC) {
+        const stack = [[startR, startC]];
+        while (stack.length > 0) {
+          const [r, c] = stack.pop();
+          const cell = state.board[r][c];
+          if (cell.revealed || cell.flagged || cell.mine) continue;
+          cell.revealed = true;
+          if (cell.adjacentMines === 0) {
+            getNeighbors(r, c).forEach(([nr, nc]) => {
+              if (!state.board[nr][nc].revealed) stack.push([nr, nc]);
+            });
+          }
+        }
+      }
 
-function chordReveal(r, c) {
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
-    const cell = state.board[r][c];
-    if (!cell.revealed || cell.adjacentMines === 0) return;
+      function toggleFlag(r, c) {
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
+        const cell = state.board[r][c];
+        if (cell.revealed) return;
 
-    const neighbors = getNeighbors(r, c);
-    const flagsAround = neighbors.filter(([nr,nc]) => state.board[nr][nc].flagged).length;
-    if (flagsAround !== cell.adjacentMines) return;
+        if (!cell.flagged && !cell.questioned) {
+          cell.flagged = true;
+          state.flagCount++;
+        } else if (cell.flagged) {
+          cell.flagged = false;
+          state.flagCount--;
+          if (state.useMarks !== false) cell.questioned = true;
+        } else if (cell.questioned) {
+          cell.questioned = false;
+        }
 
-    for (const [nr, nc] of neighbors) {
-        if (!state.board[nr][nc].flagged && !state.board[nr][nc].revealed) {
+        renderLED(document.getElementById('mineCanvas'), state.mines - state.flagCount);
+        updateCell(r, c);
+      }
+
+      function chordReveal(r, c) {
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
+        const cell = state.board[r][c];
+        if (!cell.revealed || cell.adjacentMines === 0) return;
+
+        const neighbors = getNeighbors(r, c);
+        const flagsAround = neighbors.filter(([nr, nc]) => state.board[nr][nc].flagged).length;
+        if (flagsAround !== cell.adjacentMines) return;
+
+        for (const [nr, nc] of neighbors) {
+          if (!state.board[nr][nc].flagged && !state.board[nr][nc].revealed) {
             revealCell(nr, nc);
             if (state.gamePhase === 'lost') return;
+          }
         }
-    }
-}
+      }
 
-function revealAllMines(triggeredR, triggeredC) {
-    for (let r = 0; r < state.rows; r++) {
-        for (let c = 0; c < state.cols; c++) {
+      function revealAllMines(triggeredR, triggeredC) {
+        for (let r = 0; r < state.rows; r++) {
+          for (let c = 0; c < state.cols; c++) {
             const cell = state.board[r][c];
             if (cell.mine && !cell.flagged) cell.revealed = true;
-            if (cell.flagged && !cell.mine) { cell.wrongFlag = true; cell.flagged = false; }
+            if (cell.flagged && !cell.mine) {
+              cell.wrongFlag = true;
+              cell.flagged = false;
+            }
+          }
         }
-    }
-    updateAllCells(triggeredR, triggeredC);
-}
+        updateAllCells(triggeredR, triggeredC);
+      }
 
-function checkWin() {
-    for (let r = 0; r < state.rows; r++)
-        for (let c = 0; c < state.cols; c++) {
+      function checkWin() {
+        for (let r = 0; r < state.rows; r++)
+          for (let c = 0; c < state.cols; c++) {
             const cell = state.board[r][c];
             if (!cell.mine && !cell.revealed) return;
-        }
-    // Won
-    state.gamePhase = 'won';
-    stopTimer();
-    drawFace(document.getElementById('faceCanvas'), 'cool');
-    // Auto-flag remaining mines
-    for (let r = 0; r < state.rows; r++)
-        for (let c = 0; c < state.cols; c++)
+          }
+        // Won
+        state.gamePhase = 'won';
+        stopTimer();
+        drawFace(document.getElementById('faceCanvas'), 'cool');
+        // Auto-flag remaining mines
+        for (let r = 0; r < state.rows; r++)
+          for (let c = 0; c < state.cols; c++)
             if (state.board[r][c].mine) state.board[r][c].flagged = true;
-    renderLED(document.getElementById('mineCanvas'), 0);
-    updateAllCells();
-    checkBestTime();
-}
+        renderLED(document.getElementById('mineCanvas'), 0);
+        updateAllCells();
+        checkBestTime();
+      }
 
-function checkBestTime() {
-    const diff = state.diff;
-    if (!['beginner','intermediate','expert'].includes(diff)) return;
-    const bt = loadBestTimes();
-    const key = diff;
-    if (!bt[key] || state.timerVal < bt[key].time) {
-        // New record
-        document.getElementById('winMsg').textContent =
-            `You have the fastest time for ${diff.charAt(0).toUpperCase()+diff.slice(1)} level. Please enter your name.`;
-        document.getElementById('winName').value = (bt[key] && bt[key].name) || 'Anonymous';
-        document.getElementById('winDialog').classList.add('visible');
-        document.getElementById('winOk').onclick = () => {
+      function checkBestTime() {
+        const diff = state.diff;
+        if (!['beginner', 'intermediate', 'expert'].includes(diff)) return;
+        const bt = loadBestTimes();
+        const key = diff;
+        if (!bt[key] || state.timerVal < bt[key].time) {
+          // New record
+          document.getElementById('winMsg').textContent =
+            `You have the fastest time for ${diff.charAt(0).toUpperCase() + diff.slice(1)} level. Please enter your name.`;
+          document.getElementById('winName').value = (bt[key] && bt[key].name) || 'Anonymous';
+          document.getElementById('winDialog').classList.add('visible');
+          document.getElementById('winOk').onclick = () => {
             const name = document.getElementById('winName').value || 'Anonymous';
             bt[key] = { time: state.timerVal, name };
             saveBestTimes(bt);
             document.getElementById('winDialog').classList.remove('visible');
-        };
-    }
-}
+          };
+        }
+      }
 
-// ============================================================
-// TIMER
-// ============================================================
-function startTimer() {
-    clearInterval(state.timerInterval);
-    state.timerVal = 0;
-    renderLED(document.getElementById('timerCanvas'), 0);
-    state.timerInterval = setInterval(() => {
-        state.timerVal = Math.min(999, state.timerVal + 1);
-        renderLED(document.getElementById('timerCanvas'), state.timerVal);
-    }, 1000);
-}
+      // ============================================================
+      // TIMER
+      // ============================================================
+      function startTimer() {
+        clearInterval(state.timerInterval);
+        state.timerVal = 0;
+        renderLED(document.getElementById('timerCanvas'), 0);
+        state.timerInterval = setInterval(() => {
+          state.timerVal = Math.min(999, state.timerVal + 1);
+          renderLED(document.getElementById('timerCanvas'), state.timerVal);
+        }, 1000);
+      }
 
-function stopTimer() {
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-}
+      function stopTimer() {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
 
-// ============================================================
-// MOUSE EVENTS
-// ============================================================
-function onCellMouseDown(e) {
-    e.preventDefault();
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
-    const r = parseInt(e.currentTarget.dataset.r);
-    const c = parseInt(e.currentTarget.dataset.c);
+      // ============================================================
+      // MOUSE EVENTS
+      // ============================================================
+      function onCellMouseDown(e) {
+        e.preventDefault();
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
+        const r = parseInt(e.currentTarget.dataset.r);
+        const c = parseInt(e.currentTarget.dataset.c);
 
-    if (e.button === 0) {
-        state.mouseDown = true;
-        const cell = state.board[r][c];
-        if (!cell.revealed && !cell.flagged) {
+        if (e.button === 0) {
+          state.mouseDown = true;
+          const cell = state.board[r][c];
+          if (!cell.revealed && !cell.flagged) {
             state.pressedCell = [r, c];
             e.currentTarget.classList.add('pressed-look');
-        } else if (cell.revealed && cell.adjacentMines > 0) {
+          } else if (cell.revealed && cell.adjacentMines > 0) {
             // Chord press - highlight neighbors
             state.pressedCell = [r, c];
             highlightNeighbors(r, c, true);
+          }
+          drawFace(document.getElementById('faceCanvas'), 'wow');
+        } else if (e.button === 2) {
+          toggleFlag(r, c);
         }
-        drawFace(document.getElementById('faceCanvas'), 'wow');
-    } else if (e.button === 2) {
-        toggleFlag(r, c);
-    }
-}
+      }
 
-function onCellMouseUp(e) {
-    if (e.button !== 0) return;
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') {
-        state.mouseDown = false;
-        state.pressedCell = null;
-        return;
-    }
-    const r = parseInt(e.currentTarget.dataset.r);
-    const c = parseInt(e.currentTarget.dataset.c);
+      function onCellMouseUp(e) {
+        if (e.button !== 0) return;
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') {
+          state.mouseDown = false;
+          state.pressedCell = null;
+          return;
+        }
+        const r = parseInt(e.currentTarget.dataset.r);
+        const c = parseInt(e.currentTarget.dataset.c);
 
-    if (state.pressedCell) {
-        const [pr, pc] = state.pressedCell;
-        // Unhighlight
-        if (state.board[pr][pc].revealed) {
+        if (state.pressedCell) {
+          const [pr, pc] = state.pressedCell;
+          // Unhighlight
+          if (state.board[pr][pc].revealed) {
             highlightNeighbors(pr, pc, false);
-        } else {
+          } else {
             e.currentTarget.classList.remove('pressed-look');
-        }
+          }
 
-        if (pr === r && pc === c) {
+          if (pr === r && pc === c) {
             const cell = state.board[r][c];
             if (cell.revealed) {
-                chordReveal(r, c);
+              chordReveal(r, c);
             } else {
-                revealCell(r, c);
+              revealCell(r, c);
             }
+          }
+          state.pressedCell = null;
         }
-        state.pressedCell = null;
-    }
 
-    state.mouseDown = false;
-    if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
-        drawFace(document.getElementById('faceCanvas'), 'smile');
-    }
-    updateAllCells(...(state.triggeredMine || []));
-}
+        state.mouseDown = false;
+        if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
+          drawFace(document.getElementById('faceCanvas'), 'smile');
+        }
+        updateAllCells(...(state.triggeredMine || []));
+      }
 
-function onCellEnter(e) {
-    if (!state.mouseDown || !state.pressedCell) return;
-    if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
-    const r = parseInt(e.currentTarget.dataset.r);
-    const c = parseInt(e.currentTarget.dataset.c);
-    const [pr, pc] = state.pressedCell;
+      function onCellEnter(e) {
+        if (!state.mouseDown || !state.pressedCell) return;
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
+        const r = parseInt(e.currentTarget.dataset.r);
+        const c = parseInt(e.currentTarget.dataset.c);
+        const [pr, pc] = state.pressedCell;
 
-    // If moved to a different cell while pressing, un-press old, press new
-    const oldCell = state.board[pr][pc];
-    if (!oldCell.revealed) {
-        const oldEl = document.querySelector(`[data-r="${pr}"][data-c="${pc}"]`);
-        if (oldEl) oldEl.classList.remove('pressed-look');
-    }
+        // If moved to a different cell while pressing, un-press old, press new
+        const oldCell = state.board[pr][pc];
+        if (!oldCell.revealed) {
+          const oldEl = document.querySelector(`[data-r="${pr}"][data-c="${pc}"]`);
+          if (oldEl) oldEl.classList.remove('pressed-look');
+        }
 
-    const newCell = state.board[r][c];
-    if (!newCell.revealed && !newCell.flagged) {
-        e.currentTarget.classList.add('pressed-look');
-    }
-    state.pressedCell = [r, c];
-}
+        const newCell = state.board[r][c];
+        if (!newCell.revealed && !newCell.flagged) {
+          e.currentTarget.classList.add('pressed-look');
+        }
+        state.pressedCell = [r, c];
+      }
 
-function onCellRightClick(e) {
-    e.preventDefault();
-}
+      function onCellRightClick(e) {
+        e.preventDefault();
+      }
 
-function highlightNeighbors(r, c, pressed) {
-    getNeighbors(r, c).forEach(([nr, nc]) => {
-        const cell = state.board[nr][nc];
-        if (!cell.revealed && !cell.flagged) {
+      function highlightNeighbors(r, c, pressed) {
+        getNeighbors(r, c).forEach(([nr, nc]) => {
+          const cell = state.board[nr][nc];
+          if (!cell.revealed && !cell.flagged) {
             const el = document.querySelector(`[data-r="${nr}"][data-c="${nc}"]`);
             if (el) {
-                if (pressed) el.classList.add('pressed-look');
-                else el.classList.remove('pressed-look');
+              if (pressed) el.classList.add('pressed-look');
+              else el.classList.remove('pressed-look');
             }
-        }
-    });
-}
+          }
+        });
+      }
 
-// Global mouse up (in case released outside cell)
-document.addEventListener('mouseup', (e) => {
-    if (e.button === 0 && state.mouseDown) {
-        state.mouseDown = false;
-        if (state.pressedCell) {
+      // Global mouse up (in case released outside cell)
+      document.addEventListener('mouseup', (e) => {
+        if (e.button === 0 && state.mouseDown) {
+          state.mouseDown = false;
+          if (state.pressedCell) {
             const [pr, pc] = state.pressedCell;
             if (state.board[pr][pc] && !state.board[pr][pc].revealed) {
-                const oldEl = document.querySelector(`[data-r="${pr}"][data-c="${pc}"]`);
-                if (oldEl) oldEl.classList.remove('pressed-look');
+              const oldEl = document.querySelector(`[data-r="${pr}"][data-c="${pc}"]`);
+              if (oldEl) oldEl.classList.remove('pressed-look');
             } else if (state.board[pr][pc] && state.board[pr][pc].revealed) {
-                highlightNeighbors(pr, pc, false);
+              highlightNeighbors(pr, pc, false);
             }
             state.pressedCell = null;
-        }
-        if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
+          }
+          if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
             drawFace(document.getElementById('faceCanvas'), 'smile');
+          }
         }
-    }
-});
+      });
 
-// ============================================================
-// FACE BUTTON
-// ============================================================
-document.getElementById('faceBtn').addEventListener('mousedown', () => {
-    document.getElementById('faceBtn').classList.add('pressed');
-});
-document.getElementById('faceBtn').addEventListener('mouseup', () => {
-    document.getElementById('faceBtn').classList.remove('pressed');
-    const { rows, cols, mines, diff } = state;
-    initGame(rows, cols, mines, diff);
-});
-document.getElementById('faceBtn').addEventListener('mouseleave', () => {
-    document.getElementById('faceBtn').classList.remove('pressed');
-});
-
-// ============================================================
-// KEYBOARD SHORTCUTS
-// ============================================================
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'F2') {
+      // ============================================================
+      // FACE BUTTON
+      // ============================================================
+      document.getElementById('faceBtn').addEventListener('mousedown', () => {
+        document.getElementById('faceBtn').classList.add('pressed');
+      });
+      document.getElementById('faceBtn').addEventListener('mouseup', () => {
+        document.getElementById('faceBtn').classList.remove('pressed');
         const { rows, cols, mines, diff } = state;
         initGame(rows, cols, mines, diff);
-    }
-});
+      });
+      document.getElementById('faceBtn').addEventListener('mouseleave', () => {
+        document.getElementById('faceBtn').classList.remove('pressed');
+      });
 
-// ============================================================
-// MENU LOGIC
-// ============================================================
-function closeAllMenus() {
-    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('open'));
-}
+      // ============================================================
+      // KEYBOARD SHORTCUTS
+      // ============================================================
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') {
+          const { rows, cols, mines, diff } = state;
+          initGame(rows, cols, mines, diff);
+        }
+      });
 
-document.getElementById('menuBar').addEventListener('click', (e) => {
-    const menuItem = e.target.closest('.menu-item');
-    if (!menuItem) { closeAllMenus(); return; }
-    const wasOpen = menuItem.classList.contains('open');
-    closeAllMenus();
-    if (!wasOpen) menuItem.classList.add('open');
-    e.stopPropagation();
-});
+      // ============================================================
+      // MENU LOGIC
+      // ============================================================
+      function closeAllMenus() {
+        document.querySelectorAll('.menu-item').forEach((m) => m.classList.remove('open'));
+      }
 
-document.addEventListener('click', closeAllMenus);
+      document.getElementById('menuBar').addEventListener('click', (e) => {
+        const menuItem = e.target.closest('.menu-item');
+        if (!menuItem) {
+          closeAllMenus();
+          return;
+        }
+        const wasOpen = menuItem.classList.contains('open');
+        closeAllMenus();
+        if (!wasOpen) menuItem.classList.add('open');
+        e.stopPropagation();
+      });
 
-document.getElementById('menuNew').addEventListener('click', () => {
-    closeAllMenus();
-    const { rows, cols, mines, diff } = state;
-    initGame(rows, cols, mines, diff);
-});
+      document.addEventListener('click', closeAllMenus);
 
-function setDiff(name) {
-    closeAllMenus();
-    const d = DIFFS[name];
-    initGame(d.rows, d.cols, d.mines, name);
-}
+      document.getElementById('menuNew').addEventListener('click', () => {
+        closeAllMenus();
+        const { rows, cols, mines, diff } = state;
+        initGame(rows, cols, mines, diff);
+      });
 
-document.getElementById('menuBeginner').addEventListener('click', () => setDiff('beginner'));
-document.getElementById('menuIntermediate').addEventListener('click', () => setDiff('intermediate'));
-document.getElementById('menuExpert').addEventListener('click', () => setDiff('expert'));
+      function setDiff(name) {
+        closeAllMenus();
+        const d = DIFFS[name];
+        initGame(d.rows, d.cols, d.mines, name);
+      }
 
-document.getElementById('menuCustom').addEventListener('click', () => {
-    closeAllMenus();
-    document.getElementById('customRows').value = state.rows;
-    document.getElementById('customCols').value = state.cols;
-    document.getElementById('customMines').value = state.mines;
-    document.getElementById('customDialog').classList.add('visible');
-});
+      document.getElementById('menuBeginner').addEventListener('click', () => setDiff('beginner'));
+      document
+        .getElementById('menuIntermediate')
+        .addEventListener('click', () => setDiff('intermediate'));
+      document.getElementById('menuExpert').addEventListener('click', () => setDiff('expert'));
 
-document.getElementById('menuMarks').addEventListener('click', () => {
-    closeAllMenus();
-    state.useMarks = !state.useMarks;
-    document.getElementById('menuMarks').classList.toggle('checked', state.useMarks);
-});
+      document.getElementById('menuCustom').addEventListener('click', () => {
+        closeAllMenus();
+        document.getElementById('customRows').value = state.rows;
+        document.getElementById('customCols').value = state.cols;
+        document.getElementById('customMines').value = state.mines;
+        document.getElementById('customDialog').classList.add('visible');
+      });
 
-document.getElementById('menuBestTimes').addEventListener('click', () => {
-    closeAllMenus();
-    showBestTimes();
-});
+      document.getElementById('menuMarks').addEventListener('click', () => {
+        closeAllMenus();
+        state.useMarks = !state.useMarks;
+        document.getElementById('menuMarks').classList.toggle('checked', state.useMarks);
+      });
 
-document.getElementById('menuAbout').addEventListener('click', () => {
-    closeAllMenus();
-    document.getElementById('aboutDialog').classList.add('visible');
-});
+      document.getElementById('menuBestTimes').addEventListener('click', () => {
+        closeAllMenus();
+        showBestTimes();
+      });
 
-function updateDifficultyCheck() {
-    ['beginner','intermediate','expert'].forEach(d => {
-        document.getElementById('menu' + d.charAt(0).toUpperCase() + d.slice(1))
+      document.getElementById('menuAbout').addEventListener('click', () => {
+        closeAllMenus();
+        document.getElementById('aboutDialog').classList.add('visible');
+      });
+
+      function updateDifficultyCheck() {
+        ['beginner', 'intermediate', 'expert'].forEach((d) => {
+          document
+            .getElementById('menu' + d.charAt(0).toUpperCase() + d.slice(1))
             .classList.toggle('checked', state.diff === d);
-    });
-}
+        });
+      }
 
-// Custom dialog
-document.getElementById('customOk').addEventListener('click', () => {
-    let rows = parseInt(document.getElementById('customRows').value) || 9;
-    let cols = parseInt(document.getElementById('customCols').value) || 9;
-    let mines = parseInt(document.getElementById('customMines').value) || 10;
-    rows = Math.max(9, Math.min(24, rows));
-    cols = Math.max(9, Math.min(30, cols));
-    mines = Math.max(10, Math.min(rows * cols - 9, mines));
-    document.getElementById('customDialog').classList.remove('visible');
-    initGame(rows, cols, mines, 'custom');
-});
-document.getElementById('customCancel').addEventListener('click', () => {
-    document.getElementById('customDialog').classList.remove('visible');
-});
-document.getElementById('customClose').addEventListener('click', () => {
-    document.getElementById('customDialog').classList.remove('visible');
-});
+      // Custom dialog
+      document.getElementById('customOk').addEventListener('click', () => {
+        let rows = parseInt(document.getElementById('customRows').value) || 9;
+        let cols = parseInt(document.getElementById('customCols').value) || 9;
+        let mines = parseInt(document.getElementById('customMines').value) || 10;
+        rows = Math.max(9, Math.min(24, rows));
+        cols = Math.max(9, Math.min(30, cols));
+        mines = Math.max(10, Math.min(rows * cols - 9, mines));
+        document.getElementById('customDialog').classList.remove('visible');
+        initGame(rows, cols, mines, 'custom');
+      });
+      document.getElementById('customCancel').addEventListener('click', () => {
+        document.getElementById('customDialog').classList.remove('visible');
+      });
+      document.getElementById('customClose').addEventListener('click', () => {
+        document.getElementById('customDialog').classList.remove('visible');
+      });
 
-// Best times dialog
-function showBestTimes() {
-    const bt = loadBestTimes();
-    ['beginner','intermediate','expert'].forEach(d => {
-        const prefix = d.charAt(0).toUpperCase() + d.slice(1).slice(0,2);
-        const key = d.slice(0,3);
-        const data = bt[d];
-        document.getElementById('best' + prefix + 'Time').textContent = data ? data.time : 999;
-        document.getElementById('best' + prefix + 'Name').textContent = data ? data.name : 'Anonymous';
-    });
-    document.getElementById('bestDialog').classList.add('visible');
-}
+      // Best times dialog
+      function showBestTimes() {
+        const bt = loadBestTimes();
+        ['beginner', 'intermediate', 'expert'].forEach((d) => {
+          const prefix = d.charAt(0).toUpperCase() + d.slice(1).slice(0, 2);
+          const key = d.slice(0, 3);
+          const data = bt[d];
+          document.getElementById('best' + prefix + 'Time').textContent = data ? data.time : 999;
+          document.getElementById('best' + prefix + 'Name').textContent = data
+            ? data.name
+            : 'Anonymous';
+        });
+        document.getElementById('bestDialog').classList.add('visible');
+      }
 
-document.getElementById('bestOk').addEventListener('click', () => {
-    document.getElementById('bestDialog').classList.remove('visible');
-});
-document.getElementById('bestClose').addEventListener('click', () => {
-    document.getElementById('bestDialog').classList.remove('visible');
-});
-document.getElementById('bestReset').addEventListener('click', () => {
-    saveBestTimes({});
-    showBestTimes();
-});
-document.getElementById('bestBegTime'); // force init
+      document.getElementById('bestOk').addEventListener('click', () => {
+        document.getElementById('bestDialog').classList.remove('visible');
+      });
+      document.getElementById('bestClose').addEventListener('click', () => {
+        document.getElementById('bestDialog').classList.remove('visible');
+      });
+      document.getElementById('bestReset').addEventListener('click', () => {
+        saveBestTimes({});
+        showBestTimes();
+      });
+      document.getElementById('bestBegTime'); // force init
 
-// About dialog
-document.getElementById('aboutOk').addEventListener('click', () => {
-    document.getElementById('aboutDialog').classList.remove('visible');
-});
-document.getElementById('aboutClose').addEventListener('click', () => {
-    document.getElementById('aboutDialog').classList.remove('visible');
-});
+      // About dialog
+      document.getElementById('aboutOk').addEventListener('click', () => {
+        document.getElementById('aboutDialog').classList.remove('visible');
+      });
+      document.getElementById('aboutClose').addEventListener('click', () => {
+        document.getElementById('aboutDialog').classList.remove('visible');
+      });
 
-// Close button (minimize to hint)
-document.getElementById('closeBtn').addEventListener('click', () => {
-    window.history.back();
-});
+      // Close button (minimize to hint)
+      document.getElementById('closeBtn').addEventListener('click', () => {
+        window.history.back();
+      });
 
-// ============================================================
-// NOTIFY PARENT OF SIZE
-// ============================================================
-function notifyParentSize() {
-    if (window.self !== window.top) {
-        requestAnimationFrame(() => {
+      // ============================================================
+      // NOTIFY PARENT OF SIZE
+      // ============================================================
+      function notifyParentSize() {
+        if (window.self !== window.top) {
+          requestAnimationFrame(() => {
             const win = document.querySelector('.window');
             if (win) {
-                const width = win.scrollWidth;
-                const height = win.scrollHeight;
-                window.parent.postMessage({
-                    type: 'minesweeper-resize',
-                    width: width,
-                    height: height
-                }, '*');
+              const width = win.scrollWidth;
+              const height = win.scrollHeight;
+              window.parent.postMessage(
+                {
+                  type: 'minesweeper-resize',
+                  width: width,
+                  height: height,
+                },
+                '*'
+              );
             }
-        });
-    }
-}
+          });
+        }
+      }
 
-// ============================================================
-// INIT
-// ============================================================
-// Init marks menu state
-document.getElementById('menuMarks').classList.add('checked');
-state.useMarks = true;
+      // ============================================================
+      // INIT
+      // ============================================================
+      // Init marks menu state
+      document.getElementById('menuMarks').classList.add('checked');
+      state.useMarks = true;
 
-initGame(DIFFS.beginner.rows, DIFFS.beginner.cols, DIFFS.beginner.mines, 'beginner');
+      initGame(DIFFS.beginner.rows, DIFFS.beginner.cols, DIFFS.beginner.mines, 'beginner');
 
-// Iframe mode: hide the game's own window chrome so only the game content shows
-if (window.self !== window.top) {
-    document.body.style.background = '#C0C0C0';
-    document.body.style.display = 'block';
-    document.body.style.minHeight = '0';
-    document.body.style.overflow = 'hidden';
-    const titleBar = document.querySelector('.title-bar');
-    if (titleBar) titleBar.style.display = 'none';
-    const win = document.querySelector('.window');
-    if (win) {
-        win.style.border = 'none';
-        win.style.boxShadow = 'none';
-        win.style.display = 'block';
-        win.style.width = 'fit-content';
-    }
-}
-</script>
-</body>
+      // Iframe mode: hide the game's own window chrome so only the game content shows
+      if (window.self !== window.top) {
+        document.body.style.background = '#C0C0C0';
+        document.body.style.display = 'block';
+        document.body.style.minHeight = '0';
+        document.body.style.overflow = 'hidden';
+        const titleBar = document.querySelector('.title-bar');
+        if (titleBar) titleBar.style.display = 'none';
+        const win = document.querySelector('.window');
+        if (win) {
+          win.style.border = 'none';
+          win.style.boxShadow = 'none';
+          win.style.display = 'block';
+          win.style.width = 'fit-content';
+        }
+      }
+    </script>
+  </body>
 </html>
