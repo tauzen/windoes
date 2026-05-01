@@ -216,6 +216,7 @@ async function runTests() {
 
     window.__paintVfsBridge = async (type, payload) => {
       if (type === 'paint-vfs-save') {
+        window.__lastPaintSavePath = payload.path;
         store.set(payload.path, payload.dataUrl);
         return { ok: true, path: payload.path };
       }
@@ -256,15 +257,25 @@ async function runTests() {
   await page.click('#menuOpen');
   await page.waitForTimeout(90);
 
-  const reopenedColor = await page.evaluate(() => {
+  const roundtripResult = await page.evaluate(() => {
     const c = document.getElementById('canvas');
     const data = c.getContext('2d').getImageData(35, 35, 1, 1).data;
+    const savedPath = window.__lastPaintSavePath;
     window.prompt = window.__origPrompt;
-    return [data[0], data[1], data[2]];
+    return {
+      reopenedColor: [data[0], data[1], data[2]],
+      savedPath,
+    };
   });
   assert(
-    reopenedColor[0] < 30 && reopenedColor[1] > 120 && reopenedColor[2] < 30,
-    `Opened image restores green patch (got rgb: ${reopenedColor.join(',')})`
+    roundtripResult.reopenedColor[0] < 30 &&
+      roundtripResult.reopenedColor[1] > 120 &&
+      roundtripResult.reopenedColor[2] < 30,
+    `Opened image restores green patch (got rgb: ${roundtripResult.reopenedColor.join(',')})`
+  );
+  assert(
+    roundtripResult.savedPath === '/C:/My Documents/roundtrip.png',
+    `Save normalizes extension to .png (got path: ${roundtripResult.savedPath})`
   );
 
   await browser.close();

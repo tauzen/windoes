@@ -247,16 +247,19 @@ const paintFrame = paintConfig.el.querySelector('#paintFrame');
 const paintFs = new VirtualFS();
 let paintFsInitPromise = null;
 
+async function ensureDir(path) {
+  if (!(await paintFs.exists(path))) {
+    await paintFs.mkdir(path);
+  }
+}
+
 function ensurePaintFs() {
   if (!paintFsInitPromise) {
     paintFsInitPromise = paintFs
       .init()
       .then(async () => {
-        try {
-          await paintFs.mkdir('/C:/My Documents');
-        } catch {
-          // Directory may already exist.
-        }
+        await ensureDir('/C:');
+        await ensureDir('/C:/My Documents');
       })
       .catch((error) => {
         paintFsInitPromise = null;
