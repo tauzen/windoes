@@ -153,6 +153,10 @@
         color: #808080;
       }
 
+      .menu-opt.disabled {
+        pointer-events: none;
+      }
+
       .menu-opt.disabled:hover {
         background: transparent;
         color: #808080;
@@ -395,12 +399,12 @@
           File
           <div class="menu-dropdown">
             <div class="menu-opt" id="menuNew">New</div>
-            <div class="menu-opt disabled">Open...</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Open...</div>
             <div class="menu-opt" id="menuSave">Save As...</div>
             <div class="menu-sep"></div>
-            <div class="menu-opt disabled">Print Preview</div>
-            <div class="menu-opt disabled">Page Setup...</div>
-            <div class="menu-opt disabled">Print...</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Print Preview</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Page Setup...</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Print...</div>
             <div class="menu-sep"></div>
             <div class="menu-opt" id="menuExit">Exit</div>
           </div>
@@ -411,9 +415,9 @@
             <div class="menu-opt" id="menuUndo">Undo Ctrl+Z</div>
             <div class="menu-opt" id="menuRedo">Redo Ctrl+Y</div>
             <div class="menu-sep"></div>
-            <div class="menu-opt disabled">Cut</div>
-            <div class="menu-opt disabled">Copy</div>
-            <div class="menu-opt disabled">Paste</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Cut</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Copy</div>
+            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Paste</div>
             <div class="menu-sep"></div>
             <div class="menu-opt" id="menuClear">Clear Image</div>
           </div>
@@ -940,7 +944,10 @@
       canvas.addEventListener('mouseup', endStroke);
       canvas.addEventListener('mouseleave', () => {
         if (state.drawing) {
-          endStroke({ clientX: state.lastX, clientY: state.lastY, button: 0 });
+          const rect = canvas.getBoundingClientRect();
+          const clientX = rect.left + ((state.lastX + 0.5) / canvas.width) * rect.width;
+          const clientY = rect.top + ((state.lastY + 0.5) / canvas.height) * rect.height;
+          endStroke({ clientX, clientY, button: 0 });
         }
         document.getElementById('statusCoords').textContent = '';
       });
