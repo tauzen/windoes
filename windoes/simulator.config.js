@@ -75,6 +75,10 @@ const config = {
     solitaire: 'openSolitaire',
     sol: 'openSolitaire',
     'sol.exe': 'openSolitaire',
+    paint: 'openPaint',
+    'pbrush.exe': 'openPaint',
+    mspaint: 'openPaint',
+    'mspaint.exe': 'openPaint',
   },
 };
 

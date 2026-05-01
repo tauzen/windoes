@@ -487,15 +487,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           className="submenu-item"
           id="subAccPaint"
           onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.bsod.showErrorDialog({
-                title: 'Paint',
-                text: 'Not enough memory to open Paint.\n\nClose some programs and try again.',
-                icon: 'error',
-              })
-            )
-          }
+          onClick={() => runAction(() => WindoesApp.open.paint())}
         >
           <span className="submenu-icon submenu-icon-paint" aria-hidden={true}></span>Paint
         </button>

@@ -15,6 +15,7 @@ export default function RunDialog() {
     openWinamp: () => WindoesApp.open.winamp(),
     openMinesweeper: () => WindoesApp.open.minesweeper(),
     openSolitaire: () => WindoesApp.open.solitaire(),
+    openPaint: () => WindoesApp.open.paint(),
   };
 
   function openDialog() {
