@@ -190,6 +190,9 @@
 .task-icon-solitaire {
   background-image: url('/icons/cards.png');
 }
+.task-icon-paint {
+  background-image: url('/icons/paint.png');
+}
 .task-icon-app {
   background-image: url('/icons/display.png');
 }

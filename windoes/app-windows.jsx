@@ -195,6 +195,40 @@ function openSolitaire() {
   openWindowBoilerplate('solitaire');
 }
 
+// ══════════════════════════════════════════════
+// Paint Window
+// ══════════════════════════════════════════════
+const paintConfig = WindoesApp.WindowManager.register('paint', {
+  template: {
+    id: 'paintWindow',
+    ariaLabel: 'Paint',
+    title: 'untitled - Paint',
+    titleIcon: 'titlelogo-paint',
+    titlebarId: 'paintTitlebar',
+    minimizeBtnId: 'paintMinBtn',
+    closeBtnId: 'paintCloseBtn',
+    style:
+      'left: 160px; top: 40px; width: 620px; height: 480px; min-width: unset; min-height: unset;',
+    view: (
+      <iframe
+        id="paintFrame"
+        title="Paint"
+        referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-downloads"
+      ></iframe>
+    ),
+    useSharedWindowComponent: true,
+  },
+  taskButton: { id: 'paintTaskBtn', icon: 'task-icon-paint', label: 'untitled - Paint' },
+  iframeId: 'paintFrame',
+  iframeSrc: './applications/paint/index.html',
+  hasChrome: false,
+});
+
+function openPaint() {
+  openWindowBoilerplate('paint');
+}
+
 function resizeWindowFromIframe(config, width, height) {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
     return;
@@ -208,10 +242,11 @@ function resizeWindowFromIframe(config, width, height) {
 const winampFrame = winampConfig.el.querySelector('#winampFrame');
 const minesweeperFrame = minesweeperConfig.el.querySelector('#minesweeperFrame');
 const solitaireFrame = solitaireConfig.el.querySelector('#solitaireFrame');
+const paintFrame = paintConfig.el.querySelector('#paintFrame');
 
 function isAllowedMessageSource(source) {
   if (!source) return false;
-  return [appFrame, winampFrame, minesweeperFrame, solitaireFrame].some(
+  return [appFrame, winampFrame, minesweeperFrame, solitaireFrame, paintFrame].some(
     (iframe) => iframe?.contentWindow === source
   );
 }
@@ -238,6 +273,12 @@ function onAppMessage(e) {
   if (e.data.type === 'solitaire-resize') {
     resizeWindowFromIframe(solitaireConfig, e.data.width, e.data.height);
   }
+  if (e.data.type === 'paint-resize') {
+    resizeWindowFromIframe(paintConfig, e.data.width, e.data.height);
+  }
+  if (e.data.type === 'paint-close') {
+    WindoesApp.WindowManager.close('paint');
+  }
 }
 
 // Register on shared namespace
@@ -245,6 +286,7 @@ WindoesApp.open.app = openApp;
 WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
+WindoesApp.open.paint = openPaint;
 
 // Listen for app messages (resize, close)
 window.addEventListener('message', onAppMessage);
