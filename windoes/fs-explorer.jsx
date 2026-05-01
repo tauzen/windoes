@@ -225,7 +225,17 @@ function openExplorerContextMenu(event) {
   });
 }
 
-async function openFileInNotepad(path) {
+function isPaintFile(path) {
+  const name = basename(path || '').toLowerCase();
+  return name.endsWith('.png');
+}
+
+async function openFile(path) {
+  if (isPaintFile(path)) {
+    WindoesApp.open.paint();
+    return;
+  }
+
   try {
     const content = await fs.readFile(path);
     WindoesApp.open.notepad({ filePath: path, content });
@@ -262,7 +272,7 @@ function activateExplorerItem(item) {
     return;
   }
 
-  openFileInNotepad(item.path);
+  openFile(item.path);
 }
 
 async function createNewFolder() {
