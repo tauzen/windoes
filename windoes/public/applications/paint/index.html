@@ -939,17 +939,34 @@
         pushHistory();
       }
 
-      canvas.addEventListener('mousedown', startStroke);
-      canvas.addEventListener('mousemove', continueStroke);
-      canvas.addEventListener('mouseup', endStroke);
-      canvas.addEventListener('mouseleave', () => {
-        if (state.drawing) {
-          const rect = canvas.getBoundingClientRect();
-          const clientX = rect.left + ((state.lastX + 0.5) / canvas.width) * rect.width;
-          const clientY = rect.top + ((state.lastY + 0.5) / canvas.height) * rect.height;
-          endStroke({ clientX, clientY, button: 0 });
+      function handlePointerDown(e) {
+        // Only primary/secondary button interactions
+        if (e.button !== 0 && e.button !== 2) return;
+        if (typeof canvas.setPointerCapture === 'function') {
+          canvas.setPointerCapture(e.pointerId);
         }
-        document.getElementById('statusCoords').textContent = '';
+        startStroke(e);
+      }
+
+      function handlePointerMove(e) {
+        continueStroke(e);
+      }
+
+      function handlePointerUp(e) {
+        if (typeof canvas.releasePointerCapture === 'function' && canvas.hasPointerCapture?.(e.pointerId)) {
+          canvas.releasePointerCapture(e.pointerId);
+        }
+        endStroke(e);
+      }
+
+      canvas.addEventListener('pointerdown', handlePointerDown);
+      canvas.addEventListener('pointermove', handlePointerMove);
+      canvas.addEventListener('pointerup', handlePointerUp);
+      canvas.addEventListener('pointercancel', handlePointerUp);
+      canvas.addEventListener('pointerleave', () => {
+        if (!state.drawing) {
+          document.getElementById('statusCoords').textContent = '';
+        }
       });
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 

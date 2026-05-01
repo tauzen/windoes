@@ -105,24 +105,27 @@ async function runTests() {
     document.querySelector('.color-cell[data-color="#ff0000"]').click();
   });
 
-  // Programmatically dispatch mouse events on canvas (Playwright's mouse.move/down has issues with iframes; we simulate directly)
+  // Programmatically dispatch pointer events on canvas (matches runtime pointer handlers)
   await page.evaluate(() => {
     const c = document.getElementById('canvas');
     const rect = c.getBoundingClientRect();
     function fire(type, x, y, button = 0) {
       c.dispatchEvent(
-        new MouseEvent(type, {
+        new PointerEvent(type, {
           bubbles: true,
           cancelable: true,
           clientX: rect.left + x,
           clientY: rect.top + y,
           button,
+          pointerId: 1,
+          pointerType: 'mouse',
+          isPrimary: true,
         })
       );
     }
-    fire('mousedown', 50, 50);
-    for (let i = 0; i <= 30; i += 2) fire('mousemove', 50 + i, 50 + i);
-    fire('mouseup', 80, 80);
+    fire('pointerdown', 50, 50);
+    for (let i = 0; i <= 30; i += 2) fire('pointermove', 50 + i, 50 + i);
+    fire('pointerup', 80, 80);
   });
 
   await page.waitForTimeout(50);
