@@ -232,7 +232,7 @@ function isPaintFile(path) {
 
 async function openFile(path) {
   if (isPaintFile(path)) {
-    WindoesApp.open.paint();
+    WindoesApp.open.paint({ filePath: path });
     return;
   }
 

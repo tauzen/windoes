@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
-import { openWindowBoilerplate } from './launch-helpers.js';
+import { closeStartMenuBoilerplate, openWindowBoilerplate } from './launch-helpers.js';
 import { VIEW_BORDER_PX } from './constants.js';
 import { VirtualFS } from './virtual-fs.js';
 
@@ -226,7 +226,28 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
   hasChrome: false,
 });
 
-function openPaint() {
+function buildPaintSrc(filePath = '') {
+  const base = './applications/paint/index.html';
+  if (!filePath) return base;
+
+  const params = new URLSearchParams({ filePath });
+  return `${base}?${params.toString()}`;
+}
+
+function openPaint(options = {}) {
+  const { filePath = '' } = options;
+  const config = WindoesApp.WindowManager.get('paint');
+  const nextSrc = buildPaintSrc(filePath);
+  config.iframeSrc = nextSrc;
+
+  const isAlreadyOpen = !!WindoesApp.state.get().windows?.byId?.paint?.open;
+  if (isAlreadyOpen && config.iframe) {
+    config.iframe.src = nextSrc;
+    WindoesApp.WindowManager.bringToFront('paint');
+    closeStartMenuBoilerplate();
+    return;
+  }
+
   openWindowBoilerplate('paint');
 }
 
