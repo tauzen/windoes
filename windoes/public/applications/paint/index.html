@@ -1384,6 +1384,13 @@
           win.style.width = 'fit-content';
         }
         notifyParentSize();
+
+        const launchFilePath = new URLSearchParams(window.location.search).get('filePath');
+        if (launchFilePath) {
+          loadCanvasFromVirtualFs(normalizePaintPath(launchFilePath)).catch((error) => {
+            window.alert(error?.message || 'Could not open image.');
+          });
+        }
       }
     </script>
   </body>
