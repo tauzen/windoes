@@ -215,7 +215,7 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
         id="paintFrame"
         title="Paint"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-downloads"
+        sandbox="allow-scripts allow-same-origin allow-downloads allow-modals"
       ></iframe>
     ),
     useSharedWindowComponent: true,

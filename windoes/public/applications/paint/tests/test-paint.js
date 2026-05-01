@@ -211,8 +211,6 @@ async function runTests() {
 
   await page.evaluate(() => {
     const store = new Map();
-    const requestedPaths = ['/C:/My Documents/roundtrip'];
-    let requestIx = 0;
 
     window.__paintVfsBridge = async (type, payload) => {
       if (type === 'paint-vfs-save') {
@@ -227,9 +225,6 @@ async function runTests() {
       }
       throw new Error('Unexpected VFS op: ' + type);
     };
-
-    window.__origPrompt = window.prompt;
-    window.prompt = () => requestedPaths[requestIx++] || requestedPaths[requestedPaths.length - 1];
   });
 
   // Draw a distinct color patch.
@@ -244,7 +239,10 @@ async function runTests() {
   await page.click('#fileMenu');
   await page.waitForTimeout(30);
   await page.click('#menuSave');
-  await page.waitForTimeout(60);
+  await page.waitForSelector('#filePathDialog.visible');
+  await page.fill('#filePathDialogInput', '/C:/My Documents/roundtrip');
+  await page.click('#filePathDialogConfirm');
+  await page.waitForTimeout(80);
 
   // Clear then reopen from bridge.
   await page.click('#editMenu');
@@ -255,13 +253,15 @@ async function runTests() {
   await page.click('#fileMenu');
   await page.waitForTimeout(30);
   await page.click('#menuOpen');
-  await page.waitForTimeout(90);
+  await page.waitForSelector('#filePathDialog.visible');
+  await page.fill('#filePathDialogInput', '/C:/My Documents/roundtrip');
+  await page.click('#filePathDialogConfirm');
+  await page.waitForTimeout(100);
 
   const roundtripResult = await page.evaluate(() => {
     const c = document.getElementById('canvas');
     const data = c.getContext('2d').getImageData(35, 35, 1, 1).data;
     const savedPath = window.__lastPaintSavePath;
-    window.prompt = window.__origPrompt;
     return {
       reopenedColor: [data[0], data[1], data[2]],
       savedPath,

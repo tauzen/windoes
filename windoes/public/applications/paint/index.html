@@ -376,6 +376,29 @@
       .dialog-btn:active {
         border-color: #808080 #ffffff #ffffff #808080;
       }
+
+      .file-path-dialog {
+        min-width: 420px;
+      }
+
+      .file-path-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .file-path-fields label {
+        font-size: 11px;
+      }
+
+      .file-path-fields input {
+        width: 100%;
+        font-size: 11px;
+        padding: 3px 4px;
+        border: 2px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        background: #ffffff;
+      }
     </style>
   </head>
   <body>
@@ -501,6 +524,26 @@
         </div>
         <div class="dialog-btns">
           <button class="dialog-btn" id="aboutOk">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-overlay" id="filePathDialog">
+      <div class="dialog file-path-dialog">
+        <div class="dialog-title">
+          <span id="filePathDialogTitle">Save As</span>
+          <div class="title-btn" id="filePathDialogClose" role="button" aria-label="Close">✕</div>
+        </div>
+        <div class="dialog-body">
+          <div class="file-path-fields">
+            <div id="filePathDialogMessage">Choose a file path.</div>
+            <label for="filePathDialogInput">File name:</label>
+            <input id="filePathDialogInput" type="text" aria-label="File path" />
+          </div>
+        </div>
+        <div class="dialog-btns">
+          <button class="dialog-btn" id="filePathDialogConfirm">OK</button>
+          <button class="dialog-btn" id="filePathDialogCancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -991,10 +1034,72 @@
         return `${trimmed}.png`;
       }
 
-      function askPath({ title, defaultPath }) {
-        const value = window.prompt(title, defaultPath || '/C:/My Documents/untitled.png');
-        return normalizePaintPath(value);
+      const filePathDialog = document.getElementById('filePathDialog');
+      const filePathDialogTitle = document.getElementById('filePathDialogTitle');
+      const filePathDialogMessage = document.getElementById('filePathDialogMessage');
+      const filePathDialogInput = document.getElementById('filePathDialogInput');
+      const filePathDialogConfirm = document.getElementById('filePathDialogConfirm');
+      const filePathDialogCancel = document.getElementById('filePathDialogCancel');
+      const filePathDialogClose = document.getElementById('filePathDialogClose');
+      let filePathDialogResolver = null;
+
+      function closeFilePathDialog(resultPath = null) {
+        filePathDialog.classList.remove('visible');
+        if (filePathDialogResolver) {
+          const resolve = filePathDialogResolver;
+          filePathDialogResolver = null;
+          resolve(resultPath);
+        }
       }
+
+      function requestFilePath({ title, message, defaultPath, confirmLabel = 'OK' }) {
+        if (filePathDialogResolver) {
+          closeFilePathDialog(null);
+        }
+
+        filePathDialogTitle.textContent = title || 'Save As';
+        filePathDialogMessage.textContent = message || 'Choose a file path.';
+        filePathDialogConfirm.textContent = confirmLabel;
+        filePathDialogInput.value = defaultPath || '/C:/My Documents/untitled.png';
+        filePathDialog.classList.add('visible');
+
+        requestAnimationFrame(() => {
+          filePathDialogInput.focus();
+          filePathDialogInput.select();
+        });
+
+        return new Promise((resolve) => {
+          filePathDialogResolver = resolve;
+        });
+      }
+
+      function wireFilePathDialog() {
+        const onConfirm = () => {
+          closeFilePathDialog(normalizePaintPath(filePathDialogInput.value));
+        };
+        const onCancel = () => closeFilePathDialog(null);
+
+        filePathDialogConfirm.addEventListener('click', onConfirm);
+        filePathDialogCancel.addEventListener('click', onCancel);
+        filePathDialogClose.addEventListener('click', onCancel);
+        filePathDialog.addEventListener('click', (event) => {
+          if (event.target === filePathDialog) {
+            onCancel();
+          }
+        });
+        filePathDialogInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            onConfirm();
+            return;
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            onCancel();
+          }
+        });
+      }
+      wireFilePathDialog();
 
       let paintRequestCounter = 0;
       function requestParentVfs(type, payload) {
@@ -1095,9 +1200,11 @@
 
       document.getElementById('menuOpen').addEventListener('click', async () => {
         closeAllMenus();
-        const path = askPath({
-          title: 'Open image from VirtualFS',
+        const path = await requestFilePath({
+          title: 'Open',
+          message: 'Choose an image file to open from VirtualFS.',
           defaultPath: '/C:/My Documents/untitled.png',
+          confirmLabel: 'Open',
         });
         if (!path) return;
         try {
@@ -1109,9 +1216,11 @@
 
       document.getElementById('menuSave').addEventListener('click', async () => {
         closeAllMenus();
-        const path = askPath({
-          title: 'Save image to VirtualFS',
+        const path = await requestFilePath({
+          title: 'Save As',
+          message: 'Choose where to save this image in VirtualFS.',
           defaultPath: '/C:/My Documents/untitled.png',
+          confirmLabel: 'Save',
         });
         if (!path) return;
         try {
