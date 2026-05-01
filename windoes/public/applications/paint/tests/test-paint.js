@@ -206,6 +206,78 @@ async function runTests() {
   assert(menus.image, 'Image menu exists');
   assert(menus.help, 'Help menu exists');
 
+  // ── Test 10: Save/Open roundtrip through VirtualFS bridge ─────────────
+  console.log('\nTest 10: Save/Open roundtrip via VirtualFS bridge');
+
+  await page.evaluate(() => {
+    const store = new Map();
+
+    window.__paintVfsBridge = async (type, payload) => {
+      if (type === 'paint-vfs-save') {
+        window.__lastPaintSavePath = payload.path;
+        store.set(payload.path, payload.dataUrl);
+        return { ok: true, path: payload.path };
+      }
+      if (type === 'paint-vfs-load') {
+        const dataUrl = store.get(payload.path);
+        if (!dataUrl) throw new Error('Not found');
+        return { ok: true, path: payload.path, dataUrl };
+      }
+      throw new Error('Unexpected VFS op: ' + type);
+    };
+  });
+
+  // Draw a distinct color patch.
+  await page.evaluate(() => {
+    const c = document.getElementById('canvas');
+    const x = c.getContext('2d');
+    x.fillStyle = '#00aa00';
+    x.fillRect(30, 30, 20, 20);
+  });
+
+  // Save through File > Save As...
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuSave');
+  await page.waitForSelector('#filePathDialog.visible');
+  await page.fill('#filePathDialogInput', '/C:/My Documents/roundtrip');
+  await page.click('#filePathDialogConfirm');
+  await page.waitForTimeout(80);
+
+  // Clear then reopen from bridge.
+  await page.click('#editMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuClear');
+  await page.waitForTimeout(60);
+
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuOpen');
+  await page.waitForSelector('#filePathDialog.visible');
+  await page.fill('#filePathDialogInput', '/C:/My Documents/roundtrip');
+  await page.click('#filePathDialogConfirm');
+  await page.waitForTimeout(100);
+
+  const roundtripResult = await page.evaluate(() => {
+    const c = document.getElementById('canvas');
+    const data = c.getContext('2d').getImageData(35, 35, 1, 1).data;
+    const savedPath = window.__lastPaintSavePath;
+    return {
+      reopenedColor: [data[0], data[1], data[2]],
+      savedPath,
+    };
+  });
+  assert(
+    roundtripResult.reopenedColor[0] < 30 &&
+      roundtripResult.reopenedColor[1] > 120 &&
+      roundtripResult.reopenedColor[2] < 30,
+    `Opened image restores green patch (got rgb: ${roundtripResult.reopenedColor.join(',')})`
+  );
+  assert(
+    roundtripResult.savedPath === '/C:/My Documents/roundtrip.png',
+    `Save normalizes extension to .png (got path: ${roundtripResult.savedPath})`
+  );
+
   await browser.close();
   tracker.exitWithSummary();
 }

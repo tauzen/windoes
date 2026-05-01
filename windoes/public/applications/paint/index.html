@@ -376,6 +376,29 @@
       .dialog-btn:active {
         border-color: #808080 #ffffff #ffffff #808080;
       }
+
+      .file-path-dialog {
+        min-width: 420px;
+      }
+
+      .file-path-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .file-path-fields label {
+        font-size: 11px;
+      }
+
+      .file-path-fields input {
+        width: 100%;
+        font-size: 11px;
+        padding: 3px 4px;
+        border: 2px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        background: #ffffff;
+      }
     </style>
   </head>
   <body>
@@ -399,7 +422,7 @@
           File
           <div class="menu-dropdown">
             <div class="menu-opt" id="menuNew">New</div>
-            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Open...</div>
+            <div class="menu-opt" id="menuOpen">Open...</div>
             <div class="menu-opt" id="menuSave">Save As...</div>
             <div class="menu-sep"></div>
             <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Print Preview</div>
@@ -501,6 +524,26 @@
         </div>
         <div class="dialog-btns">
           <button class="dialog-btn" id="aboutOk">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-overlay" id="filePathDialog">
+      <div class="dialog file-path-dialog">
+        <div class="dialog-title">
+          <span id="filePathDialogTitle">Save As</span>
+          <div class="title-btn" id="filePathDialogClose" role="button" aria-label="Close">✕</div>
+        </div>
+        <div class="dialog-body">
+          <div class="file-path-fields">
+            <div id="filePathDialogMessage">Choose a file path.</div>
+            <label for="filePathDialogInput">File name:</label>
+            <input id="filePathDialogInput" type="text" aria-label="File path" />
+          </div>
+        </div>
+        <div class="dialog-btns">
+          <button class="dialog-btn" id="filePathDialogConfirm">OK</button>
+          <button class="dialog-btn" id="filePathDialogCancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -984,6 +1027,137 @@
         document.querySelectorAll('.menu-item').forEach((m) => m.classList.remove('open'));
       }
 
+      function normalizePaintPath(path) {
+        const trimmed = String(path || '').trim();
+        if (!trimmed) return null;
+        if (trimmed.toLowerCase().endsWith('.png')) return trimmed;
+        return `${trimmed}.png`;
+      }
+
+      const filePathDialog = document.getElementById('filePathDialog');
+      const filePathDialogTitle = document.getElementById('filePathDialogTitle');
+      const filePathDialogMessage = document.getElementById('filePathDialogMessage');
+      const filePathDialogInput = document.getElementById('filePathDialogInput');
+      const filePathDialogConfirm = document.getElementById('filePathDialogConfirm');
+      const filePathDialogCancel = document.getElementById('filePathDialogCancel');
+      const filePathDialogClose = document.getElementById('filePathDialogClose');
+      let filePathDialogResolver = null;
+
+      function closeFilePathDialog(resultPath = null) {
+        filePathDialog.classList.remove('visible');
+        if (filePathDialogResolver) {
+          const resolve = filePathDialogResolver;
+          filePathDialogResolver = null;
+          resolve(resultPath);
+        }
+      }
+
+      function requestFilePath({ title, message, defaultPath, confirmLabel = 'OK' }) {
+        if (filePathDialogResolver) {
+          closeFilePathDialog(null);
+        }
+
+        filePathDialogTitle.textContent = title || 'Save As';
+        filePathDialogMessage.textContent = message || 'Choose a file path.';
+        filePathDialogConfirm.textContent = confirmLabel;
+        filePathDialogInput.value = defaultPath || '/C:/My Documents/untitled.png';
+        filePathDialog.classList.add('visible');
+
+        requestAnimationFrame(() => {
+          filePathDialogInput.focus();
+          filePathDialogInput.select();
+        });
+
+        return new Promise((resolve) => {
+          filePathDialogResolver = resolve;
+        });
+      }
+
+      function wireFilePathDialog() {
+        const onConfirm = () => {
+          closeFilePathDialog(normalizePaintPath(filePathDialogInput.value));
+        };
+        const onCancel = () => closeFilePathDialog(null);
+
+        filePathDialogConfirm.addEventListener('click', onConfirm);
+        filePathDialogCancel.addEventListener('click', onCancel);
+        filePathDialogClose.addEventListener('click', onCancel);
+        filePathDialog.addEventListener('click', (event) => {
+          if (event.target === filePathDialog) {
+            onCancel();
+          }
+        });
+        filePathDialogInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            onConfirm();
+            return;
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            onCancel();
+          }
+        });
+      }
+      wireFilePathDialog();
+
+      let paintRequestCounter = 0;
+      function requestParentVfs(type, payload) {
+        if (typeof window.__paintVfsBridge === 'function') {
+          return window.__paintVfsBridge(type, payload);
+        }
+
+        if (window.self === window.top) {
+          return Promise.reject(new Error('VirtualFS save/load is only available in Windoes app mode.'));
+        }
+
+        const requestId = `paint-vfs-${Date.now()}-${paintRequestCounter++}`;
+        return new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            window.removeEventListener('message', onMessage);
+            reject(new Error('VirtualFS request timed out.'));
+          }, 5000);
+
+          function onMessage(event) {
+            if (event.origin !== window.location.origin || event.source !== window.parent) return;
+            if (!event.data || event.data.requestId !== requestId) return;
+
+            if (event.data.type !== `${type}-result`) return;
+            clearTimeout(timeout);
+            window.removeEventListener('message', onMessage);
+            if (event.data.ok) {
+              resolve(event.data);
+            } else {
+              reject(new Error(event.data.error || 'VirtualFS operation failed.'));
+            }
+          }
+
+          window.addEventListener('message', onMessage);
+          window.parent.postMessage({ type, requestId, ...payload }, window.location.origin);
+        });
+      }
+
+      async function saveCanvasToVirtualFs(path) {
+        const dataUrl = canvas.toDataURL('image/png');
+        await requestParentVfs('paint-vfs-save', { path, dataUrl });
+      }
+
+      async function loadCanvasFromVirtualFs(path) {
+        const result = await requestParentVfs('paint-vfs-load', { path });
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            pushHistory();
+            resolve();
+          };
+          img.onerror = () => reject(new Error('Could not decode image data.'));
+          img.src = result.dataUrl;
+        });
+      }
+
       document.getElementById('menuBar').addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
         if (!menuItem) {
@@ -1024,13 +1198,36 @@
         redo();
       });
 
-      document.getElementById('menuSave').addEventListener('click', () => {
+      document.getElementById('menuOpen').addEventListener('click', async () => {
         closeAllMenus();
-        const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = 'untitled.png';
-        link.href = dataUrl;
-        link.click();
+        const path = await requestFilePath({
+          title: 'Open',
+          message: 'Choose an image file to open from VirtualFS.',
+          defaultPath: '/C:/My Documents/untitled.png',
+          confirmLabel: 'Open',
+        });
+        if (!path) return;
+        try {
+          await loadCanvasFromVirtualFs(path);
+        } catch (error) {
+          window.alert(error?.message || 'Could not open image.');
+        }
+      });
+
+      document.getElementById('menuSave').addEventListener('click', async () => {
+        closeAllMenus();
+        const path = await requestFilePath({
+          title: 'Save As',
+          message: 'Choose where to save this image in VirtualFS.',
+          defaultPath: '/C:/My Documents/untitled.png',
+          confirmLabel: 'Save',
+        });
+        if (!path) return;
+        try {
+          await saveCanvasToVirtualFs(path);
+        } catch (error) {
+          window.alert(error?.message || 'Could not save image.');
+        }
       });
 
       document.getElementById('menuExit').addEventListener('click', () => {
