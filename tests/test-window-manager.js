@@ -1251,6 +1251,95 @@ async function runTests() {
         }`
       );
     }
+
+    // ── Test 29: Window resizing policy + content fit behavior ───────────────
+    console.log('\nTest 29: Non-game windows are resizable; Games + Winamp are not');
+
+    await page.evaluate(() => {
+      WindoesApp.open.notepad();
+      WindoesApp.open.internetExplorer();
+      WindoesApp.open.paint();
+      WindoesApp.open.myComputer();
+      WindoesApp.open.minesweeper();
+      WindoesApp.open.solitaire();
+      WindoesApp.open.winamp();
+    });
+    await page.waitForTimeout(400);
+
+    const resizePolicyState = await page.evaluate(() => {
+      function getResizeMode(id) {
+        const el = document.getElementById(id);
+        return el ? window.getComputedStyle(el).resize : 'missing';
+      }
+
+      const notepadWindow = document.getElementById('notepadWindow');
+      if (notepadWindow) {
+        notepadWindow.style.width = '740px';
+        notepadWindow.style.height = '520px';
+      }
+
+      const notepadTextarea = document.getElementById('notepadText');
+      const textareaRect = notepadTextarea?.getBoundingClientRect();
+      const viewRect = notepadWindow?.querySelector('.view')?.getBoundingClientRect();
+
+      return {
+        notepad: getResizeMode('notepadWindow'),
+        ie: getResizeMode('ieWindow'),
+        paint: getResizeMode('paintWindow'),
+        myComputer: getResizeMode('myComputerWindow'),
+        recycleBin: getResizeMode('recycleBinWindow'),
+        app: getResizeMode('appWindow'),
+        minesweeper: getResizeMode('minesweeperWindow'),
+        solitaire: getResizeMode('solitaireWindow'),
+        winamp: getResizeMode('winampWindow'),
+        notepadContentFitsAfterResize: !!(
+          textareaRect &&
+          viewRect &&
+          textareaRect.width <= viewRect.width + 1 &&
+          textareaRect.height <= viewRect.height + 1 &&
+          textareaRect.width > 0 &&
+          textareaRect.height > 0
+        ),
+      };
+    });
+
+    assert(
+      resizePolicyState.notepad === 'both',
+      `Notepad is resizable (got ${resizePolicyState.notepad})`
+    );
+    assert(resizePolicyState.ie === 'both', `IE is resizable (got ${resizePolicyState.ie})`);
+    assert(
+      resizePolicyState.paint === 'both',
+      `Paint is resizable (got ${resizePolicyState.paint})`
+    );
+    assert(
+      resizePolicyState.myComputer === 'both',
+      `My Computer is resizable (got ${resizePolicyState.myComputer})`
+    );
+    assert(
+      resizePolicyState.recycleBin === 'both',
+      `Recycle Bin is resizable (got ${resizePolicyState.recycleBin})`
+    );
+    assert(
+      resizePolicyState.app === 'both',
+      `Generic app window is resizable (got ${resizePolicyState.app})`
+    );
+    assert(
+      resizePolicyState.minesweeper === 'none',
+      `Minesweeper is not resizable (got ${resizePolicyState.minesweeper})`
+    );
+    assert(
+      resizePolicyState.solitaire === 'none',
+      `Solitaire is not resizable (got ${resizePolicyState.solitaire})`
+    );
+    assert(
+      resizePolicyState.winamp === 'none',
+      `Winamp is not resizable (got ${resizePolicyState.winamp})`
+    );
+    assert(
+      resizePolicyState.notepadContentFitsAfterResize,
+      'Resizable window content fits inside resized notepad window'
+    );
   } finally {
     await browser.close();
     server.close();

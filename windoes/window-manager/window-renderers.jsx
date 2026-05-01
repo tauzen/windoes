@@ -132,7 +132,10 @@ export function buildHeadlessEl(tmpl) {
 
 export function buildWindowEl(tmpl, windowId) {
   const section = document.createElement('section');
-  section.className = 'window hidden' + (tmpl.className ? ' ' + tmpl.className : '');
+  section.className =
+    'window hidden' +
+    (tmpl.className ? ' ' + tmpl.className : '') +
+    (tmpl.resizable === false ? '' : ' window-resizable');
   section.id = tmpl.id;
   section.setAttribute('aria-label', tmpl.ariaLabel || tmpl.title);
   if (tmpl.style) section.style.cssText = tmpl.style;
