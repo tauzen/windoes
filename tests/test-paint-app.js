@@ -43,8 +43,8 @@ async function runTests() {
     assert(paintWindowState.exists, 'Paint window exists');
     assert(paintWindowState.visible, 'Paint window is visible after launch');
     assert(
-      paintWindowState.frameSrc.includes('applications/ms-paint/index.html'),
-      `Paint iframe src points to ms-paint app (${paintWindowState.frameSrc})`
+      paintWindowState.frameSrc.includes('applications/paint/index.html'),
+      `Paint iframe src points to paint app (${paintWindowState.frameSrc})`
     );
 
     console.log('\nTest 2: Paint opener can receive a file path and pass it to iframe src');
