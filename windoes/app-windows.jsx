@@ -5,6 +5,7 @@ import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
 import { openWindowBoilerplate } from './launch-helpers.js';
 import { VIEW_BORDER_PX } from './constants.js';
+import { VirtualFS } from './virtual-fs.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
   template: {
@@ -243,6 +244,36 @@ const winampFrame = winampConfig.el.querySelector('#winampFrame');
 const minesweeperFrame = minesweeperConfig.el.querySelector('#minesweeperFrame');
 const solitaireFrame = solitaireConfig.el.querySelector('#solitaireFrame');
 const paintFrame = paintConfig.el.querySelector('#paintFrame');
+const paintFs = new VirtualFS();
+let paintFsInitPromise = null;
+
+function ensurePaintFs() {
+  if (!paintFsInitPromise) {
+    paintFsInitPromise = paintFs
+      .init()
+      .then(async () => {
+        try {
+          await paintFs.mkdir('/C:/My Documents');
+        } catch {
+          // Directory may already exist.
+        }
+      })
+      .catch((error) => {
+        paintFsInitPromise = null;
+        throw error;
+      });
+  }
+  return paintFsInitPromise;
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error('Unable to read blob.'));
+    reader.readAsDataURL(blob);
+  });
+}
 
 function isAllowedMessageSource(source) {
   if (!source) return false;
@@ -278,6 +309,45 @@ function onAppMessage(e) {
   }
   if (e.data.type === 'paint-close') {
     WindoesApp.WindowManager.close('paint');
+  }
+  if (e.data.type === 'paint-vfs-save') {
+    const requestId = e.data.requestId;
+    Promise.resolve()
+      .then(async () => {
+        await ensurePaintFs();
+        const dataUrl = String(e.data.dataUrl || '');
+        const path = String(e.data.path || '').trim();
+        if (!path) throw new Error('A file path is required.');
+        if (!dataUrl.startsWith('data:image/png;base64,')) {
+          throw new Error('Paint only supports PNG data.');
+        }
+        const blob = await fetch(dataUrl).then((r) => r.blob());
+        await paintFs.writeFile(path, blob);
+        return { ok: true, path };
+      })
+      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .then((result) => {
+        e.source?.postMessage({ type: 'paint-vfs-save-result', requestId, ...result }, e.origin);
+      });
+  }
+  if (e.data.type === 'paint-vfs-load') {
+    const requestId = e.data.requestId;
+    Promise.resolve()
+      .then(async () => {
+        await ensurePaintFs();
+        const path = String(e.data.path || '').trim();
+        if (!path) throw new Error('A file path is required.');
+        const content = await paintFs.readFile(path);
+        if (!(content instanceof Blob)) {
+          throw new Error('Selected file is not an image blob.');
+        }
+        const dataUrl = await blobToDataUrl(content);
+        return { ok: true, path, dataUrl };
+      })
+      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .then((result) => {
+        e.source?.postMessage({ type: 'paint-vfs-load-result', requestId, ...result }, e.origin);
+      });
   }
 }
 

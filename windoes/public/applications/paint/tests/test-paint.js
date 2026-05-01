@@ -206,6 +206,67 @@ async function runTests() {
   assert(menus.image, 'Image menu exists');
   assert(menus.help, 'Help menu exists');
 
+  // ── Test 10: Save/Open roundtrip through VirtualFS bridge ─────────────
+  console.log('\nTest 10: Save/Open roundtrip via VirtualFS bridge');
+
+  await page.evaluate(() => {
+    const store = new Map();
+    const requestedPaths = ['/C:/My Documents/roundtrip'];
+    let requestIx = 0;
+
+    window.__paintVfsBridge = async (type, payload) => {
+      if (type === 'paint-vfs-save') {
+        store.set(payload.path, payload.dataUrl);
+        return { ok: true, path: payload.path };
+      }
+      if (type === 'paint-vfs-load') {
+        const dataUrl = store.get(payload.path);
+        if (!dataUrl) throw new Error('Not found');
+        return { ok: true, path: payload.path, dataUrl };
+      }
+      throw new Error('Unexpected VFS op: ' + type);
+    };
+
+    window.__origPrompt = window.prompt;
+    window.prompt = () => requestedPaths[requestIx++] || requestedPaths[requestedPaths.length - 1];
+  });
+
+  // Draw a distinct color patch.
+  await page.evaluate(() => {
+    const c = document.getElementById('canvas');
+    const x = c.getContext('2d');
+    x.fillStyle = '#00aa00';
+    x.fillRect(30, 30, 20, 20);
+  });
+
+  // Save through File > Save As...
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuSave');
+  await page.waitForTimeout(60);
+
+  // Clear then reopen from bridge.
+  await page.click('#editMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuClear');
+  await page.waitForTimeout(60);
+
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuOpen');
+  await page.waitForTimeout(90);
+
+  const reopenedColor = await page.evaluate(() => {
+    const c = document.getElementById('canvas');
+    const data = c.getContext('2d').getImageData(35, 35, 1, 1).data;
+    window.prompt = window.__origPrompt;
+    return [data[0], data[1], data[2]];
+  });
+  assert(
+    reopenedColor[0] < 30 && reopenedColor[1] > 120 && reopenedColor[2] < 30,
+    `Opened image restores green patch (got rgb: ${reopenedColor.join(',')})`
+  );
+
   await browser.close();
   tracker.exitWithSummary();
 }

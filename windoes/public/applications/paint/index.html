@@ -399,7 +399,7 @@
           File
           <div class="menu-dropdown">
             <div class="menu-opt" id="menuNew">New</div>
-            <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Open...</div>
+            <div class="menu-opt" id="menuOpen">Open...</div>
             <div class="menu-opt" id="menuSave">Save As...</div>
             <div class="menu-sep"></div>
             <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Print Preview</div>
@@ -984,6 +984,75 @@
         document.querySelectorAll('.menu-item').forEach((m) => m.classList.remove('open'));
       }
 
+      function normalizePaintPath(path) {
+        const trimmed = String(path || '').trim();
+        if (!trimmed) return null;
+        if (trimmed.toLowerCase().endsWith('.png')) return trimmed;
+        return `${trimmed}.png`;
+      }
+
+      function askPath({ title, defaultPath }) {
+        const value = window.prompt(title, defaultPath || '/C:/My Documents/untitled.png');
+        return normalizePaintPath(value);
+      }
+
+      let paintRequestCounter = 0;
+      function requestParentVfs(type, payload) {
+        if (typeof window.__paintVfsBridge === 'function') {
+          return window.__paintVfsBridge(type, payload);
+        }
+
+        if (window.self === window.top) {
+          return Promise.reject(new Error('VirtualFS save/load is only available in Windoes app mode.'));
+        }
+
+        const requestId = `paint-vfs-${Date.now()}-${paintRequestCounter++}`;
+        return new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            window.removeEventListener('message', onMessage);
+            reject(new Error('VirtualFS request timed out.'));
+          }, 5000);
+
+          function onMessage(event) {
+            if (event.origin !== window.location.origin || event.source !== window.parent) return;
+            if (!event.data || event.data.requestId !== requestId) return;
+
+            if (event.data.type !== `${type}-result`) return;
+            clearTimeout(timeout);
+            window.removeEventListener('message', onMessage);
+            if (event.data.ok) {
+              resolve(event.data);
+            } else {
+              reject(new Error(event.data.error || 'VirtualFS operation failed.'));
+            }
+          }
+
+          window.addEventListener('message', onMessage);
+          window.parent.postMessage({ type, requestId, ...payload }, window.location.origin);
+        });
+      }
+
+      async function saveCanvasToVirtualFs(path) {
+        const dataUrl = canvas.toDataURL('image/png');
+        await requestParentVfs('paint-vfs-save', { path, dataUrl });
+      }
+
+      async function loadCanvasFromVirtualFs(path) {
+        const result = await requestParentVfs('paint-vfs-load', { path });
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            pushHistory();
+            resolve();
+          };
+          img.onerror = () => reject(new Error('Could not decode image data.'));
+          img.src = result.dataUrl;
+        });
+      }
+
       document.getElementById('menuBar').addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
         if (!menuItem) {
@@ -1024,13 +1093,32 @@
         redo();
       });
 
-      document.getElementById('menuSave').addEventListener('click', () => {
+      document.getElementById('menuOpen').addEventListener('click', async () => {
         closeAllMenus();
-        const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = 'untitled.png';
-        link.href = dataUrl;
-        link.click();
+        const path = askPath({
+          title: 'Open image from VirtualFS',
+          defaultPath: '/C:/My Documents/untitled.png',
+        });
+        if (!path) return;
+        try {
+          await loadCanvasFromVirtualFs(path);
+        } catch (error) {
+          window.alert(error?.message || 'Could not open image.');
+        }
+      });
+
+      document.getElementById('menuSave').addEventListener('click', async () => {
+        closeAllMenus();
+        const path = askPath({
+          title: 'Save image to VirtualFS',
+          defaultPath: '/C:/My Documents/untitled.png',
+        });
+        if (!path) return;
+        try {
+          await saveCanvasToVirtualFs(path);
+        } catch (error) {
+          window.alert(error?.message || 'Could not save image.');
+        }
       });
 
       document.getElementById('menuExit').addEventListener('click', () => {
