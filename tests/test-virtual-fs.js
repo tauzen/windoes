@@ -179,6 +179,22 @@ async function runTests() {
       'readdir throws for missing directory'
     );
 
+    // Cross-instance cache invalidation: writes in one instance should be visible in another.
+    const sharedName = 'test-vfs-shared-' + Date.now();
+    const writerFs = new VirtualFS(sharedName);
+    const readerFs = new VirtualFS(sharedName);
+    await writerFs.init();
+    await readerFs.init();
+    await writerFs.mkdir('/shared');
+    await readerFs.readdir('/shared'); // warm reader cache for empty directory
+    await writerFs.writeFile('/shared/newfile.txt', 'hello');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const sharedEntries = await readerFs.readdir('/shared');
+    check(
+      sharedEntries.some((entry) => entry.name === 'newfile.txt' && entry.type === 'file'),
+      'readdir cache invalidates across VirtualFS instances after writeFile'
+    );
+
     // ── stat ──────────────────────────────────────────────────────────
 
     const fileStat = await fs.stat('/docs/hello.txt');

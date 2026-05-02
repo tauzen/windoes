@@ -145,15 +145,25 @@ export class VirtualFS {
   _dbName: string;
   _db: IDBDatabase | null;
   _readdirCache: Map<string, Array<{ name: string; type: 'file' | 'directory' }>>;
+  _broadcastChannel: BroadcastChannel | null;
 
   constructor(dbName = 'virtual-fs') {
     this._dbName = dbName;
     this._db = null;
     this._readdirCache = new Map();
+    this._broadcastChannel =
+      typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`virtual-fs:${dbName}`) : null;
+    this._broadcastChannel?.addEventListener('message', () => {
+      this._invalidateReaddirCache();
+    });
   }
 
   _invalidateReaddirCache() {
     this._readdirCache.clear();
+  }
+
+  _notifyMutation() {
+    this._broadcastChannel?.postMessage({ type: 'mutation', at: Date.now() });
   }
 
   _ensureInit() {
@@ -204,6 +214,7 @@ export class VirtualFS {
     stores.directories.put({ path: norm, createdAt: new Date() });
     await txDone(transaction);
     this._invalidateReaddirCache();
+    this._notifyMutation();
   }
 
   /**
@@ -244,6 +255,7 @@ export class VirtualFS {
     stores.files.put(entry);
     await txDone(transaction);
     this._invalidateReaddirCache();
+    this._notifyMutation();
   }
 
   async readFile(path: string) {
@@ -357,6 +369,7 @@ export class VirtualFS {
       stores.files.delete(norm);
       await txDone(transaction);
       this._invalidateReaddirCache();
+      this._notifyMutation();
       return;
     }
 
@@ -379,6 +392,7 @@ export class VirtualFS {
 
     await txDone(transaction);
     this._invalidateReaddirCache();
+    this._notifyMutation();
   }
 
   async rename(oldPath: string, newPath: string) {
@@ -419,6 +433,7 @@ export class VirtualFS {
       stores.files.put({ ...srcFile, path: newNorm });
       await txDone(transaction);
       this._invalidateReaddirCache();
+      this._notifyMutation();
       return;
     }
 
@@ -449,6 +464,7 @@ export class VirtualFS {
 
     await txDone(transaction);
     this._invalidateReaddirCache();
+    this._notifyMutation();
   }
 
   async exists(path: string) {
