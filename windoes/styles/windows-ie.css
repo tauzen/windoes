@@ -63,6 +63,11 @@
   display: none;
 }
 
+.window.window-resizable {
+  resize: both;
+  overflow: hidden;
+}
+
 .window.window-headless {
   background: transparent;
   border: none;

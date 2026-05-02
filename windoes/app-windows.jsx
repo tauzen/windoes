@@ -151,6 +151,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
       ></iframe>
     ),
     useSharedWindowComponent: true,
+    resizable: false,
   },
   taskButton: { id: 'minesweeperTaskBtn', icon: 'task-icon-minesweeper', label: 'Minesweeper' },
   iframeId: 'minesweeperFrame',
@@ -185,6 +186,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
       ></iframe>
     ),
     useSharedWindowComponent: true,
+    resizable: false,
   },
   taskButton: { id: 'solitaireTaskBtn', icon: 'task-icon-solitaire', label: 'Solitaire' },
   iframeId: 'solitaireFrame',
