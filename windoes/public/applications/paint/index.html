@@ -220,6 +220,40 @@
         max-height: 380px;
       }
 
+      html.iframe-embedded-root,
+      body.iframe-embedded {
+        width: 100%;
+        height: 100%;
+      }
+
+      body.iframe-embedded {
+        background: #c0c0c0;
+        display: block;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      body.iframe-embedded .window {
+        border: none;
+        box-shadow: none;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+      }
+
+      body.iframe-embedded .body {
+        flex: 1;
+        min-height: 0;
+      }
+
+      body.iframe-embedded .canvas-wrap {
+        min-width: 0;
+        min-height: 0;
+        max-width: none;
+        max-height: none;
+      }
+
       .canvas-frame {
         background: #fff;
         border: 1px solid;
@@ -1371,18 +1405,10 @@
       // INIT - iframe mode
       // ============================================================
       if (window.self !== window.top) {
-        document.body.style.background = '#C0C0C0';
-        document.body.style.display = 'block';
-        document.body.style.minHeight = '0';
-        document.body.style.overflow = 'hidden';
+        document.documentElement.classList.add('iframe-embedded-root');
+        document.body.classList.add('iframe-embedded');
         const titleBar = document.querySelector('.title-bar');
         if (titleBar) titleBar.style.display = 'none';
-        const win = document.querySelector('.window');
-        if (win) {
-          win.style.border = 'none';
-          win.style.boxShadow = 'none';
-          win.style.width = 'fit-content';
-        }
         notifyParentSize();
 
         const launchFilePath = new URLSearchParams(window.location.search).get('filePath');

@@ -75,6 +75,64 @@ async function runTests() {
       paintOpenFromPngState.filePath === '/C:/My Documents/sample.png',
       `Paint iframe filePath decodes to expected path (got: ${paintOpenFromPngState.filePath})`
     );
+
+    console.log('\nTest 3: Paint content area adapts when parent window is resized');
+
+    const resizeState = await page.evaluate(async () => {
+      const paintWindow = document.getElementById('paintWindow');
+      const frame = document.getElementById('paintFrame');
+      if (!paintWindow || !frame || !frame.contentWindow) {
+        return { ok: false, reason: 'paint window or iframe unavailable' };
+      }
+
+      const frameDoc = frame.contentWindow.document;
+      const windowEl = frameDoc.querySelector('.window');
+      const canvasWrapEl = frameDoc.getElementById('canvasWrap');
+      if (!windowEl || !canvasWrapEl) {
+        return { ok: false, reason: 'paint content nodes unavailable' };
+      }
+
+      const measure = () => ({
+        windowWidth: windowEl.getBoundingClientRect().width,
+        windowHeight: windowEl.getBoundingClientRect().height,
+        wrapWidth: canvasWrapEl.getBoundingClientRect().width,
+        wrapHeight: canvasWrapEl.getBoundingClientRect().height,
+      });
+
+      paintWindow.style.width = '900px';
+      paintWindow.style.height = '650px';
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const bigger = measure();
+
+      paintWindow.style.width = '560px';
+      paintWindow.style.height = '420px';
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const smaller = measure();
+
+      return {
+        ok: true,
+        bigger,
+        smaller,
+      };
+    });
+
+    assert(resizeState.ok, `Paint resize probe succeeded (${resizeState.reason || 'ok'})`);
+    assert(
+      resizeState.bigger.windowWidth > resizeState.smaller.windowWidth,
+      `Paint shell width tracks parent resize (${resizeState.bigger.windowWidth} > ${resizeState.smaller.windowWidth})`
+    );
+    assert(
+      resizeState.bigger.windowHeight > resizeState.smaller.windowHeight,
+      `Paint shell height tracks parent resize (${resizeState.bigger.windowHeight} > ${resizeState.smaller.windowHeight})`
+    );
+    assert(
+      resizeState.bigger.wrapWidth > resizeState.smaller.wrapWidth,
+      `Paint canvas area width tracks parent resize (${resizeState.bigger.wrapWidth} > ${resizeState.smaller.wrapWidth})`
+    );
+    assert(
+      resizeState.bigger.wrapHeight > resizeState.smaller.wrapHeight,
+      `Paint canvas area height tracks parent resize (${resizeState.bigger.wrapHeight} > ${resizeState.smaller.wrapHeight})`
+    );
   } finally {
     await browser.close();
     server.close();
