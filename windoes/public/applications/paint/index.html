@@ -439,9 +439,9 @@
     <div class="window" id="window">
       <!-- Title Bar -->
       <div class="title-bar">
-        <div class="title-bar-left">
+        <div class="title-bar-left" id="titleBarLabel">
           <div class="title-icon">🎨</div>
-          untitled - Paint
+          <span id="paintTitleText">untitled - Paint</span>
         </div>
         <div class="title-bar-buttons">
           <div class="title-btn" title="Minimize">_</div>
@@ -635,6 +635,21 @@
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const preview = document.getElementById('previewCanvas');
       const previewCtx = preview.getContext('2d');
+      const paintTitleText = document.getElementById('paintTitleText');
+      let currentFilePath = null;
+
+      function basenameFromPath(path) {
+        const normalized = String(path || '').replace(/\\/g, '/');
+        const segments = normalized.split('/').filter(Boolean);
+        return segments.length ? segments[segments.length - 1] : 'untitled';
+      }
+
+      function setPaintWindowTitle(path) {
+        const fileName = path ? basenameFromPath(path) : 'untitled';
+        paintTitleText.textContent = `${fileName} - Paint`;
+      }
+
+      setPaintWindowTitle(null);
 
       // Initialize white background
       ctx.fillStyle = '#ffffff';
@@ -1215,6 +1230,8 @@
       document.getElementById('menuNew').addEventListener('click', () => {
         closeAllMenus();
         clearCanvas();
+        currentFilePath = null;
+        setPaintWindowTitle(null);
       });
 
       document.getElementById('menuClear').addEventListener('click', () => {
@@ -1243,6 +1260,8 @@
         if (!path) return;
         try {
           await loadCanvasFromVirtualFs(path);
+          currentFilePath = path;
+          setPaintWindowTitle(path);
         } catch (error) {
           window.alert(error?.message || 'Could not open image.');
         }
@@ -1253,12 +1272,14 @@
         const path = await requestFilePath({
           title: 'Save As',
           message: 'Choose where to save this image in VirtualFS.',
-          defaultPath: '/C:/My Documents/untitled.png',
+          defaultPath: currentFilePath || '/C:/My Documents/untitled.png',
           confirmLabel: 'Save',
         });
         if (!path) return;
         try {
           await saveCanvasToVirtualFs(path);
+          currentFilePath = path;
+          setPaintWindowTitle(path);
         } catch (error) {
           window.alert(error?.message || 'Could not save image.');
         }

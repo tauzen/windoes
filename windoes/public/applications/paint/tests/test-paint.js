@@ -262,9 +262,11 @@ async function runTests() {
     const c = document.getElementById('canvas');
     const data = c.getContext('2d').getImageData(35, 35, 1, 1).data;
     const savedPath = window.__lastPaintSavePath;
+    const titleText = document.getElementById('paintTitleText')?.textContent || '';
     return {
       reopenedColor: [data[0], data[1], data[2]],
       savedPath,
+      titleText,
     };
   });
   assert(
@@ -276,6 +278,10 @@ async function runTests() {
   assert(
     roundtripResult.savedPath === '/C:/My Documents/roundtrip.png',
     `Save normalizes extension to .png (got path: ${roundtripResult.savedPath})`
+  );
+  assert(
+    roundtripResult.titleText === 'roundtrip.png - Paint',
+    `Window title reflects saved filename (got title: ${roundtripResult.titleText})`
   );
 
   await browser.close();
