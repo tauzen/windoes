@@ -17,6 +17,8 @@
  * @property {string=} id
  */
 
+import { DEFAULT_NOTEPAD_SAVE_PATH } from './constants.js';
+
 export const initialState = {
   boot: {
     phase: 'bios', // bios | splash | ready
@@ -62,7 +64,7 @@ export const initialState = {
     fileMenuLeft: 0,
     fileMenuTop: 0,
     saveDialogOpen: false,
-    saveDialogPath: '/C:/My Documents/Untitled.txt',
+    saveDialogPath: DEFAULT_NOTEPAD_SAVE_PATH,
   },
 };
 
@@ -311,8 +313,7 @@ export function reduce(current, action) {
     case 'NOTEPAD_SAVE_DIALOG_OPEN':
       return withNotepad(current, {
         saveDialogOpen: true,
-        saveDialogPath:
-          action.path || current.notepad.saveDialogPath || '/C:/My Documents/Untitled.txt',
+        saveDialogPath: action.path || current.notepad.saveDialogPath || DEFAULT_NOTEPAD_SAVE_PATH,
       });
     case 'NOTEPAD_SAVE_DIALOG_SET_PATH':
       return withNotepad(current, { saveDialogPath: action.path });

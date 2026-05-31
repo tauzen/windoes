@@ -4,6 +4,11 @@
 import WindoesApp from './app-state.js';
 import { openWindowBoilerplate } from './launch-helpers.js';
 import { normalizeBrowserUrl } from './browser-url.mjs';
+import {
+  IE_LOADING_INDICATOR_MS,
+  IE_TASK_LABEL_MAX_LEN,
+  IE_TASK_LABEL_TRUNCATE_LEN,
+} from './constants.js';
 
 // Register IE shell window with JSX-rendered chrome
 const ieConfig = WindoesApp.WindowManager.register('ie', {
@@ -119,7 +124,10 @@ function navigate(url, pushHistory = true) {
   const title = formatBrowserTitle(finalUrl);
   windowTitle.textContent = title;
 
-  const shortTitle = title.length > 30 ? title.substring(0, 28) + '...' : title;
+  const shortTitle =
+    title.length > IE_TASK_LABEL_MAX_LEN
+      ? title.substring(0, IE_TASK_LABEL_TRUNCATE_LEN) + '...'
+      : title;
   taskButtonLabel.textContent = shortTitle;
 
   if (pushHistory) {
@@ -140,7 +148,7 @@ function body_loading(on) {
     bodyLoadingTimeoutId = window.setTimeout(() => {
       document.body.classList.remove('loading');
       bodyLoadingTimeoutId = null;
-    }, 2000);
+    }, IE_LOADING_INDICATOR_MS);
   } else {
     document.body.classList.remove('loading');
   }

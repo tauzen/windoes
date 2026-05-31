@@ -7,6 +7,7 @@ import { initFS, navigateTo, resetNavigationState, saveTextFile } from './fs-exp
 import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
 import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { openWindowBoilerplate } from './launch-helpers.js';
+import { DEFAULT_NOTEPAD_SAVE_PATH } from './constants.js';
 
 WindoesApp.WindowManager.register('myComputer', {
   template: {
@@ -103,7 +104,7 @@ async function saveNotepadDocument(forceSaveAs = false) {
 
     let filePath = textarea.dataset.filePath || '';
     if (!filePath || forceSaveAs) {
-      const suggested = filePath || '/C:/My Documents/Untitled.txt';
+      const suggested = filePath || DEFAULT_NOTEPAD_SAVE_PATH;
       const selectedPath = await requestNotepadSavePath(suggested);
       if (!selectedPath) return; // user cancelled
       filePath = selectedPath.trim();

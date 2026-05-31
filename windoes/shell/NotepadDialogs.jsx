@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import WindoesApp from '../app-state.js';
+import { DEFAULT_NOTEPAD_SAVE_PATH } from '../constants.js';
 import { useDialogFocus } from './dialog-focus.js';
 import { useOutsideClick } from './outside-click.js';
 
@@ -11,7 +12,7 @@ export default function NotepadDialogs() {
   const notepadState = WindoesApp.state.use((s) => s.notepad || {});
 
   const isSaveDialogOpen = !!notepadState.saveDialogOpen;
-  const savePath = notepadState.saveDialogPath || '/C:/My Documents/Untitled.txt';
+  const savePath = notepadState.saveDialogPath || DEFAULT_NOTEPAD_SAVE_PATH;
   const isFileMenuOpen = !!notepadState.fileMenuOpen;
   const menuPosition = {
     left: notepadState.fileMenuLeft || 0,
@@ -34,7 +35,7 @@ export default function NotepadDialogs() {
 
     WindoesApp.state.dispatch({
       type: 'NOTEPAD_SAVE_DIALOG_OPEN',
-      path: suggestedPath || '/C:/My Documents/Untitled.txt',
+      path: suggestedPath || DEFAULT_NOTEPAD_SAVE_PATH,
     });
 
     return new Promise((resolve) => {
