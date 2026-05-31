@@ -262,6 +262,18 @@
         position: relative;
       }
 
+      .canvas-resize-handle {
+        position: absolute;
+        right: -5px;
+        bottom: -5px;
+        width: 9px;
+        height: 9px;
+        background: #ffffff;
+        border: 1px solid #000000;
+        cursor: nwse-resize;
+        z-index: 2;
+      }
+
       #canvas {
         display: block;
         background: #fff;
@@ -522,6 +534,7 @@
           <div class="canvas-frame">
             <canvas id="canvas" width="480" height="320"></canvas>
             <canvas id="previewCanvas" width="480" height="320"></canvas>
+            <div id="canvasResizeHandle" class="canvas-resize-handle" title="Resize canvas"></div>
           </div>
         </div>
       </div>
@@ -898,6 +911,67 @@
       function clearPreview() {
         previewCtx.clearRect(0, 0, preview.width, preview.height);
       }
+
+      function resizeCanvas(width, height) {
+        const nextWidth = Math.max(64, Math.round(width));
+        const nextHeight = Math.max(64, Math.round(height));
+        if (nextWidth === canvas.width && nextHeight === canvas.height) return false;
+
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        canvas.width = nextWidth;
+        canvas.height = nextHeight;
+        preview.width = nextWidth;
+        preview.height = nextHeight;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, nextWidth, nextHeight);
+        ctx.putImageData(image, 0, 0);
+        clearPreview();
+        return true;
+      }
+
+      const canvasResizeHandle = document.getElementById('canvasResizeHandle');
+      let canvasResizeDrag = null;
+
+      canvasResizeHandle.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        canvasResizeDrag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startWidth: canvas.width,
+          startHeight: canvas.height,
+          changed: false,
+        };
+        canvasResizeHandle.setPointerCapture?.(event.pointerId);
+      });
+
+      canvasResizeHandle.addEventListener('pointermove', (event) => {
+        if (!canvasResizeDrag || canvasResizeDrag.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        const changed = resizeCanvas(
+          canvasResizeDrag.startWidth + event.clientX - canvasResizeDrag.startX,
+          canvasResizeDrag.startHeight + event.clientY - canvasResizeDrag.startY
+        );
+        canvasResizeDrag.changed = canvasResizeDrag.changed || changed;
+      });
+
+      function finishCanvasResize(event) {
+        if (!canvasResizeDrag || canvasResizeDrag.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        if (canvasResizeHandle.hasPointerCapture?.(event.pointerId)) {
+          canvasResizeHandle.releasePointerCapture(event.pointerId);
+        }
+        if (canvasResizeDrag.changed) {
+          pushHistory();
+        }
+        canvasResizeDrag = null;
+      }
+
+      canvasResizeHandle.addEventListener('pointerup', finishCanvasResize);
+      canvasResizeHandle.addEventListener('pointercancel', finishCanvasResize);
 
       // ============================================================
       // POINTER EVENTS
