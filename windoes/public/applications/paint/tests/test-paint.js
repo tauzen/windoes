@@ -284,6 +284,83 @@ async function runTests() {
     `Window title reflects saved filename (got title: ${roundtripResult.titleText})`
   );
 
+  // ── Test 11: Canvas resize handle changes intrinsic canvas size ───────
+  console.log('\nTest 11: Canvas resize handle preserves drawing while resizing canvas');
+
+  const canvasResizeResult = await page.evaluate(async () => {
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('previewCanvas');
+    const handle = document.getElementById('canvasResizeHandle');
+    if (!canvas || !preview || !handle) {
+      return { ok: false, reason: 'canvas resize controls missing' };
+    }
+
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#ff0000';
+    context.fillRect(20, 20, 12, 12);
+
+    const before = { width: canvas.width, height: canvas.height };
+    const rect = handle.getBoundingClientRect();
+    const pointerId = 42;
+    const fire = (type, clientX, clientY) => {
+      handle.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          clientX,
+          clientY,
+          button: 0,
+          pointerId,
+          pointerType: 'mouse',
+          isPrimary: true,
+        })
+      );
+    };
+
+    fire('pointerdown', rect.left + rect.width / 2, rect.top + rect.height / 2);
+    fire('pointermove', rect.left + rect.width / 2 + 80, rect.top + rect.height / 2 + 40);
+    fire('pointerup', rect.left + rect.width / 2 + 80, rect.top + rect.height / 2 + 40);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const preserved = context.getImageData(25, 25, 1, 1).data;
+    const expanded = context.getImageData(canvas.width - 2, canvas.height - 2, 1, 1).data;
+    return {
+      ok: true,
+      before,
+      after: { width: canvas.width, height: canvas.height },
+      preview: { width: preview.width, height: preview.height },
+      preserved: [preserved[0], preserved[1], preserved[2]],
+      expanded: [expanded[0], expanded[1], expanded[2]],
+    };
+  });
+
+  assert(canvasResizeResult.ok, `Canvas resize probe succeeded (${canvasResizeResult.reason || 'ok'})`);
+  assert(
+    canvasResizeResult.after.width > canvasResizeResult.before.width,
+    `Canvas width grows after drag (${canvasResizeResult.before.width} -> ${canvasResizeResult.after.width})`
+  );
+  assert(
+    canvasResizeResult.after.height > canvasResizeResult.before.height,
+    `Canvas height grows after drag (${canvasResizeResult.before.height} -> ${canvasResizeResult.after.height})`
+  );
+  assert(
+    canvasResizeResult.preview.width === canvasResizeResult.after.width &&
+      canvasResizeResult.preview.height === canvasResizeResult.after.height,
+    `Preview canvas matches drawing canvas (${canvasResizeResult.preview.width}x${canvasResizeResult.preview.height})`
+  );
+  assert(
+    canvasResizeResult.preserved[0] > 200 &&
+      canvasResizeResult.preserved[1] < 50 &&
+      canvasResizeResult.preserved[2] < 50,
+    `Existing drawing survives resize (got rgb: ${canvasResizeResult.preserved.join(',')})`
+  );
+  assert(
+    canvasResizeResult.expanded.every((value) => value === 255),
+    `Expanded canvas area is white (got rgb: ${canvasResizeResult.expanded.join(',')})`
+  );
+
   await browser.close();
   tracker.exitWithSummary();
 }
