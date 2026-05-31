@@ -20,16 +20,16 @@ partly done, leaving **two parallel state mechanisms** that coexist throughout
 the shell. Secondary risks are **lenient type/lint coverage** and **stale
 documentation references**.
 
-| Signal | Result |
-| --- | --- |
-| `npm run lint` (eslint) | ✅ 0 errors / **0 warnings** |
-| `npm run typecheck` (tsc) | ✅ clean |
-| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none |
-| Reducer unit tests | 25 cases |
-| CI (lint + unit + integration + typecheck) | ✅ configured (`.github/workflows/test.yml`) |
-| `WindoesApp.*` imperative references | ⚠️ 143 across 21 files |
-| Module-level `let` mutable state (shell) | ⚠️ 27 |
-| Docs referenced but missing | ⚠️ 2 files |
+| Signal                                           | Result                                       |
+| ------------------------------------------------ | -------------------------------------------- |
+| `npm run lint` (eslint)                          | ✅ 0 errors / **0 warnings**                 |
+| `npm run typecheck` (tsc)                        | ✅ clean                                     |
+| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                      |
+| Reducer unit tests                               | 25 cases                                     |
+| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`) |
+| `WindoesApp.*` imperative references             | ⚠️ 143 across 21 files                       |
+| Module-level `let` mutable state (shell)         | ⚠️ 27                                        |
+| Docs referenced but missing                      | ⚠️ 2 files                                   |
 
 **Overall grade: B / B+.** Solid foundation; pay down the migration debt and
 tighten type/lint coverage before the surface area grows further.
