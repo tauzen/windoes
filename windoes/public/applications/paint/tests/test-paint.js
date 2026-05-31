@@ -336,7 +336,10 @@ async function runTests() {
     };
   });
 
-  assert(canvasResizeResult.ok, `Canvas resize probe succeeded (${canvasResizeResult.reason || 'ok'})`);
+  assert(
+    canvasResizeResult.ok,
+    `Canvas resize probe succeeded (${canvasResizeResult.reason || 'ok'})`
+  );
   assert(
     canvasResizeResult.after.width > canvasResizeResult.before.width,
     `Canvas width grows after drag (${canvasResizeResult.before.width} -> ${canvasResizeResult.after.width})`
