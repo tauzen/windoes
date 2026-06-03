@@ -1,24 +1,125 @@
+// ─── State shape ─────────────────────────────────────────────────────────────
+
 /**
- * @typedef {Object} WindoesAction
- * @property {string} type
- * @property {number=} value
- * @property {string=} splashStatus
- * @property {string=} status
- * @property {number=} progress
- * @property {string[]=} stack
- * @property {string|null=} focusedId
- * @property {Record<string, unknown>=} byId
- * @property {number=} x
- * @property {number=} y
- * @property {string|null=} selectedPath
- * @property {number=} left
- * @property {number=} top
- * @property {string=} path
- * @property {string=} id
+ * @typedef {Object} BootState
+ * @property {'bios' | 'splash' | 'ready'} phase
+ * @property {number} biosMemory
+ * @property {string} biosStatus
+ * @property {number} splashProgress
+ * @property {string} splashStatus
+ * @property {boolean} done
+ */
+
+/**
+ * @typedef {Object} MenusState
+ * @property {boolean} startOpen
+ * @property {boolean} programsOpen
+ * @property {boolean} accessoriesOpen
+ * @property {boolean} gamesOpen
+ * @property {boolean} desktopContextOpen
+ * @property {boolean} explorerContextOpen
+ */
+
+/**
+ * @typedef {Object} DialogsState
+ * @property {boolean} runOpen
+ * @property {boolean} errorOpen
+ * @property {boolean} shutdownOpen
+ * @property {boolean} shutdownScreenVisible
+ * @property {boolean} notepadSaveOpen
+ * @property {boolean} notepadUnsavedOpen
+ */
+
+/**
+ * @typedef {Object} WindowState
+ * @property {string} id
+ * @property {boolean} open
+ * @property {boolean} minimized
+ * @property {boolean} maximized
+ * @property {boolean} focused
+ * @property {number} zIndex
+ * @property {boolean} taskbarVisible
+ */
+
+/**
+ * @typedef {Object} WindowsState
+ * @property {string[]} stack
+ * @property {string | null} focusedId
+ * @property {Record<string, WindowState>} byId
+ */
+
+/**
+ * @typedef {Object} SelectionState
+ * @property {string | null} desktopIconId
+ * @property {string | null} explorerItemPath
+ */
+
+/**
+ * @typedef {Object} ExplorerState
+ * @property {boolean} contextMenuOpen
+ * @property {number} contextMenuX
+ * @property {number} contextMenuY
+ * @property {string | null} selectedPath
+ */
+
+/**
+ * @typedef {Object} NotepadState
+ * @property {boolean} fileMenuOpen
+ * @property {number} fileMenuLeft
+ * @property {number} fileMenuTop
+ * @property {boolean} saveDialogOpen
+ * @property {string} saveDialogPath
+ */
+
+/**
+ * @typedef {Object} State
+ * @property {BootState} boot
+ * @property {MenusState} menus
+ * @property {DialogsState} dialogs
+ * @property {WindowsState} windows
+ * @property {SelectionState} selection
+ * @property {ExplorerState} explorer
+ * @property {NotepadState} notepad
+ */
+
+// ─── Action union ────────────────────────────────────────────────────────────
+
+/**
+ * Discriminated union of every action the reducer understands. Each member
+ * carries only the payload fields its case reads, so `switch (action.type)`
+ * narrows `action` to the exact shape inside each branch.
+ *
+ * @typedef {(
+ *   | { type: 'BOOT_RESET', splashStatus?: string }
+ *   | { type: 'BOOT_BIOS_PROGRESS', value: number }
+ *   | { type: 'BOOT_BIOS_STATUS', value: string }
+ *   | { type: 'BOOT_PHASE_SPLASH', status?: string }
+ *   | { type: 'BOOT_SPLASH_PROGRESS', progress: number, status?: string }
+ *   | { type: 'BOOT_FINISH' }
+ *   | { type: 'WINDOW_REGISTER', id: string }
+ *   | { type: 'WINDOW_OPEN', id: string }
+ *   | { type: 'WINDOW_CLOSE', id: string }
+ *   | { type: 'WINDOW_MINIMIZE', id: string }
+ *   | { type: 'WINDOW_RESTORE', id: string }
+ *   | { type: 'WINDOW_FOCUS', id: string }
+ *   | { type: 'WINDOW_MAXIMIZE_TOGGLE', id: string }
+ *   | { type: 'EXPLORER_CONTEXT_OPEN', x?: number, y?: number, selectedPath?: string | null }
+ *   | { type: 'EXPLORER_CONTEXT_CLOSE' }
+ *   | { type: 'NOTEPAD_FILE_MENU_OPEN', left?: number, top?: number }
+ *   | { type: 'NOTEPAD_FILE_MENU_CLOSE' }
+ *   | { type: 'NOTEPAD_SAVE_DIALOG_OPEN', path?: string }
+ *   | { type: 'NOTEPAD_SAVE_DIALOG_SET_PATH', path: string }
+ *   | { type: 'NOTEPAD_SAVE_DIALOG_CLOSE' }
+ *   | { type: 'SHUTDOWN_DIALOG_OPEN' }
+ *   | { type: 'SHUTDOWN_DIALOG_CLOSE' }
+ *   | { type: 'SHUTDOWN_SCREEN_SHOW' }
+ *   | { type: 'SHUTDOWN_SCREEN_HIDE' }
+ * )} WindoesAction
  */
 
 import { DEFAULT_NOTEPAD_SAVE_PATH } from './constants.js';
 
+/** @type {State} */
 export const initialState = {
   boot: {
     phase: 'bios', // bios | splash | ready
@@ -68,6 +169,10 @@ export const initialState = {
   },
 };
 
+/**
+ * @param {string} id
+ * @returns {WindowState}
+ */
 function defaultWindowState(id) {
   return {
     id,
@@ -80,13 +185,23 @@ function defaultWindowState(id) {
   };
 }
 
+/**
+ * @param {Record<string, WindowState>} byId
+ * @param {string} id
+ * @returns {WindowState}
+ */
 function upsertWindow(byId, id) {
   return byId[id] ? { ...byId[id] } : defaultWindowState(id);
 }
 
+/**
+ * @param {WindowsState} windows
+ * @returns {WindowsState}
+ */
 function recomputeWindowMeta(windows) {
   const stack = windows.stack;
   const focusedId = stack.length ? stack[stack.length - 1] : null;
+  /** @type {Record<string, WindowState>} */
   const nextById = {};
 
   Object.entries(windows.byId).forEach(([id, win]) => {
@@ -115,6 +230,12 @@ function recomputeWindowMeta(windows) {
   };
 }
 
+/**
+ * @param {State} current
+ * @param {string} id
+ * @param {(windows: WindowsState, win: WindowState, previous: WindowState | undefined) => void} mutate
+ * @returns {State}
+ */
 function withWindowState(current, id, mutate) {
   if (!id) return current;
 
@@ -136,17 +257,30 @@ function withWindowState(current, id, mutate) {
   };
 }
 
+/**
+ * @param {string[]} stack
+ * @param {string} id
+ */
 function moveWindowToTop(stack, id) {
   const idx = stack.indexOf(id);
   if (idx !== -1) stack.splice(idx, 1);
   stack.push(id);
 }
 
+/**
+ * @param {string[]} stack
+ * @param {string} id
+ */
 function removeWindowFromStack(stack, id) {
   const idx = stack.indexOf(id);
   if (idx !== -1) stack.splice(idx, 1);
 }
 
+/**
+ * @param {State} current
+ * @param {Partial<NotepadState>} nextNotepad
+ * @returns {State}
+ */
 function withNotepad(current, nextNotepad) {
   return {
     ...current,
@@ -157,6 +291,11 @@ function withNotepad(current, nextNotepad) {
   };
 }
 
+/**
+ * @param {State} current
+ * @param {Partial<DialogsState>} nextDialogs
+ * @returns {State}
+ */
 function withDialogs(current, nextDialogs) {
   return {
     ...current,
@@ -168,8 +307,9 @@ function withDialogs(current, nextDialogs) {
 }
 
 /**
- * @param {typeof initialState} current
+ * @param {State} current
  * @param {WindoesAction} action
+ * @returns {State}
  */
 export function reduce(current, action) {
   switch (action.type) {
@@ -303,8 +443,12 @@ export function reduce(current, action) {
     case 'NOTEPAD_FILE_MENU_OPEN':
       return withNotepad(current, {
         fileMenuOpen: true,
-        fileMenuLeft: Number.isFinite(action.left) ? action.left : current.notepad.fileMenuLeft,
-        fileMenuTop: Number.isFinite(action.top) ? action.top : current.notepad.fileMenuTop,
+        fileMenuLeft: Number.isFinite(action.left)
+          ? /** @type {number} */ (action.left)
+          : current.notepad.fileMenuLeft,
+        fileMenuTop: Number.isFinite(action.top)
+          ? /** @type {number} */ (action.top)
+          : current.notepad.fileMenuTop,
       });
     case 'NOTEPAD_FILE_MENU_CLOSE':
       if (!current.notepad.fileMenuOpen) return current;

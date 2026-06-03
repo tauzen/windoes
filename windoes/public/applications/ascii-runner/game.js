@@ -21,9 +21,6 @@ const isMobile =
   'ontouchstart' in window ||
   navigator.maxTouchPoints > 0;
 
-// Touch state for visual feedback
-let touchActive = false;
-
 // Color Palette - mirrors CSS variables for use in canvas
 const COLORS = {
   // Background colors
@@ -81,7 +78,6 @@ let highScore = parseInt(localStorage.getItem('asciiRunnerHighScore')) || 0;
 // Screen effects
 let screenShake = 0;
 let glitchEffect = 0;
-let flashEffect = 0;
 
 // Player
 const player = {
@@ -252,7 +248,6 @@ let chunksGenerated = 0;
 let jumpParticles = [];
 let landParticles = [];
 let coinParticles = [];
-let trailParticles = [];
 let deathParticles = [];
 
 // ASCII Art Background Elements
@@ -520,7 +515,6 @@ function drawNeonSigns() {
 
 function drawASCIICity() {
   const parallax = 0.3;
-  const time = Date.now() * 0.001;
 
   // Draw ASCII city pattern
   for (let i = 0; i < ASCII_CITY.length; i++) {
@@ -991,7 +985,6 @@ function checkOrientation() {
 function handleJumpBtnStart(e) {
   e.preventDefault();
   e.stopPropagation();
-  touchActive = true;
   player.jumpKeyHeld = true;
 
   const jumpBtn = document.getElementById('jump-btn');
@@ -1006,7 +999,6 @@ function handleJumpBtnStart(e) {
 function handleJumpBtnEnd(e) {
   e.preventDefault();
   e.stopPropagation();
-  touchActive = false;
   player.jumpKeyHeld = false;
 
   const jumpBtn = document.getElementById('jump-btn');
@@ -1135,7 +1127,6 @@ function handleTouchStart(e) {
   if (e.target.id === 'jump-btn') return;
 
   e.preventDefault();
-  touchActive = true;
   player.jumpKeyHeld = true;
 
   const jumpBtn = document.getElementById('jump-btn');
@@ -1151,7 +1142,6 @@ function handleTouchEnd(e) {
   if (e.target.id === 'jump-btn') return;
 
   e.preventDefault();
-  touchActive = false;
   player.jumpKeyHeld = false;
 
   const jumpBtn = document.getElementById('jump-btn');
@@ -1165,7 +1155,7 @@ function handleTouchEnd(e) {
   }
 }
 
-function handleClick(e) {
+function handleClick() {
   player.jumpKeyHeld = true;
   handleInput();
   setTimeout(() => {
