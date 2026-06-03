@@ -1,4 +1,5 @@
 import reactPlugin from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default [
@@ -22,6 +23,7 @@ export default [
     },
     plugins: {
       react: reactPlugin,
+      'react-hooks': reactHooks,
     },
     settings: {
       react: {
@@ -29,11 +31,13 @@ export default [
       },
     },
     rules: {
-      'no-unused-vars': 'warn',
-      'react/jsx-key': 'warn',
+      'no-unused-vars': 'error',
+      'react/jsx-key': 'error',
       'react/jsx-uses-vars': 'warn',
-      'no-implicit-globals': 'warn',
+      'no-implicit-globals': 'error',
       'consistent-return': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 ];

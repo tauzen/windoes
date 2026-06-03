@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import ShellApp from './shell-app.jsx';
+import { BOOT_SEQUENCE_DELAY_MS } from './constants.js';
 
 let bootTimerId = null;
 
@@ -24,7 +25,7 @@ async function bootstrap() {
   await import('./app-windows.jsx');
   await import('./utility-windows.jsx');
 
-  bootTimerId = window.setTimeout(runBootSequence, 300);
+  bootTimerId = window.setTimeout(runBootSequence, BOOT_SEQUENCE_DELAY_MS);
 }
 
 bootstrap();

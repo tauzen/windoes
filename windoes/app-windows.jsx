@@ -4,7 +4,11 @@
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
 import { closeStartMenuBoilerplate, openWindowBoilerplate } from './launch-helpers.js';
-import { VIEW_BORDER_PX } from './constants.js';
+import {
+  APP_TASK_LABEL_MAX_LEN,
+  APP_TASK_LABEL_TRUNCATE_LEN,
+  VIEW_BORDER_PX,
+} from './constants.js';
 import { VirtualFS } from './virtual-fs.js';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
@@ -57,7 +61,10 @@ const appWindowCleanups = [];
 function openApp(title, url) {
   appWindowTitle.textContent = title;
   appStatusText.textContent = 'Opening...';
-  appTaskLabel.textContent = title.length > 22 ? title.substring(0, 20) + '...' : title;
+  appTaskLabel.textContent =
+    title.length > APP_TASK_LABEL_MAX_LEN
+      ? title.substring(0, APP_TASK_LABEL_TRUNCATE_LEN) + '...'
+      : title;
   // Set dynamic iframe src before opening
   WindoesApp.WindowManager.get('app').iframeSrc = url;
   appFrame.src = url;
