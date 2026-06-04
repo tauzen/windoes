@@ -82,6 +82,7 @@ export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, trigg
  * @param {(keep: string[]) => void} props.onKeep
  * @param {(item: object) => void} props.onSelect
  * @param {() => (HTMLElement|null)[]} props.getAdjacentEls - Parent/child panels for leave checks.
+ * @param {(e: import('react').KeyboardEvent) => void} [props.onKeyDown] - Panel-level keyboard navigation.
  */
 export function Submenu({
   submenu,
@@ -93,6 +94,7 @@ export function Submenu({
   onKeep,
   onSelect,
   getAdjacentEls,
+  onKeyDown,
 }) {
   function onMouseLeave(e) {
     const stayInside = getAdjacentEls().some((el) => el && el.contains(e.relatedTarget));
@@ -109,6 +111,7 @@ export function Submenu({
       aria-label={submenu.ariaLabel}
       style={style}
       onMouseLeave={onMouseLeave}
+      onKeyDown={onKeyDown}
     >
       {submenu.items.map((item, i) => (
         <MenuItem
