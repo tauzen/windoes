@@ -40,6 +40,51 @@ async function runTests() {
     await dialog.dismiss();
   });
 
+  await page.addInitScript(() => {
+    const nativeAdd = EventTarget.prototype.addEventListener;
+    const nativeRemove = EventTarget.prototype.removeEventListener;
+    const listenerIds = new WeakMap();
+    const activeListeners = new Map();
+    let nextListenerId = 1;
+
+    function getListenerId(listener) {
+      if (!listenerIds.has(listener)) listenerIds.set(listener, nextListenerId++);
+      return listenerIds.get(listener);
+    }
+
+    function keyFor(target, type, listener, options) {
+      const id = target?.id || target?.dataset?.windowId || target?.tagName || 'unknown';
+      const capture = typeof options === 'boolean' ? options : !!options?.capture;
+      return `${id}:${type}:${getListenerId(listener)}:${capture}`;
+    }
+
+    EventTarget.prototype.addEventListener = function patchedAddEventListener(
+      type,
+      listener,
+      options
+    ) {
+      if (listener) activeListeners.set(keyFor(this, type, listener, options), { target: this, type });
+      return nativeAdd.call(this, type, listener, options);
+    };
+
+    EventTarget.prototype.removeEventListener = function patchedRemoveEventListener(
+      type,
+      listener,
+      options
+    ) {
+      if (listener) activeListeners.delete(keyFor(this, type, listener, options));
+      return nativeRemove.call(this, type, listener, options);
+    };
+
+    window.__activeListenerCount = (targetId, type) => {
+      let count = 0;
+      for (const record of activeListeners.values()) {
+        if (record.target?.id === targetId && record.type === type) count += 1;
+      }
+      return count;
+    };
+  });
+
   try {
     // ── Test 1: Winamp open → close → reopen loads iframe correctly ───────
     console.log('\nTest 1: Winamp reopen loads iframe after close');
@@ -1339,6 +1384,43 @@ async function runTests() {
     assert(
       resizePolicyState.notepadContentFitsAfterResize,
       'Resizable window content fits inside resized notepad window'
+    );
+
+    // ── Test 30: Per-window lifecycle listeners clean up on close ───────────
+    console.log('\nTest 30: Window close tears down and reopen restores lifecycle listeners');
+
+    await page.evaluate(() => WindoesApp.WindowManager.close('ie'));
+    await page.waitForTimeout(100);
+
+    const closedListenerState = await page.evaluate(() => ({
+      goClick: window.__activeListenerCount('goBtn', 'click'),
+      addressKeydown: window.__activeListenerCount('addressInput', 'keydown'),
+    }));
+
+    assert(
+      closedListenerState.goClick === 0,
+      `IE Go button click listener is removed after close (got ${closedListenerState.goClick})`
+    );
+    assert(
+      closedListenerState.addressKeydown === 0,
+      `IE address keydown listener is removed after close (got ${closedListenerState.addressKeydown})`
+    );
+
+    await page.evaluate(() => WindoesApp.open.internetExplorer());
+    await page.waitForTimeout(100);
+
+    const reopenedListenerState = await page.evaluate(() => ({
+      goClick: window.__activeListenerCount('goBtn', 'click'),
+      addressKeydown: window.__activeListenerCount('addressInput', 'keydown'),
+    }));
+
+    assert(
+      reopenedListenerState.goClick === 1,
+      `IE Go button click listener is restored once after reopen (got ${reopenedListenerState.goClick})`
+    );
+    assert(
+      reopenedListenerState.addressKeydown === 1,
+      `IE address keydown listener is restored once after reopen (got ${reopenedListenerState.addressKeydown})`
     );
   } finally {
     await browser.close();
