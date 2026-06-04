@@ -52,18 +52,10 @@ WindoesApp.WindowManager.register('myComputer', {
   hasChrome: true,
 });
 
-let fsReady = false;
-
-async function ensureFS() {
-  if (fsReady) return;
-  await initFS();
-  fsReady = true;
-}
-
 function openMyComputer() {
   openWindowBoilerplate('myComputer');
 
-  ensureFS().then(() => {
+  initFS().then(() => {
     resetNavigationState();
     navigateTo(null);
   });
@@ -109,7 +101,7 @@ function requestNotepadSavePath(suggestedPath) {
 
 async function saveNotepadDocument(forceSaveAs = false) {
   try {
-    await ensureFS();
+    await initFS();
 
     const textarea = notepadConfig.el.querySelector('#notepadText');
     if (!textarea) return;
