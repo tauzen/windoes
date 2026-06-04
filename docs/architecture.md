@@ -74,6 +74,14 @@ Embedded apps (standalone, in iframes)
   `rename`/`rm`, `readdir` caching with cross-tab `BroadcastChannel`
   invalidation, and a defensive `normalizePath`. It is **not** a host
   filesystem — `..` resolves within the virtual tree only.
+- **Access rights:** entries can be flagged as protected "system" files or
+  directories (`mkdir`/`writeFile` accept a `{ system }` option, and
+  `setSystem`/`isSystem` toggle/read it). Protected entries cannot be deleted
+  (`rm`, including a recursive delete whose subtree contains a protected child)
+  or renamed — both throw `PermissionDeniedError`. `stat`/`readdir` surface the
+  flag so the explorer disables Rename/Delete on them. The shipped `/C:`,
+  `/C:/My Documents`, and `Hello.txt` paths are protected on first boot
+  (`fs-explorer.jsx`).
 
 ## Embedded applications
 

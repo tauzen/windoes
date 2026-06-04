@@ -12,6 +12,9 @@ export default function ExplorerContextMenu() {
   };
   const selectedPath = explorerState.selectedPath || null;
   const hasSelection = !!selectedPath;
+  // System (protected) entries cannot be renamed or deleted.
+  const isSystem = !!explorerState.selectedIsSystem;
+  const canModify = hasSelection && !isSystem;
 
   function closeMenu() {
     WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
@@ -52,11 +55,11 @@ export default function ExplorerContextMenu() {
       <button
         type="button"
         role="menuitem"
-        className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
+        className={`context-menu-item${canModify ? '' : ' disabled'}`}
         data-action="rename"
-        disabled={!hasSelection}
+        disabled={!canModify}
         onClick={() => {
-          if (hasSelection) runAction('rename');
+          if (canModify) runAction('rename');
         }}
       >
         Rename
@@ -64,11 +67,11 @@ export default function ExplorerContextMenu() {
       <button
         type="button"
         role="menuitem"
-        className={`context-menu-item${hasSelection ? '' : ' disabled'}`}
+        className={`context-menu-item${canModify ? '' : ' disabled'}`}
         data-action="delete"
-        disabled={!hasSelection}
+        disabled={!canModify}
         onClick={() => {
-          if (hasSelection) runAction('delete');
+          if (canModify) runAction('delete');
         }}
       >
         Delete

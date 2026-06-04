@@ -40,6 +40,16 @@ export class DirectoryNotEmptyError extends Error {
   }
 }
 
+export class PermissionDeniedError extends Error {
+  path: string;
+
+  constructor(path: string, action = 'modify') {
+    super(`Access denied: cannot ${action} system file or directory: '${path}'`);
+    this.name = 'PermissionDeniedError';
+    this.path = path;
+  }
+}
+
 // ─── Path Utilities ──────────────────────────────────────────────────────────
 
 export function normalizePath(path: string) {
@@ -144,7 +154,7 @@ function computeContentSize(content: string | ArrayBuffer | ArrayBufferView | Bl
 export class VirtualFS {
   _dbName: string;
   _db: IDBDatabase | null;
-  _readdirCache: Map<string, Array<{ name: string; type: 'file' | 'directory' }>>;
+  _readdirCache: Map<string, Array<{ name: string; type: 'file' | 'directory'; system?: boolean }>>;
   _broadcastChannel: BroadcastChannel | null;
 
   constructor(dbName = 'virtual-fs') {
@@ -189,7 +199,7 @@ export class VirtualFS {
     return this;
   }
 
-  async mkdir(path: string) {
+  async mkdir(path: string, { system = false }: { system?: boolean } = {}) {
     const db = this._ensureInit();
     const norm = normalizePath(path);
 
@@ -212,7 +222,7 @@ export class VirtualFS {
     const existingFile = await req(stores.files.get(norm));
     if (existingFile) throw new FileExistsError(norm);
 
-    stores.directories.put({ path: norm, createdAt: new Date() });
+    stores.directories.put({ path: norm, createdAt: new Date(), system: !!system });
     await txDone(transaction);
     this._invalidateReaddirCache();
     this._notifyMutation();
@@ -221,8 +231,14 @@ export class VirtualFS {
   /**
    * @param {string} path
    * @param {string|ArrayBuffer|ArrayBufferView|Blob} content
+   * @param {{ system?: boolean }} [options] When `system` is provided it sets the
+   *   protection flag; when omitted, overwrites preserve the existing flag.
    */
-  async writeFile(path: string, content: string | ArrayBuffer | ArrayBufferView | Blob) {
+  async writeFile(
+    path: string,
+    content: string | ArrayBuffer | ArrayBufferView | Blob,
+    { system }: { system?: boolean } = {}
+  ) {
     const db = this._ensureInit();
     const norm = normalizePath(path);
     const parent = parentPath(norm);
@@ -251,6 +267,7 @@ export class VirtualFS {
       type: 'file',
       createdAt: existing ? existing.createdAt : now,
       modifiedAt: now,
+      system: system === undefined ? !!(existing && existing.system) : !!system,
     };
 
     stores.files.put(entry);
@@ -299,7 +316,12 @@ export class VirtualFS {
       if (d.path !== norm && d.path.startsWith(prefix)) {
         const rest = d.path.slice(prefix.length);
         if (!rest.includes('/')) {
-          children.set(rest, { name: rest, type: 'directory' });
+          const entry: { name: string; type: 'directory'; system?: boolean } = {
+            name: rest,
+            type: 'directory',
+          };
+          if (d.system) entry.system = true;
+          children.set(rest, entry);
         }
       }
     }
@@ -309,7 +331,12 @@ export class VirtualFS {
         const rest = f.path.slice(prefix.length);
         if (!rest.includes('/')) {
           if (!children.has(rest)) {
-            children.set(rest, { name: rest, type: 'file' });
+            const entry: { name: string; type: 'file'; system?: boolean } = {
+              name: rest,
+              type: 'file',
+            };
+            if (f.system) entry.system = true;
+            children.set(rest, entry);
           }
         }
       }
@@ -336,6 +363,7 @@ export class VirtualFS {
         size: 0,
         createdAt: dir.createdAt,
         modifiedAt: dir.createdAt,
+        system: !!dir.system,
       };
     }
     if (file) {
@@ -345,10 +373,45 @@ export class VirtualFS {
         size: file.size,
         createdAt: file.createdAt,
         modifiedAt: file.modifiedAt,
+        system: !!file.system,
       };
     }
 
     throw new FileNotFoundError(norm);
+  }
+
+  /**
+   * Mark (or unmark) an existing file or directory as a protected system entry.
+   * System entries cannot be deleted or renamed. Returns nothing; throws
+   * FileNotFoundError if the path does not exist.
+   */
+  async setSystem(path: string, system = true) {
+    const db = this._ensureInit();
+    const norm = normalizePath(path);
+
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readwrite');
+    const dir = await req(stores.directories.get(norm));
+    const file = await req(stores.files.get(norm));
+
+    if (!dir && !file) throw new FileNotFoundError(norm);
+
+    if (dir) {
+      stores.directories.put({ ...dir, system: !!system });
+    } else {
+      stores.files.put({ ...file, system: !!system });
+    }
+
+    await txDone(transaction);
+    this._invalidateReaddirCache();
+    this._notifyMutation();
+  }
+
+  /**
+   * Convenience read-only check for whether a path is a protected system entry.
+   */
+  async isSystem(path: string) {
+    const { system } = await this.stat(path);
+    return !!system;
   }
 
   async rm(path: string, { recursive = false }: { recursive?: boolean } = {}) {
@@ -365,6 +428,11 @@ export class VirtualFS {
     const file = await req(stores.files.get(norm));
 
     if (!dir && !file) throw new FileNotFoundError(norm);
+
+    // System files/directories are protected from removal.
+    if ((dir && dir.system) || (file && file.system)) {
+      throw new PermissionDeniedError(norm, 'delete');
+    }
 
     if (file) {
       stores.files.delete(norm);
@@ -384,6 +452,12 @@ export class VirtualFS {
 
     if ((childDirs.length > 0 || childFiles.length > 0) && !recursive) {
       throw new DirectoryNotEmptyError(norm);
+    }
+
+    // A recursive delete must not silently destroy protected descendants.
+    const protectedChild = childDirs.find((d) => d.system) || childFiles.find((f) => f.system);
+    if (protectedChild) {
+      throw new PermissionDeniedError(protectedChild.path, 'delete');
     }
 
     // Delete directory and all descendants
@@ -427,6 +501,11 @@ export class VirtualFS {
     const srcDir = await req(stores.directories.get(oldNorm));
     const srcFile = await req(stores.files.get(oldNorm));
     if (!srcDir && !srcFile) throw new FileNotFoundError(oldNorm);
+
+    // System files/directories are protected from being moved away from their path.
+    if ((srcDir && srcDir.system) || (srcFile && srcFile.system)) {
+      throw new PermissionDeniedError(oldNorm, 'rename');
+    }
 
     if (srcFile) {
       // Simple file rename
