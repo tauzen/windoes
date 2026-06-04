@@ -42,8 +42,9 @@ Embedded apps (standalone, in iframes)
   with immutable updates and helper combinators (`withWindowState`,
   `recomputeWindowMeta`, `withDialogs`, `withNotepad`). Unit-tested in
   `tests/node/reducer.test.js`.
-- The canonical state slices are `boot`, `menus`, `dialogs`, `windows`,
-  `selection`, `explorer`, `notepad`. See the ADR for the full contract.
+- Canonical state is organized into reducer slices for boot, menus, dialogs,
+  windows, selection, explorer, notepad, browser, and generic app metadata. See
+  the ADR for the full contract.
 
 ## Windowing
 
@@ -79,8 +80,10 @@ Embedded apps (standalone, in iframes)
 Apps under `windoes/public/applications/` are standalone bundles loaded in
 sandboxed iframes and managed as an npm workspace. They talk to the shell via
 `postMessage`; the shell validates both `event.origin` and `event.source`
-before acting (`app-windows.jsx`). These apps are currently outside the shell
-lint/type configuration (tracked in the code-quality roadmap).
+before acting (`app-windows.jsx`). These apps are now covered by the shared
+ESLint config (the former `public/applications/**` ignore was removed); they
+remain outside the TypeScript configuration (tracked in the code-quality
+roadmap).
 
 ## Shared constants
 

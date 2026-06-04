@@ -1,6 +1,10 @@
 # Windoes — Code Quality Report
 
-_Date: 2026-05-31 · Branch: `claude/amazing-hypatia-0daRl` · Commit: `d0e9ecc`_
+_Originally authored: 2026-05-31 · Branch: `claude/amazing-hypatia-0daRl` · Commit: `d0e9ecc`_
+
+_Last synced with codebase: 2026-06-04 — **Phases 1–3 complete** (roadmap items
+1–9) **plus Phase 4 item 10**. Only Phase 4 items 11–12 remain open. Per-item
+progress is annotated inline below._
 
 A Windows-98-inspired desktop simulator (React 19 + JS/JSX, two `.ts` modules,
 Vite 8, Playwright). Shell code lives in `windoes/`; five embedded apps live
@@ -14,33 +18,44 @@ runtime correctness.
 The project is in **good baseline health**. Tooling is wired up and green, the
 state core (reducer + virtual filesystem) is well designed and tested, and the
 codebase is small (~3k LOC of shell + ~1.7k LOC for the largest app). The main
-quality risk is **architectural drift**: an in-progress migration from a legacy
-imperative model (`window.WindoesApp.*`) to a React/reducer model is only
-partly done, leaving **two parallel state mechanisms** that coexist throughout
-the shell. Secondary risks are **lenient type/lint coverage** and **stale
-documentation references**.
+quality risk called out at authoring time — **architectural drift** from the
+in-progress `window.WindoesApp.*` → React/reducer migration — has since been
+substantially paid down: the four imperative subsystems flagged in Phase 3 now
+live in the reducer, lint/type coverage has been tightened, and the previously
+missing docs now exist. The remaining `WindoesApp.*` bridge is the legacy
+compatibility layer described in the ADR, burned down one subsystem at a time.
 
-| Signal                                           | Result                                       |
-| ------------------------------------------------ | -------------------------------------------- |
-| `npm run lint` (eslint)                          | ✅ 0 errors / **0 warnings**                 |
-| `npm run typecheck` (tsc)                        | ✅ clean                                     |
-| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                      |
-| Reducer unit tests                               | 25 cases                                     |
-| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`) |
-| `WindoesApp.*` imperative references             | ⚠️ 143 across 21 files                       |
-| Module-level `let` mutable state (shell)         | ⚠️ 27                                        |
-| Docs referenced but missing                      | ⚠️ 2 files                                   |
+The table below shows the signals as measured at the 2026-06-04 sync (originals
+in parentheses where they have moved).
 
-**Overall grade: B / B+.** Solid foundation; pay down the migration debt and
-tighten type/lint coverage before the surface area grows further.
+| Signal                                           | Result                                                 |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| `npm run lint` (eslint)                          | ✅ clean, with only non-blocking hook warnings         |
+| `npm run typecheck` (tsc, `strict: true`)        | ✅ clean                                               |
+| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                                |
+| Reducer unit tests                               | ✅ expanded reducer coverage                           |
+| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`)           |
+| Lint/format coverage of embedded apps            | ✅ now linted (ignore removed)                         |
+| `WindoesApp.*` imperative bridge                 | ⚠️ still present as the legacy bridge described by ADR |
+| Docs referenced but missing                      | ✅ none known (all referenced docs live under `docs/`) |
+
+The remaining ESLint output is limited to non-blocking
+`react-hooks/exhaustive-deps` guidance surfaced by the newly-added
+`eslint-plugin-react-hooks`.
+
+**Overall grade: B+ / A−.** Roadmap items 1–10 are complete (all of Phases 1–3
+plus the Phase 4 Start-menu decomposition); the foundation is now backed by
+stricter gates and a documented state contract. Only the Phase 4 polish items
+11–12 (async-error surfacing, menu keyboard nav) remain.
 
 ---
 
 ## 2. Strengths
 
-- **Clean tooling gates.** ESLint and `tsc --noEmit` both pass with zero
-  warnings. Prettier + Husky + `lint-staged` enforce formatting on commit. CI
-  runs the full `test:all` matrix on every non-`main` push.
+- **Clean tooling gates.** ESLint and `tsc --noEmit` pass, with hook dependency
+  guidance kept as non-blocking lint output. Prettier + Husky + `lint-staged`
+  enforce formatting on commit. CI runs the full `test:all` matrix on every
+  non-`main` push.
 - **Well-architected virtual filesystem** (`windoes/virtual-fs.ts`). Dedicated
   error classes (`FileNotFoundError`, `FileExistsError`, …), single-transaction
   atomic `rename`/`rm` (`virtual-fs.ts:410`), `readdir` caching with
@@ -49,8 +64,8 @@ tighten type/lint coverage before the surface area grows further.
   (`virtual-fs.ts:45-66`). This is the strongest file in the repo.
 - **Clean reducer core.** `app-state-reducer.mjs` is a pure, switch-based
   reducer with immutable updates and helper combinators (`withWindowState`,
-  `recomputeWindowMeta`, `withDialogs`). 25 dedicated unit tests in
-  `tests/node/reducer.test.js`.
+  `recomputeWindowMeta`, `withDialogs`). Dedicated unit tests in
+  `tests/node/reducer.test.js` cover the reducer in isolation.
 - **Reasonable store design.** `app-state.ts` uses `useSyncExternalStore` with a
   selector hook and reference-equality dispatch short-circuit
   (`app-state.ts:33-39`) — the right primitive for React 19.
@@ -96,6 +111,11 @@ is the root cause behind most of the file-level smells below.
 Onboarding docs that 404 are worse than none, because they imply a contract
 nobody can read. (This report is the first file in `docs/`.)
 
+- _Resolved (roadmap item 1):_ both files now exist —
+  `docs/adr-react-shell-state-contract.md` (the state contract) and
+  `docs/architecture.md` (system overview) — so every README/CHANGELOG
+  reference resolves. There are no dangling doc links.
+
 ### 3.3 TypeScript adoption is nominal
 
 `tsconfig.json` sets `strict: false` and lists only **two** files in `files`
@@ -104,6 +124,15 @@ the shell (all `.jsx`/`.js`/`.mjs`) is effectively untyped. The reducer action
 shape is hand-maintained as a JSDoc `@typedef` (`app-state-reducer.mjs:1-18`)
 and cast away with `as never` in `app-state.ts:34` — so action payloads are
 unchecked end to end.
+
+- _Resolved (roadmap items 5 & 6):_ `tsconfig.json` now sets `strict: true`
+  for the checked modules (`@types/react`/`@types/react-dom` added,
+  `_ensureInit` returns the live DB so transaction calls narrow off the
+  `IDBDatabase | null` field). The reducer action shape is now a checked
+  discriminated `WindoesAction` union with explicit per-slice `State` typedefs,
+  and the `as never` dispatch cast in `app-state.ts` is gone — action payloads
+  are type-checked at dispatch sites. Broadening `files`/`include` to cover the
+  rest of the `.jsx`/`.js` shell under `strict` remains future work.
 
 ### 3.4 Lint/type coverage excludes the largest code
 
@@ -118,6 +147,14 @@ The ESLint ruleset itself is minimal: five rules, **all set to `warn`**
 `no-implicit-globals`, `consistent-return`). Nothing fails the build, and there
 is no `eslint-plugin-react-hooks` despite heavy hook/effect usage.
 
+- _Resolved (roadmap items 2 & 4):_ the `windoes/public/applications/**`
+  ESLint ignore was removed, so `game.js` and the embedded apps now share the
+  shell's baseline (the dead state it surfaced was cleared).
+  `no-unused-vars`, `react/jsx-key`, and `no-implicit-globals` were promoted
+  from `warn` to **`error`**, and `eslint-plugin-react-hooks` was added
+  (`rules-of-hooks: error`, `exhaustive-deps: warn`). Lint passes with no
+  blocking errors.
+
 ### 3.5 Magic numbers & hardcoded strings
 
 Scattered literals with no named constant or explanation:
@@ -128,6 +165,10 @@ Scattered literals with no named constant or explanation:
   `2000`ms in `ie-window.jsx`.
 - Title truncation thresholds: `> 22 ? …substring(0, 20)` in `app-windows.jsx:60`,
   `> 30 ? …substring(0, 28)` in `ie-window.jsx`.
+
+- _Resolved (roadmap item 3):_ the boot delay, IE loading timeout,
+  taskbar-label truncation budgets, and the default Notepad save path are now
+  named constants in `windoes/constants.js` instead of inline literals.
 
 ### 3.6 Large, repetitive components
 
@@ -140,8 +181,8 @@ on every open. It's the prime candidate for a data-driven menu-item factory.
   model (`start-menu-config.js`) plus `MenuItem`/`Submenu` presentational
   components (`MenuItems.jsx`); the menu and submenus now render by mapping over
   config, and the per-item hover handlers collapse into a single rule keyed on
-  each panel's `chain` of ancestors. The component dropped to ~365 lines with
-  identical DOM ids/classes/ARIA and behaviour. The `useLayoutEffect`
+  each panel's `chain` of ancestors. The component is substantially smaller
+  while preserving DOM ids/classes/ARIA and behaviour. The `useLayoutEffect`
   positioning pass is intentionally retained (it derives from DOM measurement).
 
 ### 3.7 Lifecycle cleanup is HMR-only in several modules
@@ -151,6 +192,11 @@ collect listener-cleanup callbacks but only invoke them on Vite HMR dispose, not
 when the corresponding window actually closes. Long sessions can accumulate
 listeners/timeouts. (Functional impact is low in a single-page retro toy, but
 it's a latent leak and a confusing pattern.)
+
+- _Resolved (roadmap item 9):_ listener teardown for `app-windows.jsx` and
+  `ie-window.jsx` is now driven off window-close lifecycle in
+  `window-manager.jsx`/`state-applier.js`, not just HMR dispose, with
+  coverage in `tests/test-window-manager.js`.
 
 ### 3.8 Async error handling is inconsistent
 
@@ -175,35 +221,40 @@ gap: `writeFile` does not surface IndexedDB quota errors distinctly.)
 Ordered by value-to-effort. None of this is urgent — the app works and the
 gates are green — but it's the path to keeping it maintainable as it grows.
 
-### Phase 1 — Cheap, high-value hygiene (hours)
+> **Status (2026-06-04):** Phases 1–3 are complete (items 1–9), and Phase 4's
+> item 10 has landed. Phase 4 items 11–12 are still open. Completed items are
+> marked **✅ Done** with a note of how they landed.
 
-1. **Fix the docs.** Either add `docs/adr-react-shell-state-contract.md` and
-   `docs/architecture.md`, or remove the dangling references in README/CHANGELOG.
-2. **Promote lint rules to errors** where the code already complies (it does —
-   0 warnings today): turn `no-unused-vars`, `react/jsx-key`,
-   `no-implicit-globals` into `error`, and add `eslint-plugin-react-hooks`
-   (`rules-of-hooks: error`, `exhaustive-deps: warn`).
-3. **Extract magic constants** (paths, timeouts, truncation lengths) into
-   `constants.js`, which already exists.
+### Phase 1 — Cheap, high-value hygiene (hours) — ✅ Done
 
-### Phase 2 — Coverage of the blind spots (days)
+1. **✅ Fix the docs.** Added `docs/adr-react-shell-state-contract.md` and
+   `docs/architecture.md`; all README/CHANGELOG references now resolve.
+2. **✅ Promote lint rules to errors.** `no-unused-vars`, `react/jsx-key`, and
+   `no-implicit-globals` are now `error`, and `eslint-plugin-react-hooks` was
+   added (`rules-of-hooks: error`, `exhaustive-deps: warn`).
+3. **✅ Extract magic constants** (boot delay, IE loading timeout, taskbar-label
+   truncation budgets, default Notepad save path) into `windoes/constants.js`.
 
-4. **Lint + format the embedded apps.** Remove the
-   `windoes/public/applications/**` ignore (start with `--max-warnings`
-   tolerance), so `game.js` and friends get the same baseline.
-5. **Tighten TypeScript incrementally.** Flip `strict: true` for the two
-   existing `.ts` files, then migrate one more leaf module per PR
-   (`event-bus.js`, `constants.js`, `dragging.js` are low-risk starts).
-6. **Type the reducer action union.** Replace the JSDoc typedef + `as never`
-   with a discriminated union so action payloads are checked at dispatch sites.
+### Phase 2 — Coverage of the blind spots (days) — ✅ Done
 
-### Phase 3 — Pay down the architectural debt (weeks, incremental)
+4. **✅ Lint + format the embedded apps.** Removed the
+   `windoes/public/applications/**` ignore, so `game.js` and friends share the
+   shell baseline; the dead code it surfaced was cleared.
+5. **✅ Tighten TypeScript.** Flipped `strict: true` for the checked modules
+   (added `@types/react`/`@types/react-dom`; `_ensureInit` returns the live DB
+   so VFS transactions narrow off `IDBDatabase | null`). Broadening `strict`
+   coverage to the remaining `.jsx`/`.js` shell modules remains future work.
+6. **✅ Type the reducer action union.** Replaced the JSDoc typedef + `as never`
+   with a discriminated `WindoesAction` union, so action payloads are checked at
+   dispatch sites.
+
+### Phase 3 — Pay down the architectural debt (weeks, incremental) — ✅ Done
 
 7. **Write the state-contract ADR first** (Phase 1 doc), then **migrate one
    imperative subsystem at a time** off `WindoesApp.*` into reducer
    actions + React handlers. Suggested order by isolation: IE history →
    notepad file state → paint FS init → start-menu submenu state. Track the
-   `WindoesApp.*` reference count (currently 143) as a burn-down metric.
+   `WindoesApp.*` reference count as a burn-down metric.
    - _Done:_ **IE history** migrated into the `browser` reducer slice
      (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/
      `BROWSER_HISTORY_RESET`), retiring the module-level `historyStack`/
@@ -247,8 +298,12 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      are intentionally left as uncontrolled inputs.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close
    actions (React effect cleanup), not just HMR dispose.
+   - _Done:_ window-close lifecycle in `window-manager.jsx`/`state-applier.js`
+     now invokes the per-window listener teardown for `app-windows.jsx` and
+     `ie-window.jsx` (no longer HMR-only), covered by
+     `tests/test-window-manager.js`.
 
-### Phase 4 — Refactors that get easier after Phase 3
+### Phase 4 — Refactors that get easier after Phase 3 — ⏳ Item 10 done; 11–12 open
 
 10. **Decompose `StartMenu.jsx`** into a data-driven menu config + small
     presentational components; collapse the duplicated hover handlers.
@@ -256,8 +311,9 @@ gates are green — but it's the path to keeping it maintainable as it grows.
       `windoes/shell/start-menu-config.js` and rendered it through
       `MenuItem`/`Submenu` components in `windoes/shell/MenuItems.jsx`. The
       per-item `onXEnter`/`onXLeave` handlers collapse into one chain-derived
-      keep/leave rule, dropping `StartMenu.jsx` from 629 to ~365 lines with
-      unchanged DOM/ARIA/behaviour, guarded by `tests/node/start-menu-config.test.js`.
+      keep/leave rule, substantially reducing `StartMenu.jsx` while keeping
+      DOM/ARIA/behaviour unchanged, guarded by
+      `tests/node/start-menu-config.test.js`.
 11. **Add async error surfacing** — route VFS typed errors into the existing
     error-dialog UI instead of silent catches.
 12. **Add keyboard navigation** (arrow keys) to menus to complete the a11y story
@@ -267,8 +323,19 @@ gates are green — but it's the path to keeping it maintainable as it grows.
 
 ## 5. Suggested "done" metrics
 
-- `WindoesApp.*` references trending toward 0 (from 143).
-- Module-level `let` state in shell trending toward 0 (from 27).
-- `tsconfig` `files`/`include` covering the whole shell with `strict: true`.
-- Embedded apps under lint.
-- Zero dangling doc references.
+Status at the 2026-06-04 sync (☑ met, ☐ outstanding):
+
+- ☐ `WindoesApp.*` references continuing to trend down. The four Phase 3
+  subsystems were migrated off the bridge, but it remains the sanctioned legacy
+  compatibility layer; full removal is long-term work.
+- ☐ Module-level `let` state in shell continuing to trend down. Reduced by the
+  Phase 3 migrations (e.g. IE history, notepad path, FS-init guards); a handful
+  of legitimate non-state `let`s remain.
+- ☐ `tsconfig` `files`/`include` covering the whole shell with `strict: true`.
+  `strict: true` is on for the checked `.ts` modules; broadening coverage to
+  the rest of the `.jsx`/`.js` shell is still open.
+- ☑ Embedded apps under lint.
+- ☑ Zero dangling doc references.
+- ☑ Reducer unit-test coverage has grown, with new suites for the single-flight
+  memoizer (`once.test.js`) and the data-driven Start-menu config
+  (`start-menu-config.test.js`).

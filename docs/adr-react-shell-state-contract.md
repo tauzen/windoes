@@ -1,6 +1,6 @@
 # ADR: React shell state contract
 
-_Status: Accepted (documents current state) · Last updated: 2026-05-31_
+_Status: Accepted (documents current state) · Last updated: 2026-06-04_
 
 ## Context
 
@@ -62,11 +62,12 @@ Window focus and z-index are **derived** from `windows.stack` by
 
 ### 4. Action shape
 
-Actions are `{ type: string, ...payload }`. The action union is currently
-documented as a JSDoc `@typedef` at the top of `app-state-reducer.mjs` and cast
-with `as never` at the dispatch boundary (`app-state.ts:34`). Tightening this
-into a checked discriminated union is tracked as Phase 2 of the code-quality
-roadmap (see `docs/code-quality-report.md`).
+Actions are `{ type: string, ...payload }`. The action union is a checked
+discriminated `WindoesAction` union defined in `app-state-reducer.mjs`;
+`app-state.ts` imports it as the `dispatch` parameter type, so action payloads
+are type-checked at dispatch sites (the former `as never` cast is gone). This
+was completed as Phase 2 of the code-quality roadmap
+(see `docs/code-quality-report.md`).
 
 Action types in use today, grouped by slice:
 
@@ -98,7 +99,7 @@ imperative handle was removed once the Start menu moved to the `menus` slice.
 React component handlers. Do not add new global imperative handles, new
 module-level `let` state, or new DOM-as-state writes (`textContent`,
 `dataset`, cached `querySelector` results). The `WindoesApp.*` reference count
-is tracked as a burn-down metric (143 at the time of the code-quality report).
+is tracked as a qualitative burn-down metric in the code-quality report.
 
 ## Consequences
 
