@@ -6,6 +6,7 @@ function WindowTitlebar({ windowId, template }) {
     const win = s.windows?.byId?.[windowId];
     return !!(win && win.focused && win.open && !win.minimized);
   });
+  const maximized = WindoesApp.state.use((s) => !!s.windows?.byId?.[windowId]?.maximized);
 
   const hasMaxBtn = template.maximizeBtn || template.maximizeBtnId;
 
@@ -40,10 +41,10 @@ function WindowTitlebar({ windowId, template }) {
           <button
             className="ctrl-btn ctrl-max"
             type="button"
-            aria-label="Maximize"
+            aria-label={maximized ? 'Restore' : 'Maximize'}
             {...(template.maximizeBtnId ? { id: template.maximizeBtnId } : {})}
           >
-            □
+            {maximized ? '⧉' : '□'}
           </button>
         )}
         {template.closeBtnId && (

@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3 (item 8): the window maximize-button glyph (`□`/`⧉`) is
+  now rendered reactively from the reducer's `maximized` flag in the React
+  titlebar, removing the imperative `updateMaxBtn` DOM writer. The button also
+  exposes `aria-label="Restore"` while maximized.
 - Code-quality Phase 3: migrated Start-menu and submenu open state into the
   canonical `menus` reducer slice (`START_MENU_TOGGLE`/`START_MENU_CLOSE`/
   `MENU_SUBMENUS_KEEP`), removing the `startMenuOpen` prop-drilling, the

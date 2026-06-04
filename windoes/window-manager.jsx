@@ -10,7 +10,6 @@ import {
   applyWindowState,
   ensureAttached,
   handleWindowInteraction,
-  updateMaxBtn,
 } from './window-manager/state-applier.js';
 import {
   runCleanupFns,
@@ -50,9 +49,6 @@ const WindowManager = {
   _runCleanupFns: runCleanupFns,
   _ensureAttached(win) {
     ensureAttached(this, win);
-  },
-  _updateMaxBtn(win, maximized) {
-    updateMaxBtn(win, maximized);
   },
   _applyWindowState(win, state) {
     applyWindowState(this, win, state);

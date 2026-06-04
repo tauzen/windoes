@@ -223,6 +223,15 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      listed under roadmap item 7.
 8. **Eliminate DOM-as-state.** Replace `textContent`/`dataset` mutations and
    `querySelector` caches with component state/props as each subsystem migrates.
+   - _Done:_ Notepad title/path (see item 7) and the **window maximize-button
+     glyph**, which is now rendered reactively from `windows.byId[id].maximized`
+     in `WindowTitlebar` — retiring the imperative `updateMaxBtn`
+     `querySelector`/`textContent` writer in `state-applier.js`. (The button
+     also now exposes `aria-label="Restore"` while maximized.)
+   - _Remaining:_ the imperative `textContent` writes for the IE window and the
+     generic app window (title / status / task-button label) in `ie-window.jsx`
+     and `app-windows.jsx`. Other `dataset`/`querySelector` hits are legitimate
+     event-delegation/identity reads, not state.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close
    actions (React effect cleanup), not just HMR dispose.
 
