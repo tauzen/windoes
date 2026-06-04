@@ -6,6 +6,15 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 4 (item 10): decomposed the 629-line `StartMenu.jsx` into a
+  data-driven menu model (`windoes/shell/start-menu-config.js`) plus small
+  presentational components (`windoes/shell/MenuItems.jsx` — `MenuItem`,
+  `Submenu`). The cascading submenus and their items now render by mapping over
+  config, and the family of near-duplicate `onXEnter`/`onXLeave` hover handlers
+  collapses into a single rule derived from each panel's `chain` of ancestor
+  submenus. DOM ids, classes, ARIA attributes, and hover/leave behaviour are
+  unchanged; added `tests/node/start-menu-config.test.js` to lock the model's
+  structural invariants.
 - Code-quality Phase 3 (item 8): the Internet Explorer and generic app windows
   now render their title, status-bar text, and task-button label reactively from
   new `browser`/`app` reducer state (`BROWSER_SET_PAGE`/`BROWSER_SET_STATUS`,
