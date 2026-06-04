@@ -76,6 +76,16 @@
  * @typedef {Object} BrowserState
  * @property {string[]} historyStack
  * @property {number} historyIndex
+ * @property {string} title
+ * @property {string} status
+ * @property {string} taskLabel
+ */
+
+/**
+ * @typedef {Object} AppState
+ * @property {string} title
+ * @property {string} status
+ * @property {string} taskLabel
  */
 
 /**
@@ -88,6 +98,7 @@
  * @property {ExplorerState} explorer
  * @property {NotepadState} notepad
  * @property {BrowserState} browser
+ * @property {AppState} app
  */
 
 // ─── Action union ────────────────────────────────────────────────────────────
@@ -130,6 +141,10 @@
  *   | { type: 'BROWSER_BACK' }
  *   | { type: 'BROWSER_FORWARD' }
  *   | { type: 'BROWSER_HISTORY_RESET' }
+ *   | { type: 'BROWSER_SET_PAGE', title: string, taskLabel: string, status: string }
+ *   | { type: 'BROWSER_SET_STATUS', status: string }
+ *   | { type: 'APP_SET_PAGE', title: string, taskLabel: string, status: string }
+ *   | { type: 'APP_SET_STATUS', status: string }
  * )} WindoesAction
  */
 
@@ -187,6 +202,14 @@ export const initialState = {
   browser: {
     historyStack: [],
     historyIndex: -1,
+    title: 'about:blank - Microsoft Internet Explorer',
+    status: 'Done',
+    taskLabel: 'about:blank - Microsoft Int...',
+  },
+  app: {
+    title: 'Application',
+    status: 'Done',
+    taskLabel: 'Application',
   },
 };
 
@@ -338,6 +361,21 @@ function withBrowser(current, nextBrowser) {
     browser: {
       ...current.browser,
       ...nextBrowser,
+    },
+  };
+}
+
+/**
+ * @param {State} current
+ * @param {Partial<AppState>} nextApp
+ * @returns {State}
+ */
+function withApp(current, nextApp) {
+  return {
+    ...current,
+    app: {
+      ...current.app,
+      ...nextApp,
     },
   };
 }
@@ -592,6 +630,25 @@ export function reduce(current, action) {
         return current;
       }
       return withBrowser(current, { historyStack: [], historyIndex: -1 });
+    case 'BROWSER_SET_PAGE':
+      return withBrowser(current, {
+        title: action.title,
+        taskLabel: action.taskLabel,
+        status: action.status,
+      });
+    case 'BROWSER_SET_STATUS':
+      if (current.browser.status === action.status) return current;
+      return withBrowser(current, { status: action.status });
+
+    case 'APP_SET_PAGE':
+      return withApp(current, {
+        title: action.title,
+        taskLabel: action.taskLabel,
+        status: action.status,
+      });
+    case 'APP_SET_STATUS':
+      if (current.app.status === action.status) return current;
+      return withApp(current, { status: action.status });
 
     default:
       return current;

@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3 (item 8): the Internet Explorer and generic app windows
+  now render their title, status-bar text, and task-button label reactively from
+  new `browser`/`app` reducer state (`BROWSER_SET_PAGE`/`BROWSER_SET_STATUS`,
+  `APP_SET_PAGE`/`APP_SET_STATUS`), removing the imperative `textContent`
+  writes in `ie-window.jsx` and `app-windows.jsx`.
 - Code-quality Phase 3 (item 8): the window maximize-button glyph (`□`/`⧉`) is
   now rendered reactively from the reducer's `maximized` flag in the React
   titlebar, removing the imperative `updateMaxBtn` DOM writer. The button also
