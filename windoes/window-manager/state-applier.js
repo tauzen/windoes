@@ -13,11 +13,6 @@ export function ensureAttached(manager, win) {
   win._attached = true;
 }
 
-export function updateMaxBtn(win, maximized) {
-  const btn = win.el ? win.el.querySelector('.ctrl-max') : null;
-  if (btn) btn.textContent = maximized ? '⧉' : '□';
-}
-
 export function applyWindowState(manager, win, state) {
   if (!state) return;
 
@@ -63,8 +58,6 @@ export function applyWindowState(manager, win, state) {
         win.el.style.height = win._savedStyle.height;
       }
     }
-
-    manager._updateMaxBtn(win, !!state.maximized);
   }
 
   if (win.taskBtn) {
