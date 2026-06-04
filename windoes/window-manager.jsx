@@ -47,6 +47,19 @@ const WindowManager = {
 
   _trackListener: trackListener,
   _runCleanupFns: runCleanupFns,
+  _setupWindowLifecycle(win) {
+    if (!win || win._lifecycleActive) return;
+    const cleanups = [];
+    setupRegistrationListeners(this, win.id, win, cleanups);
+    win._lifecycleCleanups = cleanups;
+    win._lifecycleActive = true;
+  },
+  _cleanupWindowLifecycle(win) {
+    if (!win || !win._lifecycleActive) return;
+    this._runCleanupFns(win._lifecycleCleanups);
+    win._lifecycleCleanups = [];
+    win._lifecycleActive = false;
+  },
   _ensureAttached(win) {
     ensureAttached(this, win);
   },
@@ -79,13 +92,11 @@ const WindowManager = {
     if (config.el) config.el.dataset.windowId = id;
     config._attached = false;
     config._lastState = null;
+    config._lifecycleActive = false;
+    config._lifecycleCleanups = [];
     this._windows[id] = config;
 
     this._dispatch({ type: 'WINDOW_REGISTER', id });
-
-    const cleanups = [];
-    config._cleanups = cleanups;
-    setupRegistrationListeners(this, id, config, cleanups);
 
     return config;
   },
@@ -170,8 +181,7 @@ if (import.meta.hot) {
     unsubscribeWindowManagerBridge();
     unsubscribeWindowInteraction();
     Object.values(WindowManager._windows).forEach((win) => {
-      WindowManager._runCleanupFns(win?._cleanups);
-      win._cleanups = [];
+      WindowManager._cleanupWindowLifecycle(win);
     });
   });
 }

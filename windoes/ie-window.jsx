@@ -104,6 +104,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
   iframe: null, // IE manages its own iframe/navigation
   iframeSrc: null,
   hasChrome: true,
+  setup: setupIEWindowListeners,
 });
 
 // Get references to elements within the generated window
@@ -272,17 +273,21 @@ const historyBtn = ieConfig.el.querySelector('#historyBtn');
 const backBtn = ieConfig.el.querySelector('#backBtn');
 const forwardBtn = ieConfig.el.querySelector('#forwardBtn');
 
-goBtn.addEventListener('click', onGoClick);
-addressInput.addEventListener('keydown', onAddressKeyDown);
-homeBtn.addEventListener('click', onHomeClick);
-refreshBtn.addEventListener('click', onRefreshClick);
-stopBtn.addEventListener('click', onStopClick);
-searchBtn.addEventListener('click', onSearchClick);
-favoritesBtn.addEventListener('click', onFavoritesClick);
-historyBtn.addEventListener('click', onHistoryClick);
-backBtn.addEventListener('click', onBackClick);
-forwardBtn.addEventListener('click', onForwardClick);
-frame.addEventListener('load', onFrameLoad);
+function setupIEWindowListeners() {
+  goBtn.addEventListener('click', onGoClick);
+  addressInput.addEventListener('keydown', onAddressKeyDown);
+  homeBtn.addEventListener('click', onHomeClick);
+  refreshBtn.addEventListener('click', onRefreshClick);
+  stopBtn.addEventListener('click', onStopClick);
+  searchBtn.addEventListener('click', onSearchClick);
+  favoritesBtn.addEventListener('click', onFavoritesClick);
+  historyBtn.addEventListener('click', onHistoryClick);
+  backBtn.addEventListener('click', onBackClick);
+  forwardBtn.addEventListener('click', onForwardClick);
+  frame.addEventListener('load', onFrameLoad);
+
+  return cleanupIEWindowListeners;
+}
 
 function cleanupIEWindowListeners() {
   goBtn.removeEventListener('click', onGoClick);
@@ -297,12 +302,6 @@ function cleanupIEWindowListeners() {
   forwardBtn.removeEventListener('click', onForwardClick);
   frame.removeEventListener('load', onFrameLoad);
   body_loading(false);
-}
-
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {
-    cleanupIEWindowListeners();
-  });
 }
 
 // Register on shared namespace

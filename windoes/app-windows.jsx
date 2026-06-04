@@ -65,10 +65,20 @@ const appConfig = WindoesApp.WindowManager.register('app', {
   iframeId: 'appFrame',
   iframeSrc: null, // set dynamically per openApp call
   hasChrome: true,
+  setup: setupAppWindowListeners,
 });
 
 const appFrame = appConfig.el.querySelector('#appFrame');
-const appWindowCleanups = [];
+
+function setupAppWindowListeners() {
+  const releaseMessageListener = retainAppMessageListener();
+  appFrame.addEventListener('load', onAppFrameLoad);
+
+  return () => {
+    appFrame.removeEventListener('load', onAppFrameLoad);
+    releaseMessageListener();
+  };
+}
 
 function openApp(title, url) {
   const shortTitle =
@@ -92,11 +102,6 @@ function onAppFrameLoad() {
   WindoesApp.state.dispatch({ type: 'APP_SET_STATUS', status: 'Done' });
   WindoesApp.ui.setBodyLoading?.(false);
 }
-
-appFrame.addEventListener('load', onAppFrameLoad);
-appWindowCleanups.push(() => {
-  appFrame.removeEventListener('load', onAppFrameLoad);
-});
 
 // ══════════════════════════════════════════════
 // Winamp Window
@@ -133,6 +138,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
   headless: true,
   draggable: false,
   setup(config) {
+    const releaseMessageListener = retainAppMessageListener();
     const handle = config.el.querySelector('.headless-drag-handle');
     const closeBtn = config.el.querySelector('.headless-close-btn');
     const disposeDrag = makeDraggable(handle, config.el);
@@ -143,6 +149,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
     return () => {
       closeBtn.removeEventListener('click', onCloseClick);
       if (typeof disposeDrag === 'function') disposeDrag();
+      releaseMessageListener();
     };
   },
 });
@@ -180,6 +187,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
   iframeId: 'minesweeperFrame',
   iframeSrc: './applications/minesweeper/index.html',
   hasChrome: false,
+  setup: retainAppMessageListener,
 });
 
 function openMinesweeper() {
@@ -215,6 +223,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
   iframeId: 'solitaireFrame',
   iframeSrc: './applications/solitaire/index.html',
   hasChrome: false,
+  setup: retainAppMessageListener,
 });
 
 function openSolitaire() {
@@ -249,6 +258,7 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
   iframeId: 'paintFrame',
   iframeSrc: './applications/paint/index.html',
   hasChrome: false,
+  setup: retainAppMessageListener,
 });
 
 function buildPaintSrc(filePath = '') {
@@ -389,6 +399,22 @@ function onAppMessage(e) {
   }
 }
 
+let appMessageListenerRefs = 0;
+
+function retainAppMessageListener() {
+  if (appMessageListenerRefs === 0) {
+    window.addEventListener('message', onAppMessage);
+  }
+  appMessageListenerRefs += 1;
+
+  return () => {
+    appMessageListenerRefs = Math.max(0, appMessageListenerRefs - 1);
+    if (appMessageListenerRefs === 0) {
+      window.removeEventListener('message', onAppMessage);
+    }
+  };
+}
+
 // Register on shared namespace
 WindoesApp.open.app = openApp;
 WindoesApp.open.winamp = openWinamp;
@@ -396,13 +422,9 @@ WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 WindoesApp.open.paint = openPaint;
 
-// Listen for app messages (resize, close)
-window.addEventListener('message', onAppMessage);
-
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
+    appMessageListenerRefs = 0;
     window.removeEventListener('message', onAppMessage);
-    appWindowCleanups.forEach((cleanup) => cleanup());
-    appWindowCleanups.length = 0;
   });
 }

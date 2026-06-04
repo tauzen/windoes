@@ -22,6 +22,10 @@ export function applyWindowState(manager, win, state) {
     manager._ensureAttached(win);
   }
 
+  if (state.open || state.minimized) {
+    manager._setupWindowLifecycle(win);
+  }
+
   if (win.iframe && win.iframeSrc && state.open && !prev?.open) {
     const currentSrc = win.iframe.getAttribute('src');
     if (!currentSrc || currentSrc === '' || currentSrc === 'about:blank') {
@@ -76,6 +80,7 @@ export function applyWindowState(manager, win, state) {
       win.iframe.src = 'about:blank';
     }
     if (win.onClose) win.onClose();
+    manager._cleanupWindowLifecycle(win);
   }
 
   win._lastState = { ...state };
