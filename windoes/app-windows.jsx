@@ -10,6 +10,7 @@ import {
   VIEW_BORDER_PX,
 } from './constants.js';
 import { VirtualFS } from './virtual-fs.js';
+import { once } from './once.mjs';
 
 const appConfig = WindoesApp.WindowManager.register('app', {
   template: {
@@ -275,7 +276,6 @@ const minesweeperFrame = minesweeperConfig.el.querySelector('#minesweeperFrame')
 const solitaireFrame = solitaireConfig.el.querySelector('#solitaireFrame');
 const paintFrame = paintConfig.el.querySelector('#paintFrame');
 const paintFs = new VirtualFS();
-let paintFsInitPromise = null;
 
 async function ensureDir(path) {
   if (!(await paintFs.exists(path))) {
@@ -283,21 +283,11 @@ async function ensureDir(path) {
   }
 }
 
-function ensurePaintFs() {
-  if (!paintFsInitPromise) {
-    paintFsInitPromise = paintFs
-      .init()
-      .then(async () => {
-        await ensureDir('/C:');
-        await ensureDir('/C:/My Documents');
-      })
-      .catch((error) => {
-        paintFsInitPromise = null;
-        throw error;
-      });
-  }
-  return paintFsInitPromise;
-}
+const ensurePaintFs = once(async () => {
+  await paintFs.init();
+  await ensureDir('/C:');
+  await ensureDir('/C:/My Documents');
+});
 
 function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {

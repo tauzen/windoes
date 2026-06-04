@@ -4,6 +4,7 @@
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
 import { createExplorerNavigation } from './explorer-navigation.mjs';
+import { once } from './once.mjs';
 
 const fs = new VirtualFS();
 const navigation = createExplorerNavigation();
@@ -46,8 +47,6 @@ const MY_COMPUTER_ITEMS = [
     errorIcon: 'info',
   },
 ];
-
-let fsInitialized = false;
 
 let navigationViewStateCache = {
   address: 'My Computer',
@@ -106,9 +105,7 @@ function subscribeNavigationView(listener) {
   return navigation.subscribe(listener);
 }
 
-async function initFS() {
-  if (fsInitialized) return;
-
+const initFS = once(async () => {
   await fs.init();
   for (const dir of DEFAULT_DIRS) {
     if (!(await fs.exists(dir))) {
@@ -119,9 +116,7 @@ async function initFS() {
   if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
     await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
   }
-
-  fsInitialized = true;
-}
+});
 
 function readRootItems() {
   return MY_COMPUTER_ITEMS.map((item) => ({

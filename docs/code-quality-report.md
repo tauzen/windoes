@@ -204,7 +204,15 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      (`NOTEPAD_SET_FILE_PATH`), retiring the `textarea.dataset.filePath`
      DOM-as-state and the `#notepadTitle` `textContent` mutations in
      `utility-windows.jsx` (the title now renders from state via a
-     `NotepadTitleText` component). Next: paint FS init.
+     `NotepadTitleText` component).
+   - _Done:_ **Paint FS init** (and the sibling explorer/notepad FS-init
+     guards) unified behind a single tested single-flight memoizer
+     (`windoes/once.mjs`), retiring three module-level `let` guards
+     (`paintFsInitPromise`, `fsInitialized`, `fsReady`) and fixing a latent
+     concurrent-init race in `initFS`. An async-I/O init promise is
+     deliberately **not** reducer state — the reducer stays pure per the ADR —
+     so this milestone is a `let`-burndown/dedup rather than a reducer
+     migration. Next: start-menu submenu state.
 8. **Eliminate DOM-as-state.** Replace `textContent`/`dataset` mutations and
    `querySelector` caches with component state/props as each subsystem migrates.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close

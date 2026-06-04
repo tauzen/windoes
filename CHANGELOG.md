@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3: unified the paint/explorer/notepad VirtualFS-init
+  guards behind a single tested single-flight memoizer (`windoes/once.mjs`),
+  removing three module-level `let` flags (`paintFsInitPromise`,
+  `fsInitialized`, `fsReady`) and fixing a latent concurrent-init race in the
+  explorer's `initFS`.
 - Code-quality Phase 3: migrated Notepad's current-document path off the
   `textarea.dataset.filePath` DOM-as-state into a `notepad.currentFilePath`
   reducer field (`NOTEPAD_SET_FILE_PATH`). The titlebar now renders from state
