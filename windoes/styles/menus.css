@@ -62,9 +62,12 @@
   white-space: nowrap;
   position: relative;
 }
-.menu-item:hover {
+.menu-item:hover,
+.menu-item:focus,
+.menu-item:focus-visible {
   background: #000080;
   color: #fff;
+  outline: none;
 }
 
 .menu-icon {
@@ -179,9 +182,12 @@
   cursor: default;
   white-space: nowrap;
 }
-.submenu-item:hover {
+.submenu-item:hover,
+.submenu-item:focus,
+.submenu-item:focus-visible {
   background: #000080;
   color: #fff;
+  outline: none;
 }
 
 .submenu-icon {

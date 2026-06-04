@@ -8,6 +8,7 @@ import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-
 import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { openWindowBoilerplate } from './launch-helpers.js';
 import { DEFAULT_NOTEPAD_SAVE_PATH } from './constants.js';
+import { describeFsError } from './fs-errors.mjs';
 
 // Notepad title derives from the canonical store (`notepad.currentFilePath`)
 // rather than a DOM `textContent` mutation, so the titlebar stays in sync with
@@ -55,10 +56,16 @@ WindoesApp.WindowManager.register('myComputer', {
 function openMyComputer() {
   openWindowBoilerplate('myComputer');
 
-  initFS().then(() => {
-    resetNavigationState();
-    navigateTo(null);
-  });
+  initFS()
+    .then(() => {
+      resetNavigationState();
+      navigateTo(null);
+    })
+    .catch((error) => {
+      WindoesApp.bsod.showErrorDialog(
+        describeFsError(error, { title: 'My Computer', action: 'open My Computer' })
+      );
+    });
 }
 
 // ══════════════════════════════════════════════
@@ -120,11 +127,9 @@ async function saveNotepadDocument(forceSaveAs = false) {
 
     WindoesApp.sound.playClickSound();
   } catch (e) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Save Error',
-      text: `Cannot save file: ${e.message}`,
-      icon: 'error',
-    });
+    WindoesApp.bsod.showErrorDialog(
+      describeFsError(e, { title: 'Save Error', action: 'save the file' })
+    );
   }
 }
 

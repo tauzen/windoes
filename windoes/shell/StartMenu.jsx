@@ -1,10 +1,32 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
 import { useDialogFocus } from './dialog-focus.js';
 import { useOutsideClick } from './outside-click.js';
 import { MenuItem, Submenu } from './MenuItems.jsx';
 import { ROOT_FAMILY, ROOT_ITEMS, SUBMENUS } from './start-menu-config.js';
+import {
+  chainForSubmenu,
+  nextRovingIndex,
+  parentChainForSubmenu,
+  submenuKeyFromControlsId,
+} from './menu-keyboard.js';
+
+// Focusable entries within a single menu panel, in DOM order.
+function getMenuItems(panelEl) {
+  if (!panelEl) return [];
+  return Array.from(panelEl.querySelectorAll('[role="menuitem"]'));
+}
+
+// Focus a panel's item by index on the next frame — used after a submenu opens
+// (its panel is `display: none` until the reducer flips it open and React
+// commits the `open` class), so the element is focusable by the time this runs.
+function focusPanelItemSoon(panelEl, index = 0) {
+  requestAnimationFrame(() => {
+    const items = getMenuItems(panelEl);
+    items[Math.max(0, Math.min(index, items.length - 1))]?.focus();
+  });
+}
 
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
@@ -160,6 +182,83 @@ export default function StartMenu({ startButtonRef }) {
     return [parentEl, childEl];
   }
 
+  // Open `key`'s submenu (keeping its ancestors) and move focus into it. Shared
+  // by ArrowRight and Enter/Space on an arrow item.
+  function openSubmenuFromArrow(controlsId) {
+    const childKey = submenuKeyFromControlsId(controlsId);
+    if (!childKey) return false;
+    keepSubmenus(chainForSubmenu(childKey));
+    focusPanelItemSoon(panelRefs[childKey].current, 0);
+    return true;
+  }
+
+  // Roving keyboard navigation for the Start menu and its cascading submenus.
+  // `panelKey` is the submenu key for a cascading panel, or null for the root
+  // menu. Attached at the panel level so it sees keys from any focused item.
+  function onMenuKeyDown(event, panelKey) {
+    const panelEl = event.currentTarget;
+    const items = getMenuItems(panelEl);
+    const currentIndex = items.indexOf(document.activeElement);
+    const { key } = event;
+
+    if (key === 'Escape') {
+      event.preventDefault();
+      closeAllMenus();
+      requestAnimationFrame(() => startButtonRef?.current?.focus());
+      return;
+    }
+
+    const rovingIndex = nextRovingIndex(key, currentIndex, items.length);
+    if (rovingIndex !== null) {
+      event.preventDefault();
+      items[rovingIndex]?.focus();
+      return;
+    }
+
+    const controlsId = document.activeElement?.getAttribute?.('aria-controls');
+
+    if (key === 'ArrowRight') {
+      if (openSubmenuFromArrow(controlsId)) event.preventDefault();
+      return;
+    }
+
+    if (key === 'Enter' || key === ' ') {
+      // Arrow items have no click action; open their submenu. Leaf items fall
+      // through to the native button click.
+      if (controlsId && openSubmenuFromArrow(controlsId)) event.preventDefault();
+      return;
+    }
+
+    if (key === 'ArrowLeft' && panelKey) {
+      event.preventDefault();
+      keepSubmenus(parentChainForSubmenu(panelKey));
+      requestAnimationFrame(() => triggerRefs[panelKey]?.current?.focus());
+    }
+  }
+
+  // While the Start menu is open, Arrow keys on the Start button move focus into
+  // the menu (the button lives in the taskbar, outside the menu's keydown
+  // scope), and Escape closes it.
+  useEffect(() => {
+    const button = startButtonRef?.current;
+    if (!button || !startMenuOpen) return undefined;
+
+    function onStartButtonKeyDown(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const items = getMenuItems(startMenuRef.current);
+        if (items.length === 0) return;
+        e.preventDefault();
+        (e.key === 'ArrowDown' ? items[0] : items[items.length - 1]).focus();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeAllMenus();
+      }
+    }
+
+    button.addEventListener('keydown', onStartButtonKeyDown);
+    return () => button.removeEventListener('keydown', onStartButtonKeyDown);
+  }, [startMenuOpen, startButtonRef]);
+
   useLayoutEffect(() => {
     let nextStyles = submenuStyles;
 
@@ -213,6 +312,7 @@ export default function StartMenu({ startButtonRef }) {
         role="menu"
         aria-label="Start menu"
         style={{ display: shellVisible ? '' : 'none' }}
+        onKeyDown={(e) => onMenuKeyDown(e, null)}
         onMouseLeave={(e) => {
           const programsSubmenu = programsSubmenuRef.current;
           if (programsSubmenu && !programsSubmenu.contains(e.relatedTarget)) {
@@ -252,6 +352,7 @@ export default function StartMenu({ startButtonRef }) {
           onKeep={keepSubmenus}
           onSelect={onSelect}
           getAdjacentEls={() => getAdjacentEls(submenu)}
+          onKeyDown={(e) => onMenuKeyDown(e, submenu.key)}
         />
       ))}
 

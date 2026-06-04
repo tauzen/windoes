@@ -2,9 +2,11 @@
 
 _Originally authored: 2026-05-31 · Branch: `claude/amazing-hypatia-0daRl` · Commit: `d0e9ecc`_
 
-_Last synced with codebase: 2026-06-04 — **Phases 1–3 complete** (roadmap items
-1–9) **plus Phase 4 item 10**. Only Phase 4 items 11–12 remain open. Per-item
-progress is annotated inline below._
+_Last synced with codebase: 2026-06-04 — **Phases 1–4 complete** (roadmap items
+1–12). All roadmap items have landed; the remaining open work is the long-term
+`WindoesApp.*` burn-down and broadening `strict` typing to the whole shell
+(tracked under §5, not the numbered roadmap). Per-item progress is annotated
+inline below._
 
 A Windows-98-inspired desktop simulator (React 19 + JS/JSX, two `.ts` modules,
 Vite 8, Playwright). Shell code lives in `windoes/`; five embedded apps live
@@ -43,10 +45,11 @@ The remaining ESLint output is limited to non-blocking
 `react-hooks/exhaustive-deps` guidance surfaced by the newly-added
 `eslint-plugin-react-hooks`.
 
-**Overall grade: B+ / A−.** Roadmap items 1–10 are complete (all of Phases 1–3
-plus the Phase 4 Start-menu decomposition); the foundation is now backed by
-stricter gates and a documented state contract. Only the Phase 4 polish items
-11–12 (async-error surfacing, menu keyboard nav) remain.
+**Overall grade: A−.** Roadmap items 1–12 are complete (all of Phases 1–4); the
+foundation is now backed by stricter gates, a documented state contract,
+filesystem errors that surface through the dialog UI, and keyboard-navigable
+menus. The remaining work is the long-term `WindoesApp.*` burn-down and
+whole-shell `strict` typing (tracked under §5).
 
 ---
 
@@ -205,6 +208,16 @@ Several `.then()`/`await` flows (paint FS init, notepad save path, IE stop) lack
 leave the UI believing it succeeded. The VFS throws rich typed errors — the
 callers mostly don't use them.
 
+- _Resolved (roadmap item 11):_ a `describeFsError` mapper (`windoes/fs-errors.mjs`)
+  turns the VFS typed errors (keyed on `error.name`) into friendly,
+  era-appropriate dialog content, and the filesystem callers route through it:
+  the explorer open/create/delete catches, the Notepad save catch, and the
+  previously bare `initFS().then(…)` in `openMyComputer` (now `.catch()`-guarded)
+  all surface failures through the shared error-dialog UI instead of swallowing
+  them. The paint save/load flows already report failures back to the paint
+  iframe over `postMessage`, and the IE `stop()` `catch` is an intentional
+  cross-origin no-op. Covered by `tests/node/fs-errors.test.js`.
+
 ### 3.9 Note on a non-issue (scoped out)
 
 An automated pass flagged "path traversal to `/etc/`" in the notepad save flow.
@@ -212,7 +225,9 @@ An automated pass flagged "path traversal to `/etc/`" in the notepad save flow.
 store, and `normalizePath` resolves `..` segments _within_ the virtual tree
 (`virtual-fs.ts:53-65`) — there is no host filesystem to escape to. Worth a
 cosmetic guard against confusing `..` paths, nothing more. (One genuinely minor
-gap: `writeFile` does not surface IndexedDB quota errors distinctly.)
+gap: `writeFile` did not surface IndexedDB quota errors distinctly — now
+addressed: `describeFsError` maps the browser's `QuotaExceededError` to a
+dedicated "not enough free space" message as part of roadmap item 11.)
 
 ---
 
@@ -221,9 +236,8 @@ gap: `writeFile` does not surface IndexedDB quota errors distinctly.)
 Ordered by value-to-effort. None of this is urgent — the app works and the
 gates are green — but it's the path to keeping it maintainable as it grows.
 
-> **Status (2026-06-04):** Phases 1–3 are complete (items 1–9), and Phase 4's
-> item 10 has landed. Phase 4 items 11–12 are still open. Completed items are
-> marked **✅ Done** with a note of how they landed.
+> **Status (2026-06-04):** Phases 1–4 are complete (items 1–12). Completed items
+> are marked **✅ Done** with a note of how they landed.
 
 ### Phase 1 — Cheap, high-value hygiene (hours) — ✅ Done
 
@@ -303,7 +317,7 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      `ie-window.jsx` (no longer HMR-only), covered by
      `tests/test-window-manager.js`.
 
-### Phase 4 — Refactors that get easier after Phase 3 — ⏳ Item 10 done; 11–12 open
+### Phase 4 — Refactors that get easier after Phase 3 — ✅ Done
 
 10. **Decompose `StartMenu.jsx`** into a data-driven menu config + small
     presentational components; collapse the duplicated hover handlers.
@@ -314,10 +328,24 @@ gates are green — but it's the path to keeping it maintainable as it grows.
       keep/leave rule, substantially reducing `StartMenu.jsx` while keeping
       DOM/ARIA/behaviour unchanged, guarded by
       `tests/node/start-menu-config.test.js`.
-11. **Add async error surfacing** — route VFS typed errors into the existing
+11. **✅ Add async error surfacing** — route VFS typed errors into the existing
     error-dialog UI instead of silent catches.
-12. **Add keyboard navigation** (arrow keys) to menus to complete the a11y story
-    the `aria-*` attributes already promise.
+    - _Done:_ `windoes/fs-errors.mjs` maps the VFS typed errors (and the
+      browser's `QuotaExceededError`) to friendly dialog content via
+      `describeFsError`; the explorer open/create/delete catches, the Notepad
+      save catch, and the previously bare `openMyComputer` init promise now all
+      surface through `WindoesApp.bsod.showErrorDialog`. Unit-tested in
+      `tests/node/fs-errors.test.js`.
+12. **✅ Add keyboard navigation** (arrow keys) to menus to complete the a11y
+    story the `aria-*` attributes already promise.
+    - _Done:_ the Start menu and its cascading submenus now support roving
+      Up/Down (with Home/End and wrap-around), Right/Enter to open a submenu and
+      focus its first item, Left to collapse back to the parent trigger, and
+      Escape to close and return focus to the Start button. The pure navigation
+      logic lives in `windoes/shell/menu-keyboard.js` (unit-tested in
+      `tests/node/menu-keyboard.test.js`); `StartMenu.jsx`/`MenuItems.jsx` wire
+      it to focus, and `menus.css` adds a `:focus`/`:focus-visible` highlight so
+      the keyboard position is visible.
 
 ---
 
@@ -337,5 +365,7 @@ Status at the 2026-06-04 sync (☑ met, ☐ outstanding):
 - ☑ Embedded apps under lint.
 - ☑ Zero dangling doc references.
 - ☑ Reducer unit-test coverage has grown, with new suites for the single-flight
-  memoizer (`once.test.js`) and the data-driven Start-menu config
-  (`start-menu-config.test.js`).
+  memoizer (`once.test.js`), the data-driven Start-menu config
+  (`start-menu-config.test.js`), the filesystem-error mapper
+  (`fs-errors.test.js`), and the menu keyboard-navigation helpers
+  (`menu-keyboard.test.js`).

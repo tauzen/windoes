@@ -5,6 +5,7 @@ import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
 import { createExplorerNavigation } from './explorer-navigation.mjs';
 import { once } from './once.mjs';
+import { describeFsError } from './fs-errors.mjs';
 
 const fs = new VirtualFS();
 const navigation = createExplorerNavigation();
@@ -251,11 +252,9 @@ async function openFile(path) {
     const content = await fs.readFile(path);
     WindoesApp.open.notepad({ filePath: path, content });
   } catch (error) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error',
-      text: `Cannot open file: ${error.message}`,
-      icon: 'error',
-    });
+    WindoesApp.bsod.showErrorDialog(
+      describeFsError(error, { title: 'Error', action: `open '${basename(path)}'` })
+    );
   }
 }
 
@@ -302,11 +301,9 @@ async function createNewFolder() {
     WindoesApp.sound.playClickSound();
     await refreshExplorerView();
   } catch (error) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error',
-      text: `Cannot create folder: ${error.message}`,
-      icon: 'error',
-    });
+    WindoesApp.bsod.showErrorDialog(
+      describeFsError(error, { title: 'Error', action: `create '${name}'` })
+    );
   }
 }
 
@@ -324,11 +321,9 @@ async function deleteSelected(selectedPath) {
     WindoesApp.sound.playClickSound();
     await refreshExplorerView();
   } catch (error) {
-    WindoesApp.bsod.showErrorDialog({
-      title: 'Error Deleting File',
-      text: `Cannot delete '${name}': ${error.message}`,
-      icon: 'error',
-    });
+    WindoesApp.bsod.showErrorDialog(
+      describeFsError(error, { title: 'Error Deleting File', action: `delete '${name}'` })
+    );
   }
 }
 
