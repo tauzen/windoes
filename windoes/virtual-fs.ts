@@ -166,10 +166,11 @@ export class VirtualFS {
     this._broadcastChannel?.postMessage({ type: 'mutation', at: Date.now() });
   }
 
-  _ensureInit() {
+  _ensureInit(): IDBDatabase {
     if (!this._db) {
       throw new Error('VirtualFS not initialized. Call init() first.');
     }
+    return this._db;
   }
 
   async init() {
@@ -189,12 +190,12 @@ export class VirtualFS {
   }
 
   async mkdir(path: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
     const parent = parentPath(norm);
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readwrite');
 
     // Check parent exists
     if (parent !== null) {
@@ -222,13 +223,13 @@ export class VirtualFS {
    * @param {string|ArrayBuffer|ArrayBufferView|Blob} content
    */
   async writeFile(path: string, content: string | ArrayBuffer | ArrayBufferView | Blob) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
     const parent = parentPath(norm);
 
     const size = computeContentSize(content);
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readwrite');
 
     // Parent must exist
     if (parent !== null) {
@@ -259,10 +260,10 @@ export class VirtualFS {
   }
 
   async readFile(path: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
-    const { transaction, stores } = tx(this._db, ['files'], 'readonly');
+    const { transaction, stores } = tx(db, ['files'], 'readonly');
     const file = await req(stores.files.get(norm));
     await txDone(transaction);
 
@@ -271,7 +272,7 @@ export class VirtualFS {
   }
 
   async readdir(path: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
     const cached = this._readdirCache.get(norm);
@@ -279,7 +280,7 @@ export class VirtualFS {
       return cached.map((entry) => ({ ...entry }));
     }
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readonly');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readonly');
 
     // Verify directory exists
     const dir = await req(stores.directories.get(norm));
@@ -320,10 +321,10 @@ export class VirtualFS {
   }
 
   async stat(path: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readonly');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readonly');
     const dir = await req(stores.directories.get(norm));
     const file = await req(stores.files.get(norm));
     await txDone(transaction);
@@ -351,14 +352,14 @@ export class VirtualFS {
   }
 
   async rm(path: string, { recursive = false }: { recursive?: boolean } = {}) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
     if (norm === '/') {
       throw new Error('Cannot delete root directory');
     }
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readwrite');
 
     const dir = await req(stores.directories.get(norm));
     const file = await req(stores.files.get(norm));
@@ -396,7 +397,7 @@ export class VirtualFS {
   }
 
   async rename(oldPath: string, newPath: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const oldNorm = normalizePath(oldPath);
     const newNorm = normalizePath(newPath);
 
@@ -409,7 +410,7 @@ export class VirtualFS {
 
     // Single-transaction guarantee: all path rewrites happen inside one IndexedDB
     // readwrite transaction so rename is atomic with respect to observers.
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readwrite');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readwrite');
 
     // New parent must exist
     if (newParent !== null) {
@@ -468,10 +469,10 @@ export class VirtualFS {
   }
 
   async exists(path: string) {
-    this._ensureInit();
+    const db = this._ensureInit();
     const norm = normalizePath(path);
 
-    const { transaction, stores } = tx(this._db, ['directories', 'files'], 'readonly');
+    const { transaction, stores } = tx(db, ['directories', 'files'], 'readonly');
     const dir = await req(stores.directories.get(norm));
     const file = await req(stores.files.get(norm));
     await txDone(transaction);

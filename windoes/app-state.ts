@@ -6,7 +6,7 @@ import defaultConfig from './simulator.config.js';
 import { initialState, reduce } from './app-state-reducer.mjs';
 import { createEventBus } from './event-bus.js';
 
-type Action = { type: string; [key: string]: unknown };
+type Action = import('./app-state-reducer.mjs').WindoesAction;
 type Listener = () => void;
 type State = typeof initialState;
 
@@ -31,7 +31,7 @@ function emit() {
 }
 
 function dispatch(action: Action) {
-  const next = reduce(state, action as never);
+  const next = reduce(state, action);
   if (next !== state) {
     state = next;
     emit();

@@ -148,8 +148,6 @@ async function runTests() {
   // ── Test 8: Volume slider responds to changes ────────────────────────
   console.log('\nTest 8: Volume slider responds to changes');
 
-  const initialVolume = await page.evaluate(() => document.getElementById('volume-slider').value);
-
   await page.evaluate(() => {
     const slider = document.getElementById('volume-slider');
     slider.value = '30';
