@@ -136,6 +136,14 @@ submenu-leaf blocks and a family of almost-identical `onXEnter`/`onXLeave`
 handlers, plus imperative submenu positioning via `useLayoutEffect` recomputed
 on every open. It's the prime candidate for a data-driven menu-item factory.
 
+- _Done (roadmap item 10):_ `StartMenu.jsx` was decomposed into a data-driven
+  model (`start-menu-config.js`) plus `MenuItem`/`Submenu` presentational
+  components (`MenuItems.jsx`); the menu and submenus now render by mapping over
+  config, and the per-item hover handlers collapse into a single rule keyed on
+  each panel's `chain` of ancestors. The component dropped to ~365 lines with
+  identical DOM ids/classes/ARIA and behaviour. The `useLayoutEffect`
+  positioning pass is intentionally retained (it derives from DOM measurement).
+
 ### 3.7 Lifecycle cleanup is HMR-only in several modules
 
 Modules such as `app-windows.jsx`, `ie-window.jsx`, and `utility-windows.jsx`
@@ -244,6 +252,12 @@ gates are green — but it's the path to keeping it maintainable as it grows.
 
 10. **Decompose `StartMenu.jsx`** into a data-driven menu config + small
     presentational components; collapse the duplicated hover handlers.
+    - _Done:_ extracted the menu/submenu structure into
+      `windoes/shell/start-menu-config.js` and rendered it through
+      `MenuItem`/`Submenu` components in `windoes/shell/MenuItems.jsx`. The
+      per-item `onXEnter`/`onXLeave` handlers collapse into one chain-derived
+      keep/leave rule, dropping `StartMenu.jsx` from 629 to ~365 lines with
+      unchanged DOM/ARIA/behaviour, guarded by `tests/node/start-menu-config.test.js`.
 11. **Add async error surfacing** — route VFS typed errors into the existing
     error-dialog UI instead of silent catches.
 12. **Add keyboard navigation** (arrow keys) to menus to complete the a11y story

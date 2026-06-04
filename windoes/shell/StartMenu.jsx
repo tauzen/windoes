@@ -3,6 +3,8 @@ import WindoesApp from '../app-state.js';
 import { TASKBAR_HEIGHT_PX } from '../constants.js';
 import { useDialogFocus } from './dialog-focus.js';
 import { useOutsideClick } from './outside-click.js';
+import { MenuItem, Submenu } from './MenuItems.jsx';
+import { ROOT_FAMILY, ROOT_ITEMS, SUBMENUS } from './start-menu-config.js';
 
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
@@ -63,65 +65,28 @@ export default function StartMenu({ startButtonRef }) {
   const programsOpen = WindoesApp.state.use((s) => s.menus.programsOpen);
   const accessoriesOpen = WindoesApp.state.use((s) => s.menus.accessoriesOpen);
   const gamesOpen = WindoesApp.state.use((s) => s.menus.gamesOpen);
-  const submenuOpen = { programs: programsOpen, accessories: accessoriesOpen, games: gamesOpen };
+  const openByKey = { programs: programsOpen, accessories: accessoriesOpen, games: gamesOpen };
   const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
 
-  function keepSubmenus(...keepKeys) {
-    WindoesApp.state.dispatch({ type: 'MENU_SUBMENUS_KEEP', keep: keepKeys });
-  }
+  // Per-submenu DOM handles, keyed so the config-driven render and the
+  // positioning effect can look them up without bespoke per-panel wiring.
+  const panelRefs = {
+    programs: programsSubmenuRef,
+    accessories: accessoriesSubmenuRef,
+    games: gamesSubmenuRef,
+  };
+  const triggerRefs = {
+    programs: menuProgramsRef,
+    accessories: subAccessoriesRef,
+    games: subAccGamesRef,
+  };
 
-  function closeSubmenus() {
-    keepSubmenus();
+  function keepSubmenus(keepKeys = []) {
+    WindoesApp.state.dispatch({ type: 'MENU_SUBMENUS_KEEP', keep: keepKeys });
   }
 
   function closeAllMenus() {
     WindoesApp.state.dispatch({ type: 'START_MENU_CLOSE' });
-  }
-
-  function onProgramsEnter() {
-    keepSubmenus('programs');
-  }
-
-  function onSubAccessoriesEnter() {
-    keepSubmenus('programs', 'accessories');
-  }
-
-  function onSubAccGamesEnter() {
-    keepSubmenus('programs', 'accessories', 'games');
-  }
-
-  function onStartMenuLeave(e) {
-    const programsSubmenu = programsSubmenuRef.current;
-    if (programsSubmenu && !programsSubmenu.contains(e.relatedTarget)) {
-      closeSubmenus();
-    }
-  }
-
-  function onProgramsLeave(e) {
-    const startMenu = startMenuRef.current;
-    const accessoriesSubmenu = accessoriesSubmenuRef.current;
-    if (!startMenu || !accessoriesSubmenu) return;
-
-    if (!startMenu.contains(e.relatedTarget) && !accessoriesSubmenu.contains(e.relatedTarget)) {
-      closeSubmenus();
-    }
-  }
-
-  function onAccessoriesLeave(e) {
-    const programsSubmenu = programsSubmenuRef.current;
-    const gamesSubmenu = gamesSubmenuRef.current;
-    if (!programsSubmenu || !gamesSubmenu) return;
-
-    if (!programsSubmenu.contains(e.relatedTarget) && !gamesSubmenu.contains(e.relatedTarget)) {
-      keepSubmenus('programs');
-    }
-  }
-
-  function onGamesLeave(e) {
-    const accessoriesSubmenu = accessoriesSubmenuRef.current;
-    if (accessoriesSubmenu && !accessoriesSubmenu.contains(e.relatedTarget)) {
-      keepSubmenus('programs', 'accessories');
-    }
   }
 
   function performShutdown() {
@@ -131,11 +96,6 @@ export default function StartMenu({ startButtonRef }) {
   function performRestart() {
     WindoesApp.state.dispatch({ type: 'SHUTDOWN_SCREEN_HIDE' });
     location.reload();
-  }
-
-  function runAction(handler) {
-    handler();
-    closeAllMenus();
   }
 
   function showHelpDialog() {
@@ -153,44 +113,72 @@ export default function StartMenu({ startButtonRef }) {
     WindoesApp.sound.playClickSound();
   }
 
+  // Resolve a config `action` descriptor to a side-effecting handler.
+  function resolveAction(action) {
+    switch (action.kind) {
+      case 'open':
+        return () => WindoesApp.open[action.app]();
+      case 'openApp':
+        return () => WindoesApp.open.app(action.name, action.url);
+      case 'error':
+        return () =>
+          WindoesApp.bsod.showErrorDialog({
+            title: action.title,
+            text: action.text,
+            icon: action.icon,
+          });
+      case 'help':
+        return showHelpDialog;
+      case 'run':
+        return () => WindoesApp.runDialog.open?.();
+      case 'shutdown':
+        return () => openShutdownDialog('shutdown');
+      default:
+        return () => {};
+    }
+  }
+
+  // Activate a leaf item. The shutdown flow manages its own menu close (and
+  // ordering with the click sound), so it is not wrapped in the auto-close.
+  function onSelect(item) {
+    const run = resolveAction(item.action);
+    if (item.action.kind === 'shutdown') {
+      run();
+      return;
+    }
+    run();
+    closeAllMenus();
+  }
+
+  // Parent/child panels a submenu may yield focus to without collapsing, used
+  // by each panel's pointer-leave check.
+  function getAdjacentEls(submenu) {
+    const parentEl = submenu.parentKey
+      ? panelRefs[submenu.parentKey].current
+      : startMenuRef.current;
+    const childEl = submenu.childKey ? panelRefs[submenu.childKey].current : null;
+    return [parentEl, childEl];
+  }
+
   useLayoutEffect(() => {
     let nextStyles = submenuStyles;
 
-    if (programsOpen) {
+    for (const submenu of SUBMENUS) {
+      if (!openByKey[submenu.key]) continue;
       const style = calcSubmenuStyle({
-        submenuEl: programsSubmenuRef.current,
-        triggerEl: menuProgramsRef.current,
+        submenuEl: panelRefs[submenu.key].current,
+        triggerEl: triggerRefs[submenu.key].current,
+        parentSubmenuEl: submenu.parentKey ? panelRefs[submenu.parentKey].current : null,
       });
-      if (style && !areStylesEqual(submenuStyles.programs, style)) {
-        nextStyles = { ...nextStyles, programs: style };
-      }
-    }
-
-    if (accessoriesOpen) {
-      const style = calcSubmenuStyle({
-        submenuEl: accessoriesSubmenuRef.current,
-        triggerEl: subAccessoriesRef.current,
-        parentSubmenuEl: programsSubmenuRef.current,
-      });
-      if (style && !areStylesEqual(submenuStyles.accessories, style)) {
-        nextStyles = { ...nextStyles, accessories: style };
-      }
-    }
-
-    if (gamesOpen) {
-      const style = calcSubmenuStyle({
-        submenuEl: gamesSubmenuRef.current,
-        triggerEl: subAccGamesRef.current,
-        parentSubmenuEl: accessoriesSubmenuRef.current,
-      });
-      if (style && !areStylesEqual(submenuStyles.games, style)) {
-        nextStyles = { ...nextStyles, games: style };
+      if (style && !areStylesEqual(submenuStyles[submenu.key], style)) {
+        nextStyles = { ...nextStyles, [submenu.key]: style };
       }
     }
 
     if (nextStyles !== submenuStyles) {
       setSubmenuStyles(nextStyles);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startMenuOpen, programsOpen, accessoriesOpen, gamesOpen, submenuStyles]);
 
   const getStartMenuElements = useCallback(
@@ -225,289 +213,47 @@ export default function StartMenu({ startButtonRef }) {
         role="menu"
         aria-label="Start menu"
         style={{ display: shellVisible ? '' : 'none' }}
-        onMouseLeave={onStartMenuLeave}
+        onMouseLeave={(e) => {
+          const programsSubmenu = programsSubmenuRef.current;
+          if (programsSubmenu && !programsSubmenu.contains(e.relatedTarget)) {
+            keepSubmenus([]);
+          }
+        }}
       >
         <div className="start-rail" aria-hidden={true}>
           <span className="rail-windoes">Windoes</span>
           <strong>XD</strong>
         </div>
         <div className="menu-list" role="none">
-          <button
-            type="button"
-            role="menuitem"
-            className="menu-item"
-            id="menuWindoesUpdate"
-            onMouseEnter={closeSubmenus}
-            onClick={() => runAction(() => WindoesApp.open.internetExplorer())}
-          >
-            <span className="menu-icon menu-icon-winupdate" aria-hidden={true}></span>Windoes Update
-          </button>
-          <div className="menu-separator" role="separator"></div>
-          <button
-            ref={menuProgramsRef}
-            type="button"
-            role="menuitem"
-            className="menu-item menu-item-arrow"
-            id="menuPrograms"
-            aria-haspopup="menu"
-            aria-controls="programsSubmenu"
-            aria-expanded={submenuOpen.programs ? 'true' : 'false'}
-            onMouseEnter={onProgramsEnter}
-          >
-            <span className="menu-icon menu-icon-programs" aria-hidden={true}></span>Programs
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="menu-item"
-            id="menuHelp"
-            onMouseEnter={closeSubmenus}
-            onClick={() => runAction(showHelpDialog)}
-          >
-            <span className="menu-icon menu-icon-help" aria-hidden={true}></span>Help
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="menu-item"
-            id="menuRun"
-            onMouseEnter={closeSubmenus}
-            onClick={() => runAction(() => WindoesApp.runDialog.open?.())}
-          >
-            <span className="menu-icon menu-icon-run" aria-hidden={true}></span>Run...
-          </button>
-          <div className="menu-separator" role="separator"></div>
-          <button
-            type="button"
-            role="menuitem"
-            className="menu-item menu-shutdown"
-            id="menuShutdown"
-            onMouseEnter={closeSubmenus}
-            onClick={() => openShutdownDialog('shutdown')}
-          >
-            <span className="menu-icon menu-icon-shutdown" aria-hidden={true}></span>Shut Down...
-          </button>
+          {ROOT_ITEMS.map((item, i) => (
+            <MenuItem
+              key={item.id || `sep-${i}`}
+              item={item}
+              family={ROOT_FAMILY}
+              keep={item.submenu ? [item.submenu] : []}
+              expanded={item.submenu ? openByKey[item.submenu] : undefined}
+              triggerRef={item.submenu ? triggerRefs[item.submenu] : undefined}
+              onKeep={keepSubmenus}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       </div>
 
-      <div
-        ref={programsSubmenuRef}
-        className={`programs-submenu${submenuOpen.programs ? ' open' : ''}`}
-        id="programsSubmenu"
-        role="menu"
-        aria-label="Programs"
-        style={submenuStyles.programs}
-        onMouseLeave={onProgramsLeave}
-      >
-        <button
-          ref={subAccessoriesRef}
-          type="button"
-          role="menuitem"
-          className="submenu-item submenu-item-arrow"
-          id="subAccessories"
-          aria-haspopup="menu"
-          aria-controls="accessoriesSubmenu"
-          aria-expanded={submenuOpen.accessories ? 'true' : 'false'}
-          onMouseEnter={onSubAccessoriesEnter}
-        >
-          <span className="submenu-icon submenu-icon-folder" aria-hidden={true}></span>Accessories
-        </button>
-        <div className="context-menu-sep" role="separator"></div>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subIE"
-          onMouseEnter={() => keepSubmenus('programs')}
-          onClick={() => runAction(() => WindoesApp.open.internetExplorer())}
-        >
-          <span className="submenu-icon submenu-icon-ie" aria-hidden={true}></span>Internet Explorer
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subMSDOS"
-          onMouseEnter={() => keepSubmenus('programs')}
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.bsod.showErrorDialog({
-                title: 'MS-DOS Prompt',
-                text: 'This program cannot be run in Windoes mode.',
-                icon: 'error',
-              })
-            )
-          }
-        >
-          <span className="submenu-icon submenu-icon-msdos" aria-hidden={true}></span>MS-DOS Prompt
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subOutlook"
-          onMouseEnter={() => keepSubmenus('programs')}
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.bsod.showErrorDialog({
-                title: 'Outlook Express',
-                text: 'No Internet mail server is configured.\n\nPlease check your mail settings in Internet Accounts.',
-                icon: 'info',
-              })
-            )
-          }
-        >
-          <span className="submenu-icon submenu-icon-outlook" aria-hidden={true}></span>Outlook
-          Express
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subExplorer"
-          onMouseEnter={() => keepSubmenus('programs')}
-          onClick={() => runAction(() => WindoesApp.open.myComputer())}
-        >
-          <span className="submenu-icon submenu-icon-explorer" aria-hidden={true}></span>Windoes
-          Explorer
-        </button>
-      </div>
-
-      <div
-        ref={accessoriesSubmenuRef}
-        className={`programs-submenu accessories-submenu${submenuOpen.accessories ? ' open' : ''}`}
-        id="accessoriesSubmenu"
-        role="menu"
-        aria-label="Accessories"
-        style={submenuStyles.accessories}
-        onMouseLeave={onAccessoriesLeave}
-      >
-        <button
-          ref={subAccGamesRef}
-          type="button"
-          role="menuitem"
-          className="submenu-item submenu-item-arrow"
-          id="subAccGames"
-          aria-haspopup="menu"
-          aria-controls="gamesSubmenu"
-          aria-expanded={submenuOpen.games ? 'true' : 'false'}
-          onMouseEnter={onSubAccGamesEnter}
-        >
-          <span className="submenu-icon submenu-icon-folder" aria-hidden={true}></span>Games
-        </button>
-        <div className="context-menu-sep" role="separator"></div>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subAccCalculator"
-          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.bsod.showErrorDialog({
-                title: 'Calculator',
-                text: 'Calculator is not available in this version of Windoes.',
-                icon: 'info',
-              })
-            )
-          }
-        >
-          <span className="submenu-icon submenu-icon-calculator" aria-hidden={true}></span>
-          Calculator
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subAccImaging"
-          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.bsod.showErrorDialog({
-                title: 'Windoes',
-                text: 'This feature is not available in this version of Windoes.',
-                icon: 'info',
-              })
-            )
-          }
-        >
-          <span className="submenu-icon submenu-icon-imaging" aria-hidden={true}></span>Imaging
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subAccNotepad"
-          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
-          onClick={() => runAction(() => WindoesApp.open.notepad())}
-        >
-          <span className="submenu-icon submenu-icon-notepad" aria-hidden={true}></span>Notepad
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subAccPaint"
-          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
-          onClick={() => runAction(() => WindoesApp.open.paint())}
-        >
-          <span className="submenu-icon submenu-icon-paint" aria-hidden={true}></span>Paint
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subAccWordPad"
-          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
-          onClick={() => runAction(() => WindoesApp.open.notepad())}
-        >
-          <span className="submenu-icon submenu-icon-wordpad" aria-hidden={true}></span>WordPad
-        </button>
-      </div>
-
-      <div
-        ref={gamesSubmenuRef}
-        className={`programs-submenu games-submenu${submenuOpen.games ? ' open' : ''}`}
-        id="gamesSubmenu"
-        role="menu"
-        aria-label="Games"
-        style={submenuStyles.games}
-        onMouseLeave={onGamesLeave}
-      >
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subGameAsciiRunner"
-          onClick={() =>
-            runAction(() =>
-              WindoesApp.open.app('ASCII Runner', './applications/ascii-runner/index.html')
-            )
-          }
-        >
-          <span className="submenu-icon submenu-icon-ascii-runner" aria-hidden={true}></span>ASCII
-          Runner
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subGameMinesweeper"
-          onClick={() => runAction(() => WindoesApp.open.minesweeper())}
-        >
-          <span className="submenu-icon submenu-icon-minesweeper" aria-hidden={true}></span>
-          Minesweeper
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          className="submenu-item"
-          id="subGameSolitaire"
-          onClick={() => runAction(() => WindoesApp.open.solitaire())}
-        >
-          <span className="submenu-icon submenu-icon-solitaire" aria-hidden={true}></span>Solitaire
-        </button>
-      </div>
+      {SUBMENUS.map((submenu) => (
+        <Submenu
+          key={submenu.key}
+          submenu={submenu}
+          open={openByKey[submenu.key]}
+          style={submenuStyles[submenu.key]}
+          panelRef={panelRefs[submenu.key]}
+          childTriggerRef={submenu.childKey ? triggerRefs[submenu.childKey] : null}
+          openByKey={openByKey}
+          onKeep={keepSubmenus}
+          onSelect={onSelect}
+          getAdjacentEls={() => getAdjacentEls(submenu)}
+        />
+      ))}
 
       <div
         className={`dialog-overlay shutdown-dialog${shutdownOpen ? ' active' : ''}`}
