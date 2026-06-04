@@ -81,7 +81,6 @@ const WindoesApp = {
   // ── runtime service APIs (filled by feature modules) ────────
   bsod: {},
   open: {},
-  startMenu: {},
   runDialog: {},
   errorDialog: {},
   browser: {},

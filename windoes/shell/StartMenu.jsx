@@ -40,7 +40,7 @@ function calcSubmenuStyle({ submenuEl, triggerEl, parentSubmenuEl }) {
   };
 }
 
-export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuOpen }) {
+export default function StartMenu({ startButtonRef }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const startMenuRef = useRef(null);
   const programsSubmenuRef = useRef(null);
@@ -56,46 +56,38 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
   const shellVisible = bootDone && !shutdownScreenVisible;
   const [shutdownOption, setShutdownOption] = useState('shutdown');
-  const [submenuOpen, setSubmenuOpen] = useState({
-    programs: false,
-    accessories: false,
-    games: false,
-  });
+
+  // Start-menu and submenu open flags are canonical reducer state (`menus`).
+  // Submenu positioning, derived from DOM measurement, stays local.
+  const startMenuOpen = WindoesApp.state.use((s) => s.menus.startOpen);
+  const programsOpen = WindoesApp.state.use((s) => s.menus.programsOpen);
+  const accessoriesOpen = WindoesApp.state.use((s) => s.menus.accessoriesOpen);
+  const gamesOpen = WindoesApp.state.use((s) => s.menus.gamesOpen);
+  const submenuOpen = { programs: programsOpen, accessories: accessoriesOpen, games: gamesOpen };
   const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
 
-  function closeOtherSubmenus(...keepKeys) {
-    if (!startMenuOpen) {
-      setSubmenuOpen({ programs: false, accessories: false, games: false });
-      return;
-    }
-
-    const keep = new Set(keepKeys);
-    setSubmenuOpen({
-      programs: keep.has('programs'),
-      accessories: keep.has('accessories'),
-      games: keep.has('games'),
-    });
+  function keepSubmenus(...keepKeys) {
+    WindoesApp.state.dispatch({ type: 'MENU_SUBMENUS_KEEP', keep: keepKeys });
   }
 
   function closeSubmenus() {
-    closeOtherSubmenus();
+    keepSubmenus();
   }
 
   function closeAllMenus() {
-    setStartMenuOpen(false);
-    closeSubmenus();
+    WindoesApp.state.dispatch({ type: 'START_MENU_CLOSE' });
   }
 
   function onProgramsEnter() {
-    closeOtherSubmenus('programs');
+    keepSubmenus('programs');
   }
 
   function onSubAccessoriesEnter() {
-    closeOtherSubmenus('programs', 'accessories');
+    keepSubmenus('programs', 'accessories');
   }
 
   function onSubAccGamesEnter() {
-    closeOtherSubmenus('programs', 'accessories', 'games');
+    keepSubmenus('programs', 'accessories', 'games');
   }
 
   function onStartMenuLeave(e) {
@@ -121,14 +113,14 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
     if (!programsSubmenu || !gamesSubmenu) return;
 
     if (!programsSubmenu.contains(e.relatedTarget) && !gamesSubmenu.contains(e.relatedTarget)) {
-      closeOtherSubmenus('programs');
+      keepSubmenus('programs');
     }
   }
 
   function onGamesLeave(e) {
     const accessoriesSubmenu = accessoriesSubmenuRef.current;
     if (accessoriesSubmenu && !accessoriesSubmenu.contains(e.relatedTarget)) {
-      closeOtherSubmenus('programs', 'accessories');
+      keepSubmenus('programs', 'accessories');
     }
   }
 
@@ -162,15 +154,9 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
   }
 
   useLayoutEffect(() => {
-    if (!startMenuOpen) {
-      setSubmenuOpen({ programs: false, accessories: false, games: false });
-    }
-  }, [startMenuOpen]);
-
-  useLayoutEffect(() => {
     let nextStyles = submenuStyles;
 
-    if (submenuOpen.programs) {
+    if (programsOpen) {
       const style = calcSubmenuStyle({
         submenuEl: programsSubmenuRef.current,
         triggerEl: menuProgramsRef.current,
@@ -180,7 +166,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
       }
     }
 
-    if (submenuOpen.accessories) {
+    if (accessoriesOpen) {
       const style = calcSubmenuStyle({
         submenuEl: accessoriesSubmenuRef.current,
         triggerEl: subAccessoriesRef.current,
@@ -191,7 +177,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
       }
     }
 
-    if (submenuOpen.games) {
+    if (gamesOpen) {
       const style = calcSubmenuStyle({
         submenuEl: gamesSubmenuRef.current,
         triggerEl: subAccGamesRef.current,
@@ -205,31 +191,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
     if (nextStyles !== submenuStyles) {
       setSubmenuStyles(nextStyles);
     }
-  }, [startMenuOpen, submenuOpen, submenuStyles]);
-
-  useLayoutEffect(() => {
-    WindoesApp.startMenu.closeSubmenus = closeSubmenus;
-    WindoesApp.startMenu.closeAll = closeAllMenus;
-    WindoesApp.startMenu.isOpen = () => !!startMenuOpen;
-
-    WindoesApp.startMenu.toggle = () => {
-      setStartMenuOpen((open) => {
-        const nextOpen = !open;
-        if (!nextOpen) {
-          closeSubmenus();
-        }
-        WindoesApp.sound.playClickSound();
-        return nextOpen;
-      });
-    };
-
-    return () => {
-      delete WindoesApp.startMenu.closeSubmenus;
-      delete WindoesApp.startMenu.closeAll;
-      delete WindoesApp.startMenu.isOpen;
-      delete WindoesApp.startMenu.toggle;
-    };
-  }, [setStartMenuOpen, startMenuOpen]);
+  }, [startMenuOpen, programsOpen, accessoriesOpen, gamesOpen, submenuStyles]);
 
   const getStartMenuElements = useCallback(
     () => [
@@ -356,7 +318,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subIE"
-          onMouseEnter={() => closeOtherSubmenus('programs')}
+          onMouseEnter={() => keepSubmenus('programs')}
           onClick={() => runAction(() => WindoesApp.open.internetExplorer())}
         >
           <span className="submenu-icon submenu-icon-ie" aria-hidden={true}></span>Internet Explorer
@@ -366,7 +328,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subMSDOS"
-          onMouseEnter={() => closeOtherSubmenus('programs')}
+          onMouseEnter={() => keepSubmenus('programs')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -384,7 +346,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subOutlook"
-          onMouseEnter={() => closeOtherSubmenus('programs')}
+          onMouseEnter={() => keepSubmenus('programs')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -403,7 +365,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subExplorer"
-          onMouseEnter={() => closeOtherSubmenus('programs')}
+          onMouseEnter={() => keepSubmenus('programs')}
           onClick={() => runAction(() => WindoesApp.open.myComputer())}
         >
           <span className="submenu-icon submenu-icon-explorer" aria-hidden={true}></span>Windoes
@@ -439,7 +401,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subAccCalculator"
-          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
+          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -458,7 +420,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subAccImaging"
-          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
+          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
           onClick={() =>
             runAction(() =>
               WindoesApp.bsod.showErrorDialog({
@@ -476,7 +438,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subAccNotepad"
-          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
+          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
           onClick={() => runAction(() => WindoesApp.open.notepad())}
         >
           <span className="submenu-icon submenu-icon-notepad" aria-hidden={true}></span>Notepad
@@ -486,7 +448,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subAccPaint"
-          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
+          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
           onClick={() => runAction(() => WindoesApp.open.paint())}
         >
           <span className="submenu-icon submenu-icon-paint" aria-hidden={true}></span>Paint
@@ -496,7 +458,7 @@ export default function StartMenu({ startButtonRef, startMenuOpen, setStartMenuO
           role="menuitem"
           className="submenu-item"
           id="subAccWordPad"
-          onMouseEnter={() => closeOtherSubmenus('programs', 'accessories')}
+          onMouseEnter={() => keepSubmenus('programs', 'accessories')}
           onClick={() => runAction(() => WindoesApp.open.notepad())}
         >
           <span className="submenu-icon submenu-icon-wordpad" aria-hidden={true}></span>WordPad

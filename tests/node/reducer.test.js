@@ -245,6 +245,69 @@ test('SHUTDOWN_SCREEN_HIDE hides shutdown screen', async () => {
   assert.equal(next.dialogs.shutdownScreenVisible, false);
 });
 
+test('START_MENU_TOGGLE opens then closes the start menu', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'START_MENU_TOGGLE' });
+  assert.equal(next.menus.startOpen, true);
+  next = reduce(next, { type: 'START_MENU_TOGGLE' });
+  assert.equal(next.menus.startOpen, false);
+});
+
+test('START_MENU_TOGGLE collapses any open submenus', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.menus.startOpen = true;
+  current.menus.programsOpen = true;
+  current.menus.accessoriesOpen = true;
+  const next = reduce(current, { type: 'START_MENU_TOGGLE' });
+  assert.equal(next.menus.startOpen, false);
+  assert.equal(next.menus.programsOpen, false);
+  assert.equal(next.menus.accessoriesOpen, false);
+});
+
+test('START_MENU_CLOSE closes the menu and submenus, and is a no-op when already closed', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.menus.startOpen = true;
+  current.menus.programsOpen = true;
+  const next = reduce(current, { type: 'START_MENU_CLOSE' });
+  assert.equal(next.menus.startOpen, false);
+  assert.equal(next.menus.programsOpen, false);
+  const same = reduce(next, { type: 'START_MENU_CLOSE' });
+  assert.equal(same, next);
+});
+
+test('MENU_SUBMENUS_KEEP opens only the kept submenus', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.menus.startOpen = true;
+  const next = reduce(current, {
+    type: 'MENU_SUBMENUS_KEEP',
+    keep: ['programs', 'accessories'],
+  });
+  assert.equal(next.menus.programsOpen, true);
+  assert.equal(next.menus.accessoriesOpen, true);
+  assert.equal(next.menus.gamesOpen, false);
+});
+
+test('MENU_SUBMENUS_KEEP cannot open submenus while the start menu is closed', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.menus.startOpen = false;
+  current.menus.programsOpen = true;
+  const next = reduce(current, { type: 'MENU_SUBMENUS_KEEP', keep: ['programs'] });
+  assert.equal(next.menus.programsOpen, false);
+});
+
+test('MENU_SUBMENUS_KEEP is a no-op when the submenu set is unchanged', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.menus.startOpen = true;
+  current.menus.programsOpen = true;
+  const next = reduce(current, { type: 'MENU_SUBMENUS_KEEP', keep: ['programs'] });
+  assert.equal(next, current);
+});
+
 test('NOTEPAD_SET_FILE_PATH records the current document path', async () => {
   const { reduce } = await loadReducerModule();
   const next = reduce(await freshState(), {

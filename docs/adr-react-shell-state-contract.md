@@ -71,6 +71,7 @@ Action types in use today, grouped by slice:
 
 - **boot**: `BOOT_RESET`, `BOOT_BIOS_PROGRESS`, `BOOT_BIOS_STATUS`,
   `BOOT_PHASE_SPLASH`, `BOOT_SPLASH_PROGRESS`, `BOOT_FINISH`
+- **menus**: `START_MENU_TOGGLE`, `START_MENU_CLOSE`, `MENU_SUBMENUS_KEEP`
 - **windows**: `WINDOW_REGISTER`, `WINDOW_OPEN`, `WINDOW_CLOSE`,
   `WINDOW_FOCUS`, `WINDOW_MINIMIZE`, `WINDOW_RESTORE`, `WINDOW_MAXIMIZE_TOGGLE`
 - **dialogs**: `SHUTDOWN_DIALOG_OPEN`, `SHUTDOWN_DIALOG_CLOSE`,
@@ -86,8 +87,10 @@ Action types in use today, grouped by slice:
 
 Beyond `WindoesApp.state`, `WindoesApp.config`, and the typed `WindoesApp.events`
 buses, the namespace carries runtime-filled service handles
-(`open`, `bsod`, `ui`, `browser`, `startMenu`, `WindowManager`, …) populated by
-feature modules at import time. These exist **only as a compatibility bridge**.
+(`open`, `bsod`, `ui`, `browser`, `WindowManager`, …) populated by feature
+modules at import time. These exist **only as a compatibility bridge** and are
+burned down one subsystem at a time — e.g. the former `WindoesApp.startMenu`
+imperative handle was removed once the Start menu moved to the `menus` slice.
 
 **Rule for new code:** implement new shell behavior as reducer actions plus
 React component handlers. Do not add new global imperative handles, new

@@ -212,7 +212,15 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      concurrent-init race in `initFS`. An async-I/O init promise is
      deliberately **not** reducer state — the reducer stays pure per the ADR —
      so this milestone is a `let`-burndown/dedup rather than a reducer
-     migration. Next: start-menu submenu state.
+     migration.
+   - _Done:_ **Start-menu submenu state** migrated into the (previously dead)
+     `menus` reducer slice via `START_MENU_TOGGLE`/`START_MENU_CLOSE`/
+     `MENU_SUBMENUS_KEEP`. Removed the `startMenuOpen` prop-drilling, the
+     `submenuOpen` local `useState`, and the entire `WindoesApp.startMenu.*`
+     imperative bridge (4 handles + its consumers in `Taskbar`, `RunDialog`,
+     and `launch-helpers`). Submenu positioning, which is derived from DOM
+     measurement, intentionally stays local. This completes the subsystems
+     listed under roadmap item 7.
 8. **Eliminate DOM-as-state.** Replace `textContent`/`dataset` mutations and
    `querySelector` caches with component state/props as each subsystem migrates.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close

@@ -5,11 +5,7 @@ import WindoesApp from './app-state.js';
 // and play the click sound. Called from every open*() so the behaviour stays
 // consistent regardless of how the launcher was triggered.
 export function closeStartMenuBoilerplate() {
-  if (typeof WindoesApp.startMenu.closeAll === 'function') {
-    WindoesApp.startMenu.closeAll();
-  } else if (typeof WindoesApp.startMenu.closeSubmenus === 'function') {
-    WindoesApp.startMenu.closeSubmenus();
-  }
+  WindoesApp.state.dispatch({ type: 'START_MENU_CLOSE' });
   WindoesApp.sound.playClickSound();
 }
 
