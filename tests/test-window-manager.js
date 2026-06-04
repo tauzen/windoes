@@ -63,7 +63,8 @@ async function runTests() {
       listener,
       options
     ) {
-      if (listener) activeListeners.set(keyFor(this, type, listener, options), { target: this, type });
+      if (listener)
+        activeListeners.set(keyFor(this, type, listener, options), { target: this, type });
       return nativeAdd.call(this, type, listener, options);
     };
 
