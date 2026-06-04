@@ -69,6 +69,7 @@
  * @property {number} fileMenuTop
  * @property {boolean} saveDialogOpen
  * @property {string} saveDialogPath
+ * @property {string} currentFilePath
  */
 
 /**
@@ -117,6 +118,7 @@
  *   | { type: 'NOTEPAD_SAVE_DIALOG_OPEN', path?: string }
  *   | { type: 'NOTEPAD_SAVE_DIALOG_SET_PATH', path: string }
  *   | { type: 'NOTEPAD_SAVE_DIALOG_CLOSE' }
+ *   | { type: 'NOTEPAD_SET_FILE_PATH', path: string }
  *   | { type: 'SHUTDOWN_DIALOG_OPEN' }
  *   | { type: 'SHUTDOWN_DIALOG_CLOSE' }
  *   | { type: 'SHUTDOWN_SCREEN_SHOW' }
@@ -177,6 +179,7 @@ export const initialState = {
     fileMenuTop: 0,
     saveDialogOpen: false,
     saveDialogPath: DEFAULT_NOTEPAD_SAVE_PATH,
+    currentFilePath: '',
   },
   browser: {
     historyStack: [],
@@ -494,6 +497,9 @@ export function reduce(current, action) {
     case 'NOTEPAD_SAVE_DIALOG_CLOSE':
       if (!current.notepad.saveDialogOpen) return current;
       return withNotepad(current, { saveDialogOpen: false });
+    case 'NOTEPAD_SET_FILE_PATH':
+      if (current.notepad.currentFilePath === action.path) return current;
+      return withNotepad(current, { currentFilePath: action.path });
     case 'SHUTDOWN_DIALOG_OPEN':
       if (current.dialogs.shutdownOpen) return current;
       return withDialogs(current, { shutdownOpen: true });

@@ -151,7 +151,7 @@ async function runTests() {
         const oldContent = oldExists ? await fs.readFile(originalPath) : null;
         const title = document.getElementById('notepadTitle')?.textContent || '';
         const expectedTitle = `${basename(newPath)} - Notepad`;
-        const filePath = document.getElementById('notepadText')?.dataset?.filePath || '';
+        const filePath = WindoesApp.state.get().notepad.currentFilePath || '';
 
         return {
           newExists,
@@ -187,7 +187,7 @@ async function runTests() {
     const newState = await page.evaluate(() => {
       const textarea = document.getElementById('notepadText');
       const title = document.getElementById('notepadTitle')?.textContent || '';
-      const filePath = textarea?.dataset?.filePath || '';
+      const filePath = WindoesApp.state.get().notepad.currentFilePath || '';
       return {
         text: textarea ? textarea.value : null,
         title,

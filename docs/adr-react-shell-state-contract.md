@@ -53,7 +53,7 @@ belongs in one of these slices, not in module-level variables or the DOM:
 | `windows`   | `stack`, `focusedId`, and `byId` window records (the window model). |
 | `selection` | Selected desktop icon / explorer item.                              |
 | `explorer`  | Explorer context-menu position and selected path.                   |
-| `notepad`   | Notepad file-menu and save-dialog state.                            |
+| `notepad`   | Notepad file-menu, save-dialog, and current document path.          |
 | `browser`   | Internet Explorer history stack and current position.               |
 
 Window focus and z-index are **derived** from `windows.stack` by
@@ -78,7 +78,7 @@ Action types in use today, grouped by slice:
 - **explorer**: `EXPLORER_CONTEXT_OPEN`, `EXPLORER_CONTEXT_CLOSE`
 - **notepad**: `NOTEPAD_FILE_MENU_OPEN`, `NOTEPAD_FILE_MENU_CLOSE`,
   `NOTEPAD_SAVE_DIALOG_OPEN`, `NOTEPAD_SAVE_DIALOG_CLOSE`,
-  `NOTEPAD_SAVE_DIALOG_SET_PATH`
+  `NOTEPAD_SAVE_DIALOG_SET_PATH`, `NOTEPAD_SET_FILE_PATH`
 - **browser**: `BROWSER_NAVIGATE`, `BROWSER_BACK`, `BROWSER_FORWARD`,
   `BROWSER_HISTORY_RESET`
 

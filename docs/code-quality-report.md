@@ -199,7 +199,12 @@ gates are green — but it's the path to keeping it maintainable as it grows.
    - _Done:_ **IE history** migrated into the `browser` reducer slice
      (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/
      `BROWSER_HISTORY_RESET`), retiring the module-level `historyStack`/
-     `historyIndex` variables in `ie-window.jsx`. Next: notepad file state.
+     `historyIndex` variables in `ie-window.jsx`.
+   - _Done:_ **Notepad file state** migrated into `notepad.currentFilePath`
+     (`NOTEPAD_SET_FILE_PATH`), retiring the `textarea.dataset.filePath`
+     DOM-as-state and the `#notepadTitle` `textContent` mutations in
+     `utility-windows.jsx` (the title now renders from state via a
+     `NotepadTitleText` component). Next: paint FS init.
 8. **Eliminate DOM-as-state.** Replace `textContent`/`dataset` mutations and
    `querySelector` caches with component state/props as each subsystem migrates.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close

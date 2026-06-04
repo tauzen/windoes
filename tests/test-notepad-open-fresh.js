@@ -20,7 +20,7 @@ async function getNotepadSnapshot(page) {
     const title = document.getElementById('notepadTitle')?.textContent || '';
     return {
       text: textarea ? textarea.value : null,
-      filePath: textarea?.dataset?.filePath || '',
+      filePath: WindoesApp.state.get().notepad.currentFilePath || '',
       title,
     };
   });
