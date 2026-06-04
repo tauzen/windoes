@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3: migrated Start-menu and submenu open state into the
+  canonical `menus` reducer slice (`START_MENU_TOGGLE`/`START_MENU_CLOSE`/
+  `MENU_SUBMENUS_KEEP`), removing the `startMenuOpen` prop-drilling, the
+  `submenuOpen` local component state, and the entire `WindoesApp.startMenu.*`
+  imperative bridge (consumed by the taskbar, Run dialog, and launch helpers).
 - Code-quality Phase 3: unified the paint/explorer/notepad VirtualFS-init
   guards behind a single tested single-flight memoizer (`windoes/once.mjs`),
   removing three module-level `let` flags (`paintFsInitPromise`,

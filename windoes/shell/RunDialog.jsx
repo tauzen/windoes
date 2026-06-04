@@ -19,7 +19,7 @@ export default function RunDialog() {
   };
 
   function openDialog() {
-    WindoesApp.startMenu.closeAll?.();
+    WindoesApp.state.dispatch({ type: 'START_MENU_CLOSE' });
     setRunValue('');
     setIsOpen(true);
     WindoesApp.sound.playClickSound();

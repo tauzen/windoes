@@ -104,6 +104,9 @@
  *   | { type: 'BOOT_PHASE_SPLASH', status?: string }
  *   | { type: 'BOOT_SPLASH_PROGRESS', progress: number, status?: string }
  *   | { type: 'BOOT_FINISH' }
+ *   | { type: 'START_MENU_TOGGLE' }
+ *   | { type: 'START_MENU_CLOSE' }
+ *   | { type: 'MENU_SUBMENUS_KEEP', keep?: string[] }
  *   | { type: 'WINDOW_REGISTER', id: string }
  *   | { type: 'WINDOW_OPEN', id: string }
  *   | { type: 'WINDOW_CLOSE', id: string }
@@ -311,6 +314,21 @@ function withNotepad(current, nextNotepad) {
 
 /**
  * @param {State} current
+ * @param {Partial<MenusState>} nextMenus
+ * @returns {State}
+ */
+function withMenus(current, nextMenus) {
+  return {
+    ...current,
+    menus: {
+      ...current.menus,
+      ...nextMenus,
+    },
+  };
+}
+
+/**
+ * @param {State} current
  * @param {Partial<BrowserState>} nextBrowser
  * @returns {State}
  */
@@ -399,6 +417,45 @@ export function reduce(current, action) {
           done: true,
         },
       };
+
+    case 'START_MENU_TOGGLE':
+      // Toggling always collapses submenus; they reopen on hover.
+      return withMenus(current, {
+        startOpen: !current.menus.startOpen,
+        programsOpen: false,
+        accessoriesOpen: false,
+        gamesOpen: false,
+      });
+    case 'START_MENU_CLOSE':
+      if (
+        !current.menus.startOpen &&
+        !current.menus.programsOpen &&
+        !current.menus.accessoriesOpen &&
+        !current.menus.gamesOpen
+      ) {
+        return current;
+      }
+      return withMenus(current, {
+        startOpen: false,
+        programsOpen: false,
+        accessoriesOpen: false,
+        gamesOpen: false,
+      });
+    case 'MENU_SUBMENUS_KEEP': {
+      // Submenus can only be open while the Start menu itself is open.
+      const keep = new Set(current.menus.startOpen ? action.keep || [] : []);
+      const programsOpen = keep.has('programs');
+      const accessoriesOpen = keep.has('accessories');
+      const gamesOpen = keep.has('games');
+      if (
+        programsOpen === current.menus.programsOpen &&
+        accessoriesOpen === current.menus.accessoriesOpen &&
+        gamesOpen === current.menus.gamesOpen
+      ) {
+        return current;
+      }
+      return withMenus(current, { programsOpen, accessoriesOpen, gamesOpen });
+    }
 
     case 'WINDOW_REGISTER':
       return withWindowState(current, action.id, () => {});

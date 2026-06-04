@@ -5,9 +5,10 @@ function formatClock(now) {
   return now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export default function Taskbar({ taskbarRef, startButtonRef, startMenuOpen, setStartMenuOpen }) {
+export default function Taskbar({ taskbarRef, startButtonRef }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const shutdownScreenVisible = WindoesApp.state.use((s) => s.dialogs.shutdownScreenVisible);
+  const startMenuOpen = WindoesApp.state.use((s) => s.menus.startOpen);
   const [clockText, setClockText] = useState(() => formatClock(new Date()));
 
   useEffect(() => {
@@ -61,11 +62,7 @@ export default function Taskbar({ taskbarRef, startButtonRef, startMenuOpen, set
         aria-controls="startMenu"
         aria-expanded={startMenuOpen ? 'true' : 'false'}
         onClick={() => {
-          if (typeof WindoesApp.startMenu.toggle === 'function') {
-            WindoesApp.startMenu.toggle();
-            return;
-          }
-          setStartMenuOpen((open) => !open);
+          WindoesApp.state.dispatch({ type: 'START_MENU_TOGGLE' });
           WindoesApp.sound.playClickSound();
         }}
       >
