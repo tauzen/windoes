@@ -42,8 +42,9 @@ Embedded apps (standalone, in iframes)
   with immutable updates and helper combinators (`withWindowState`,
   `recomputeWindowMeta`, `withDialogs`, `withNotepad`). Unit-tested in
   `tests/node/reducer.test.js`.
-- The canonical state slices are `boot`, `menus`, `dialogs`, `windows`,
-  `selection`, `explorer`, `notepad`. See the ADR for the full contract.
+- Canonical state is organized into reducer slices for boot, menus, dialogs,
+  windows, selection, explorer, notepad, browser, and generic app metadata. See
+  the ADR for the full contract.
 
 ## Windowing
 

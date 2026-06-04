@@ -99,7 +99,7 @@ imperative handle was removed once the Start menu moved to the `menus` slice.
 React component handlers. Do not add new global imperative handles, new
 module-level `let` state, or new DOM-as-state writes (`textContent`,
 `dataset`, cached `querySelector` results). The `WindoesApp.*` reference count
-is tracked as a burn-down metric (143 at the time of the code-quality report).
+is tracked as a qualitative burn-down metric in the code-quality report.
 
 ## Consequences
 

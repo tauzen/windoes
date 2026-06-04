@@ -30,18 +30,18 @@ in parentheses where they have moved).
 
 | Signal                                           | Result                                                  |
 | ------------------------------------------------ | ------------------------------------------------------- |
-| `npm run lint` (eslint)                          | ✅ 0 errors / 1 warning (`exhaustive-deps`)             |
+| `npm run lint` (eslint)                          | ✅ clean, with only non-blocking hook warnings          |
 | `npm run typecheck` (tsc, `strict: true`)        | ✅ clean                                                |
 | `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                                 |
-| Reducer unit tests                               | 43 cases (was 25)                                       |
+| Reducer unit tests                               | ✅ expanded reducer coverage                            |
 | CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`)            |
 | Lint/format coverage of embedded apps            | ✅ now linted (ignore removed)                          |
-| `WindoesApp.*` imperative bridge                 | ⚠️ still present across 21 files (legacy bridge by ADR) |
-| Docs referenced but missing                      | ✅ 0 (all under `docs/`)                                |
+| `WindoesApp.*` imperative bridge                 | ⚠️ still present as the legacy bridge described by ADR  |
+| Docs referenced but missing                      | ✅ none known (all referenced docs live under `docs/`)  |
 
-The single ESLint warning is `react-hooks/exhaustive-deps` in
-`NotepadDialogs.jsx`, surfaced by the newly-added `eslint-plugin-react-hooks`;
-it is configured as a `warn` (non-blocking) rule.
+The remaining ESLint output is limited to non-blocking
+`react-hooks/exhaustive-deps` guidance surfaced by the newly-added
+`eslint-plugin-react-hooks`.
 
 **Overall grade: B+ / A−.** Roadmap items 1–10 are complete (all of Phases 1–3
 plus the Phase 4 Start-menu decomposition); the foundation is now backed by
@@ -52,9 +52,10 @@ stricter gates and a documented state contract. Only the Phase 4 polish items
 
 ## 2. Strengths
 
-- **Clean tooling gates.** ESLint and `tsc --noEmit` both pass with zero
-  warnings. Prettier + Husky + `lint-staged` enforce formatting on commit. CI
-  runs the full `test:all` matrix on every non-`main` push.
+- **Clean tooling gates.** ESLint and `tsc --noEmit` pass, with hook dependency
+  guidance kept as non-blocking lint output. Prettier + Husky + `lint-staged`
+  enforce formatting on commit. CI runs the full `test:all` matrix on every
+  non-`main` push.
 - **Well-architected virtual filesystem** (`windoes/virtual-fs.ts`). Dedicated
   error classes (`FileNotFoundError`, `FileExistsError`, …), single-transaction
   atomic `rename`/`rm` (`virtual-fs.ts:410`), `readdir` caching with
@@ -63,8 +64,8 @@ stricter gates and a documented state contract. Only the Phase 4 polish items
   (`virtual-fs.ts:45-66`). This is the strongest file in the repo.
 - **Clean reducer core.** `app-state-reducer.mjs` is a pure, switch-based
   reducer with immutable updates and helper combinators (`withWindowState`,
-  `recomputeWindowMeta`, `withDialogs`). 25 dedicated unit tests in
-  `tests/node/reducer.test.js`.
+  `recomputeWindowMeta`, `withDialogs`). Dedicated unit tests in
+  `tests/node/reducer.test.js` cover the reducer in isolation.
 - **Reasonable store design.** `app-state.ts` uses `useSyncExternalStore` with a
   selector hook and reference-equality dispatch short-circuit
   (`app-state.ts:33-39`) — the right primitive for React 19.
@@ -151,7 +152,8 @@ is no `eslint-plugin-react-hooks` despite heavy hook/effect usage.
   shell's baseline (the dead state it surfaced was cleared).
   `no-unused-vars`, `react/jsx-key`, and `no-implicit-globals` were promoted
   from `warn` to **`error`**, and `eslint-plugin-react-hooks` was added
-  (`rules-of-hooks: error`, `exhaustive-deps: warn`). Lint runs at 0 errors.
+  (`rules-of-hooks: error`, `exhaustive-deps: warn`). Lint passes with no
+  blocking errors.
 
 ### 3.5 Magic numbers & hardcoded strings
 
@@ -179,8 +181,8 @@ on every open. It's the prime candidate for a data-driven menu-item factory.
   model (`start-menu-config.js`) plus `MenuItem`/`Submenu` presentational
   components (`MenuItems.jsx`); the menu and submenus now render by mapping over
   config, and the per-item hover handlers collapse into a single rule keyed on
-  each panel's `chain` of ancestors. The component dropped to ~365 lines with
-  identical DOM ids/classes/ARIA and behaviour. The `useLayoutEffect`
+  each panel's `chain` of ancestors. The component is substantially smaller
+  while preserving DOM ids/classes/ARIA and behaviour. The `useLayoutEffect`
   positioning pass is intentionally retained (it derives from DOM measurement).
 
 ### 3.7 Lifecycle cleanup is HMR-only in several modules
@@ -252,7 +254,7 @@ gates are green — but it's the path to keeping it maintainable as it grows.
    imperative subsystem at a time** off `WindoesApp.*` into reducer
    actions + React handlers. Suggested order by isolation: IE history →
    notepad file state → paint FS init → start-menu submenu state. Track the
-   `WindoesApp.*` reference count (currently 143) as a burn-down metric.
+   `WindoesApp.*` reference count as a burn-down metric.
    - _Done:_ **IE history** migrated into the `browser` reducer slice
      (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/
      `BROWSER_HISTORY_RESET`), retiring the module-level `historyStack`/
@@ -309,8 +311,9 @@ gates are green — but it's the path to keeping it maintainable as it grows.
       `windoes/shell/start-menu-config.js` and rendered it through
       `MenuItem`/`Submenu` components in `windoes/shell/MenuItems.jsx`. The
       per-item `onXEnter`/`onXLeave` handlers collapse into one chain-derived
-      keep/leave rule, dropping `StartMenu.jsx` from 629 to ~365 lines with
-      unchanged DOM/ARIA/behaviour, guarded by `tests/node/start-menu-config.test.js`.
+      keep/leave rule, substantially reducing `StartMenu.jsx` while keeping
+      DOM/ARIA/behaviour unchanged, guarded by
+      `tests/node/start-menu-config.test.js`.
 11. **Add async error surfacing** — route VFS typed errors into the existing
     error-dialog UI instead of silent catches.
 12. **Add keyboard navigation** (arrow keys) to menus to complete the a11y story
@@ -322,17 +325,17 @@ gates are green — but it's the path to keeping it maintainable as it grows.
 
 Status at the 2026-06-04 sync (☑ met, ☐ outstanding):
 
-- ☐ `WindoesApp.*` references trending toward 0 (from 143). The four Phase 3
+- ☐ `WindoesApp.*` references continuing to trend down. The four Phase 3
   subsystems were migrated off the bridge, but it remains the sanctioned legacy
-  compatibility layer across 21 files; full removal is long-term work.
-- ☐ Module-level `let` state in shell trending toward 0 (from 27). Reduced by
-  the Phase 3 migrations (e.g. IE history, notepad path, FS-init guards); a
-  handful of legitimate non-state `let`s remain.
+  compatibility layer; full removal is long-term work.
+- ☐ Module-level `let` state in shell continuing to trend down. Reduced by the
+  Phase 3 migrations (e.g. IE history, notepad path, FS-init guards); a handful
+  of legitimate non-state `let`s remain.
 - ☐ `tsconfig` `files`/`include` covering the whole shell with `strict: true`.
   `strict: true` is on for the checked `.ts` modules; broadening coverage to
   the rest of the `.jsx`/`.js` shell is still open.
 - ☑ Embedded apps under lint.
 - ☑ Zero dangling doc references.
-- ☑ Reducer unit-test coverage grown (25 → 43 cases), with new suites for the
-  single-flight memoizer (`once.test.js`) and the data-driven Start-menu config
+- ☑ Reducer unit-test coverage has grown, with new suites for the single-flight
+  memoizer (`once.test.js`) and the data-driven Start-menu config
   (`start-menu-config.test.js`).
