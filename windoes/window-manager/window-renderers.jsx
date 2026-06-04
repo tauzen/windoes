@@ -60,12 +60,17 @@ function WindowShell({ windowId, template }) {
   const viewStyle = template.viewStyle;
   const notepadFileMenuOpen = WindoesApp.state.use((s) => !!s.notepad?.fileMenuOpen);
 
+  // `title` may be a React element (reactive titles), so prefer a plain-string
+  // label for the menubar to avoid "[object Object] menu".
+  const menubarLabel =
+    typeof template.title === 'string' ? template.title : template.ariaLabel || 'Window';
+
   return (
     <>
       <WindowTitlebar windowId={windowId} template={template} />
 
       {template.menubar && (
-        <div className="menubar" role="menubar" aria-label={`${template.title} menu`}>
+        <div className="menubar" role="menubar" aria-label={`${menubarLabel} menu`}>
           {template.menubar.map((item, index) => {
             if (typeof item === 'string') {
               return (

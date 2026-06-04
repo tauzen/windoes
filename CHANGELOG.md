@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3: migrated Notepad's current-document path off the
+  `textarea.dataset.filePath` DOM-as-state into a `notepad.currentFilePath`
+  reducer field (`NOTEPAD_SET_FILE_PATH`). The titlebar now renders from state
+  via a `NotepadTitleText` component instead of `#notepadTitle.textContent`
+  mutations, and the window menubar `aria-label` no longer breaks when a window
+  uses a reactive (non-string) title.
 - Code-quality Phase 3: migrated Internet Explorer history off module-level
   `historyStack`/`historyIndex` variables into a canonical `browser` reducer
   slice (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/

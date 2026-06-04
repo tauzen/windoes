@@ -9,6 +9,18 @@ import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { openWindowBoilerplate } from './launch-helpers.js';
 import { DEFAULT_NOTEPAD_SAVE_PATH } from './constants.js';
 
+// Notepad title derives from the canonical store (`notepad.currentFilePath`)
+// rather than a DOM `textContent` mutation, so the titlebar stays in sync with
+// state automatically.
+function notepadTitleFor(filePath) {
+  return filePath ? `${basename(filePath)} - Notepad` : 'Untitled - Notepad';
+}
+
+function NotepadTitleText() {
+  const currentFilePath = WindoesApp.state.use((s) => s.notepad.currentFilePath);
+  return <>{notepadTitleFor(currentFilePath)}</>;
+}
+
 WindoesApp.WindowManager.register('myComputer', {
   template: {
     id: 'myComputerWindow',
@@ -65,7 +77,7 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
     id: 'notepadWindow',
     className: 'notepad-window',
     ariaLabel: 'Notepad',
-    title: 'Untitled - Notepad',
+    title: <NotepadTitleText />,
     titleIcon: 'titlelogo-notepad',
     titleSpanId: 'notepadTitle',
     titlebarId: 'notepadTitlebar',
@@ -102,7 +114,7 @@ async function saveNotepadDocument(forceSaveAs = false) {
     const textarea = notepadConfig.el.querySelector('#notepadText');
     if (!textarea) return;
 
-    let filePath = textarea.dataset.filePath || '';
+    let filePath = WindoesApp.state.get().notepad.currentFilePath || '';
     if (!filePath || forceSaveAs) {
       const suggested = filePath || DEFAULT_NOTEPAD_SAVE_PATH;
       const selectedPath = await requestNotepadSavePath(suggested);
@@ -112,10 +124,7 @@ async function saveNotepadDocument(forceSaveAs = false) {
     }
 
     await saveTextFile(filePath, textarea.value || '');
-    textarea.dataset.filePath = filePath;
-
-    const titleEl = notepadConfig.el.querySelector('#notepadTitle');
-    if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
+    WindoesApp.state.dispatch({ type: 'NOTEPAD_SET_FILE_PATH', path: filePath });
 
     WindoesApp.sound.playClickSound();
   } catch (e) {
@@ -132,10 +141,7 @@ function newNotepadDocument() {
   if (!textarea) return;
 
   textarea.value = '';
-  delete textarea.dataset.filePath;
-
-  const titleEl = notepadConfig.el.querySelector('#notepadTitle');
-  if (titleEl) titleEl.textContent = 'Untitled - Notepad';
+  WindoesApp.state.dispatch({ type: 'NOTEPAD_SET_FILE_PATH', path: '' });
 
   textarea.focus();
   WindoesApp.sound.playClickSound();
@@ -170,18 +176,10 @@ function openNotepad(options = {}) {
   openWindowBoilerplate('notepad');
 
   const textarea = notepadConfig.el.querySelector('#notepadText');
-  const titleEl = notepadConfig.el.querySelector('#notepadTitle');
 
   if (textarea && !preserveCurrentDocument) {
     textarea.value = content;
-
-    if (filePath) {
-      textarea.dataset.filePath = filePath;
-      if (titleEl) titleEl.textContent = `${basename(filePath)} - Notepad`;
-    } else {
-      delete textarea.dataset.filePath;
-      if (titleEl) titleEl.textContent = 'Untitled - Notepad';
-    }
+    WindoesApp.state.dispatch({ type: 'NOTEPAD_SET_FILE_PATH', path: filePath || '' });
   }
 }
 

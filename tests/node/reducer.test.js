@@ -245,6 +245,31 @@ test('SHUTDOWN_SCREEN_HIDE hides shutdown screen', async () => {
   assert.equal(next.dialogs.shutdownScreenVisible, false);
 });
 
+test('NOTEPAD_SET_FILE_PATH records the current document path', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), {
+    type: 'NOTEPAD_SET_FILE_PATH',
+    path: '/C:/My Documents/notes.txt',
+  });
+  assert.equal(next.notepad.currentFilePath, '/C:/My Documents/notes.txt');
+});
+
+test('NOTEPAD_SET_FILE_PATH clears the path for a new document', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.notepad.currentFilePath = '/C:/My Documents/notes.txt';
+  const next = reduce(current, { type: 'NOTEPAD_SET_FILE_PATH', path: '' });
+  assert.equal(next.notepad.currentFilePath, '');
+});
+
+test('NOTEPAD_SET_FILE_PATH is a no-op when the path is unchanged', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  current.notepad.currentFilePath = '/C:/x.txt';
+  const next = reduce(current, { type: 'NOTEPAD_SET_FILE_PATH', path: '/C:/x.txt' });
+  assert.equal(next, current);
+});
+
 test('BROWSER_NAVIGATE pushes onto history and advances the index', async () => {
   const { reduce } = await loadReducerModule();
   let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'about:blank' });
