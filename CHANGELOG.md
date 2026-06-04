@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Access rights for the virtual filesystem: files and directories can be flagged
+  as protected "system" entries that cannot be deleted or renamed. `VirtualFS`
+  gains a `{ system }` option on `mkdir`/`writeFile`, `setSystem`/`isSystem`
+  helpers, a `system` field on `stat`/`readdir` results, and a new
+  `PermissionDeniedError` thrown by `rm` (including recursive deletes whose
+  subtree contains a protected child) and `rename`. The shipped `/C:`,
+  `/C:/My Documents`, and `Hello.txt` paths are now protected on first boot, and
+  the explorer context menu disables Rename/Delete for protected items.
+
 ### Changed
 
 - Code-quality Phase 4 (item 10): decomposed the 629-line `StartMenu.jsx` into a

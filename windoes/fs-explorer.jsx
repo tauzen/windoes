@@ -11,6 +11,10 @@ const navigation = createExplorerNavigation();
 
 const DEFAULT_DIRS = ['/C:', '/C:/My Documents'];
 
+// Paths that ship with the system and must not be deleted or renamed. They are
+// flagged as protected ("system") entries in the VirtualFS on first boot.
+const SYSTEM_PATHS = ['/C:', '/C:/My Documents', '/C:/My Documents/Hello.txt'];
+
 const MY_COMPUTER_ITEMS = [
   {
     id: 'floppy-a',
@@ -116,6 +120,13 @@ const initFS = once(async () => {
   if (!(await fs.exists('/C:/My Documents/Hello.txt'))) {
     await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
   }
+
+  // Protect the shipped folders/files so they cannot be deleted or renamed.
+  for (const path of SYSTEM_PATHS) {
+    if ((await fs.exists(path)) && !(await fs.isSystem(path))) {
+      await fs.setSystem(path, true);
+    }
+  }
 });
 
 function readRootItems() {
@@ -156,6 +167,7 @@ async function refreshExplorerView() {
         label: entry.name,
         path: childPath,
         type: entry.type,
+        system: !!entry.system,
         icon: entry.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file',
       });
     }
@@ -211,12 +223,16 @@ function openExplorerContextMenu(event) {
 
   const itemEl = event.target.closest('.folder-item');
   const selectedPath = itemEl ? itemEl.dataset.path : null;
+  const selectedItem = selectedPath
+    ? explorerViewState.items.find((item) => item.path === selectedPath)
+    : null;
 
   WindoesApp.state.dispatch({
     type: 'EXPLORER_CONTEXT_OPEN',
     x: event.clientX,
     y: event.clientY,
     selectedPath,
+    selectedIsSystem: !!(selectedItem && selectedItem.system),
   });
 }
 

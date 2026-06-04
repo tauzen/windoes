@@ -345,6 +345,92 @@ async function runTests() {
     check((await fs.exists('/')) === true, 'exists returns true for root');
     check((await fs.exists('/nothing')) === false, 'exists returns false for missing');
 
+    // ── Access rights / system (protected) entries ────────────────────
+
+    const afs = new VirtualFS('test-vfs-access-' + Date.now());
+    await afs.init();
+
+    // mkdir / writeFile accept a `system` flag
+    await afs.mkdir('/sys', { system: true });
+    await afs.writeFile('/sys/boot.ini', 'protected', { system: true });
+    check((await afs.stat('/sys')).system === true, 'mkdir system flag set on directory');
+    check((await afs.stat('/sys/boot.ini')).system === true, 'writeFile system flag set on file');
+    check((await afs.isSystem('/sys')) === true, 'isSystem returns true for protected dir');
+
+    // Non-system entries default to system === false
+    await afs.mkdir('/normal');
+    await afs.writeFile('/normal/note.txt', 'hi');
+    check((await afs.stat('/normal')).system === false, 'mkdir defaults to non-system');
+    check((await afs.isSystem('/normal/note.txt')) === false, 'isSystem false for normal file');
+
+    // readdir surfaces system flag only for protected entries
+    const sysListing = await afs.readdir('/');
+    const sysEntry = sysListing.find((entry) => entry.name === 'sys');
+    const normalEntry = sysListing.find((entry) => entry.name === 'normal');
+    check(sysEntry && sysEntry.system === true, 'readdir reports system flag for protected dir');
+    check(
+      normalEntry && normalEntry.system === undefined,
+      'readdir omits system flag for normal dir'
+    );
+
+    // rm is blocked for protected file and directory
+    await expectError(
+      () => afs.rm('/sys/boot.ini'),
+      'PermissionDeniedError',
+      'rm blocks deleting protected file'
+    );
+    await expectError(
+      () => afs.rm('/sys', { recursive: true }),
+      'PermissionDeniedError',
+      'rm blocks deleting protected directory'
+    );
+    check(await afs.exists('/sys/boot.ini'), 'protected file survives blocked delete');
+
+    // recursive rm of a normal dir containing a protected child is blocked
+    await afs.mkdir('/mixed');
+    await afs.writeFile('/mixed/keep.cfg', 'x', { system: true });
+    await afs.writeFile('/mixed/scratch.txt', 'y');
+    await expectError(
+      () => afs.rm('/mixed', { recursive: true }),
+      'PermissionDeniedError',
+      'recursive rm blocked by protected descendant'
+    );
+    check(await afs.exists('/mixed/scratch.txt'), 'mixed dir untouched after blocked recursive rm');
+
+    // rename is blocked for protected entries
+    await expectError(
+      () => afs.rename('/sys', '/sys-moved'),
+      'PermissionDeniedError',
+      'rename blocks moving protected directory'
+    );
+
+    // overwriting a protected file preserves its system flag
+    await afs.writeFile('/sys/boot.ini', 'changed');
+    check(
+      (await afs.stat('/sys/boot.ini')).system === true,
+      'writeFile overwrite preserves system flag'
+    );
+
+    // setSystem can lift protection, after which delete succeeds
+    await afs.setSystem('/sys/boot.ini', false);
+    check((await afs.isSystem('/sys/boot.ini')) === false, 'setSystem(false) clears protection');
+    await afs.rm('/sys/boot.ini');
+    check(!(await afs.exists('/sys/boot.ini')), 'unprotected file can be deleted');
+
+    // setSystem can promote an existing entry to protected
+    await afs.setSystem('/normal/note.txt', true);
+    await expectError(
+      () => afs.rm('/normal/note.txt'),
+      'PermissionDeniedError',
+      'setSystem(true) protects an existing file from deletion'
+    );
+
+    await expectError(
+      () => afs.setSystem('/does-not-exist', true),
+      'FileNotFoundError',
+      'setSystem throws for missing path'
+    );
+
     // ── Full scenario from spec ───────────────────────────────────────
 
     const fs2 = new VirtualFS('test-vfs-scenario-' + Date.now());
