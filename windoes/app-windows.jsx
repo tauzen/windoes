@@ -12,12 +12,26 @@ import {
 import { VirtualFS } from './virtual-fs.js';
 import { once } from './once.mjs';
 
+// App-window title, status, and task-button label render reactively from the
+// canonical `app` slice instead of imperative `textContent` writes.
+function AppTitleText() {
+  return <>{WindoesApp.state.use((s) => s.app.title)}</>;
+}
+
+function AppStatusText() {
+  return <>{WindoesApp.state.use((s) => s.app.status)}</>;
+}
+
+function AppTaskLabel() {
+  return <>{WindoesApp.state.use((s) => s.app.taskLabel)}</>;
+}
+
 const appConfig = WindoesApp.WindowManager.register('app', {
   template: {
     id: 'appWindow',
     className: 'app-window',
     ariaLabel: 'Application window',
-    title: 'Application',
+    title: <AppTitleText />,
     titleIcon: 'titlelogo-app',
     titleSpanId: 'appWindowTitle',
     titlebarId: 'appTitlebar',
@@ -37,7 +51,7 @@ const appConfig = WindoesApp.WindowManager.register('app', {
     ),
     statusBar: (
       <span className="status-left" id="appStatusText">
-        Done
+        <AppStatusText />
       </span>
     ),
     useSharedWindowComponent: true,
@@ -45,7 +59,7 @@ const appConfig = WindoesApp.WindowManager.register('app', {
   taskButton: {
     id: 'appTaskButton',
     icon: 'task-icon-app',
-    label: 'Application',
+    label: <AppTaskLabel />,
     labelId: 'appTaskLabel',
   },
   iframeId: 'appFrame',
@@ -54,18 +68,19 @@ const appConfig = WindoesApp.WindowManager.register('app', {
 });
 
 const appFrame = appConfig.el.querySelector('#appFrame');
-const appWindowTitle = appConfig.el.querySelector('#appWindowTitle');
-const appStatusText = appConfig.el.querySelector('#appStatusText');
-const appTaskLabel = appConfig.taskBtn.querySelector('#appTaskLabel');
 const appWindowCleanups = [];
 
 function openApp(title, url) {
-  appWindowTitle.textContent = title;
-  appStatusText.textContent = 'Opening...';
-  appTaskLabel.textContent =
+  const shortTitle =
     title.length > APP_TASK_LABEL_MAX_LEN
       ? title.substring(0, APP_TASK_LABEL_TRUNCATE_LEN) + '...'
       : title;
+  WindoesApp.state.dispatch({
+    type: 'APP_SET_PAGE',
+    title,
+    taskLabel: shortTitle,
+    status: 'Opening...',
+  });
   // Set dynamic iframe src before opening
   WindoesApp.WindowManager.get('app').iframeSrc = url;
   appFrame.src = url;
@@ -74,7 +89,7 @@ function openApp(title, url) {
 }
 
 function onAppFrameLoad() {
-  appStatusText.textContent = 'Done';
+  WindoesApp.state.dispatch({ type: 'APP_SET_STATUS', status: 'Done' });
   WindoesApp.ui.setBodyLoading?.(false);
 }
 

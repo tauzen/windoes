@@ -228,10 +228,15 @@ gates are green — but it's the path to keeping it maintainable as it grows.
      in `WindowTitlebar` — retiring the imperative `updateMaxBtn`
      `querySelector`/`textContent` writer in `state-applier.js`. (The button
      also now exposes `aria-label="Restore"` while maximized.)
-   - _Remaining:_ the imperative `textContent` writes for the IE window and the
-     generic app window (title / status / task-button label) in `ie-window.jsx`
-     and `app-windows.jsx`. Other `dataset`/`querySelector` hits are legitimate
-     event-delegation/identity reads, not state.
+   - _Done:_ the **IE window** and **generic app window** title / status /
+     task-button label now render reactively from the `browser` and `app`
+     reducer slices (`BROWSER_SET_PAGE`/`BROWSER_SET_STATUS`,
+     `APP_SET_PAGE`/`APP_SET_STATUS`) via small `Ie*`/`App*` components,
+     retiring the imperative `textContent` writes in `ie-window.jsx` and
+     `app-windows.jsx`. Item 8 is complete for the shell; the remaining
+     `dataset`/`querySelector` hits are legitimate event-delegation/identity
+     reads, and form-input values (`addressInput.value`, the notepad textarea)
+     are intentionally left as uncontrolled inputs.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close
    actions (React effect cleanup), not just HMR dispose.
 

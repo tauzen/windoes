@@ -10,12 +10,26 @@ import {
   IE_TASK_LABEL_TRUNCATE_LEN,
 } from './constants.js';
 
+// Title, status, and task-button label render reactively from the canonical
+// `browser` slice instead of imperative `textContent` writes.
+function IeTitleText() {
+  return <>{WindoesApp.state.use((s) => s.browser.title)}</>;
+}
+
+function IeStatusText() {
+  return <>{WindoesApp.state.use((s) => s.browser.status)}</>;
+}
+
+function IeTaskLabel() {
+  return <>{WindoesApp.state.use((s) => s.browser.taskLabel)}</>;
+}
+
 // Register IE shell window with JSX-rendered chrome
 const ieConfig = WindoesApp.WindowManager.register('ie', {
   template: {
     id: 'ieWindow',
     ariaLabel: 'Internet Explorer window',
-    title: 'about:blank - Microsoft Internet Explorer',
+    title: <IeTitleText />,
     titleLogoClass: 'title-logo',
     titleSpanId: 'windowTitle',
     titlebarId: 'titlebar',
@@ -77,7 +91,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
     statusBar: (
       <>
         <span className="status-left" id="statusText">
-          Done
+          <IeStatusText />
         </span>
         <span className="status-right">
           <span className="status-icon"></span>Internet
@@ -86,7 +100,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
     ),
     useSharedWindowComponent: true,
   },
-  taskButton: { id: 'taskButton', icon: 'task-icon-ie', label: 'about:blank - Microsoft Int...' },
+  taskButton: { id: 'taskButton', icon: 'task-icon-ie', label: <IeTaskLabel /> },
   iframe: null, // IE manages its own iframe/navigation
   iframeSrc: null,
   hasChrome: true,
@@ -95,9 +109,6 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
 // Get references to elements within the generated window
 const frame = ieConfig.el.querySelector('#browserFrame');
 const addressInput = ieConfig.el.querySelector('#addressInput');
-const statusText = ieConfig.el.querySelector('#statusText');
-const windowTitle = ieConfig.el.querySelector('#windowTitle');
-const taskButtonLabel = ieConfig.taskBtn.querySelector('span:last-child');
 
 const homePage = 'https://example.com';
 let bodyLoadingTimeoutId = null;
@@ -114,7 +125,6 @@ function formatBrowserTitle(url) {
 
 function navigate(url, pushHistory = true) {
   const finalUrl = normalizeBrowserUrl(url, homePage);
-  statusText.textContent = 'Opening page...';
   body_loading(true);
 
   if (finalUrl === 'about:blank') {
@@ -126,13 +136,17 @@ function navigate(url, pushHistory = true) {
 
   addressInput.value = finalUrl;
   const title = formatBrowserTitle(finalUrl);
-  windowTitle.textContent = title;
-
   const shortTitle =
     title.length > IE_TASK_LABEL_MAX_LEN
       ? title.substring(0, IE_TASK_LABEL_TRUNCATE_LEN) + '...'
       : title;
-  taskButtonLabel.textContent = shortTitle;
+
+  WindoesApp.state.dispatch({
+    type: 'BROWSER_SET_PAGE',
+    title,
+    taskLabel: shortTitle,
+    status: 'Opening page...',
+  });
 
   if (pushHistory) {
     WindoesApp.state.dispatch({ type: 'BROWSER_NAVIGATE', url: finalUrl });
@@ -179,7 +193,7 @@ function onHomeClick() {
 }
 
 function onRefreshClick() {
-  statusText.textContent = 'Refreshing...';
+  WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Refreshing...' });
   if (addressInput.value && addressInput.value !== 'about:blank') {
     frame.src = addressInput.value;
   }
@@ -191,7 +205,7 @@ function onStopClick() {
   } catch {
     // Ignore cross-origin stop errors.
   }
-  statusText.textContent = 'Stopped';
+  WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Stopped' });
 }
 
 function onSearchClick() {
@@ -244,7 +258,7 @@ function onForwardClick() {
 }
 
 function onFrameLoad() {
-  statusText.textContent = 'Done';
+  WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Done' });
   body_loading(false);
 }
 

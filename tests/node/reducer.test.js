@@ -388,6 +388,51 @@ test('BROWSER_HISTORY_RESET clears history and is a no-op when already empty', a
   assert.equal(same, next);
 });
 
+test('BROWSER_SET_PAGE updates IE title, task label, and status together', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), {
+    type: 'BROWSER_SET_PAGE',
+    title: 'https://example.com - Microsoft Internet Explorer',
+    taskLabel: 'https://example.com - M...',
+    status: 'Opening page...',
+  });
+  assert.equal(next.browser.title, 'https://example.com - Microsoft Internet Explorer');
+  assert.equal(next.browser.taskLabel, 'https://example.com - M...');
+  assert.equal(next.browser.status, 'Opening page...');
+});
+
+test('BROWSER_SET_STATUS updates status and is a no-op when unchanged', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), { type: 'BROWSER_SET_STATUS', status: 'Stopped' });
+  assert.equal(next.browser.status, 'Stopped');
+  const same = reduce(next, { type: 'BROWSER_SET_STATUS', status: 'Stopped' });
+  assert.equal(same, next);
+});
+
+test('APP_SET_PAGE updates app-window title, task label, and status together', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), {
+    type: 'APP_SET_PAGE',
+    title: 'ASCII Runner',
+    taskLabel: 'ASCII Runner',
+    status: 'Opening...',
+  });
+  assert.equal(next.app.title, 'ASCII Runner');
+  assert.equal(next.app.taskLabel, 'ASCII Runner');
+  assert.equal(next.app.status, 'Opening...');
+});
+
+test('APP_SET_STATUS updates status and is a no-op when unchanged', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  // Initial status is 'Done', so setting it again returns the same reference.
+  assert.equal(reduce(current, { type: 'APP_SET_STATUS', status: 'Done' }), current);
+  const changed = reduce(current, { type: 'APP_SET_STATUS', status: 'Opening...' });
+  assert.equal(changed.app.status, 'Opening...');
+  const same = reduce(changed, { type: 'APP_SET_STATUS', status: 'Opening...' });
+  assert.equal(same, changed);
+});
+
 test('unknown action returns current state object', async () => {
   const { reduce } = await loadReducerModule();
   const current = await freshState();
