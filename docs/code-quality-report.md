@@ -196,6 +196,10 @@ gates are green — but it's the path to keeping it maintainable as it grows.
    actions + React handlers. Suggested order by isolation: IE history →
    notepad file state → paint FS init → start-menu submenu state. Track the
    `WindoesApp.*` reference count (currently 143) as a burn-down metric.
+   - _Done:_ **IE history** migrated into the `browser` reducer slice
+     (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/
+     `BROWSER_HISTORY_RESET`), retiring the module-level `historyStack`/
+     `historyIndex` variables in `ie-window.jsx`. Next: notepad file state.
 8. **Eliminate DOM-as-state.** Replace `textContent`/`dataset` mutations and
    `querySelector` caches with component state/props as each subsystem migrates.
 9. **Unify lifecycle cleanup.** Drive listener teardown off window-close

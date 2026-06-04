@@ -99,10 +99,14 @@ const statusText = ieConfig.el.querySelector('#statusText');
 const windowTitle = ieConfig.el.querySelector('#windowTitle');
 const taskButtonLabel = ieConfig.taskBtn.querySelector('span:last-child');
 
-const historyStack = [];
-let historyIndex = -1;
 const homePage = 'https://example.com';
 let bodyLoadingTimeoutId = null;
+
+// Browser history lives in the canonical store (`state.browser`), not in
+// module-level variables. These helpers keep the call sites terse.
+function getHistory() {
+  return WindoesApp.state.get().browser;
+}
 
 function formatBrowserTitle(url) {
   return url + ' - Microsoft Internet Explorer';
@@ -131,9 +135,7 @@ function navigate(url, pushHistory = true) {
   taskButtonLabel.textContent = shortTitle;
 
   if (pushHistory) {
-    historyStack.splice(historyIndex + 1);
-    historyStack.push(finalUrl);
-    historyIndex = historyStack.length - 1;
+    WindoesApp.state.dispatch({ type: 'BROWSER_NAVIGATE', url: finalUrl });
   }
 }
 
@@ -158,7 +160,7 @@ function openInternetExplorer() {
   openWindowBoilerplate('ie');
 
   if (!frame.src || frame.src === 'about:blank' || frame.src === '') {
-    if (historyStack.length === 0) {
+    if (getHistory().historyStack.length === 0) {
       navigate('about:blank');
     }
   }
@@ -205,6 +207,7 @@ function onFavoritesClick() {
 }
 
 function onHistoryClick() {
+  const { historyStack, historyIndex } = getHistory();
   if (historyStack.length === 0) {
     WindoesApp.bsod.showErrorDialog({
       title: 'History',
@@ -223,16 +226,20 @@ function onHistoryClick() {
 }
 
 function onBackClick() {
+  const { historyStack, historyIndex } = getHistory();
   if (historyIndex > 0) {
-    historyIndex -= 1;
-    navigate(historyStack[historyIndex], false);
+    const targetUrl = historyStack[historyIndex - 1];
+    WindoesApp.state.dispatch({ type: 'BROWSER_BACK' });
+    navigate(targetUrl, false);
   }
 }
 
 function onForwardClick() {
+  const { historyStack, historyIndex } = getHistory();
   if (historyIndex < historyStack.length - 1) {
-    historyIndex += 1;
-    navigate(historyStack[historyIndex], false);
+    const targetUrl = historyStack[historyIndex + 1];
+    WindoesApp.state.dispatch({ type: 'BROWSER_FORWARD' });
+    navigate(targetUrl, false);
   }
 }
 

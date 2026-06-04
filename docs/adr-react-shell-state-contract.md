@@ -54,6 +54,7 @@ belongs in one of these slices, not in module-level variables or the DOM:
 | `selection` | Selected desktop icon / explorer item.                              |
 | `explorer`  | Explorer context-menu position and selected path.                   |
 | `notepad`   | Notepad file-menu and save-dialog state.                            |
+| `browser`   | Internet Explorer history stack and current position.               |
 
 Window focus and z-index are **derived** from `windows.stack` by
 `recomputeWindowMeta` — they are never set directly.
@@ -78,6 +79,8 @@ Action types in use today, grouped by slice:
 - **notepad**: `NOTEPAD_FILE_MENU_OPEN`, `NOTEPAD_FILE_MENU_CLOSE`,
   `NOTEPAD_SAVE_DIALOG_OPEN`, `NOTEPAD_SAVE_DIALOG_CLOSE`,
   `NOTEPAD_SAVE_DIALOG_SET_PATH`
+- **browser**: `BROWSER_NAVIGATE`, `BROWSER_BACK`, `BROWSER_FORWARD`,
+  `BROWSER_HISTORY_RESET`
 
 ### 5. The `WindoesApp.*` bridge is legacy-only
 

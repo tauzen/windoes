@@ -72,6 +72,12 @@
  */
 
 /**
+ * @typedef {Object} BrowserState
+ * @property {string[]} historyStack
+ * @property {number} historyIndex
+ */
+
+/**
  * @typedef {Object} State
  * @property {BootState} boot
  * @property {MenusState} menus
@@ -80,6 +86,7 @@
  * @property {SelectionState} selection
  * @property {ExplorerState} explorer
  * @property {NotepadState} notepad
+ * @property {BrowserState} browser
  */
 
 // ─── Action union ────────────────────────────────────────────────────────────
@@ -114,6 +121,10 @@
  *   | { type: 'SHUTDOWN_DIALOG_CLOSE' }
  *   | { type: 'SHUTDOWN_SCREEN_SHOW' }
  *   | { type: 'SHUTDOWN_SCREEN_HIDE' }
+ *   | { type: 'BROWSER_NAVIGATE', url: string }
+ *   | { type: 'BROWSER_BACK' }
+ *   | { type: 'BROWSER_FORWARD' }
+ *   | { type: 'BROWSER_HISTORY_RESET' }
  * )} WindoesAction
  */
 
@@ -166,6 +177,10 @@ export const initialState = {
     fileMenuTop: 0,
     saveDialogOpen: false,
     saveDialogPath: DEFAULT_NOTEPAD_SAVE_PATH,
+  },
+  browser: {
+    historyStack: [],
+    historyIndex: -1,
   },
 };
 
@@ -287,6 +302,21 @@ function withNotepad(current, nextNotepad) {
     notepad: {
       ...current.notepad,
       ...nextNotepad,
+    },
+  };
+}
+
+/**
+ * @param {State} current
+ * @param {Partial<BrowserState>} nextBrowser
+ * @returns {State}
+ */
+function withBrowser(current, nextBrowser) {
+  return {
+    ...current,
+    browser: {
+      ...current.browser,
+      ...nextBrowser,
     },
   };
 }
@@ -478,6 +508,28 @@ export function reduce(current, action) {
     case 'SHUTDOWN_SCREEN_HIDE':
       if (!current.dialogs.shutdownScreenVisible) return current;
       return withDialogs(current, { shutdownScreenVisible: false });
+
+    case 'BROWSER_NAVIGATE': {
+      // Drop any forward entries past the current position, then append.
+      const historyStack = current.browser.historyStack.slice(0, current.browser.historyIndex + 1);
+      historyStack.push(action.url);
+      return withBrowser(current, {
+        historyStack,
+        historyIndex: historyStack.length - 1,
+      });
+    }
+    case 'BROWSER_BACK':
+      if (current.browser.historyIndex <= 0) return current;
+      return withBrowser(current, { historyIndex: current.browser.historyIndex - 1 });
+    case 'BROWSER_FORWARD':
+      if (current.browser.historyIndex >= current.browser.historyStack.length - 1) return current;
+      return withBrowser(current, { historyIndex: current.browser.historyIndex + 1 });
+    case 'BROWSER_HISTORY_RESET':
+      if (current.browser.historyStack.length === 0 && current.browser.historyIndex === -1) {
+        return current;
+      }
+      return withBrowser(current, { historyStack: [], historyIndex: -1 });
+
     default:
       return current;
   }
