@@ -245,6 +245,61 @@ test('SHUTDOWN_SCREEN_HIDE hides shutdown screen', async () => {
   assert.equal(next.dialogs.shutdownScreenVisible, false);
 });
 
+test('BROWSER_NAVIGATE pushes onto history and advances the index', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'about:blank' });
+  assert.deepEqual(next.browser.historyStack, ['about:blank']);
+  assert.equal(next.browser.historyIndex, 0);
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'https://example.com' });
+  assert.deepEqual(next.browser.historyStack, ['about:blank', 'https://example.com']);
+  assert.equal(next.browser.historyIndex, 1);
+});
+
+test('BROWSER_NAVIGATE drops forward entries after going back', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'a' });
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'b' });
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'c' });
+  next = reduce(next, { type: 'BROWSER_BACK' });
+  next = reduce(next, { type: 'BROWSER_BACK' });
+  assert.equal(next.browser.historyIndex, 0);
+  // Navigating from a back position truncates the forward history.
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'd' });
+  assert.deepEqual(next.browser.historyStack, ['a', 'd']);
+  assert.equal(next.browser.historyIndex, 1);
+});
+
+test('BROWSER_BACK moves the index back and is a no-op at the start', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'a' });
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'b' });
+  next = reduce(next, { type: 'BROWSER_BACK' });
+  assert.equal(next.browser.historyIndex, 0);
+  const same = reduce(next, { type: 'BROWSER_BACK' });
+  assert.equal(same, next);
+});
+
+test('BROWSER_FORWARD moves the index forward and is a no-op at the end', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'a' });
+  next = reduce(next, { type: 'BROWSER_NAVIGATE', url: 'b' });
+  next = reduce(next, { type: 'BROWSER_BACK' });
+  next = reduce(next, { type: 'BROWSER_FORWARD' });
+  assert.equal(next.browser.historyIndex, 1);
+  const same = reduce(next, { type: 'BROWSER_FORWARD' });
+  assert.equal(same, next);
+});
+
+test('BROWSER_HISTORY_RESET clears history and is a no-op when already empty', async () => {
+  const { reduce } = await loadReducerModule();
+  let next = reduce(await freshState(), { type: 'BROWSER_NAVIGATE', url: 'a' });
+  next = reduce(next, { type: 'BROWSER_HISTORY_RESET' });
+  assert.deepEqual(next.browser.historyStack, []);
+  assert.equal(next.browser.historyIndex, -1);
+  const same = reduce(next, { type: 'BROWSER_HISTORY_RESET' });
+  assert.equal(same, next);
+});
+
 test('unknown action returns current state object', async () => {
   const { reduce } = await loadReducerModule();
   const current = await freshState();

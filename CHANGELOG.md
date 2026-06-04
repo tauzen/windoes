@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Code-quality Phase 3: migrated Internet Explorer history off module-level
+  `historyStack`/`historyIndex` variables into a canonical `browser` reducer
+  slice (`BROWSER_NAVIGATE`/`BROWSER_BACK`/`BROWSER_FORWARD`/
+  `BROWSER_HISTORY_RESET`), with unit tests. `ie-window.jsx` now reads/writes
+  history through `WindoesApp.state`, the first imperative subsystem retired
+  per the migration roadmap.
 - Code-quality Phase 2: brought the embedded apps under ESLint (removed the
   `windoes/public/applications/**` ignore) and cleared the dead code it
   surfaced (`game.js` unused effect/touch state, an unused test binding).
