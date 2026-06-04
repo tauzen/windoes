@@ -28,16 +28,16 @@ compatibility layer described in the ADR, burned down one subsystem at a time.
 The table below shows the signals as measured at the 2026-06-04 sync (originals
 in parentheses where they have moved).
 
-| Signal                                           | Result                                                  |
-| ------------------------------------------------ | ------------------------------------------------------- |
-| `npm run lint` (eslint)                          | ✅ clean, with only non-blocking hook warnings          |
-| `npm run typecheck` (tsc, `strict: true`)        | ✅ clean                                                |
-| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                                 |
-| Reducer unit tests                               | ✅ expanded reducer coverage                            |
-| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`)            |
-| Lint/format coverage of embedded apps            | ✅ now linted (ignore removed)                          |
-| `WindoesApp.*` imperative bridge                 | ⚠️ still present as the legacy bridge described by ADR  |
-| Docs referenced but missing                      | ✅ none known (all referenced docs live under `docs/`)  |
+| Signal                                           | Result                                                 |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| `npm run lint` (eslint)                          | ✅ clean, with only non-blocking hook warnings         |
+| `npm run typecheck` (tsc, `strict: true`)        | ✅ clean                                               |
+| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                                |
+| Reducer unit tests                               | ✅ expanded reducer coverage                           |
+| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`)           |
+| Lint/format coverage of embedded apps            | ✅ now linted (ignore removed)                         |
+| `WindoesApp.*` imperative bridge                 | ⚠️ still present as the legacy bridge described by ADR |
+| Docs referenced but missing                      | ✅ none known (all referenced docs live under `docs/`) |
 
 The remaining ESLint output is limited to non-blocking
 `react-hooks/exhaustive-deps` guidance surfaced by the newly-added
