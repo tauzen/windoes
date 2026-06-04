@@ -79,8 +79,10 @@ Embedded apps (standalone, in iframes)
 Apps under `windoes/public/applications/` are standalone bundles loaded in
 sandboxed iframes and managed as an npm workspace. They talk to the shell via
 `postMessage`; the shell validates both `event.origin` and `event.source`
-before acting (`app-windows.jsx`). These apps are currently outside the shell
-lint/type configuration (tracked in the code-quality roadmap).
+before acting (`app-windows.jsx`). These apps are now covered by the shared
+ESLint config (the former `public/applications/**` ignore was removed); they
+remain outside the TypeScript configuration (tracked in the code-quality
+roadmap).
 
 ## Shared constants
 
