@@ -10,6 +10,7 @@ const integrationScripts = [
   'test-window-manager.js',
   'test-duplicate-windows.js',
   'test-icons.js',
+  'test-boot-preload.js',
   'test-notepad-save.js',
   'test-notepad-file-menu.js',
   'test-virtual-fs.js',
