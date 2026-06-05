@@ -30,7 +30,7 @@ export default function MyComputerToolbar() {
         <div className="toolbar-grip"></div>
         <label htmlFor="explorerAddress">Address</label>
         <div className="address-input-wrap">
-          <span className="address-icon address-icon-folder" aria-hidden="true"></span>
+          <span className={`address-icon ${navigationViewState.addressIcon}`} aria-hidden="true"></span>
           <input
             id="explorerAddress"
             value={navigationViewState.address}
