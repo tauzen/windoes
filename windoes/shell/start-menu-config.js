@@ -55,28 +55,6 @@ export const SUBMENUS = [
         action: { kind: 'open', app: 'internetExplorer' },
       },
       {
-        id: 'subMSDOS',
-        icon: 'msdos',
-        label: 'MS-DOS Prompt',
-        action: {
-          kind: 'error',
-          title: 'MS-DOS Prompt',
-          text: 'This program cannot be run in Windoes mode.',
-          icon: 'error',
-        },
-      },
-      {
-        id: 'subOutlook',
-        icon: 'outlook',
-        label: 'Outlook Express',
-        action: {
-          kind: 'error',
-          title: 'Outlook Express',
-          text: 'No Internet mail server is configured.\n\nPlease check your mail settings in Internet Accounts.',
-          icon: 'info',
-        },
-      },
-      {
         id: 'subExplorer',
         icon: 'explorer',
         label: 'Windoes Explorer',
@@ -95,28 +73,6 @@ export const SUBMENUS = [
     items: [
       { id: 'subAccGames', icon: 'folder', label: 'Games', submenu: 'games' },
       { separator: true },
-      {
-        id: 'subAccCalculator',
-        icon: 'calculator',
-        label: 'Calculator',
-        action: {
-          kind: 'error',
-          title: 'Calculator',
-          text: 'Calculator is not available in this version of Windoes.',
-          icon: 'info',
-        },
-      },
-      {
-        id: 'subAccImaging',
-        icon: 'imaging',
-        label: 'Imaging',
-        action: {
-          kind: 'error',
-          title: 'Windoes',
-          text: 'This feature is not available in this version of Windoes.',
-          icon: 'info',
-        },
-      },
       {
         id: 'subAccNotepad',
         icon: 'notepad',

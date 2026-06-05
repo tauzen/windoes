@@ -217,6 +217,21 @@
   content: none;
 }
 
+/* Paint - paint program */
+.icon-paint .icon-graphic {
+  background-image: url('/icons/paint.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+.icon-paint .icon-graphic::before,
+.icon-paint .icon-graphic::after {
+  content: none;
+}
+
 /* Solitaire - playing cards */
 .icon-solitaire .icon-graphic {
   background-image: url('/icons/cards.png');
