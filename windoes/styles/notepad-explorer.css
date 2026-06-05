@@ -180,15 +180,42 @@
   text-align: center;
 }
 
-/* Explorer folder address icon override */
+/* Address bar location icons - mirror the shell icon for the current folder */
+.address-icon-mycomputer,
+.address-icon-disk,
+.address-icon-mydocs,
 .address-icon-folder {
-  background: linear-gradient(180deg, #fc0 0%, #e8a000 100%);
-  border-radius: 1px;
-  width: 14px !important;
-  height: 11px !important;
-  top: 50% !important;
-  margin-top: -5px !important;
+  width: 16px !important;
+  height: 16px !important;
   border: none;
+  border-radius: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+/* Replace the default Internet Explorer "e" glyph with the folder icon */
+.address-icon-mycomputer::before,
+.address-icon-disk::before,
+.address-icon-mydocs::before,
+.address-icon-folder::before {
+  content: none;
+}
+
+.address-icon-mycomputer {
+  background-image: url('/icons/my-computer.png');
+}
+
+.address-icon-disk {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='2' width='18' height='28' rx='2' fill='%23D8D0C0' stroke='%23908880' stroke-width='0.8'/><rect x='4' y='2' width='18' height='10' rx='2' fill='%231040C0'/><rect x='6' y='5' width='14' height='5' fill='%230830A8'/><rect x='16' y='14' width='4' height='2' rx='0.5' fill='%23A09880'/><rect x='16' y='17.5' width='4' height='2' rx='0.5' fill='%23A09880'/><rect x='16' y='21' width='4' height='2' rx='0.5' fill='%23A09880'/><circle cx='10' cy='20' r='4' fill='none' stroke='%23808890' stroke-width='1.5'/><circle cx='10' cy='20' r='1.5' fill='%23909090'/><rect x='23' y='8' width='6' height='18' rx='1' fill='%23C8C0B0' stroke='%23908880' stroke-width='0.6'/><rect x='24.5' y='10' width='3' height='5' rx='0.5' fill='%23909090'/></svg>");
+}
+
+.address-icon-mydocs {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='4' width='15' height='19' rx='1' fill='%23FFFFFF' stroke='%23808080' stroke-width='1'/><line x1='12' y1='9' x2='21' y2='9' stroke='%231040C0' stroke-width='1.4'/><line x1='12' y1='13' x2='21' y2='13' stroke='%23A0A0A0' stroke-width='1.2'/><line x1='12' y1='16.5' x2='21' y2='16.5' stroke='%23A0A0A0' stroke-width='1.2'/><line x1='12' y1='20' x2='18' y2='20' stroke='%23A0A0A0' stroke-width='1.2'/><path d='M2 14 h12 l3 -3 h11 a1 1 0 0 1 1 1 v14 a1 1 0 0 1 -1 1 H3 a1 1 0 0 1 -1 -1 Z' fill='%23FFCC33' stroke='%23C8881C' stroke-width='0.8'/><path d='M2 14 h12 l3 -3 h11 a1 1 0 0 1 1 1 v3 H2 Z' fill='%23FFD957'/></svg>");
+}
+
+.address-icon-folder {
+  background-image: url('/icons/folder.png');
 }
 
 /* Explorer-specific context menu layering */

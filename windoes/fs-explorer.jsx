@@ -55,6 +55,7 @@ const MY_COMPUTER_ITEMS = [
 
 let navigationViewStateCache = {
   address: 'My Computer',
+  addressIcon: 'address-icon-mycomputer',
   canGoBack: false,
 };
 
@@ -88,12 +89,23 @@ function displayPath(path) {
   return path.replace(/^\//, '').replace(/\//g, '\\');
 }
 
+// Pick the address bar icon that matches the current location, mirroring the
+// shell icons used elsewhere (My Computer, drive, My Documents, plain folder).
+function addressIconFor(path) {
+  if (path === null) return 'address-icon-mycomputer';
+  if (/^\/[A-Za-z]:$/.test(path)) return 'address-icon-disk';
+  if (path === '/C:/My Documents') return 'address-icon-mydocs';
+  return 'address-icon-folder';
+}
+
 function getNavigationViewState() {
   const { path, canGoBack } = navigation.getState();
   const nextAddress = displayPath(path);
+  const nextAddressIcon = addressIconFor(path);
 
   if (
     navigationViewStateCache.address === nextAddress &&
+    navigationViewStateCache.addressIcon === nextAddressIcon &&
     navigationViewStateCache.canGoBack === canGoBack
   ) {
     return navigationViewStateCache;
@@ -101,6 +113,7 @@ function getNavigationViewState() {
 
   navigationViewStateCache = {
     address: nextAddress,
+    addressIcon: nextAddressIcon,
     canGoBack,
   };
   return navigationViewStateCache;
