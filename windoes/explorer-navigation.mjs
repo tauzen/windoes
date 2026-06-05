@@ -33,6 +33,15 @@ function createExplorerNavigation() {
     return currentPath;
   }
 
+  function goForward() {
+    if (historyIndex >= historyStack.length - 1) return currentPath;
+
+    historyIndex += 1;
+    currentPath = historyStack[historyIndex];
+    emitChange();
+    return currentPath;
+  }
+
   function goUp() {
     if (currentPath === null) return currentPath;
 
@@ -56,6 +65,7 @@ function createExplorerNavigation() {
     return {
       path: currentPath,
       canGoBack: historyIndex > 0,
+      canGoForward: historyIndex < historyStack.length - 1,
     };
   }
 
@@ -66,6 +76,7 @@ function createExplorerNavigation() {
   return {
     navigateTo,
     goBack,
+    goForward,
     goUp,
     reset,
     getState,
