@@ -57,6 +57,7 @@ let navigationViewStateCache = {
   address: 'My Computer',
   addressIcon: 'address-icon-mycomputer',
   canGoBack: false,
+  canGoForward: false,
 };
 
 let explorerViewState = {
@@ -99,14 +100,15 @@ function addressIconFor(path) {
 }
 
 function getNavigationViewState() {
-  const { path, canGoBack } = navigation.getState();
+  const { path, canGoBack, canGoForward } = navigation.getState();
   const nextAddress = displayPath(path);
   const nextAddressIcon = addressIconFor(path);
 
   if (
     navigationViewStateCache.address === nextAddress &&
     navigationViewStateCache.addressIcon === nextAddressIcon &&
-    navigationViewStateCache.canGoBack === canGoBack
+    navigationViewStateCache.canGoBack === canGoBack &&
+    navigationViewStateCache.canGoForward === canGoForward
   ) {
     return navigationViewStateCache;
   }
@@ -115,6 +117,7 @@ function getNavigationViewState() {
     address: nextAddress,
     addressIcon: nextAddressIcon,
     canGoBack,
+    canGoForward,
   };
   return navigationViewStateCache;
 }
@@ -211,6 +214,12 @@ function navigateTo(path, addToHistory = true) {
 function goBack() {
   if (!navigation.getState().canGoBack) return;
   navigation.goBack();
+  refreshExplorerView();
+}
+
+function goForward() {
+  if (!navigation.getState().canGoForward) return;
+  navigation.goForward();
   refreshExplorerView();
 }
 
@@ -385,6 +394,7 @@ export {
   getExplorerViewState,
   getNavigationViewState,
   goBack,
+  goForward,
   goUp,
   initFS,
   navigateTo,
