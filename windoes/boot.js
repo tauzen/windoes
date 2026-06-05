@@ -4,6 +4,7 @@
 import WindoesApp from './app-state.js';
 import { BOOT_MEMORY_TARGET_KB } from './constants.js';
 import defaultConfig from './simulator.config.js';
+import { preloadBootAssets } from './boot-preload.js';
 
 export function runBootSequence() {
   const bootMessages = WindoesApp.config.bootMessages || defaultConfig.bootMessages;
@@ -35,27 +36,45 @@ export function runBootSequence() {
 function showSplashScreen(bootMessages) {
   WindoesApp.state.dispatch({ type: 'BOOT_PHASE_SPLASH', status: bootMessages[0] });
 
-  let progress = 0;
-  let msgIdx = 0;
-  const progressInterval = setInterval(() => {
-    progress += Math.random() * 8 + 2;
-    if (progress > 100) progress = 100;
+  // `target` tracks how far the real asset preload has progressed (0-100);
+  // `displayed` eases toward it so the bar always animates smoothly, even when
+  // every asset is already cached and the preload finishes near-instantly.
+  let target = 0;
+  let displayed = 0;
+  let preloadDone = false;
 
-    if (progress > (msgIdx + 1) * 14 && msgIdx < bootMessages.length - 1) {
-      msgIdx++;
+  preloadBootAssets({
+    onProgress: (loaded, total) => {
+      target = total === 0 ? 100 : (loaded / total) * 100;
+    },
+  }).finally(() => {
+    target = 100;
+    preloadDone = true;
+  });
+
+  const progressInterval = setInterval(() => {
+    // Move at least 1% per tick, and a quarter of the remaining gap, so the bar
+    // keeps pace with fast loads without ever jumping past real progress.
+    if (displayed < target) {
+      displayed = Math.min(target, displayed + Math.max(1, (target - displayed) * 0.25));
     }
+
+    const msgIdx = Math.min(
+      bootMessages.length - 1,
+      Math.floor((displayed / 100) * bootMessages.length)
+    );
 
     WindoesApp.state.dispatch({
       type: 'BOOT_SPLASH_PROGRESS',
-      progress,
+      progress: displayed,
       status: bootMessages[msgIdx],
     });
 
-    if (progress >= 100) {
+    if (preloadDone && displayed >= 100) {
       clearInterval(progressInterval);
       setTimeout(finishBoot, 400);
     }
-  }, 150);
+  }, 100);
 }
 
 function finishBoot() {
