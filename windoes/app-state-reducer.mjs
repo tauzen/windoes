@@ -464,11 +464,7 @@ export function reduce(current, action) {
         gamesOpen: false,
       });
     case 'START_MENU_CLOSE':
-      if (
-        !current.menus.startOpen &&
-        !current.menus.programsOpen &&
-        !current.menus.gamesOpen
-      ) {
+      if (!current.menus.startOpen && !current.menus.programsOpen && !current.menus.gamesOpen) {
         return current;
       }
       return withMenus(current, {
@@ -481,10 +477,7 @@ export function reduce(current, action) {
       const keep = new Set(current.menus.startOpen ? action.keep || [] : []);
       const programsOpen = keep.has('programs');
       const gamesOpen = keep.has('games');
-      if (
-        programsOpen === current.menus.programsOpen &&
-        gamesOpen === current.menus.gamesOpen
-      ) {
+      if (programsOpen === current.menus.programsOpen && gamesOpen === current.menus.gamesOpen) {
         return current;
       }
       return withMenus(current, { programsOpen, gamesOpen });

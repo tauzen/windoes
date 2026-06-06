@@ -955,14 +955,8 @@ async function runTests() {
       startMenuAccessibilityState.menuProgramsExpanded,
       'Programs trigger aria-expanded is true when open'
     );
-    assert(
-      startMenuAccessibilityState.subGamesRole,
-      'Games trigger uses role="menuitem"'
-    );
-    assert(
-      startMenuAccessibilityState.subGamesHasPopup,
-      'Games trigger exposes aria-haspopup'
-    );
+    assert(startMenuAccessibilityState.subGamesRole, 'Games trigger uses role="menuitem"');
+    assert(startMenuAccessibilityState.subGamesHasPopup, 'Games trigger exposes aria-haspopup');
     assert(
       startMenuAccessibilityState.subGamesExpanded,
       'Games trigger aria-expanded is true when submenu open'
