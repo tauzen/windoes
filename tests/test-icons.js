@@ -123,8 +123,7 @@ async function runTests() {
     const submenuIconTests = [
       { selector: '.submenu-icon-ie', name: 'Internet Explorer' },
       { selector: '.submenu-icon-folder', name: 'Folder' },
-      { selector: '.submenu-icon-msdos', name: 'MS-DOS Prompt' },
-      { selector: '.submenu-icon-outlook', name: 'Outlook Express' },
+      { selector: '.submenu-icon-explorer', name: 'Windoes Explorer' },
     ];
 
     for (const { selector, name } of submenuIconTests) {

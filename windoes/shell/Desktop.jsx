@@ -12,6 +12,7 @@ const desktopIconDefs = [
   { id: 'iconWinamp', className: 'icon-winamp', label: 'Winamp' },
   { id: 'iconMinesweeper', className: 'icon-minesweeper', label: 'Minesweeper' },
   { id: 'iconSolitaire', className: 'icon-solitaire', label: 'Solitaire' },
+  { id: 'iconPaint', className: 'icon-paint', label: 'Paint' },
 ];
 
 const dedicatedHandlers = {
@@ -21,6 +22,7 @@ const dedicatedHandlers = {
   iconWinamp: () => WindoesApp.open.winamp?.(),
   iconMinesweeper: () => WindoesApp.open.minesweeper?.(),
   iconSolitaire: () => WindoesApp.open.solitaire?.(),
+  iconPaint: () => WindoesApp.open.paint?.(),
 };
 
 const experimentApps = WindoesApp.config.experimentApps || [
