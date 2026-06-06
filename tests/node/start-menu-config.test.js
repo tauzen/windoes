@@ -23,7 +23,7 @@ test('every menu item has a unique DOM id', async () => {
 
   assert.equal(new Set(ids).size, ids.length, `duplicate menu ids: ${ids.join(', ')}`);
   // Ids the integration tests hover/click must keep existing.
-  for (const id of ['menuPrograms', 'subAccessories', 'subAccPaint']) {
+  for (const id of ['menuPrograms', 'subGames', 'subPaint']) {
     assert.ok(ids.includes(id), `expected menu id "${id}" to exist`);
   }
 });

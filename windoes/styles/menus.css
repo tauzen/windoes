@@ -160,11 +160,8 @@
   display: block;
 }
 
-.accessories-submenu {
-  z-index: 27;
-}
 .games-submenu {
-  z-index: 28;
+  z-index: 27;
 }
 
 .submenu-item {

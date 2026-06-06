@@ -18,16 +18,14 @@ async function runTests() {
   const page = await ctx.newPage();
 
   try {
-    console.log('\nTest 1: Start Menu Accessories → Paint opens MS Paint app window');
+    console.log('\nTest 1: Start Menu Programs → Paint opens MS Paint app window');
     await waitForBoot(page, baseUrl);
 
     await page.click('#startButton');
     await page.waitForTimeout(150);
     await page.hover('#menuPrograms');
     await page.waitForTimeout(150);
-    await page.hover('#subAccessories');
-    await page.waitForTimeout(150);
-    await page.click('#subAccPaint');
+    await page.click('#subPaint');
     await page.waitForTimeout(300);
 
     const paintWindowState = await page.evaluate(() => {

@@ -904,9 +904,7 @@ async function runTests() {
     await page.waitForTimeout(120);
     await page.hover('#menuPrograms');
     await page.waitForTimeout(120);
-    await page.hover('#subAccessories');
-    await page.waitForTimeout(120);
-    await page.hover('#subAccGames');
+    await page.hover('#subGames');
     await page.waitForTimeout(120);
 
     const startMenuAccessibilityState = await page.evaluate(() => {
@@ -914,10 +912,8 @@ async function runTests() {
       const startMenu = document.getElementById('startMenu');
       const menuPrograms = document.getElementById('menuPrograms');
       const programsSubmenu = document.getElementById('programsSubmenu');
-      const accessoriesSubmenu = document.getElementById('accessoriesSubmenu');
       const gamesSubmenu = document.getElementById('gamesSubmenu');
-      const subAccessories = document.getElementById('subAccessories');
-      const subAccGames = document.getElementById('subAccGames');
+      const subGames = document.getElementById('subGames');
 
       return {
         startButtonHasPopup: startButton?.getAttribute('aria-haspopup') === 'menu',
@@ -927,16 +923,12 @@ async function runTests() {
         menuProgramsRole: menuPrograms?.getAttribute('role') === 'menuitem',
         menuProgramsHasPopup: menuPrograms?.getAttribute('aria-haspopup') === 'menu',
         menuProgramsExpanded: menuPrograms?.getAttribute('aria-expanded') === 'true',
-        subAccessoriesRole: subAccessories?.getAttribute('role') === 'menuitem',
-        subAccessoriesHasPopup: subAccessories?.getAttribute('aria-haspopup') === 'menu',
-        subAccessoriesExpanded: subAccessories?.getAttribute('aria-expanded') === 'true',
-        subAccGamesExpanded: subAccGames?.getAttribute('aria-expanded') === 'true',
+        subGamesRole: subGames?.getAttribute('role') === 'menuitem',
+        subGamesHasPopup: subGames?.getAttribute('aria-haspopup') === 'menu',
+        subGamesExpanded: subGames?.getAttribute('aria-expanded') === 'true',
         programsSubmenuRole: programsSubmenu?.getAttribute('role') === 'menu',
-        accessoriesSubmenuRole: accessoriesSubmenu?.getAttribute('role') === 'menu',
         gamesSubmenuRole: gamesSubmenu?.getAttribute('role') === 'menu',
         programsBottomSet: !!programsSubmenu?.style?.bottom,
-        accessoriesPositionSet:
-          !!accessoriesSubmenu?.style?.bottom && !!accessoriesSubmenu?.style?.left,
         gamesPositionSet: !!gamesSubmenu?.style?.bottom && !!gamesSubmenu?.style?.left,
       };
     });
@@ -964,34 +956,22 @@ async function runTests() {
       'Programs trigger aria-expanded is true when open'
     );
     assert(
-      startMenuAccessibilityState.subAccessoriesRole,
-      'Accessories trigger uses role="menuitem"'
+      startMenuAccessibilityState.subGamesRole,
+      'Games trigger uses role="menuitem"'
     );
     assert(
-      startMenuAccessibilityState.subAccessoriesHasPopup,
-      'Accessories trigger exposes aria-haspopup'
+      startMenuAccessibilityState.subGamesHasPopup,
+      'Games trigger exposes aria-haspopup'
     );
     assert(
-      startMenuAccessibilityState.subAccessoriesExpanded,
-      'Accessories trigger aria-expanded is true when submenu open'
-    );
-    assert(
-      startMenuAccessibilityState.subAccGamesExpanded,
-      'Games trigger aria-expanded is true when open'
+      startMenuAccessibilityState.subGamesExpanded,
+      'Games trigger aria-expanded is true when submenu open'
     );
     assert(startMenuAccessibilityState.programsSubmenuRole, 'Programs submenu uses role="menu"');
-    assert(
-      startMenuAccessibilityState.accessoriesSubmenuRole,
-      'Accessories submenu uses role="menu"'
-    );
     assert(startMenuAccessibilityState.gamesSubmenuRole, 'Games submenu uses role="menu"');
     assert(
       startMenuAccessibilityState.programsBottomSet,
       'Programs submenu has computed bottom style'
-    );
-    assert(
-      startMenuAccessibilityState.accessoriesPositionSet,
-      'Accessories submenu has computed left/bottom style'
     );
     assert(
       startMenuAccessibilityState.gamesPositionSet,
@@ -1001,14 +981,12 @@ async function runTests() {
     // ── Test 24: Launching from nested Start submenu closes all Start layers ─
     console.log('\nTest 24: Start submenus fully close after launching Notepad');
 
-    await page.click('#subAccNotepad');
+    await page.click('#subNotepad');
     await page.waitForTimeout(150);
 
     const startMenuLaunchState = await page.evaluate(() => ({
       startMenuOpen: document.getElementById('startMenu')?.classList.contains('open') || false,
       programsOpen: document.getElementById('programsSubmenu')?.classList.contains('open') || false,
-      accessoriesOpen:
-        document.getElementById('accessoriesSubmenu')?.classList.contains('open') || false,
       gamesOpen: document.getElementById('gamesSubmenu')?.classList.contains('open') || false,
       notepadVisible: !document.getElementById('notepadWindow')?.classList.contains('hidden'),
     }));
@@ -1016,10 +994,6 @@ async function runTests() {
     assert(startMenuLaunchState.notepadVisible, 'Notepad opens from Start submenu launch');
     assert(!startMenuLaunchState.startMenuOpen, 'Start menu closes after launching Notepad');
     assert(!startMenuLaunchState.programsOpen, 'Programs submenu closes after launching Notepad');
-    assert(
-      !startMenuLaunchState.accessoriesOpen,
-      'Accessories submenu closes after launching Notepad'
-    );
     assert(!startMenuLaunchState.gamesOpen, 'Nested Games submenu closes after launching Notepad');
 
     // ── Test 25: IE Favorites/History use Windoes error dialog (no native alert) ─

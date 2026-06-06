@@ -44,9 +44,23 @@ export const SUBMENUS = [
     className: 'programs-submenu',
     chain: ['programs'],
     parentKey: null,
-    childKey: 'accessories',
+    childKey: 'games',
     items: [
-      { id: 'subAccessories', icon: 'folder', label: 'Accessories', submenu: 'accessories' },
+      { id: 'subGames', icon: 'folder', label: 'Games', submenu: 'games' },
+      { separator: true },
+      {
+        id: 'subNotepad',
+        icon: 'notepad',
+        label: 'Notepad',
+        action: { kind: 'open', app: 'notepad' },
+      },
+      { id: 'subPaint', icon: 'paint', label: 'Paint', action: { kind: 'open', app: 'paint' } },
+      {
+        id: 'subWordPad',
+        icon: 'wordpad',
+        label: 'WordPad',
+        action: { kind: 'open', app: 'notepad' },
+      },
       { separator: true },
       {
         id: 'subIE',
@@ -63,38 +77,12 @@ export const SUBMENUS = [
     ],
   },
   {
-    key: 'accessories',
-    domId: 'accessoriesSubmenu',
-    ariaLabel: 'Accessories',
-    className: 'programs-submenu accessories-submenu',
-    chain: ['programs', 'accessories'],
-    parentKey: 'programs',
-    childKey: 'games',
-    items: [
-      { id: 'subAccGames', icon: 'folder', label: 'Games', submenu: 'games' },
-      { separator: true },
-      {
-        id: 'subAccNotepad',
-        icon: 'notepad',
-        label: 'Notepad',
-        action: { kind: 'open', app: 'notepad' },
-      },
-      { id: 'subAccPaint', icon: 'paint', label: 'Paint', action: { kind: 'open', app: 'paint' } },
-      {
-        id: 'subAccWordPad',
-        icon: 'wordpad',
-        label: 'WordPad',
-        action: { kind: 'open', app: 'notepad' },
-      },
-    ],
-  },
-  {
     key: 'games',
     domId: 'gamesSubmenu',
     ariaLabel: 'Games',
     className: 'programs-submenu games-submenu',
-    chain: ['programs', 'accessories', 'games'],
-    parentKey: 'accessories',
+    chain: ['programs', 'games'],
+    parentKey: 'programs',
     childKey: null,
     items: [
       {

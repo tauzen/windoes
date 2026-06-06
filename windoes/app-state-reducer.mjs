@@ -14,7 +14,6 @@
  * @typedef {Object} MenusState
  * @property {boolean} startOpen
  * @property {boolean} programsOpen
- * @property {boolean} accessoriesOpen
  * @property {boolean} gamesOpen
  * @property {boolean} desktopContextOpen
  * @property {boolean} explorerContextOpen
@@ -164,7 +163,6 @@ export const initialState = {
   menus: {
     startOpen: false,
     programsOpen: false,
-    accessoriesOpen: false,
     gamesOpen: false,
     desktopContextOpen: false,
     explorerContextOpen: false,
@@ -463,14 +461,12 @@ export function reduce(current, action) {
       return withMenus(current, {
         startOpen: !current.menus.startOpen,
         programsOpen: false,
-        accessoriesOpen: false,
         gamesOpen: false,
       });
     case 'START_MENU_CLOSE':
       if (
         !current.menus.startOpen &&
         !current.menus.programsOpen &&
-        !current.menus.accessoriesOpen &&
         !current.menus.gamesOpen
       ) {
         return current;
@@ -478,23 +474,20 @@ export function reduce(current, action) {
       return withMenus(current, {
         startOpen: false,
         programsOpen: false,
-        accessoriesOpen: false,
         gamesOpen: false,
       });
     case 'MENU_SUBMENUS_KEEP': {
       // Submenus can only be open while the Start menu itself is open.
       const keep = new Set(current.menus.startOpen ? action.keep || [] : []);
       const programsOpen = keep.has('programs');
-      const accessoriesOpen = keep.has('accessories');
       const gamesOpen = keep.has('games');
       if (
         programsOpen === current.menus.programsOpen &&
-        accessoriesOpen === current.menus.accessoriesOpen &&
         gamesOpen === current.menus.gamesOpen
       ) {
         return current;
       }
-      return withMenus(current, { programsOpen, accessoriesOpen, gamesOpen });
+      return withMenus(current, { programsOpen, gamesOpen });
     }
 
     case 'WINDOW_REGISTER':

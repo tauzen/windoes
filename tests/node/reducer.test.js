@@ -258,11 +258,11 @@ test('START_MENU_TOGGLE collapses any open submenus', async () => {
   const current = await freshState();
   current.menus.startOpen = true;
   current.menus.programsOpen = true;
-  current.menus.accessoriesOpen = true;
+  current.menus.gamesOpen = true;
   const next = reduce(current, { type: 'START_MENU_TOGGLE' });
   assert.equal(next.menus.startOpen, false);
   assert.equal(next.menus.programsOpen, false);
-  assert.equal(next.menus.accessoriesOpen, false);
+  assert.equal(next.menus.gamesOpen, false);
 });
 
 test('START_MENU_CLOSE closes the menu and submenus, and is a no-op when already closed', async () => {
@@ -283,11 +283,10 @@ test('MENU_SUBMENUS_KEEP opens only the kept submenus', async () => {
   current.menus.startOpen = true;
   const next = reduce(current, {
     type: 'MENU_SUBMENUS_KEEP',
-    keep: ['programs', 'accessories'],
+    keep: ['programs', 'games'],
   });
   assert.equal(next.menus.programsOpen, true);
-  assert.equal(next.menus.accessoriesOpen, true);
-  assert.equal(next.menus.gamesOpen, false);
+  assert.equal(next.menus.gamesOpen, true);
 });
 
 test('MENU_SUBMENUS_KEEP cannot open submenus while the start menu is closed', async () => {
