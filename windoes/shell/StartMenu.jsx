@@ -30,7 +30,6 @@ function focusPanelItemSoon(panelEl, index = 0) {
 
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
-  accessories: {},
   games: {},
 };
 
@@ -68,11 +67,9 @@ export default function StartMenu({ startButtonRef }) {
   const bootDone = WindoesApp.state.use((s) => s.boot.done);
   const startMenuRef = useRef(null);
   const programsSubmenuRef = useRef(null);
-  const accessoriesSubmenuRef = useRef(null);
   const gamesSubmenuRef = useRef(null);
   const menuProgramsRef = useRef(null);
-  const subAccessoriesRef = useRef(null);
-  const subAccGamesRef = useRef(null);
+  const subGamesRef = useRef(null);
   const shutdownDialogRef = useRef(null);
   const shutdownOkBtnRef = useRef(null);
 
@@ -85,22 +82,19 @@ export default function StartMenu({ startButtonRef }) {
   // Submenu positioning, derived from DOM measurement, stays local.
   const startMenuOpen = WindoesApp.state.use((s) => s.menus.startOpen);
   const programsOpen = WindoesApp.state.use((s) => s.menus.programsOpen);
-  const accessoriesOpen = WindoesApp.state.use((s) => s.menus.accessoriesOpen);
   const gamesOpen = WindoesApp.state.use((s) => s.menus.gamesOpen);
-  const openByKey = { programs: programsOpen, accessories: accessoriesOpen, games: gamesOpen };
+  const openByKey = { programs: programsOpen, games: gamesOpen };
   const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
 
   // Per-submenu DOM handles, keyed so the config-driven render and the
   // positioning effect can look them up without bespoke per-panel wiring.
   const panelRefs = {
     programs: programsSubmenuRef,
-    accessories: accessoriesSubmenuRef,
     games: gamesSubmenuRef,
   };
   const triggerRefs = {
     programs: menuProgramsRef,
-    accessories: subAccessoriesRef,
-    games: subAccGamesRef,
+    games: subGamesRef,
   };
 
   function keepSubmenus(keepKeys = []) {
@@ -278,14 +272,13 @@ export default function StartMenu({ startButtonRef }) {
       setSubmenuStyles(nextStyles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startMenuOpen, programsOpen, accessoriesOpen, gamesOpen, submenuStyles]);
+  }, [startMenuOpen, programsOpen, gamesOpen, submenuStyles]);
 
   const getStartMenuElements = useCallback(
     () => [
       startButtonRef?.current,
       startMenuRef.current,
       programsSubmenuRef.current,
-      accessoriesSubmenuRef.current,
       gamesSubmenuRef.current,
     ],
     [startButtonRef]

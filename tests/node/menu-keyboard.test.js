@@ -44,7 +44,6 @@ test('submenuKeyFromControlsId maps an arrow item back to its submenu key', asyn
   const { submenuKeyFromControlsId } = await loadModule();
 
   assert.equal(submenuKeyFromControlsId('programsSubmenu'), 'programs');
-  assert.equal(submenuKeyFromControlsId('accessoriesSubmenu'), 'accessories');
   assert.equal(submenuKeyFromControlsId('gamesSubmenu'), 'games');
   assert.equal(submenuKeyFromControlsId('notARealSubmenu'), null);
   assert.equal(submenuKeyFromControlsId(null), null);
@@ -54,12 +53,10 @@ test('chainForSubmenu opens ancestors; parentChainForSubmenu drops the own key',
   const { chainForSubmenu, parentChainForSubmenu } = await loadModule();
 
   assert.deepEqual(chainForSubmenu('programs'), ['programs']);
-  assert.deepEqual(chainForSubmenu('accessories'), ['programs', 'accessories']);
-  assert.deepEqual(chainForSubmenu('games'), ['programs', 'accessories', 'games']);
+  assert.deepEqual(chainForSubmenu('games'), ['programs', 'games']);
 
   assert.deepEqual(parentChainForSubmenu('programs'), []);
-  assert.deepEqual(parentChainForSubmenu('accessories'), ['programs']);
-  assert.deepEqual(parentChainForSubmenu('games'), ['programs', 'accessories']);
+  assert.deepEqual(parentChainForSubmenu('games'), ['programs']);
 
   assert.equal(chainForSubmenu('mystery'), null);
   assert.equal(parentChainForSubmenu('mystery'), null);
