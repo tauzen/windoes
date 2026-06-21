@@ -380,10 +380,7 @@ async function runTests() {
   const fileMenuOpenAfterDialog = await page.evaluate(() =>
     document.getElementById('fileMenu').classList.contains('open')
   );
-  assert(
-    !fileMenuOpenAfterDialog,
-    'File menu is closed once the file chooser dialog is shown'
-  );
+  assert(!fileMenuOpenAfterDialog, 'File menu is closed once the file chooser dialog is shown');
 
   // Clean up the open dialog.
   await page.click('#filePathDialogCancel');
