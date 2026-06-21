@@ -8,6 +8,7 @@ import DesktopContextMenu from './shell/DesktopContextMenu.jsx';
 import RunDialog from './shell/RunDialog.jsx';
 import ErrorDialog from './shell/ErrorDialog.jsx';
 import NotepadDialogs from './shell/NotepadDialogs.jsx';
+import FileChooserDialog from './shell/FileChooserDialog.jsx';
 import ExplorerContextMenu from './shell/ExplorerContextMenu.jsx';
 import DragOverlay from './shell/DragOverlay.jsx';
 
@@ -26,6 +27,7 @@ export default function ShellApp() {
       <RunDialog />
       <ErrorDialog />
       <NotepadDialogs />
+      <FileChooserDialog />
       <ExplorerContextMenu />
       <DragOverlay />
       <RenderRegistryPortals />

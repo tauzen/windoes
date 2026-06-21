@@ -197,6 +197,175 @@
   outline: none;
 }
 
+/* ── File Chooser Dialog (Open / Save As) ── */
+.file-chooser-box {
+  min-width: 440px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+}
+.file-chooser-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 6px;
+}
+.file-chooser-look-label {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.file-chooser-location {
+  flex: 1;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  border: 2px inset #c0c0c0;
+  background: #fff;
+  padding: 0 6px;
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.file-chooser-tool-btn {
+  width: 24px;
+  height: 22px;
+  flex-shrink: 0;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  padding: 0;
+}
+.file-chooser-tool-btn:active:not(:disabled) {
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-bottom: 2px solid #fff;
+  border-right: 2px solid #fff;
+}
+.file-chooser-tool-btn:disabled {
+  opacity: 0.5;
+}
+.file-chooser-tool-icon {
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+.fc-icon-up {
+  background-image: url('/icons/up.png');
+}
+.fc-icon-newfolder {
+  background-image: url('/icons/new-folder.png');
+}
+.file-chooser-list {
+  margin: 0 10px;
+  height: 200px;
+  overflow-y: auto;
+  border: 2px inset #c0c0c0;
+  background: #fff;
+  padding: 2px;
+}
+.file-chooser-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-size: 11px;
+  cursor: default;
+}
+.file-chooser-item:hover {
+  background: #d9e2f3;
+}
+.file-chooser-item.selected {
+  background: #000080;
+  color: #fff;
+}
+.file-chooser-item-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+.file-chooser-item-icon.is-dir {
+  background-image: url('/icons/folder.png');
+}
+.file-chooser-item-icon.is-file {
+  background-image: url('/icons/notepad.png');
+}
+.file-chooser-item-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.file-chooser-new-folder-input {
+  flex: 1;
+  font-size: 11px;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  border: 1px solid #000;
+  padding: 1px 2px;
+  outline: none;
+}
+.file-chooser-empty {
+  color: #808080;
+  font-size: 11px;
+  padding: 20px;
+  text-align: center;
+}
+.file-chooser-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.file-chooser-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.file-chooser-row label {
+  font-size: 11px;
+  white-space: nowrap;
+  width: 70px;
+}
+.file-chooser-row input {
+  flex: 1;
+  height: 22px;
+  border: 2px inset #c0c0c0;
+  padding: 0 4px;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  background: #fff;
+  outline: none;
+}
+.file-chooser-filetype {
+  flex: 1;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  border: 2px inset #c0c0c0;
+  background: #fff;
+  padding: 0 6px;
+  font-size: 11px;
+}
+.file-chooser-row .dialog-btn {
+  min-width: 75px;
+  width: 75px;
+}
+.file-chooser-error {
+  color: #a00000;
+  font-size: 11px;
+  padding: 2px 0 0 78px;
+}
+
 /* ── Shutdown Dialog ── */
 .shutdown-dialog .dialog-box {
   min-width: 310px;

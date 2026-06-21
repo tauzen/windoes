@@ -1104,36 +1104,38 @@ async function runTests() {
     const errorRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
     assert(errorRestoreFocusId === 'favoritesBtn', 'Error dialog close restores focus to opener');
 
-    // Notepad Save dialog: open from focused file menu and close restores focus
+    // File chooser Save dialog: open from focused file menu and close restores focus
     await page.evaluate(() => {
       const fileMenu = document.getElementById('notepadFileMenu');
       fileMenu?.focus();
-      WindoesApp.state.dispatch({
-        type: 'NOTEPAD_SAVE_DIALOG_OPEN',
-        path: '/C:/My Documents/Untitled.txt',
+      window.__fileChooserResult = WindoesApp.fileChooser.open({
+        mode: 'save',
+        title: 'Save As',
+        startPath: '/C:/My Documents/Untitled.txt',
       });
     });
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(150);
 
     const saveDialogOpenState = await page.evaluate(() => ({
       activeId: document.activeElement?.id || '',
-      isOpen: document.getElementById('notepadSaveDialog')?.classList.contains('active') || false,
+      isOpen: document.getElementById('fileChooserDialog')?.classList.contains('active') || false,
     }));
-    assert(saveDialogOpenState.isOpen, 'Notepad Save dialog opens');
+    assert(saveDialogOpenState.isOpen, 'File chooser Save dialog opens');
     assert(
-      saveDialogOpenState.activeId === 'notepadSavePathInput',
-      'Save dialog initially focuses path input'
+      saveDialogOpenState.activeId === 'fileChooserNameInput',
+      'Save dialog initially focuses file name input'
     );
 
-    await page.keyboard.press('Tab'); // Save
-    await page.keyboard.press('Tab'); // Cancel
-    await page.keyboard.press('Tab'); // Close
-    await page.keyboard.press('Tab'); // loops back to input
+    // Tab keeps focus trapped inside the dialog.
+    await page.keyboard.press('Tab');
+    const saveTrapState = await page.evaluate(() => {
+      const active = document.activeElement;
+      const dialog = document.querySelector('#fileChooserDialog .dialog-box');
+      return { withinDialog: !!(active && dialog && dialog.contains(active)) };
+    });
+    assert(saveTrapState.withinDialog, 'Save dialog traps Tab focus within dialog');
 
-    const saveLoopFocusId = await page.evaluate(() => document.activeElement?.id || '');
-    assert(saveLoopFocusId === 'notepadSavePathInput', 'Save dialog traps Tab and loops focus');
-
-    await page.click('#notepadSaveCancelBtn');
+    await page.click('#fileChooserCancelBtn');
     await page.waitForTimeout(100);
 
     const saveRestoreFocusId = await page.evaluate(() => document.activeElement?.id || '');
@@ -1194,7 +1196,6 @@ async function runTests() {
         desktopIconGraphic: '.desktop-icons .icon .icon-graphic',
         runDialogIcon: '#runDialog .dialog-icon',
         errorDialogIcon: '#errorDialogIcon',
-        notepadSaveDialogIcon: '#notepadSaveDialog .dialog-icon',
         titlebarLogo: '#ieWindow .title-logo',
         taskbarWindowIcon: '#taskButton .task-icon',
       };

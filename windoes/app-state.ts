@@ -87,6 +87,7 @@ const WindoesApp = {
   ui: {},
   desktopContext: {},
   notepadDialogs: {},
+  fileChooser: {},
 };
 
 // Keep on window for iframe communication

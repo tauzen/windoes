@@ -100,13 +100,13 @@ async function runTests() {
     await page.waitForTimeout(150);
 
     const saveDialogVisible = await page.evaluate(() => {
-      const saveDialog = document.getElementById('notepadSaveDialog');
+      const saveDialog = document.getElementById('fileChooserDialog');
       return !!(saveDialog && saveDialog.classList.contains('active'));
     });
-    assert(saveDialogVisible, 'Save action opens Notepad Save dialog for untitled docs');
+    assert(saveDialogVisible, 'Save action opens file chooser Save dialog for untitled docs');
 
-    await page.fill('#notepadSavePathInput', savePath);
-    await page.click('#notepadSaveConfirmBtn');
+    await page.fill('#fileChooserNameInput', savePath);
+    await page.click('#fileChooserConfirmBtn');
     await page.waitForTimeout(250);
 
     const savedResult = await page.evaluate(async (targetPath) => {
@@ -130,13 +130,16 @@ async function runTests() {
     await page.waitForTimeout(150);
 
     const saveAsDialogVisible = await page.evaluate(() => {
-      const saveDialog = document.getElementById('notepadSaveDialog');
+      const saveDialog = document.getElementById('fileChooserDialog');
       return !!(saveDialog && saveDialog.classList.contains('active'));
     });
-    assert(saveAsDialogVisible, 'Save As action opens Notepad Save dialog even for existing file');
+    assert(
+      saveAsDialogVisible,
+      'Save As action opens file chooser Save dialog even for existing file'
+    );
 
-    await page.fill('#notepadSavePathInput', saveAsPath);
-    await page.click('#notepadSaveConfirmBtn');
+    await page.fill('#fileChooserNameInput', saveAsPath);
+    await page.click('#fileChooserConfirmBtn');
     await page.waitForTimeout(250);
 
     const saveAsResult = await page.evaluate(

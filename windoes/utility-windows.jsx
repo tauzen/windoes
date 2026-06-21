@@ -3,7 +3,13 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, resetNavigationState, saveTextFile } from './fs-explorer.jsx';
+import {
+  initFS,
+  navigateTo,
+  openFile,
+  resetNavigationState,
+  saveTextFile,
+} from './fs-explorer.jsx';
 import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
 import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { openWindowBoilerplate } from './launch-helpers.js';
@@ -97,13 +103,45 @@ const notepadConfig = WindoesApp.WindowManager.register('notepad', {
 });
 
 function requestNotepadSavePath(suggestedPath) {
-  if (
-    WindoesApp.notepadDialogs &&
-    typeof WindoesApp.notepadDialogs.requestSavePath === 'function'
-  ) {
-    return WindoesApp.notepadDialogs.requestSavePath(suggestedPath);
+  if (WindoesApp.fileChooser && typeof WindoesApp.fileChooser.open === 'function') {
+    return WindoesApp.fileChooser.open({
+      mode: 'save',
+      title: 'Save As',
+      confirmLabel: 'Save',
+      startPath: suggestedPath || DEFAULT_NOTEPAD_SAVE_PATH,
+      extensions: ['.txt'],
+      defaultExtension: '.txt',
+      allowCreateFolder: true,
+    });
   }
   return Promise.resolve(null);
+}
+
+async function openNotepadDocument() {
+  if (!WindoesApp.fileChooser || typeof WindoesApp.fileChooser.open !== 'function') return;
+
+  try {
+    await initFS();
+
+    const currentPath = WindoesApp.state.get().notepad.currentFilePath || '';
+    const selectedPath = await WindoesApp.fileChooser.open({
+      mode: 'open',
+      title: 'Open',
+      confirmLabel: 'Open',
+      startPath: currentPath || DEFAULT_NOTEPAD_SAVE_PATH,
+      extensions: ['.txt'],
+    });
+    if (!selectedPath) return; // user cancelled
+
+    // `openFile` reads the chosen file and routes it to the right app (Notepad
+    // for text, Paint for images), reusing the explorer's open behavior.
+    await openFile(selectedPath);
+    WindoesApp.sound.playClickSound();
+  } catch (e) {
+    WindoesApp.bsod.showErrorDialog(
+      describeFsError(e, { title: 'Open Error', action: 'open the file' })
+    );
+  }
 }
 
 async function saveNotepadDocument(forceSaveAs = false) {
@@ -149,6 +187,10 @@ function processNotepadInteraction(command) {
 
   if (command.type === 'new') {
     newNotepadDocument();
+    return;
+  }
+  if (command.type === 'open') {
+    openNotepadDocument();
     return;
   }
   if (command.type === 'save') {

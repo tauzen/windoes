@@ -378,6 +378,34 @@ function onAppMessage(e) {
         e.source?.postMessage({ type: 'paint-vfs-save-result', requestId, ...result }, e.origin);
       });
   }
+  if (e.data.type === 'paint-request-file-path') {
+    const requestId = e.data.requestId;
+    Promise.resolve()
+      .then(async () => {
+        const openChooser = WindoesApp.fileChooser && WindoesApp.fileChooser.open;
+        if (typeof openChooser !== 'function') {
+          throw new Error('File chooser is not available.');
+        }
+        const mode = e.data.mode === 'open' ? 'open' : 'save';
+        const path = await openChooser({
+          mode,
+          title: e.data.title || (mode === 'open' ? 'Open' : 'Save As'),
+          confirmLabel: e.data.confirmLabel || (mode === 'open' ? 'Open' : 'Save'),
+          startPath: e.data.defaultPath || '/C:/My Documents/untitled.png',
+          extensions: ['.png'],
+          defaultExtension: '.png',
+          allowCreateFolder: mode !== 'open',
+        });
+        return { ok: true, path: path || null };
+      })
+      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .then((result) => {
+        e.source?.postMessage(
+          { type: 'paint-request-file-path-result', requestId, ...result },
+          e.origin
+        );
+      });
+  }
   if (e.data.type === 'paint-vfs-load') {
     const requestId = e.data.requestId;
     Promise.resolve()

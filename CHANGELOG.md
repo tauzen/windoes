@@ -6,6 +6,15 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- A shared file chooser dialog (`windoes/shell/FileChooserDialog.jsx`) used for
+  opening and saving files. It browses the VirtualFS, lists folders and files
+  (filtered by type), lets you navigate into folders and back up a level, type a
+  file name at the chosen location, and — in Save mode — create new folders. It
+  is driven imperatively via `WindoesApp.fileChooser.open(options)`, which
+  resolves to the chosen absolute path (or `null` on cancel). Notepad now uses it
+  for Save / Save As and gains an "Open..." menu entry (Ctrl+O); Paint routes its
+  Open and Save As through the same dialog via the iframe message bridge (falling
+  back to its built-in prompt only when run standalone).
 - Access rights for the virtual filesystem: files and directories can be flagged
   as protected "system" entries that cannot be deleted or renamed. `VirtualFS`
   gains a `{ system }` option on `mkdir`/`writeFile`, `setSystem`/`isSystem`
