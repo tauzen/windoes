@@ -110,54 +110,57 @@ export default function FileChooserDialog() {
 
   // Imperative entry point exposed on the shared namespace. Only touches stable
   // setters/refs so it is safe to register once.
-  const open = useCallback((options = {}) => {
-    // Abandon any dialog that was already awaiting a choice.
-    resolveWith(null);
+  const open = useCallback(
+    (options = {}) => {
+      // Abandon any dialog that was already awaiting a choice.
+      resolveWith(null);
 
-    const mode = options.mode === 'open' ? 'open' : 'save';
-    const extensions = (options.extensions || []).map((ext) => ext.toLowerCase());
+      const mode = options.mode === 'open' ? 'open' : 'save';
+      const extensions = (options.extensions || []).map((ext) => ext.toLowerCase());
 
-    let dir = DEFAULT_DIR;
-    let name = '';
-    if (options.startPath) {
-      try {
-        const norm = normalizePath(options.startPath);
-        const base = basename(norm);
-        // A name with an extension is treated as a file suggestion; otherwise the
-        // path is taken to be the directory to open in.
-        if (base && base.includes('.')) {
-          dir = parentPath(norm) || FILE_CHOOSER_ROOT;
-          name = base;
-        } else {
-          dir = norm;
+      let dir = DEFAULT_DIR;
+      let name = '';
+      if (options.startPath) {
+        try {
+          const norm = normalizePath(options.startPath);
+          const base = basename(norm);
+          // A name with an extension is treated as a file suggestion; otherwise the
+          // path is taken to be the directory to open in.
+          if (base && base.includes('.')) {
+            dir = parentPath(norm) || FILE_CHOOSER_ROOT;
+            name = base;
+          } else {
+            dir = norm;
+          }
+        } catch {
+          dir = DEFAULT_DIR;
         }
-      } catch {
-        dir = DEFAULT_DIR;
       }
-    }
 
-    setConfig({
-      mode,
-      title: options.title || (mode === 'open' ? 'Open' : 'Save As'),
-      confirmLabel: options.confirmLabel || (mode === 'open' ? 'Open' : 'Save'),
-      extensions,
-      defaultExtension: (options.defaultExtension || '').toLowerCase(),
-      allowCreateFolder:
-        options.allowCreateFolder === undefined ? mode === 'save' : !!options.allowCreateFolder,
-    });
-    setCurrentDir(dir);
-    setFileName(name);
-    setSelectedName(null);
-    setErrorText('');
-    setCreatingFolder(false);
-    setNewFolderName('');
-    setIsOpen(true);
-    setRefreshKey((key) => key + 1);
+      setConfig({
+        mode,
+        title: options.title || (mode === 'open' ? 'Open' : 'Save As'),
+        confirmLabel: options.confirmLabel || (mode === 'open' ? 'Open' : 'Save'),
+        extensions,
+        defaultExtension: (options.defaultExtension || '').toLowerCase(),
+        allowCreateFolder:
+          options.allowCreateFolder === undefined ? mode === 'save' : !!options.allowCreateFolder,
+      });
+      setCurrentDir(dir);
+      setFileName(name);
+      setSelectedName(null);
+      setErrorText('');
+      setCreatingFolder(false);
+      setNewFolderName('');
+      setIsOpen(true);
+      setRefreshKey((key) => key + 1);
 
-    return new Promise((resolve) => {
-      resolverRef.current = resolve;
-    });
-  }, [resolveWith]);
+      return new Promise((resolve) => {
+        resolverRef.current = resolve;
+      });
+    },
+    [resolveWith]
+  );
 
   useEffect(() => {
     WindoesApp.fileChooser.open = open;

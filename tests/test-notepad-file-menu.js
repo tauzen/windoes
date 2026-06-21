@@ -133,7 +133,10 @@ async function runTests() {
       const saveDialog = document.getElementById('fileChooserDialog');
       return !!(saveDialog && saveDialog.classList.contains('active'));
     });
-    assert(saveAsDialogVisible, 'Save As action opens file chooser Save dialog even for existing file');
+    assert(
+      saveAsDialogVisible,
+      'Save As action opens file chooser Save dialog even for existing file'
+    );
 
     await page.fill('#fileChooserNameInput', saveAsPath);
     await page.click('#fileChooserConfirmBtn');

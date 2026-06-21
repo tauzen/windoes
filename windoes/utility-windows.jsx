@@ -3,7 +3,13 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { basename } from './virtual-fs.js';
-import { initFS, navigateTo, openFile, resetNavigationState, saveTextFile } from './fs-explorer.jsx';
+import {
+  initFS,
+  navigateTo,
+  openFile,
+  resetNavigationState,
+  saveTextFile,
+} from './fs-explorer.jsx';
 import { MyComputerStatusLeft, MyComputerTitleText, MyComputerView } from './my-computer-view.jsx';
 import MyComputerToolbar from './my-computer-toolbar.jsx';
 import { openWindowBoilerplate } from './launch-helpers.js';
