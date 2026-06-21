@@ -659,7 +659,13 @@
 
       function setPaintWindowTitle(path) {
         const fileName = path ? basenameFromPath(path) : 'untitled';
-        paintTitleText.textContent = `${fileName} - Paint`;
+        const title = `${fileName} - Paint`;
+        paintTitleText.textContent = title;
+        // When embedded in Windoes the in-app title bar is hidden and the shell
+        // window provides the title, so mirror the change to the parent shell.
+        if (window.self !== window.top) {
+          window.parent.postMessage({ type: 'paint-title', title }, window.location.origin);
+        }
       }
 
       setPaintWindowTitle(null);
@@ -865,10 +871,7 @@
       function pickColor(x, y) {
         const data = ctx.getImageData(x, y, 1, 1).data;
         const hex =
-          '#' +
-          [data[0], data[1], data[2]]
-            .map((v) => v.toString(16).padStart(2, '0'))
-            .join('');
+          '#' + [data[0], data[1], data[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
         return hex;
       }
 
@@ -1119,7 +1122,10 @@
       }
 
       function handlePointerUp(e) {
-        if (typeof canvas.releasePointerCapture === 'function' && canvas.hasPointerCapture?.(e.pointerId)) {
+        if (
+          typeof canvas.releasePointerCapture === 'function' &&
+          canvas.hasPointerCapture?.(e.pointerId)
+        ) {
           canvas.releasePointerCapture(e.pointerId);
         }
         endStroke(e);
@@ -1285,7 +1291,9 @@
         }
 
         if (window.self === window.top) {
-          return Promise.reject(new Error('VirtualFS save/load is only available in Windoes app mode.'));
+          return Promise.reject(
+            new Error('VirtualFS save/load is only available in Windoes app mode.')
+          );
         }
 
         const requestId = `paint-vfs-${Date.now()}-${paintRequestCounter++}`;
@@ -1564,9 +1572,15 @@
 
         const launchFilePath = new URLSearchParams(window.location.search).get('filePath');
         if (launchFilePath) {
-          loadCanvasFromVirtualFs(normalizePaintPath(launchFilePath)).catch((error) => {
-            window.alert(error?.message || 'Could not open image.');
-          });
+          const normalizedLaunchPath = normalizePaintPath(launchFilePath);
+          loadCanvasFromVirtualFs(normalizedLaunchPath)
+            .then(() => {
+              currentFilePath = normalizedLaunchPath;
+              setPaintWindowTitle(normalizedLaunchPath);
+            })
+            .catch((error) => {
+              window.alert(error?.message || 'Could not open image.');
+            });
         }
       }
     </script>

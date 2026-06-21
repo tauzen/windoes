@@ -89,6 +89,12 @@
  */
 
 /**
+ * @typedef {Object} PaintState
+ * @property {string} title
+ * @property {string} taskLabel
+ */
+
+/**
  * @typedef {Object} State
  * @property {BootState} boot
  * @property {MenusState} menus
@@ -99,6 +105,7 @@
  * @property {NotepadState} notepad
  * @property {BrowserState} browser
  * @property {AppState} app
+ * @property {PaintState} paint
  */
 
 // ─── Action union ────────────────────────────────────────────────────────────
@@ -145,6 +152,7 @@
  *   | { type: 'BROWSER_SET_STATUS', status: string }
  *   | { type: 'APP_SET_PAGE', title: string, taskLabel: string, status: string }
  *   | { type: 'APP_SET_STATUS', status: string }
+ *   | { type: 'PAINT_SET_TITLE', title: string, taskLabel: string }
  * )} WindoesAction
  */
 
@@ -210,6 +218,10 @@ export const initialState = {
     title: 'Application',
     status: 'Done',
     taskLabel: 'Application',
+  },
+  paint: {
+    title: 'untitled - Paint',
+    taskLabel: 'untitled - Paint',
   },
 };
 
@@ -376,6 +388,21 @@ function withApp(current, nextApp) {
     app: {
       ...current.app,
       ...nextApp,
+    },
+  };
+}
+
+/**
+ * @param {State} current
+ * @param {Partial<PaintState>} nextPaint
+ * @returns {State}
+ */
+function withPaint(current, nextPaint) {
+  return {
+    ...current,
+    paint: {
+      ...current.paint,
+      ...nextPaint,
     },
   };
 }
@@ -639,6 +666,12 @@ export function reduce(current, action) {
     case 'APP_SET_STATUS':
       if (current.app.status === action.status) return current;
       return withApp(current, { status: action.status });
+
+    case 'PAINT_SET_TITLE':
+      if (current.paint.title === action.title && current.paint.taskLabel === action.taskLabel) {
+        return current;
+      }
+      return withPaint(current, { title: action.title, taskLabel: action.taskLabel });
 
     default:
       return current;

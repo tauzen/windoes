@@ -432,6 +432,24 @@ test('APP_SET_STATUS updates status and is a no-op when unchanged', async () => 
   assert.equal(same, changed);
 });
 
+test('PAINT_SET_TITLE updates paint title and task label, no-op when unchanged', async () => {
+  const { reduce } = await loadReducerModule();
+  const current = await freshState();
+  const next = reduce(current, {
+    type: 'PAINT_SET_TITLE',
+    title: 'sketch.png - Paint',
+    taskLabel: 'sketch.png - Paint',
+  });
+  assert.equal(next.paint.title, 'sketch.png - Paint');
+  assert.equal(next.paint.taskLabel, 'sketch.png - Paint');
+  const same = reduce(next, {
+    type: 'PAINT_SET_TITLE',
+    title: 'sketch.png - Paint',
+    taskLabel: 'sketch.png - Paint',
+  });
+  assert.equal(same, next);
+});
+
 test('unknown action returns current state object', async () => {
   const { reduce } = await loadReducerModule();
   const current = await freshState();
