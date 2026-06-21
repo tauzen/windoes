@@ -1341,6 +1341,13 @@
           closeAllMenus();
           return;
         }
+        // Clicking an option inside a dropdown (e.g. Open.../Save As... which
+        // opens the FileChooser) should close the menu, not re-toggle the
+        // parent menu back open behind the dialog.
+        if (e.target.closest('.menu-dropdown')) {
+          closeAllMenus();
+          return;
+        }
         const wasOpen = menuItem.classList.contains('open');
         closeAllMenus();
         if (!wasOpen) menuItem.classList.add('open');
