@@ -398,6 +398,7 @@ export {
   goUp,
   initFS,
   navigateTo,
+  openFile,
   openExplorerContextMenu,
   resetNavigationState,
   saveTextFile,

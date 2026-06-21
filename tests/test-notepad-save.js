@@ -46,13 +46,13 @@ async function runTests() {
     await page.waitForTimeout(150);
 
     const saveDialogVisible = await page.evaluate(() => {
-      const saveDialog = document.getElementById('notepadSaveDialog');
+      const saveDialog = document.getElementById('fileChooserDialog');
       return !!(saveDialog && saveDialog.classList.contains('active'));
     });
-    assert(saveDialogVisible, 'Ctrl+S on untitled document opens Notepad Save dialog');
+    assert(saveDialogVisible, 'Ctrl+S on untitled document opens file chooser Save dialog');
 
-    await page.fill('#notepadSavePathInput', savePath);
-    await page.click('#notepadSaveConfirmBtn');
+    await page.fill('#fileChooserNameInput', savePath);
+    await page.click('#fileChooserConfirmBtn');
     await page.waitForTimeout(250);
 
     const saved = await page.evaluate(
