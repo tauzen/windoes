@@ -26,6 +26,17 @@ function AppTaskLabel() {
   return <>{WindoesApp.state.use((s) => s.app.taskLabel)}</>;
 }
 
+// Paint's window title and task-button label track the opened file name. The
+// titlebar re-renders on focus/blur, so the title must come from state rather
+// than imperative DOM writes (which a re-render would discard).
+function PaintTitleText() {
+  return <>{WindoesApp.state.use((s) => s.paint.title)}</>;
+}
+
+function PaintTaskLabel() {
+  return <>{WindoesApp.state.use((s) => s.paint.taskLabel)}</>;
+}
+
 const appConfig = WindoesApp.WindowManager.register('app', {
   template: {
     id: 'appWindow',
@@ -237,8 +248,9 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
   template: {
     id: 'paintWindow',
     ariaLabel: 'Paint',
-    title: 'untitled - Paint',
+    title: <PaintTitleText />,
     titleIcon: 'titlelogo-paint',
+    titleSpanId: 'paintWindowTitle',
     titlebarId: 'paintTitlebar',
     minimizeBtnId: 'paintMinBtn',
     closeBtnId: 'paintCloseBtn',
@@ -254,7 +266,12 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
     ),
     useSharedWindowComponent: true,
   },
-  taskButton: { id: 'paintTaskBtn', icon: 'task-icon-paint', label: 'untitled - Paint' },
+  taskButton: {
+    id: 'paintTaskBtn',
+    icon: 'task-icon-paint',
+    label: <PaintTaskLabel />,
+    labelId: 'paintTaskLabel',
+  },
   iframeId: 'paintFrame',
   iframeSrc: './applications/paint/index.html',
   hasChrome: false,
@@ -357,6 +374,15 @@ function onAppMessage(e) {
   }
   if (e.data.type === 'paint-close') {
     WindoesApp.WindowManager.close('paint');
+  }
+  if (e.data.type === 'paint-title') {
+    const title =
+      typeof e.data.title === 'string' && e.data.title ? e.data.title : 'untitled - Paint';
+    const taskLabel =
+      title.length > APP_TASK_LABEL_MAX_LEN
+        ? title.substring(0, APP_TASK_LABEL_TRUNCATE_LEN) + '...'
+        : title;
+    WindoesApp.state.dispatch({ type: 'PAINT_SET_TITLE', title, taskLabel });
   }
   if (e.data.type === 'paint-vfs-save') {
     const requestId = e.data.requestId;
