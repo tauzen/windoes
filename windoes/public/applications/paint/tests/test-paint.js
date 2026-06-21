@@ -364,6 +364,28 @@ async function runTests() {
     `Expanded canvas area is white (got rgb: ${canvasResizeResult.expanded.join(',')})`
   );
 
+  // ── Test 12: File menu closes when the file dialog opens ─────────────
+  console.log('\nTest 12: File menu closes when the file chooser dialog opens');
+
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  const fileMenuOpenBeforeDialog = await page.evaluate(() =>
+    document.getElementById('fileMenu').classList.contains('open')
+  );
+  assert(fileMenuOpenBeforeDialog, 'File menu is open after clicking File');
+
+  await page.click('#menuSave');
+  await page.waitForSelector('#filePathDialog.visible');
+
+  const fileMenuOpenAfterDialog = await page.evaluate(() =>
+    document.getElementById('fileMenu').classList.contains('open')
+  );
+  assert(!fileMenuOpenAfterDialog, 'File menu is closed once the file chooser dialog is shown');
+
+  // Clean up the open dialog.
+  await page.click('#filePathDialogCancel');
+  await page.waitForTimeout(30);
+
   await browser.close();
   tracker.exitWithSummary();
 }
