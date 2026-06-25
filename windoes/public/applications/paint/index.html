@@ -469,6 +469,7 @@
           <div class="menu-dropdown">
             <div class="menu-opt" id="menuNew">New</div>
             <div class="menu-opt" id="menuOpen">Open...</div>
+            <div class="menu-opt" id="menuSaveFile">Save Ctrl+S</div>
             <div class="menu-opt" id="menuSave">Save As...</div>
             <div class="menu-sep"></div>
             <div class="menu-opt disabled" aria-disabled="true" tabindex="-1">Print Preview</div>
@@ -1411,8 +1412,8 @@
         }
       });
 
-      document.getElementById('menuSave').addEventListener('click', async () => {
-        closeAllMenus();
+      // Prompt for a destination and save there (File > Save As...).
+      async function saveImageAs() {
         const path = await chooseFilePath({
           mode: 'save',
           title: 'Save As',
@@ -1428,6 +1429,30 @@
         } catch (error) {
           window.alert(error?.message || 'Could not save image.');
         }
+      }
+
+      // Save to the current file if there is one, otherwise behave like Save As.
+      async function saveImage() {
+        if (!currentFilePath) {
+          await saveImageAs();
+          return;
+        }
+        try {
+          await saveCanvasToVirtualFs(currentFilePath);
+          setPaintWindowTitle(currentFilePath);
+        } catch (error) {
+          window.alert(error?.message || 'Could not save image.');
+        }
+      }
+
+      document.getElementById('menuSaveFile').addEventListener('click', () => {
+        closeAllMenus();
+        saveImage();
+      });
+
+      document.getElementById('menuSave').addEventListener('click', () => {
+        closeAllMenus();
+        saveImageAs();
       });
 
       document.getElementById('menuExit').addEventListener('click', () => {
@@ -1533,7 +1558,7 @@
           redo();
         } else if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
           e.preventDefault();
-          document.getElementById('menuSave').click();
+          document.getElementById('menuSaveFile').click();
         }
       });
 
