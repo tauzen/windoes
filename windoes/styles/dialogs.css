@@ -366,6 +366,11 @@
   padding: 2px 0 0 78px;
 }
 
+/* Overwrite confirmation stacks on top of the open file chooser. */
+.file-chooser-overwrite-overlay {
+  z-index: 110;
+}
+
 /* ── Shutdown Dialog ── */
 .shutdown-dialog .dialog-box {
   min-width: 310px;

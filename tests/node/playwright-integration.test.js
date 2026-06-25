@@ -13,6 +13,7 @@ const integrationScripts = [
   'test-boot-preload.js',
   'test-notepad-save.js',
   'test-notepad-file-menu.js',
+  'test-file-chooser-overwrite.js',
   'test-virtual-fs.js',
   'test-axe-accessibility.js',
 ];
