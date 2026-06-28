@@ -55,6 +55,8 @@ export default function FileChooserDialog() {
   const nameInputRef = useRef(null);
   const newFolderInputRef = useRef(null);
   const resolverRef = useRef(null);
+  const overwriteBoxRef = useRef(null);
+  const replaceButtonRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
@@ -66,6 +68,9 @@ export default function FileChooserDialog() {
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  // When saving over an existing file, holds the target path awaiting the
+  // user's confirmation in the "replace existing file?" sub-dialog.
+  const [overwriteTarget, setOverwriteTarget] = useState(null);
 
   // Refresh the folder listing whenever the dialog opens or the directory
   // changes. A failed read (e.g. a stale starting path) falls back to the root.
@@ -103,6 +108,7 @@ export default function FileChooserDialog() {
     (result) => {
       setIsOpen(false);
       setCreatingFolder(false);
+      setOverwriteTarget(null);
       resolveWith(result ?? null);
     },
     [resolveWith]
@@ -152,6 +158,7 @@ export default function FileChooserDialog() {
       setErrorText('');
       setCreatingFolder(false);
       setNewFolderName('');
+      setOverwriteTarget(null);
       setIsOpen(true);
       setRefreshKey((key) => key + 1);
 
@@ -181,6 +188,14 @@ export default function FileChooserDialog() {
     dialogRef,
     initialFocusRef: nameInputRef,
     onInitialFocus: handleInitialFocus,
+  });
+
+  // The overwrite confirmation sits on top of the chooser; trap focus there
+  // while it is shown so Tab/Escape stay within the prompt.
+  useDialogFocus({
+    isOpen: overwriteTarget !== null,
+    dialogRef: overwriteBoxRef,
+    initialFocusRef: replaceButtonRef,
   });
 
   // Focus the inline new-folder field as soon as it appears.
@@ -302,10 +317,28 @@ export default function FileChooserDialog() {
         setErrorText('That folder does not exist.');
         return;
       }
+
+      // Saving over an existing file is destructive, so confirm the overwrite
+      // before resolving with the chosen path.
+      if (await fs.exists(finalPath)) {
+        setOverwriteTarget(finalPath);
+        return;
+      }
+
       close(finalPath);
     } catch (e) {
       setErrorText(describeFsError(e).text);
     }
+  }
+
+  function confirmOverwrite() {
+    const target = overwriteTarget;
+    setOverwriteTarget(null);
+    if (target) close(target);
+  }
+
+  function cancelOverwrite() {
+    setOverwriteTarget(null);
   }
 
   async function submitNewFolder() {
@@ -333,165 +366,225 @@ export default function FileChooserDialog() {
   }
 
   return (
-    <div
-      className={`dialog-overlay file-chooser-dialog${isOpen ? ' active' : ''}`}
-      id="fileChooserDialog"
-    >
-      <div ref={dialogRef} className="dialog-box file-chooser-box">
-        <div className="dialog-titlebar">
-          <span>{config.title}</span>
-          <button
-            className="ctrl-btn"
-            id="fileChooserCloseBtn"
-            aria-label="Close"
-            onClick={() => close(null)}
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="file-chooser-toolbar">
-          <label className="file-chooser-look-label" htmlFor="fileChooserList">
-            Look in:
-          </label>
-          <span className="file-chooser-location" id="fileChooserLocation">
-            {displayDir(currentDir)}
-          </span>
-          <button
-            type="button"
-            id="fileChooserUpBtn"
-            className="file-chooser-tool-btn"
-            title="Up One Level"
-            aria-label="Up One Level"
-            onClick={goUp}
-            disabled={currentDir === FILE_CHOOSER_ROOT}
-          >
-            <span className="file-chooser-tool-icon fc-icon-up" aria-hidden={true}></span>
-          </button>
-          {config.allowCreateFolder && (
+    <>
+      <div
+        className={`dialog-overlay file-chooser-dialog${isOpen ? ' active' : ''}`}
+        id="fileChooserDialog"
+      >
+        <div ref={dialogRef} className="dialog-box file-chooser-box">
+          <div className="dialog-titlebar">
+            <span>{config.title}</span>
             <button
-              type="button"
-              id="fileChooserNewFolderBtn"
-              className="file-chooser-tool-btn"
-              title="Create New Folder"
-              aria-label="Create New Folder"
-              onClick={() => {
-                setErrorText('');
-                setNewFolderName('New Folder');
-                setCreatingFolder(true);
-              }}
+              className="ctrl-btn"
+              id="fileChooserCloseBtn"
+              aria-label="Close"
+              onClick={() => close(null)}
             >
-              <span className="file-chooser-tool-icon fc-icon-newfolder" aria-hidden={true}></span>
-            </button>
-          )}
-        </div>
-
-        <div className="file-chooser-list" id="fileChooserList" role="listbox">
-          {creatingFolder && (
-            <div className="file-chooser-item file-chooser-new-folder">
-              <span className="file-chooser-item-icon is-dir" aria-hidden={true}></span>
-              <input
-                ref={newFolderInputRef}
-                type="text"
-                id="fileChooserNewFolderInput"
-                aria-label="New folder name"
-                className="file-chooser-new-folder-input"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                onBlur={submitNewFolder}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    submitNewFolder();
-                  } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    setCreatingFolder(false);
-                    setNewFolderName('');
-                  }
-                }}
-              />
-            </div>
-          )}
-
-          {visibleItems.length === 0 && !creatingFolder ? (
-            <div className="file-chooser-empty">This folder is empty.</div>
-          ) : (
-            visibleItems.map((item) => (
-              <div
-                key={`${item.type}:${item.name}`}
-                className={`file-chooser-item${selectedName === item.name ? ' selected' : ''}`}
-                role="option"
-                aria-selected={selectedName === item.name}
-                data-name={item.name}
-                data-type={item.type}
-                onClick={() => selectItem(item)}
-                onDoubleClick={() => activateItem(item)}
-              >
-                <span
-                  className={`file-chooser-item-icon ${
-                    item.type === 'directory' ? 'is-dir' : 'is-file'
-                  }`}
-                  aria-hidden={true}
-                ></span>
-                <span className="file-chooser-item-label">{item.name}</span>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="file-chooser-fields">
-          <div className="file-chooser-row">
-            <label htmlFor="fileChooserNameInput">File name:</label>
-            <input
-              ref={nameInputRef}
-              type="text"
-              id="fileChooserNameInput"
-              aria-label="File name"
-              value={fileName}
-              onChange={(e) => {
-                setFileName(e.target.value);
-                setErrorText('');
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  confirmChoice();
-                } else if (e.key === 'Escape') {
-                  e.preventDefault();
-                  close(null);
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="dialog-btn"
-              id="fileChooserConfirmBtn"
-              onClick={() => confirmChoice()}
-            >
-              {config.confirmLabel}
+              ×
             </button>
           </div>
-          <div className="file-chooser-row">
-            <label htmlFor="fileChooserFileType">Files of type:</label>
-            <span className="file-chooser-filetype" id="fileChooserFileType">
-              {filterLabel}
+
+          <div className="file-chooser-toolbar">
+            <label className="file-chooser-look-label" htmlFor="fileChooserList">
+              Look in:
+            </label>
+            <span className="file-chooser-location" id="fileChooserLocation">
+              {displayDir(currentDir)}
             </span>
             <button
               type="button"
+              id="fileChooserUpBtn"
+              className="file-chooser-tool-btn"
+              title="Up One Level"
+              aria-label="Up One Level"
+              onClick={goUp}
+              disabled={currentDir === FILE_CHOOSER_ROOT}
+            >
+              <span className="file-chooser-tool-icon fc-icon-up" aria-hidden={true}></span>
+            </button>
+            {config.allowCreateFolder && (
+              <button
+                type="button"
+                id="fileChooserNewFolderBtn"
+                className="file-chooser-tool-btn"
+                title="Create New Folder"
+                aria-label="Create New Folder"
+                onClick={() => {
+                  setErrorText('');
+                  setNewFolderName('New Folder');
+                  setCreatingFolder(true);
+                }}
+              >
+                <span
+                  className="file-chooser-tool-icon fc-icon-newfolder"
+                  aria-hidden={true}
+                ></span>
+              </button>
+            )}
+          </div>
+
+          <div className="file-chooser-list" id="fileChooserList" role="listbox">
+            {creatingFolder && (
+              <div className="file-chooser-item file-chooser-new-folder">
+                <span className="file-chooser-item-icon is-dir" aria-hidden={true}></span>
+                <input
+                  ref={newFolderInputRef}
+                  type="text"
+                  id="fileChooserNewFolderInput"
+                  aria-label="New folder name"
+                  className="file-chooser-new-folder-input"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onBlur={submitNewFolder}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitNewFolder();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setCreatingFolder(false);
+                      setNewFolderName('');
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            {visibleItems.length === 0 && !creatingFolder ? (
+              <div className="file-chooser-empty">This folder is empty.</div>
+            ) : (
+              visibleItems.map((item) => (
+                <div
+                  key={`${item.type}:${item.name}`}
+                  className={`file-chooser-item${selectedName === item.name ? ' selected' : ''}`}
+                  role="option"
+                  aria-selected={selectedName === item.name}
+                  data-name={item.name}
+                  data-type={item.type}
+                  onClick={() => selectItem(item)}
+                  onDoubleClick={() => activateItem(item)}
+                >
+                  <span
+                    className={`file-chooser-item-icon ${
+                      item.type === 'directory' ? 'is-dir' : 'is-file'
+                    }`}
+                    aria-hidden={true}
+                  ></span>
+                  <span className="file-chooser-item-label">{item.name}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="file-chooser-fields">
+            <div className="file-chooser-row">
+              <label htmlFor="fileChooserNameInput">File name:</label>
+              <input
+                ref={nameInputRef}
+                type="text"
+                id="fileChooserNameInput"
+                aria-label="File name"
+                value={fileName}
+                onChange={(e) => {
+                  setFileName(e.target.value);
+                  setErrorText('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmChoice();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    close(null);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="dialog-btn"
+                id="fileChooserConfirmBtn"
+                onClick={() => confirmChoice()}
+              >
+                {config.confirmLabel}
+              </button>
+            </div>
+            <div className="file-chooser-row">
+              <label htmlFor="fileChooserFileType">Files of type:</label>
+              <span className="file-chooser-filetype" id="fileChooserFileType">
+                {filterLabel}
+              </span>
+              <button
+                type="button"
+                className="dialog-btn"
+                id="fileChooserCancelBtn"
+                onClick={() => close(null)}
+              >
+                Cancel
+              </button>
+            </div>
+            {errorText && (
+              <div className="file-chooser-error" id="fileChooserError" role="alert">
+                {errorText}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`dialog-overlay file-chooser-overwrite-overlay${
+          overwriteTarget !== null ? ' active' : ''
+        }`}
+        id="fileChooserOverwriteDialog"
+      >
+        <div
+          ref={overwriteBoxRef}
+          className="dialog-box"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              cancelOverwrite();
+            }
+          }}
+        >
+          <div className="dialog-titlebar">
+            <span>{config.confirmLabel}</span>
+            <button
+              className="ctrl-btn"
+              id="fileChooserOverwriteCloseBtn"
+              aria-label="Close"
+              onClick={cancelOverwrite}
+            >
+              ×
+            </button>
+          </div>
+          <div className="dialog-body">
+            <div className="dialog-icon dialog-icon-warning" aria-hidden={true}></div>
+            <div className="dialog-text" id="fileChooserOverwriteText">
+              {overwriteTarget ? basename(overwriteTarget) : ''} already exists.
+              <br />
+              Do you want to replace it?
+            </div>
+          </div>
+          <div className="dialog-buttons">
+            <button
+              ref={replaceButtonRef}
               className="dialog-btn"
-              id="fileChooserCancelBtn"
-              onClick={() => close(null)}
+              id="fileChooserReplaceBtn"
+              onClick={confirmOverwrite}
+            >
+              Replace
+            </button>
+            <button
+              className="dialog-btn"
+              id="fileChooserOverwriteCancelBtn"
+              onClick={cancelOverwrite}
             >
               Cancel
             </button>
           </div>
-          {errorText && (
-            <div className="file-chooser-error" id="fileChooserError" role="alert">
-              {errorText}
-            </div>
-          )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- The file chooser now warns before overwriting in Save mode. When the chosen
+  name (or a typed name) matches an existing file, a confirmation dialog appears
+  explaining that the file will be replaced, with **Cancel** (return to the
+  chooser without resolving) and **Replace** (proceed with the overwrite)
+  buttons. Covered by `tests/test-file-chooser-overwrite.js`.
 - A shared file chooser dialog (`windoes/shell/FileChooserDialog.jsx`) used for
   opening and saving files. It browses the VirtualFS, lists folders and files
   (filtered by type), lets you navigate into folders and back up a level, type a
