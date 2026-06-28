@@ -386,6 +386,58 @@ async function runTests() {
   await page.click('#filePathDialogCancel');
   await page.waitForTimeout(30);
 
+  // ── Test 13: Save writes to the current file without a dialog ─────────
+  console.log('\nTest 13: File > Save reuses the current path without prompting');
+
+  // currentFilePath is still the roundtrip.png saved in Test 10. Draw a new
+  // patch, then Save and confirm it persists straight to that path.
+  await page.evaluate(() => {
+    window.__lastPaintSavePath = null;
+    const c = document.getElementById('canvas');
+    const x = c.getContext('2d');
+    x.fillStyle = '#aa0000';
+    x.fillRect(70, 70, 15, 15);
+  });
+
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuSaveFile');
+  await page.waitForTimeout(80);
+
+  const directSave = await page.evaluate(() => ({
+    dialogVisible: document.getElementById('filePathDialog').classList.contains('visible'),
+    savedPath: window.__lastPaintSavePath,
+  }));
+  assert(
+    !directSave.dialogVisible,
+    'Save does not open the file path dialog when a current file exists'
+  );
+  assert(
+    directSave.savedPath === '/C:/My Documents/roundtrip.png',
+    `Save writes to the current file path (got: ${directSave.savedPath})`
+  );
+
+  // ── Test 14: Save with no current file falls back to Save As ──────────
+  console.log('\nTest 14: File > Save with no current file prompts for a path');
+
+  // New clears the current file path, so Save should prompt like Save As.
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuNew');
+  await page.waitForTimeout(50);
+
+  await page.click('#fileMenu');
+  await page.waitForTimeout(30);
+  await page.click('#menuSaveFile');
+  await page.waitForSelector('#filePathDialog.visible');
+  const promptedWhenNoPath = await page.evaluate(() =>
+    document.getElementById('filePathDialog').classList.contains('visible')
+  );
+  assert(promptedWhenNoPath, 'Save prompts for a path when no current file is set');
+
+  await page.click('#filePathDialogCancel');
+  await page.waitForTimeout(30);
+
   await browser.close();
   tracker.exitWithSummary();
 }
