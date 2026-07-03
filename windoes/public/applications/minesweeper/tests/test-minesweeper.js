@@ -7,6 +7,8 @@
  * - Board renders with correct number of cells for Beginner difficulty
  * - Left-clicking a cell reveals it
  * - Right-clicking a cell flags it
+ * - Long-pressing a cell (touch) flags it
+ * - Quick tap (touch) reveals a cell
  * - New game (face button) resets the board
  * - Menu system works
  */
@@ -96,6 +98,66 @@ async function runTests() {
     return state.board.some((row) => row.some((cell) => cell.flagged));
   });
   assert(flagged, 'Right-click flags an unrevealed cell');
+
+  // ── Test 5b: Long-press (touch) flags a cell ─────────────────────────
+  console.log('\nTest 5b: Long-press (touch) flags a cell');
+
+  // Reset the board so all cells are unrevealed and unflagged
+  await page.click('#faceBtn');
+  await page.waitForTimeout(300);
+
+  const dispatchTouch = (selector, type) =>
+    page.evaluate(
+      ([sel, evType]) => {
+        const el = document.querySelector(sel);
+        const rect = el.getBoundingClientRect();
+        const touch = new Touch({
+          identifier: 1,
+          target: el,
+          clientX: rect.x + rect.width / 2,
+          clientY: rect.y + rect.height / 2,
+        });
+        el.dispatchEvent(
+          new TouchEvent(evType, {
+            touches: evType === 'touchend' ? [] : [touch],
+            targetTouches: evType === 'touchend' ? [] : [touch],
+            changedTouches: [touch],
+            bubbles: true,
+            cancelable: true,
+          })
+        );
+      },
+      [selector, type]
+    );
+
+  await dispatchTouch('#board .cell', 'touchstart');
+  await page.waitForTimeout(600); // longer than the 350ms long-press threshold
+  await dispatchTouch('#board .cell', 'touchend');
+  await page.waitForTimeout(100);
+
+  const flaggedByTouch = await page.evaluate(() =>
+    state.board.some((row) => row.some((cell) => cell.flagged))
+  );
+  assert(flaggedByTouch, 'Long-press flags an unrevealed cell');
+
+  const revealedByLongPress = await page.evaluate(
+    () => document.querySelectorAll('#board .cell.revealed').length
+  );
+  assert(revealedByLongPress === 0, 'Long-press does not reveal the cell');
+
+  // ── Test 5c: Quick tap (touch) reveals a cell ────────────────────────
+  console.log('\nTest 5c: Quick tap (touch) reveals a cell');
+
+  // Tap a different cell (last one on the board) briefly
+  await dispatchTouch('#board .cell:last-child', 'touchstart');
+  await page.waitForTimeout(100); // well under the long-press threshold
+  await dispatchTouch('#board .cell:last-child', 'touchend');
+  await page.waitForTimeout(100);
+
+  const revealedByTap = await page.evaluate(
+    () => document.querySelectorAll('#board .cell.revealed').length
+  );
+  assert(revealedByTap >= 1, `Quick tap reveals a cell (revealed: ${revealedByTap})`);
 
   // ── Test 6: Face button resets the game ──────────────────────────────
   console.log('\nTest 6: Face button resets the game');
