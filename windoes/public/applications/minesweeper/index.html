@@ -229,6 +229,8 @@
       .cell {
         width: 16px;
         height: 16px;
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
         border: 2px solid;
         border-color: #ffffff #808080 #808080 #ffffff;
         background: #c0c0c0;
@@ -968,6 +970,10 @@
             cell.addEventListener('mouseup', onCellMouseUp);
             cell.addEventListener('contextmenu', onCellRightClick);
             cell.addEventListener('mouseenter', onCellEnter);
+            cell.addEventListener('touchstart', onCellTouchStart, { passive: true });
+            cell.addEventListener('touchmove', onCellTouchMove, { passive: true });
+            cell.addEventListener('touchend', onCellTouchEnd);
+            cell.addEventListener('touchcancel', onCellTouchCancel);
             boardEl.appendChild(cell);
           }
         }
@@ -1314,6 +1320,93 @@
 
       function onCellRightClick(e) {
         e.preventDefault();
+      }
+
+      // ============================================================
+      // TOUCH EVENTS (mobile: long-press to flag, tap to reveal)
+      // ============================================================
+      const LONG_PRESS_MS = 350;
+      const TOUCH_MOVE_CANCEL_PX = 10;
+      let touchState = null; // { r, c, el, timer, longPressFired, startX, startY }
+
+      function clearTouchState() {
+        if (!touchState) return;
+        clearTimeout(touchState.timer);
+        touchState.el.classList.remove('pressed-look');
+        touchState = null;
+        if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
+          drawFace(document.getElementById('faceCanvas'), 'smile');
+        }
+      }
+
+      function onCellTouchStart(e) {
+        if (e.touches.length > 1) {
+          clearTouchState();
+          return;
+        }
+        if (state.gamePhase === 'won' || state.gamePhase === 'lost') return;
+        const el = e.currentTarget;
+        const r = parseInt(el.dataset.r);
+        const c = parseInt(el.dataset.c);
+        const touch = e.touches[0];
+        const cell = state.board[r][c];
+
+        touchState = {
+          r,
+          c,
+          el,
+          longPressFired: false,
+          startX: touch.clientX,
+          startY: touch.clientY,
+          timer: setTimeout(() => {
+            if (!touchState) return;
+            touchState.longPressFired = true;
+            el.classList.remove('pressed-look');
+            toggleFlag(r, c);
+            if (navigator.vibrate) navigator.vibrate(50);
+          }, LONG_PRESS_MS),
+        };
+
+        if (!cell.revealed && !cell.flagged) el.classList.add('pressed-look');
+        drawFace(document.getElementById('faceCanvas'), 'wow');
+      }
+
+      function onCellTouchMove(e) {
+        if (!touchState) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - touchState.startX;
+        const dy = touch.clientY - touchState.startY;
+        // Finger moved too far: treat as scroll, not a tap or long-press
+        if (Math.hypot(dx, dy) > TOUCH_MOVE_CANCEL_PX) clearTouchState();
+      }
+
+      function onCellTouchEnd(e) {
+        if (!touchState) return;
+        // Suppress the synthesized mouse events so the cell isn't handled twice
+        e.preventDefault();
+        clearTimeout(touchState.timer);
+        touchState.el.classList.remove('pressed-look');
+
+        const { r, c, longPressFired } = touchState;
+        touchState = null;
+
+        if (!longPressFired && state.gamePhase !== 'won' && state.gamePhase !== 'lost') {
+          const cell = state.board[r][c];
+          if (cell.revealed) {
+            chordReveal(r, c);
+          } else {
+            revealCell(r, c);
+          }
+          updateAllCells(...(state.triggeredMine || []));
+        }
+
+        if (state.gamePhase === 'playing' || state.gamePhase === 'idle') {
+          drawFace(document.getElementById('faceCanvas'), 'smile');
+        }
+      }
+
+      function onCellTouchCancel() {
+        clearTouchState();
       }
 
       function highlightNeighbors(r, c, pressed) {
