@@ -19,6 +19,10 @@
         min-height: 100vh;
         font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
         font-size: 11px;
+        /* Safari needs the -webkit- prefix, otherwise long-press shows text selection handles */
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       /* ===== WINDOW ===== */
@@ -27,6 +31,7 @@
         border: 2px solid;
         border-color: #dfdfdf #404040 #404040 #dfdfdf;
         box-shadow: 1px 1px 0 #000;
+        -webkit-user-select: none;
         user-select: none;
       }
 
