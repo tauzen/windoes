@@ -4,6 +4,7 @@
 import WindoesApp from './app-state.js';
 import { VirtualFS, basename } from './virtual-fs.js';
 import { createExplorerNavigation } from './explorer-navigation.mjs';
+import { isHtmlFilePath } from './browser-url.mjs';
 import { once } from './once.mjs';
 import { describeFsError } from './fs-errors.mjs';
 
@@ -138,6 +139,25 @@ const initFS = once(async () => {
     await fs.writeFile('/C:/My Documents/Hello.txt', 'Hello from Windoes XD!');
   }
 
+  if (!(await fs.exists('/C:/My Documents/Welcome.html'))) {
+    await fs.writeFile(
+      '/C:/My Documents/Welcome.html',
+      [
+        '<!doctype html>',
+        '<html>',
+        '<head><title>Welcome to Windoes</title></head>',
+        '<body bgcolor="#008080" text="#ffffff">',
+        '<center>',
+        '<h1>Welcome to Windoes!</h1>',
+        '<p>This page is stored on your Local Disk (C:) and rendered by Internet Explorer.</p>',
+        '<p><marquee>Best viewed at 800x600 in 256 colors.</marquee></p>',
+        '</center>',
+        '</body>',
+        '</html>',
+      ].join('\n')
+    );
+  }
+
   // Protect the shipped folders/files so they cannot be deleted or renamed.
   for (const path of SYSTEM_PATHS) {
     if ((await fs.exists(path)) && !(await fs.isSystem(path))) {
@@ -185,7 +205,12 @@ async function refreshExplorerView() {
         path: childPath,
         type: entry.type,
         system: !!entry.system,
-        icon: entry.type === 'directory' ? 'folder-icon-folder' : 'folder-icon-file',
+        icon:
+          entry.type === 'directory'
+            ? 'folder-icon-folder'
+            : isHtmlFilePath(childPath)
+              ? 'folder-icon-html'
+              : 'folder-icon-file',
       });
     }
 
@@ -234,6 +259,30 @@ function resetNavigationState() {
   refreshExplorerView();
 }
 
+// Shared by right-click and touch long-press: open the context menu at the
+// given viewport coordinates, targeting the explorer item at `selectedPath`
+// (or the folder background when null).
+function openExplorerContextMenuAt(x, y, selectedPath = null) {
+  const { path: currentPath } = navigation.getState();
+  if (currentPath === null) {
+    WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
+    return;
+  }
+
+  const selectedItem = selectedPath
+    ? explorerViewState.items.find((item) => item.path === selectedPath)
+    : null;
+
+  WindoesApp.state.dispatch({
+    type: 'EXPLORER_CONTEXT_OPEN',
+    x,
+    y,
+    selectedPath: selectedItem ? selectedPath : null,
+    selectedIsSystem: !!(selectedItem && selectedItem.system),
+    selectedType: selectedItem ? selectedItem.type : null,
+  });
+}
+
 function openExplorerContextMenu(event) {
   const { path: currentPath } = navigation.getState();
   if (currentPath === null) {
@@ -245,18 +294,7 @@ function openExplorerContextMenu(event) {
   event.stopPropagation();
 
   const itemEl = event.target.closest('.folder-item');
-  const selectedPath = itemEl ? itemEl.dataset.path : null;
-  const selectedItem = selectedPath
-    ? explorerViewState.items.find((item) => item.path === selectedPath)
-    : null;
-
-  WindoesApp.state.dispatch({
-    type: 'EXPLORER_CONTEXT_OPEN',
-    x: event.clientX,
-    y: event.clientY,
-    selectedPath,
-    selectedIsSystem: !!(selectedItem && selectedItem.system),
-  });
+  openExplorerContextMenuAt(event.clientX, event.clientY, itemEl ? itemEl.dataset.path : null);
 }
 
 function isPaintFile(path) {
@@ -270,9 +308,26 @@ async function openFile(path) {
     return;
   }
 
+  if (isHtmlFilePath(path)) {
+    WindoesApp.open.htmlFile({ filePath: path });
+    return;
+  }
+
+  await openFileInNotepad(path);
+}
+
+// "Open With > Notepad": always load the raw text into Notepad, even for
+// file types that normally open elsewhere (HTML in IE, PNG in Paint).
+async function openFileInNotepad(path) {
   try {
     const content = await fs.readFile(path);
-    WindoesApp.open.notepad({ filePath: path, content });
+    const text =
+      typeof content === 'string'
+        ? content
+        : content instanceof Blob
+          ? await content.text()
+          : String(content);
+    WindoesApp.open.notepad({ filePath: path, content: text });
   } catch (error) {
     WindoesApp.bsod.showErrorDialog(
       describeFsError(error, { title: 'Error', action: `open '${basename(path)}'` })
@@ -362,6 +417,14 @@ function renameSelected(selectedPath) {
 function handleExplorerInteraction(command = {}) {
   const selectedPath = command.selectedPath || null;
 
+  if (command.type === 'open') {
+    if (selectedPath) openFile(selectedPath);
+    return;
+  }
+  if (command.type === 'open-with-notepad') {
+    if (selectedPath) openFileInNotepad(selectedPath);
+    return;
+  }
   if (command.type === 'new-folder') {
     createNewFolder();
     return;
@@ -400,6 +463,7 @@ export {
   navigateTo,
   openFile,
   openExplorerContextMenu,
+  openExplorerContextMenuAt,
   resetNavigationState,
   saveTextFile,
   subscribeExplorerView,

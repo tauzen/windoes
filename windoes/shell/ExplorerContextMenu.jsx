@@ -1,5 +1,6 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
+import { isHtmlFilePath } from '../browser-url.mjs';
 import { useOutsideClick } from './outside-click.js';
 
 export default function ExplorerContextMenu() {
@@ -15,6 +16,14 @@ export default function ExplorerContextMenu() {
   // System (protected) entries cannot be renamed or deleted.
   const isSystem = !!explorerState.selectedIsSystem;
   const canModify = hasSelection && !isSystem;
+  // HTML documents get Open (in Internet Explorer) plus an Open With submenu.
+  const isHtmlFile = explorerState.selectedType === 'file' && isHtmlFilePath(selectedPath);
+
+  // "Open With" expands on hover (desktop) or tap (touch).
+  const [openWithExpanded, setOpenWithExpanded] = useState(false);
+  useEffect(() => {
+    if (!isOpen) setOpenWithExpanded(false);
+  }, [isOpen]);
 
   function closeMenu() {
     WindoesApp.state.dispatch({ type: 'EXPLORER_CONTEXT_CLOSE' });
@@ -42,6 +51,52 @@ export default function ExplorerContextMenu() {
       role="menu"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
+      {isHtmlFile && (
+        <>
+          <button
+            type="button"
+            role="menuitem"
+            className="context-menu-item default-action"
+            data-action="open"
+            onClick={() => runAction('open')}
+          >
+            Open
+          </button>
+          <div
+            className="context-menu-branch"
+            onMouseEnter={() => setOpenWithExpanded(true)}
+            onMouseLeave={() => setOpenWithExpanded(false)}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              aria-haspopup="menu"
+              aria-expanded={openWithExpanded}
+              className="context-menu-item context-menu-item-arrow"
+              data-action="open-with"
+              onClick={() => setOpenWithExpanded(true)}
+            >
+              Open With
+            </button>
+            <div
+              className={`context-menu context-submenu${openWithExpanded ? ' open' : ''}`}
+              id="explorerOpenWithSubmenu"
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                className="context-menu-item"
+                data-action="open-with-notepad"
+                onClick={() => runAction('open-with-notepad')}
+              >
+                Notepad
+              </button>
+            </div>
+          </div>
+          <div className="context-menu-sep"></div>
+        </>
+      )}
       <button
         type="button"
         role="menuitem"
