@@ -298,6 +298,30 @@
   background: transparent;
   color: #808080;
 }
+.context-menu-item.default-action {
+  font-weight: bold;
+}
+.context-menu-item-arrow {
+  display: flex;
+  align-items: center;
+}
+.context-menu-item-arrow::after {
+  content: '\25b6';
+  font-size: 8px;
+  margin-left: auto;
+  padding-left: 12px;
+}
+.context-menu-branch {
+  position: relative;
+}
+/* Nested submenu (e.g. "Open With") anchored to its parent item */
+.context-menu.context-submenu {
+  position: absolute;
+  left: calc(100% - 4px);
+  top: -2px;
+  min-width: 120px;
+  z-index: 31;
+}
 .context-menu-sep {
   border-top: 1px solid #808080;
   border-bottom: 1px solid #fff;

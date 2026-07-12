@@ -109,7 +109,7 @@ function requestNotepadSavePath(suggestedPath) {
       title: 'Save As',
       confirmLabel: 'Save',
       startPath: suggestedPath || DEFAULT_NOTEPAD_SAVE_PATH,
-      extensions: ['.txt'],
+      extensions: ['.txt', '.html', '.htm'],
       defaultExtension: '.txt',
       allowCreateFolder: true,
     });
@@ -129,7 +129,7 @@ async function openNotepadDocument() {
       title: 'Open',
       confirmLabel: 'Open',
       startPath: currentPath || DEFAULT_NOTEPAD_SAVE_PATH,
-      extensions: ['.txt'],
+      extensions: ['.txt', '.html', '.htm'],
     });
     if (!selectedPath) return; // user cancelled
 

@@ -6,6 +6,17 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- HTML file support: files ending in `.html`/`.htm` are treated as web pages
+  and open in Internet Explorer, which renders VirtualFS documents in its
+  content frame (local documents render sandboxed without `allow-same-origin`).
+  The address bar shows the Windows-style path (`C:\My Documents\page.html`),
+  which can also be typed directly, and Back/Forward/Refresh work across local
+  pages. In the explorer, HTML files get an IE document icon, and their context
+  menu — right-click on desktop, long-press on touch devices — offers **Open**
+  (Internet Explorer) plus **Open With > Notepad** to view and edit the source.
+  Notepad's Open/Save dialogs now accept `.html`/`.htm` alongside `.txt`, and a
+  sample `Welcome.html` is seeded into `My Documents` on first boot. Covered by
+  `tests/test-html-file-open.js`.
 - The file chooser now warns before overwriting in Save mode. When the chosen
   name (or a typed name) matches an existing file, a confirmation dialog appears
   explaining that the file will be replaced, with **Cancel** (return to the

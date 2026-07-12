@@ -147,6 +147,28 @@
   content: none;
 }
 
+/* HTML document icon (opens in Internet Explorer) */
+.folder-icon-html {
+  background-image: url('/icons/ie.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
+  border: none;
+}
+.folder-icon-html::before,
+.folder-icon-html::after {
+  content: none;
+}
+
+/* Long-press opens the context menu on touch devices; without this, Safari
+   shows text selection handles instead (needs the -webkit- prefix). */
+.explorer-folder-view {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* Up toolbar button icon */
 .tb-icon-up {
   background-image: url('/icons/up.png');

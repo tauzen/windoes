@@ -60,6 +60,7 @@
  * @property {number} contextMenuY
  * @property {string | null} selectedPath
  * @property {boolean} selectedIsSystem
+ * @property {'file' | 'directory' | null} selectedType
  */
 
 /**
@@ -132,7 +133,7 @@
  *   | { type: 'WINDOW_RESTORE', id: string }
  *   | { type: 'WINDOW_FOCUS', id: string }
  *   | { type: 'WINDOW_MAXIMIZE_TOGGLE', id: string }
- *   | { type: 'EXPLORER_CONTEXT_OPEN', x?: number, y?: number, selectedPath?: string | null, selectedIsSystem?: boolean }
+ *   | { type: 'EXPLORER_CONTEXT_OPEN', x?: number, y?: number, selectedPath?: string | null, selectedIsSystem?: boolean, selectedType?: 'file' | 'directory' | null }
  *   | { type: 'EXPLORER_CONTEXT_CLOSE' }
  *   | { type: 'NOTEPAD_FILE_MENU_OPEN', left?: number, top?: number }
  *   | { type: 'NOTEPAD_FILE_MENU_CLOSE' }
@@ -198,6 +199,7 @@ export const initialState = {
     contextMenuY: 0,
     selectedPath: null,
     selectedIsSystem: false,
+    selectedType: null,
   },
   notepad: {
     fileMenuOpen: false,
@@ -571,6 +573,7 @@ export function reduce(current, action) {
           contextMenuY: action.y || 0,
           selectedPath: action.selectedPath || null,
           selectedIsSystem: !!action.selectedIsSystem,
+          selectedType: action.selectedType || null,
         },
       };
     case 'EXPLORER_CONTEXT_CLOSE':
@@ -582,6 +585,7 @@ export function reduce(current, action) {
           contextMenuOpen: false,
           selectedPath: null,
           selectedIsSystem: false,
+          selectedType: null,
         },
       };
 

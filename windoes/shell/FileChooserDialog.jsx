@@ -293,11 +293,19 @@ export default function FileChooserDialog() {
         // Not an existing entry — fine for Save, validated below for Open.
       }
 
+      // Append the default extension only when the name doesn't already carry
+      // one of the allowed extensions (so "page.html" isn't turned into
+      // "page.html.txt" just because the default is ".txt").
       let finalPath = target;
-      if (
-        config.defaultExtension &&
-        !basename(finalPath).toLowerCase().endsWith(config.defaultExtension)
-      ) {
+      const allowedExtensions = config.extensions.length
+        ? config.extensions
+        : config.defaultExtension
+          ? [config.defaultExtension]
+          : [];
+      const hasAllowedExtension = allowedExtensions.some((ext) =>
+        basename(finalPath).toLowerCase().endsWith(ext)
+      );
+      if (config.defaultExtension && !hasAllowedExtension) {
         finalPath += config.defaultExtension;
       }
 

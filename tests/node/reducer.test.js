@@ -159,6 +159,19 @@ test('EXPLORER_CONTEXT_OPEN opens context menu and sets selection', async () => 
   assert.equal(next.explorer.contextMenuX, 12);
   assert.equal(next.explorer.contextMenuY, 34);
   assert.equal(next.explorer.selectedPath, '/C:/x');
+  assert.equal(next.explorer.selectedType, null);
+});
+
+test('EXPLORER_CONTEXT_OPEN records the selected entry type', async () => {
+  const { reduce } = await loadReducerModule();
+  const next = reduce(await freshState(), {
+    type: 'EXPLORER_CONTEXT_OPEN',
+    x: 12,
+    y: 34,
+    selectedPath: '/C:/page.html',
+    selectedType: 'file',
+  });
+  assert.equal(next.explorer.selectedType, 'file');
 });
 
 test('EXPLORER_CONTEXT_CLOSE closes menu when open', async () => {
@@ -166,9 +179,11 @@ test('EXPLORER_CONTEXT_CLOSE closes menu when open', async () => {
   const current = await freshState();
   current.explorer.contextMenuOpen = true;
   current.explorer.selectedPath = '/C:/x';
+  current.explorer.selectedType = 'file';
   const next = reduce(current, { type: 'EXPLORER_CONTEXT_CLOSE' });
   assert.equal(next.explorer.contextMenuOpen, false);
   assert.equal(next.explorer.selectedPath, null);
+  assert.equal(next.explorer.selectedType, null);
 });
 
 test('NOTEPAD_FILE_MENU_OPEN opens menu and records coordinates', async () => {

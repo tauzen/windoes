@@ -3,7 +3,14 @@
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
 import { openWindowBoilerplate } from './launch-helpers.js';
-import { normalizeBrowserUrl } from './browser-url.mjs';
+import {
+  isHtmlFilePath,
+  normalizeBrowserUrl,
+  vfsPathFromBrowserInput,
+  windowsPathFromVfsPath,
+} from './browser-url.mjs';
+import { VirtualFS } from './virtual-fs.js';
+import { once } from './once.mjs';
 import {
   IE_LOADING_INDICATOR_MS,
   IE_TASK_LABEL_MAX_LEN,
@@ -114,6 +121,35 @@ const addressInput = ieConfig.el.querySelector('#addressInput');
 const homePage = 'https://example.com';
 let bodyLoadingTimeoutId = null;
 
+// Remote pages keep the historical sandbox; local VFS documents render via
+// `srcdoc`, which would otherwise inherit the shell's origin, so they get an
+// opaque origin (no allow-same-origin) to keep their scripts boxed in.
+const REMOTE_SANDBOX = 'allow-scripts allow-same-origin';
+const LOCAL_SANDBOX = 'allow-scripts';
+
+const ieFs = new VirtualFS();
+const ensureIeFs = once(() => ieFs.init());
+
+function escapeHtml(text) {
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function cannotDisplayPage(displayUrl) {
+  return [
+    '<!doctype html><html><head><title>The page cannot be displayed</title></head>',
+    '<body style="font-family: Tahoma, Arial, sans-serif; font-size: 13px; margin: 24px;">',
+    '<h2 style="font-size: 16px;">The page cannot be displayed</h2>',
+    '<p>The page you are looking for is currently unavailable.</p>',
+    '<hr style="border: 0; border-top: 1px solid #c0c0c0;">',
+    `<p style="color: #808080;">Cannot find file: ${escapeHtml(displayUrl)}</p>`,
+    '</body></html>',
+  ].join('');
+}
+
+function plainTextPage(text) {
+  return `<!doctype html><html><body><pre style="font-family: monospace; font-size: 13px; white-space: pre-wrap; margin: 8px;">${escapeHtml(text)}</pre></body></html>`;
+}
+
 // Browser history lives in the canonical store (`state.browser`), not in
 // module-level variables. These helpers keep the call sites terse.
 function getHistory() {
@@ -124,17 +160,7 @@ function formatBrowserTitle(url) {
   return url + ' - Microsoft Internet Explorer';
 }
 
-function navigate(url, pushHistory = true) {
-  const finalUrl = normalizeBrowserUrl(url, homePage);
-  body_loading(true);
-
-  if (finalUrl === 'about:blank') {
-    frame.src = '';
-    frame.removeAttribute('src');
-  } else {
-    frame.src = finalUrl;
-  }
-
+function setBrowserPage(finalUrl, pushHistory) {
   addressInput.value = finalUrl;
   const title = formatBrowserTitle(finalUrl);
   const shortTitle =
@@ -152,6 +178,55 @@ function navigate(url, pushHistory = true) {
   if (pushHistory) {
     WindoesApp.state.dispatch({ type: 'BROWSER_NAVIGATE', url: finalUrl });
   }
+}
+
+function navigate(url, pushHistory = true) {
+  const localPath = vfsPathFromBrowserInput(url);
+  if (localPath) {
+    navigateToLocalFile(localPath, pushHistory);
+    return;
+  }
+
+  const finalUrl = normalizeBrowserUrl(url, homePage);
+  body_loading(true);
+
+  frame.setAttribute('sandbox', REMOTE_SANDBOX);
+  frame.removeAttribute('srcdoc');
+  if (finalUrl === 'about:blank') {
+    frame.src = '';
+    frame.removeAttribute('src');
+  } else {
+    frame.src = finalUrl;
+  }
+
+  setBrowserPage(finalUrl, pushHistory);
+}
+
+// Local VFS documents: HTML renders as a page, anything else readable renders
+// as plain text (like classic IE), and missing paths get the retro error page.
+async function navigateToLocalFile(vfsPath, pushHistory = true) {
+  const displayUrl = windowsPathFromVfsPath(vfsPath);
+  body_loading(true);
+  setBrowserPage(displayUrl, pushHistory);
+
+  let html;
+  try {
+    await ensureIeFs();
+    const content = await ieFs.readFile(vfsPath);
+    const text =
+      typeof content === 'string'
+        ? content
+        : content instanceof Blob
+          ? await content.text()
+          : String(content);
+    html = isHtmlFilePath(vfsPath) ? text : plainTextPage(text);
+  } catch {
+    html = cannotDisplayPage(displayUrl);
+  }
+
+  frame.setAttribute('sandbox', LOCAL_SANDBOX);
+  frame.removeAttribute('src');
+  frame.srcdoc = html;
 }
 
 function body_loading(on) {
@@ -195,6 +270,11 @@ function onHomeClick() {
 
 function onRefreshClick() {
   WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Refreshing...' });
+  const localPath = vfsPathFromBrowserInput(addressInput.value);
+  if (localPath) {
+    navigateToLocalFile(localPath, false);
+    return;
+  }
   if (addressInput.value && addressInput.value !== 'about:blank') {
     frame.src = addressInput.value;
   }
@@ -304,7 +384,17 @@ function cleanupIEWindowListeners() {
   body_loading(false);
 }
 
+// Open a VFS file (typically .html) as a page in Internet Explorer.
+function openHtmlFile(options = {}) {
+  const { filePath = '' } = options;
+  openWindowBoilerplate('ie');
+  if (filePath) {
+    navigate(windowsPathFromVfsPath(filePath));
+  }
+}
+
 // Register on shared namespace
 WindoesApp.open.internetExplorer = openInternetExplorer;
+WindoesApp.open.htmlFile = openHtmlFile;
 WindoesApp.browser.navigate = navigate;
 WindoesApp.ui.setBodyLoading = body_loading;
