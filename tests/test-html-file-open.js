@@ -63,8 +63,7 @@ async function runTests() {
     await page.waitForFunction(() => !!WindoesApp.state.get().windows?.byId?.ie?.open);
 
     await page.waitForFunction(
-      () =>
-        document.getElementById('addressInput')?.value === 'C:\\My Documents\\it-test-page.html'
+      () => document.getElementById('addressInput')?.value === 'C:\\My Documents\\it-test-page.html'
     );
     assert(true, 'IE address bar shows the Windows-style file path');
 
@@ -106,9 +105,7 @@ async function runTests() {
     const notepadText = await page.inputValue('#notepadText');
     assert(notepadText === HTML_SOURCE, 'Open With > Notepad loads the raw HTML source');
 
-    const notepadPath = await page.evaluate(
-      () => WindoesApp.state.get().notepad.currentFilePath
-    );
+    const notepadPath = await page.evaluate(() => WindoesApp.state.get().notepad.currentFilePath);
     assert(notepadPath === HTML_PATH, 'Notepad tracks the opened html file path');
 
     console.log('\nTest 4: non-html files do not get Open / Open With');

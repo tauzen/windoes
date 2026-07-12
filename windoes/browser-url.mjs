@@ -20,10 +20,7 @@ export function vfsPathFromBrowserInput(raw) {
   if (!match) return null;
 
   const drive = match[1].toUpperCase();
-  const rest = (match[2] || '')
-    .replace(/\\/g, '/')
-    .replace(/\/+/g, '/')
-    .replace(/\/+$/, '');
+  const rest = (match[2] || '').replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/+$/, '');
   return rest ? `/${drive}:/${rest}` : `/${drive}:`;
 }
 

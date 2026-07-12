@@ -43,10 +43,7 @@ test('vfsPathFromBrowserInput parses Windows-style paths', async () => {
     '/C:/My Documents/page.html'
   );
   assert.equal(vfsPathFromBrowserInput('c:/My Documents/page.html'), '/C:/My Documents/page.html');
-  assert.equal(
-    vfsPathFromBrowserInput('/C:/My Documents/page.html'),
-    '/C:/My Documents/page.html'
-  );
+  assert.equal(vfsPathFromBrowserInput('/C:/My Documents/page.html'), '/C:/My Documents/page.html');
   assert.equal(vfsPathFromBrowserInput('  C:\\page.html  '), '/C:/page.html');
   assert.equal(vfsPathFromBrowserInput('C:'), '/C:');
   assert.equal(vfsPathFromBrowserInput('C:\\'), '/C:');
@@ -63,10 +60,7 @@ test('vfsPathFromBrowserInput rejects non-local inputs', async () => {
 
 test('windowsPathFromVfsPath renders backslash paths', async () => {
   const { windowsPathFromVfsPath } = await loadUrlModule();
-  assert.equal(
-    windowsPathFromVfsPath('/C:/My Documents/page.html'),
-    'C:\\My Documents\\page.html'
-  );
+  assert.equal(windowsPathFromVfsPath('/C:/My Documents/page.html'), 'C:\\My Documents\\page.html');
   assert.equal(windowsPathFromVfsPath('/C:'), 'C:');
 });
 
