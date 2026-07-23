@@ -54,15 +54,13 @@
 
       .title-bar-text {
         font-size: 8px;
-        color: #c0c8d8;
+        color: #d8dce8;
         font-weight: bold;
         letter-spacing: 4px;
         text-shadow: 1px 1px 0 #000;
         text-align: center;
         font-family: 'Arial Narrow', Arial, sans-serif;
-        border: 1px solid;
-        border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
-        padding: 0 8px;
+        padding: 0 6px;
         line-height: 10px;
       }
 
@@ -75,19 +73,25 @@
 
       .title-bar-line {
         flex: 1;
-        height: 5px;
+        height: 7px;
         background: repeating-linear-gradient(
           180deg,
-          transparent 0px,
-          transparent 1px,
-          #0e1828 1px,
-          #0e1828 2px,
-          #4a5a78 2px,
-          #4a5a78 3px,
-          transparent 3px,
-          transparent 5px
+          #8a7a46 0px,
+          #8a7a46 1px,
+          #1a1408 1px,
+          #1a1408 2px,
+          transparent 2px,
+          transparent 3px
         );
         min-width: 8px;
+      }
+
+      .title-icon {
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(180deg, #f0d888 0%, #c8a44a 55%, #8a6a20 100%);
+        clip-path: polygon(62% 0, 14% 56%, 42% 56%, 34% 100%, 86% 40%, 55% 40%);
       }
 
       .title-btn {
@@ -146,29 +150,35 @@
       /* Clutterbar - vertical strip of mini buttons */
       .clutterbar {
         position: absolute;
-        left: 5px;
-        top: 4px;
+        left: 0;
+        top: 0;
+        bottom: 0;
         width: 8px;
         display: flex;
         flex-direction: column;
-        gap: 0;
+        gap: 4px;
         z-index: 3;
+        background: linear-gradient(90deg, #9a8446 0%, #6a5628 60%, #4a3a18 100%);
+        border-right: 1px solid #14100a;
+        padding-top: 3px;
+        align-items: center;
       }
 
       .clutterbar-btn {
         width: 8px;
         height: 6px;
-        font-size: 4px;
-        color: #1a6a1a;
+        font-size: 5px;
+        color: #3a2e10;
         text-align: center;
         line-height: 6px;
         cursor: pointer;
         font-family: 'Arial', sans-serif;
         font-weight: bold;
+        text-shadow: 0 1px 0 rgba(255, 232, 160, 0.35);
       }
 
       .clutterbar-btn:hover {
-        color: #00ff00;
+        color: #14100a;
       }
 
       #visualizer {
@@ -184,7 +194,7 @@
         display: flex;
         align-items: center;
         gap: 2px;
-        margin-left: 4px;
+        margin-left: 7px;
       }
 
       .play-indicator {
@@ -276,6 +286,9 @@
         gap: 2px;
         padding: 0 2px;
         height: 11px;
+        background: #14141a;
+        border: 1px solid;
+        border-color: #3a3a44 #0c0c10 #0c0c10 #3a3a44;
       }
 
       .bitrate-box .value {
@@ -445,35 +458,73 @@
         flex: 0.8;
       }
 
-      /* Volume wedge background (triangular fill) */
+      /* Volume track: classic green-to-red gradient bar with ridges */
       .volume-wedge {
         position: absolute;
         left: 2px;
         right: 2px;
         top: 50%;
         transform: translateY(-50%);
-        height: 10px;
+        height: 8px;
         pointer-events: none;
         z-index: 0;
         overflow: hidden;
+        border: 1px solid;
+        border-color: #0a0a0e #2e2e38 #2e2e38 #0a0a0e;
       }
 
       .volume-wedge-fill {
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, #0a3a0a, #1a6a1a, #2a8a2a);
-        clip-path: polygon(0% 90%, 100% 10%, 100% 90%);
+        background: linear-gradient(
+          90deg,
+          #00a800 0%,
+          #66c000 30%,
+          #ccc000 55%,
+          #cc7a00 75%,
+          #cc1e00 100%
+        );
+      }
+
+      .volume-wedge::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.55) 2px,
+          rgba(0, 0, 0, 0.55) 3px
+        );
       }
 
       .volume-wedge-bg {
+        display: none;
+      }
+
+      /* Balance track: red at edges, green at center */
+      .slider-wrapper.balance-wrap::before {
+        content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, #0e0e12, #16161c);
-        clip-path: polygon(0% 90%, 100% 10%, 100% 90%);
-        z-index: -1;
+        left: 2px;
+        right: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 8px;
+        pointer-events: none;
+        z-index: 0;
+        border: 1px solid;
+        border-color: #0a0a0e #2e2e38 #2e2e38 #0a0a0e;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.55) 2px,
+            rgba(0, 0, 0, 0.55) 3px
+          ),
+          linear-gradient(90deg, #cc1e00 0%, #ccc000 30%, #00a800 50%, #ccc000 70%, #cc1e00 100%);
       }
 
       .slider-wrapper input[type='range'] {
@@ -497,10 +548,28 @@
         width: 14px;
         height: 10px;
         margin-top: -5px;
+        background:
+          linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0) 0 4px,
+            #c8a848 4px 6px,
+            #8a6f28 6px 9px,
+            rgba(0, 0, 0, 0) 9px
+          ),
+          linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
       }
       .slider-wrapper input[type='range']::-moz-range-thumb {
         width: 14px;
         height: 10px;
+        background:
+          linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0) 0 4px,
+            #c8a848 4px 6px,
+            #8a6f28 6px 9px,
+            rgba(0, 0, 0, 0) 9px
+          ),
+          linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
       }
 
       .controls-toggles {
@@ -720,6 +789,15 @@
         margin-left: 6px;
       }
 
+      /* Winamp lightning bolt logo */
+      .winamp-logo {
+        width: 12px;
+        height: 15px;
+        margin-left: auto;
+        background: linear-gradient(180deg, #f0d888 0%, #c09a3a 60%, #8a6a20 100%);
+        clip-path: polygon(64% 0, 12% 58%, 42% 58%, 34% 100%, 88% 40%, 56% 40%);
+      }
+
       .toggle-small {
         width: 16px;
         height: 15px;
@@ -771,12 +849,11 @@
 
       .eq-title span {
         font-size: 7px;
-        color: #c0c8d8;
+        color: #d8dce8;
         font-weight: bold;
         letter-spacing: 1.5px;
-        border: 1px solid;
-        border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
-        padding: 0 6px;
+        text-shadow: 1px 1px 0 #000;
+        padding: 0 5px;
         line-height: 10px;
       }
 
@@ -785,6 +862,13 @@
         justify-content: space-between;
         align-items: center;
         padding: 4px 8px 2px;
+      }
+
+      #eq-graph {
+        background: #000;
+        border: 1px solid;
+        border-color: #0a0a10 #2a2a32 #2a2a32 #0a0a10;
+        image-rendering: pixelated;
       }
 
       .eq-header-left {
@@ -841,54 +925,7 @@
         padding: 0 2px;
       }
 
-      /* EQ colored gradient background - the classic green/yellow/red bands */
-      .eq-sliders-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 90px;
-        background: linear-gradient(
-          180deg,
-          #cc2200 0%,
-          #cc4400 8%,
-          #cc6600 16%,
-          #cc8800 24%,
-          #ccaa00 32%,
-          #aacc00 40%,
-          #66cc00 48%,
-          #33aa00 56%,
-          #228800 64%,
-          #1a7700 72%,
-          #156600 80%,
-          #105500 88%,
-          #0a4400 100%
-        );
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
-        border-radius: 1px;
-      }
-
-      /* EQ grid lines overlay */
-      .eq-sliders-section::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 90px;
-        background: repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 3px,
-          rgba(0, 0, 0, 0.3) 3px,
-          rgba(0, 0, 0, 0.3) 4px
-        );
-        pointer-events: none;
-        z-index: 0;
-      }
+      /* Each band gets its own classic red-to-green gradient track line */
 
       .eq-db-labels {
         height: 90px;
@@ -933,39 +970,59 @@
 
       input[type='range'].eq-slider::-webkit-slider-runnable-track {
         width: 3px;
-        background: linear-gradient(90deg, #111116, #1e1e24, #111116);
+        background: linear-gradient(
+          180deg,
+          #cc2200 0%,
+          #cc8800 25%,
+          #cccc00 45%,
+          #66cc00 60%,
+          #22aa00 75%,
+          #0a6600 100%
+        );
         border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #2a2a32;
+        border-right: 1px solid #0a0a0e;
       }
 
       input[type='range'].eq-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 16px !important;
         height: 6px !important;
-        background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
-        border-top: 1px solid #bbddbb;
-        border-left: 1px solid #bbddbb;
-        border-bottom: 1px solid #1a3a1a;
-        border-right: 1px solid #1a3a1a;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
+          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
+        border-top: 1px solid #e8d080;
+        border-left: 1px solid #e8d080;
+        border-bottom: 1px solid #3a2e10;
+        border-right: 1px solid #3a2e10;
         margin-left: -7px;
         cursor: pointer;
       }
 
       input[type='range'].eq-slider::-moz-range-track {
         width: 3px;
-        background: linear-gradient(90deg, #111116, #1e1e24, #111116);
+        background: linear-gradient(
+          180deg,
+          #cc2200 0%,
+          #cc8800 25%,
+          #cccc00 45%,
+          #66cc00 60%,
+          #22aa00 75%,
+          #0a6600 100%
+        );
         border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #2a2a32;
+        border-right: 1px solid #0a0a0e;
       }
 
       input[type='range'].eq-slider::-moz-range-thumb {
         width: 16px !important;
         height: 6px !important;
-        background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
-        border-top: 1px solid #bbddbb;
-        border-left: 1px solid #bbddbb;
-        border-bottom: 1px solid #1a3a1a;
-        border-right: 1px solid #1a3a1a;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
+          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
+        border-top: 1px solid #e8d080;
+        border-left: 1px solid #e8d080;
+        border-bottom: 1px solid #3a2e10;
+        border-right: 1px solid #3a2e10;
         cursor: pointer;
       }
 
@@ -981,39 +1038,59 @@
 
       input#eq-preamp-slider::-webkit-slider-runnable-track {
         width: 3px;
-        background: linear-gradient(90deg, #111116, #1e1e24, #111116);
+        background: linear-gradient(
+          180deg,
+          #cc2200 0%,
+          #cc8800 25%,
+          #cccc00 45%,
+          #66cc00 60%,
+          #22aa00 75%,
+          #0a6600 100%
+        );
         border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #2a2a32;
+        border-right: 1px solid #0a0a0e;
       }
 
       input#eq-preamp-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 16px;
         height: 6px;
-        background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
-        border-top: 1px solid #bbddbb;
-        border-left: 1px solid #bbddbb;
-        border-bottom: 1px solid #1a3a1a;
-        border-right: 1px solid #1a3a1a;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
+          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
+        border-top: 1px solid #e8d080;
+        border-left: 1px solid #e8d080;
+        border-bottom: 1px solid #3a2e10;
+        border-right: 1px solid #3a2e10;
         margin-left: -7px;
         cursor: pointer;
       }
 
       input#eq-preamp-slider::-moz-range-track {
         width: 3px;
-        background: linear-gradient(90deg, #111116, #1e1e24, #111116);
+        background: linear-gradient(
+          180deg,
+          #cc2200 0%,
+          #cc8800 25%,
+          #cccc00 45%,
+          #66cc00 60%,
+          #22aa00 75%,
+          #0a6600 100%
+        );
         border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #2a2a32;
+        border-right: 1px solid #0a0a0e;
       }
 
       input#eq-preamp-slider::-moz-range-thumb {
         width: 16px;
         height: 6px;
-        background: linear-gradient(180deg, #99cc99 0%, #6aaa6a 30%, #4a8a4a 70%, #3a7a3a 100%);
-        border-top: 1px solid #bbddbb;
-        border-left: 1px solid #bbddbb;
-        border-bottom: 1px solid #1a3a1a;
-        border-right: 1px solid #1a3a1a;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
+          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
+        border-top: 1px solid #e8d080;
+        border-left: 1px solid #e8d080;
+        border-bottom: 1px solid #3a2e10;
+        border-right: 1px solid #3a2e10;
         cursor: pointer;
       }
 
@@ -1053,12 +1130,11 @@
 
       .playlist-title span {
         font-size: 7px;
-        color: #c0c8d8;
+        color: #d8dce8;
         font-weight: bold;
         letter-spacing: 1.5px;
-        border: 1px solid;
-        border-color: #0e1828 #4a5a78 #4a5a78 #0e1828;
-        padding: 0 6px;
+        text-shadow: 1px 1px 0 #000;
+        padding: 0 5px;
         line-height: 10px;
       }
 
@@ -1082,8 +1158,9 @@
       }
 
       .playlist-tracks::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #3a3a42, #28282e);
-        border: 1px solid #4a4a52;
+        background: linear-gradient(90deg, #b89850, #8a7040);
+        border: 1px solid;
+        border-color: #d8b870 #4a3a18 #4a3a18 #d8b870;
       }
 
       .track-item {
@@ -1165,7 +1242,7 @@
 
       .playlist-info-section {
         display: flex;
-        gap: 10px;
+        gap: 6px;
         align-items: center;
       }
 
@@ -1173,6 +1250,37 @@
         font-size: 7px;
         color: #00cc00;
         font-family: 'Courier New', monospace;
+      }
+
+      .playlist-info-led {
+        font-size: 9px;
+        font-weight: bold;
+        text-shadow: 0 0 4px rgba(0, 200, 0, 0.35);
+      }
+
+      .playlist-mini-transport {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+      }
+
+      .pl-mini {
+        font-size: 6px;
+        color: #9a9aa4;
+        cursor: pointer;
+        line-height: 1;
+        font-family: 'Arial', sans-serif;
+      }
+
+      .pl-mini:hover {
+        color: #ffffff;
+      }
+
+      .pl-listopts {
+        font-size: 5px;
+        line-height: 1.2;
+        padding: 1px 3px;
+        text-align: center;
       }
 
       /* Playlist resize grip */
@@ -1316,10 +1424,7 @@
       <!-- Main Player Window -->
       <div class="winamp-main" id="main-window">
         <div class="title-bar" id="title-bar">
-          <div class="title-buttons">
-            <div class="title-btn" title="Minimize" style="visibility: hidden">_</div>
-            <div class="title-btn" title="Close" style="visibility: hidden">×</div>
-          </div>
+          <div class="title-icon"></div>
           <div class="title-bar-line"></div>
           <span class="title-bar-text">WINAMP</span>
           <div class="title-bar-line"></div>
@@ -1443,6 +1548,7 @@
               <span class="shuffle-check" id="repeat-check"></span>
             </button>
           </div>
+          <div class="winamp-logo" title="Winamp"></div>
         </div>
       </div>
 
@@ -1458,6 +1564,7 @@
             <button class="toggle-btn active" id="eq-on-btn">ON</button>
             <button class="toggle-btn" id="eq-auto-btn">AUTO</button>
           </div>
+          <canvas id="eq-graph" width="113" height="19"></canvas>
           <button class="eq-presets-btn" id="eq-presets-btn">PRESETS</button>
         </div>
         <div class="eq-body">
@@ -1499,8 +1606,18 @@
             <button class="pl-btn" id="pl-misc-btn" title="Misc">MISC</button>
           </div>
           <div class="playlist-info-section">
-            <span class="playlist-info" id="playlist-total-time">0:00:00:00</span>
             <span class="playlist-info" id="playlist-total-length">0:00</span>
+            <div class="playlist-mini-transport">
+              <span class="pl-mini" id="pl-mini-prev" title="Previous">&#9198;&#xFE0E;</span>
+              <span class="pl-mini" id="pl-mini-play" title="Play">&#9654;&#xFE0E;</span>
+              <span class="pl-mini" id="pl-mini-pause" title="Pause">&#9646;&#9646;&#xFE0E;</span>
+              <span class="pl-mini" id="pl-mini-stop" title="Stop">&#9632;&#xFE0E;</span>
+              <span class="pl-mini" id="pl-mini-next" title="Next">&#9197;&#xFE0E;</span>
+            </div>
+            <span class="playlist-info playlist-info-led" id="playlist-total-time">0:00:00:00</span>
+            <button class="pl-btn pl-listopts" id="pl-listopts-btn" title="List options">
+              LIST<br />OPTS
+            </button>
           </div>
         </div>
         <div class="playlist-resize-grip"></div>
@@ -1886,6 +2003,40 @@
         }
 
         // ===== EQUALIZER =====
+        const eqGraphCanvas = document.getElementById('eq-graph');
+        const eqGraphCtx = eqGraphCanvas.getContext('2d');
+
+        function drawEqGraph() {
+          const w = eqGraphCanvas.width;
+          const h = eqGraphCanvas.height;
+          eqGraphCtx.fillStyle = '#000';
+          eqGraphCtx.fillRect(0, 0, w, h);
+
+          eqGraphCtx.fillStyle = '#3a3a1e';
+          eqGraphCtx.fillRect(0, Math.floor(h / 2), w, 1);
+
+          const sliders = document.querySelectorAll('#eq-bands .eq-slider');
+          if (!sliders.length) return;
+          const values = Array.from(sliders).map((s) => parseFloat(s.value));
+
+          eqGraphCtx.strokeStyle = '#00cc00';
+          eqGraphCtx.lineWidth = 1;
+          eqGraphCtx.beginPath();
+          for (let x = 0; x < w; x++) {
+            const pos = (x / (w - 1)) * (values.length - 1);
+            const i = Math.min(Math.floor(pos), values.length - 2);
+            const t = pos - i;
+            const v = values[i] * (1 - t) + values[i + 1] * t;
+            const y = h / 2 - (v / 12) * (h / 2 - 2);
+            if (x === 0) {
+              eqGraphCtx.moveTo(x + 0.5, y);
+            } else {
+              eqGraphCtx.lineTo(x + 0.5, y);
+            }
+          }
+          eqGraphCtx.stroke();
+        }
+
         function buildEQ() {
           const container = document.getElementById('eq-bands');
           container.innerHTML = '';
@@ -1914,6 +2065,7 @@
               if (eqFilters[i]) {
                 eqFilters[i].gain.value = parseFloat(e.target.value);
               }
+              drawEqGraph();
             });
             container.appendChild(band);
           });
@@ -2039,19 +2191,11 @@
           e.target.value = '';
         });
 
-        // Volume
+        // Volume (track art is a static gradient bar like the classic skin)
         const volumeSlider = document.getElementById('volume-slider');
-        const volumeWedgeFill = document.getElementById('volume-wedge-fill');
-        function updateVolumeWedge() {
-          const pct = volumeSlider.value;
-          volumeWedgeFill.style.clipPath =
-            'polygon(0% 90%, ' + pct + '% ' + (90 - pct * 0.8) + '%, ' + pct + '% 90%)';
-        }
-        updateVolumeWedge();
         volumeSlider.addEventListener('input', (e) => {
           state.volume = e.target.value / 100;
           if (gainNode) gainNode.gain.value = state.volume;
-          updateVolumeWedge();
         });
 
         // Balance
@@ -2134,6 +2278,7 @@
           if (gainNode) {
             gainNode.gain.value = state.volume;
           }
+          drawEqGraph();
         });
 
         // EQ preamp
@@ -2155,6 +2300,13 @@
             removeTrack(idx);
           }
         });
+
+        // Playlist mini transport
+        document.getElementById('pl-mini-prev').addEventListener('click', prevTrack);
+        document.getElementById('pl-mini-play').addEventListener('click', togglePlay);
+        document.getElementById('pl-mini-pause').addEventListener('click', pause);
+        document.getElementById('pl-mini-stop').addEventListener('click', stop);
+        document.getElementById('pl-mini-next').addEventListener('click', nextTrack);
 
         // Visualizer click to toggle mode
         visCanvas.addEventListener('click', () => {
@@ -2178,13 +2330,11 @@
               state.volume = Math.min(1, state.volume + 0.05);
               if (gainNode) gainNode.gain.value = state.volume;
               volumeSlider.value = state.volume * 100;
-              updateVolumeWedge();
               break;
             case 'ArrowDown':
               state.volume = Math.max(0, state.volume - 0.05);
               if (gainNode) gainNode.gain.value = state.volume;
               volumeSlider.value = state.volume * 100;
-              updateVolumeWedge();
               break;
           }
         });
@@ -2244,6 +2394,7 @@
 
         // ===== INIT =====
         buildEQ();
+        drawEqGraph();
         drawVisualizer();
 
         renderPlaylist();
@@ -2315,16 +2466,13 @@
           }
         }
 
-        // Report after layout settles and when playlist toggles
+        // Report whenever the player's size changes — the playlist grows
+        // after tracks.json loads asynchronously, and the EQ/PL windows
+        // can be toggled at any time.
+        if (winampEl && 'ResizeObserver' in window) {
+          new ResizeObserver(() => reportSize()).observe(winampEl);
+        }
         setTimeout(reportSize, 100);
-        const plBtn = document.getElementById('btn-pl');
-        if (plBtn) {
-          plBtn.addEventListener('click', () => setTimeout(reportSize, 50));
-        }
-        const eqBtn = document.getElementById('btn-eq');
-        if (eqBtn) {
-          eqBtn.addEventListener('click', () => setTimeout(reportSize, 50));
-        }
       }
     </script>
   </body>
