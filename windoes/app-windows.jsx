@@ -242,6 +242,43 @@ function openSolitaire() {
 }
 
 // ══════════════════════════════════════════════
+// Minecraft Window
+// ══════════════════════════════════════════════
+// The Minecraft iframe sizes itself to whatever the window provides (its
+// canvas resyncs every frame), so the window stays resizable and maximizable.
+WindoesApp.WindowManager.register('minecraft', {
+  template: {
+    id: 'minecraftWindow',
+    ariaLabel: 'Minecraft',
+    title: 'Minecraft',
+    titleIcon: 'titlelogo-minecraft',
+    titlebarId: 'minecraftTitlebar',
+    minimizeBtnId: 'minecraftMinBtn',
+    maximizeBtn: true,
+    closeBtnId: 'minecraftCloseBtn',
+    style:
+      'left: 120px; top: 24px; width: 740px; height: 574px; min-width: unset; min-height: unset;',
+    view: (
+      <iframe
+        id="minecraftFrame"
+        title="Minecraft"
+        referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+      ></iframe>
+    ),
+    useSharedWindowComponent: true,
+  },
+  taskButton: { id: 'minecraftTaskBtn', icon: 'task-icon-minecraft', label: 'Minecraft' },
+  iframeId: 'minecraftFrame',
+  iframeSrc: './applications/minecraft/index.html',
+  hasChrome: false,
+});
+
+function openMinecraft() {
+  openWindowBoilerplate('minecraft');
+}
+
+// ══════════════════════════════════════════════
 // Paint Window
 // ══════════════════════════════════════════════
 const paintConfig = WindoesApp.WindowManager.register('paint', {
@@ -474,6 +511,7 @@ WindoesApp.open.app = openApp;
 WindoesApp.open.winamp = openWinamp;
 WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
+WindoesApp.open.minecraft = openMinecraft;
 WindoesApp.open.paint = openPaint;
 
 if (import.meta.hot) {

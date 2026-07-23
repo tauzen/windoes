@@ -22,7 +22,7 @@ WindoesApp (window-global)
    └─ open/bsod/ui/browser/... ── legacy imperative service handles (bridge)
 
 Embedded apps (standalone, in iframes)
-   public/applications/{ascii-runner,minesweeper,solitaire,paint,winamp-player}
+   public/applications/{ascii-runner,minecraft,minesweeper,solitaire,paint,winamp-player}
    communicate with the shell via postMessage (origin- + source-checked).
 ```
 
@@ -58,8 +58,8 @@ Embedded apps (standalone, in iframes)
 ## Built-in apps (windowed shell features)
 
 - `windoes/app-windows.jsx` — generic app frame plus Winamp, Minesweeper,
-  Solitaire, and Paint windows. Owns the cross-iframe `message` listener and
-  the Paint VirtualFS save/load bridge.
+  Solitaire, Minecraft, and Paint windows. Owns the cross-iframe `message`
+  listener and the Paint VirtualFS save/load bridge.
 - `windoes/ie-window.jsx` — Internet Explorer window (address bar, history,
   navigation) on top of `browser-url.mjs`.
 - `windoes/utility-windows.jsx` — My Computer explorer, Notepad, and Recycle

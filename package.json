@@ -3,6 +3,7 @@
   "private": true,
   "workspaces": [
     "windoes/public/applications/ascii-runner",
+    "windoes/public/applications/minecraft",
     "windoes/public/applications/minesweeper",
     "windoes/public/applications/paint",
     "windoes/public/applications/solitaire",
@@ -22,11 +23,12 @@
     "test:a11y": "node tests/test-axe-accessibility.js",
     "test:virtual-fs": "node tests/test-virtual-fs.js",
     "test:ascii-runner": "npm run -w ./windoes/public/applications/ascii-runner test",
+    "test:minecraft": "npm run -w ./windoes/public/applications/minecraft test",
     "test:minesweeper": "npm run -w ./windoes/public/applications/minesweeper test",
     "test:paint": "npm run -w ./windoes/public/applications/paint test",
     "test:solitaire": "npm run -w ./windoes/public/applications/solitaire test",
     "test:winamp-player": "npm run -w ./windoes/public/applications/winamp-player test",
-    "test:apps": "npm run test:ascii-runner && npm run test:minesweeper && npm run test:paint && npm run test:solitaire && npm run test:winamp-player",
+    "test:apps": "npm run test:ascii-runner && npm run test:minecraft && npm run test:minesweeper && npm run test:paint && npm run test:solitaire && npm run test:winamp-player",
     "test:all": "npm run typecheck && npm test && npm run test:apps"
   },
   "dependencies": {

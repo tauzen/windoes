@@ -12,6 +12,7 @@ const desktopIconDefs = [
   { id: 'iconWinamp', className: 'icon-winamp', label: 'Winamp' },
   { id: 'iconMinesweeper', className: 'icon-minesweeper', label: 'Minesweeper' },
   { id: 'iconSolitaire', className: 'icon-solitaire', label: 'Solitaire' },
+  { id: 'iconMinecraft', className: 'icon-minecraft', label: 'Minecraft' },
   { id: 'iconPaint', className: 'icon-paint', label: 'Paint' },
 ];
 
@@ -22,6 +23,7 @@ const dedicatedHandlers = {
   iconWinamp: () => WindoesApp.open.winamp?.(),
   iconMinesweeper: () => WindoesApp.open.minesweeper?.(),
   iconSolitaire: () => WindoesApp.open.solitaire?.(),
+  iconMinecraft: () => WindoesApp.open.minecraft?.(),
   iconPaint: () => WindoesApp.open.paint?.(),
 };
 

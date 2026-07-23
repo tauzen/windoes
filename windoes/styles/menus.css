@@ -214,6 +214,9 @@
 .submenu-icon-solitaire {
   background-image: url('/icons/cards.png');
 }
+.submenu-icon-minecraft {
+  background-image: url('/icons/minecraft.png');
+}
 .submenu-icon-ascii-runner {
   background-image: url('/icons/display.png');
 }
