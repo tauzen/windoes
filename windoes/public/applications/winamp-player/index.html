@@ -2466,16 +2466,13 @@
           }
         }
 
-        // Report after layout settles and when playlist toggles
+        // Report whenever the player's size changes — the playlist grows
+        // after tracks.json loads asynchronously, and the EQ/PL windows
+        // can be toggled at any time.
+        if (winampEl && 'ResizeObserver' in window) {
+          new ResizeObserver(() => reportSize()).observe(winampEl);
+        }
         setTimeout(reportSize, 100);
-        const plBtn = document.getElementById('btn-pl');
-        if (plBtn) {
-          plBtn.addEventListener('click', () => setTimeout(reportSize, 50));
-        }
-        const eqBtn = document.getElementById('btn-eq');
-        if (eqBtn) {
-          eqBtn.addEventListener('click', () => setTimeout(reportSize, 50));
-        }
       }
     </script>
   </body>
