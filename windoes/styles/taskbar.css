@@ -190,6 +190,9 @@
 .task-icon-solitaire {
   background-image: url('/icons/cards.png');
 }
+.task-icon-minecraft {
+  background-image: url('/icons/minecraft.png');
+}
 .task-icon-paint {
   background-image: url('/icons/paint.png');
 }

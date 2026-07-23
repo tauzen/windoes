@@ -107,6 +107,12 @@ export const SUBMENUS = [
         label: 'Solitaire',
         action: { kind: 'open', app: 'solitaire' },
       },
+      {
+        id: 'subGameMinecraft',
+        icon: 'minecraft',
+        label: 'Minecraft',
+        action: { kind: 'open', app: 'minecraft' },
+      },
     ],
   },
 ];

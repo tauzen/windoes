@@ -20,6 +20,9 @@
 .titlelogo-solitaire {
   background-image: url('/icons/cards.png');
 }
+.titlelogo-minecraft {
+  background-image: url('/icons/minecraft.png');
+}
 .titlelogo-paint {
   background-image: url('/icons/paint.png');
 }

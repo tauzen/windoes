@@ -75,6 +75,8 @@ const config = {
     solitaire: 'openSolitaire',
     sol: 'openSolitaire',
     'sol.exe': 'openSolitaire',
+    minecraft: 'openMinecraft',
+    'minecraft.exe': 'openMinecraft',
     paint: 'openPaint',
     'pbrush.exe': 'openPaint',
     mspaint: 'openPaint',

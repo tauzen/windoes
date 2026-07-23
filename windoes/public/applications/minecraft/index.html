@@ -1,0 +1,1674 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Minecraft</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #008080;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+        font-size: 11px;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      /* ===== WINDOW ===== */
+      .window {
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 1px 1px 0 #000;
+        width: 724px;
+      }
+
+      /* ===== TITLE BAR (hidden when embedded in the shell) ===== */
+      .title-bar {
+        background: linear-gradient(to right, #000080 0%, #1084d0 100%);
+        color: white;
+        padding: 2px 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 20px;
+      }
+
+      .title-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+
+      .title-btn {
+        width: 16px;
+        height: 14px;
+        background: #c0c0c0;
+        border: 1px solid;
+        border-color: #ffffff #808080 #808080 #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        color: #000;
+        cursor: pointer;
+        font-family: 'Arial', sans-serif;
+      }
+
+      /* ===== MENU BAR ===== */
+      .menubar {
+        display: flex;
+        padding: 1px 0;
+        border-bottom: 1px solid #808080;
+        position: relative;
+      }
+
+      .menu-title {
+        padding: 3px 8px;
+        cursor: default;
+      }
+
+      .menu-title:hover,
+      .menu-title.open {
+        background: #000080;
+        color: #fff;
+      }
+
+      .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+        min-width: 140px;
+        z-index: 50;
+      }
+
+      .menu-dropdown.open {
+        display: block;
+      }
+
+      .menu-option {
+        padding: 4px 20px 4px 24px;
+        cursor: default;
+        white-space: nowrap;
+      }
+
+      .menu-option:hover {
+        background: #000080;
+        color: #fff;
+      }
+
+      .menu-sep {
+        height: 1px;
+        margin: 2px 1px;
+        border-top: 1px solid #808080;
+        border-bottom: 1px solid #fff;
+      }
+
+      /* ===== VIEWPORT ===== */
+      .viewport {
+        position: relative;
+        width: 720px;
+        height: 480px;
+        border: 2px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        background: #000;
+        overflow: hidden;
+      }
+
+      #glCanvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+      }
+
+      /* ===== CROSSHAIR ===== */
+      .crosshair {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 18px;
+        height: 18px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        mix-blend-mode: difference;
+      }
+
+      .crosshair::before,
+      .crosshair::after {
+        content: '';
+        position: absolute;
+        background: #ddd;
+      }
+
+      .crosshair::before {
+        left: 8px;
+        top: 0;
+        width: 2px;
+        height: 18px;
+      }
+
+      .crosshair::after {
+        left: 0;
+        top: 8px;
+        width: 18px;
+        height: 2px;
+      }
+
+      /* ===== HOTBAR ===== */
+      .hotbar {
+        position: absolute;
+        left: 50%;
+        bottom: 8px;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 2px;
+        padding: 3px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        /* Above the click-to-play overlay so slots stay clickable */
+        z-index: 11;
+      }
+
+      .hotbar-slot {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #555;
+        background: rgba(0, 0, 0, 0.3);
+        position: relative;
+        cursor: pointer;
+      }
+
+      .hotbar-slot.selected {
+        border-color: #fff;
+      }
+
+      .hotbar-slot canvas {
+        position: absolute;
+        inset: 3px;
+        width: 30px;
+        height: 30px;
+        image-rendering: pixelated;
+      }
+
+      .hotbar-slot .slot-key {
+        position: absolute;
+        top: 0;
+        left: 2px;
+        color: #ddd;
+        font-size: 9px;
+        text-shadow: 1px 1px 0 #000;
+        z-index: 2;
+      }
+
+      /* ===== OVERLAYS ===== */
+      .center-overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 10;
+      }
+
+      .center-overlay.show {
+        display: flex;
+      }
+
+      .overlay-panel {
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        padding: 14px 22px;
+        text-align: center;
+        color: #000;
+        cursor: pointer;
+      }
+
+      .overlay-panel h1 {
+        font-size: 15px;
+        margin-bottom: 8px;
+      }
+
+      .overlay-panel table {
+        margin: 8px auto 4px;
+        border-spacing: 10px 2px;
+        text-align: left;
+      }
+
+      .overlay-panel .key {
+        font-weight: bold;
+      }
+
+      .overlay-hint {
+        margin-top: 8px;
+        font-weight: bold;
+      }
+
+      /* ===== STATUS BAR ===== */
+      .statusbar {
+        display: flex;
+        gap: 2px;
+        padding: 2px;
+      }
+
+      .status-cell {
+        border: 1px solid;
+        border-color: #808080 #ffffff #ffffff #808080;
+        padding: 2px 8px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .status-cell.grow {
+        flex: 1;
+      }
+
+      /* ===== EMBEDDED (IFRAME) MODE =====
+         The shell owns the window chrome; fill the iframe and let the
+         3D viewport take whatever space the shell window provides. */
+      body.embedded {
+        display: block;
+        min-height: 0;
+        overflow: hidden;
+        background: #c0c0c0;
+      }
+
+      body.embedded .window {
+        width: 100%;
+        height: 100vh;
+        border: none;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body.embedded .title-bar {
+        display: none;
+      }
+
+      body.embedded .viewport {
+        width: auto;
+        height: auto;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* ===== DIALOG ===== */
+      .dialog-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: 100;
+      }
+
+      .dialog-overlay.show {
+        display: flex;
+      }
+
+      .dialog-box {
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+        min-width: 300px;
+      }
+
+      .dialog-titlebar {
+        background: linear-gradient(to right, #000080 0%, #1084d0 100%);
+        color: #fff;
+        font-weight: bold;
+        padding: 3px 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .dialog-body {
+        padding: 14px 18px;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .dialog-buttons {
+        display: flex;
+        justify-content: center;
+        padding: 0 0 12px;
+      }
+
+      .dialog-btn {
+        min-width: 74px;
+        padding: 4px 12px;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .dialog-btn:active {
+        border-color: #404040 #dfdfdf #dfdfdf #404040;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window" id="window">
+      <div class="title-bar" id="titleBar">
+        <div class="title-bar-left">
+          <span>⛏️</span>
+          <span>Minecraft</span>
+        </div>
+        <div>
+          <button class="title-btn" id="closeBtn" aria-label="Close">✕</button>
+        </div>
+      </div>
+
+      <div class="menubar" id="menubar">
+        <span class="menu-title" id="menuGame" data-menu="gameDropdown"><u>G</u>ame</span>
+        <span class="menu-title" id="menuHelp" data-menu="helpDropdown"><u>H</u>elp</span>
+        <div class="menu-dropdown" id="gameDropdown" style="left: 0">
+          <div class="menu-option" id="menuNewWorld">New World</div>
+        </div>
+        <div class="menu-dropdown" id="helpDropdown" style="left: 44px">
+          <div class="menu-option" id="menuControls">Controls...</div>
+          <div class="menu-sep"></div>
+          <div class="menu-option" id="menuAbout">About Minecraft...</div>
+        </div>
+      </div>
+
+      <div class="viewport" id="viewport">
+        <canvas id="glCanvas" width="720" height="480"></canvas>
+        <div class="crosshair" aria-hidden="true"></div>
+        <div class="hotbar" id="hotbar"></div>
+        <div class="center-overlay show" id="playOverlay">
+          <div class="overlay-panel" id="playPanel">
+            <h1>⛏️ Minecraft</h1>
+            <table>
+              <tr>
+                <td class="key">W A S D</td>
+                <td>Move</td>
+              </tr>
+              <tr>
+                <td class="key">Mouse</td>
+                <td>Look around</td>
+              </tr>
+              <tr>
+                <td class="key">Space</td>
+                <td>Jump / swim</td>
+              </tr>
+              <tr>
+                <td class="key">Left click</td>
+                <td>Break block</td>
+              </tr>
+              <tr>
+                <td class="key">Right click</td>
+                <td>Place block</td>
+              </tr>
+              <tr>
+                <td class="key">1&ndash;8 / wheel</td>
+                <td>Select block</td>
+              </tr>
+              <tr>
+                <td class="key">Esc</td>
+                <td>Release mouse</td>
+              </tr>
+            </table>
+            <div class="overlay-hint" id="overlayHint">Click to play</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="statusbar">
+        <div class="status-cell grow" id="statusPos">x: 0 y: 0 z: 0</div>
+        <div class="status-cell" id="statusBlock">Grass</div>
+        <div class="status-cell" id="statusFps">0 fps</div>
+      </div>
+    </div>
+
+    <div class="dialog-overlay" id="aboutDialog">
+      <div class="dialog-box">
+        <div class="dialog-titlebar">
+          <span>About Minecraft</span>
+          <button class="title-btn" id="aboutCloseX" aria-label="Close">✕</button>
+        </div>
+        <div class="dialog-body">
+          <div style="font-size: 24px">⛏️</div>
+          <b>Minecraft for Windoes</b><br />
+          A tiny voxel sandbox.<br />
+          Dig, build, and explore a procedurally<br />
+          generated world &mdash; one block at a time.
+        </div>
+        <div class="dialog-buttons">
+          <button class="dialog-btn" id="aboutCloseBtn">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      'use strict';
+
+      // ============================================================
+      // CONSTANTS
+      // ============================================================
+      var SX = 64,
+        SY = 48,
+        SZ = 64; // world dimensions
+      var SEA = 13; // water level
+      var DEFAULT_SEED = 1337;
+
+      var AIR = 0,
+        GRASS = 1,
+        DIRT = 2,
+        STONE = 3,
+        SAND = 4,
+        LOG = 5,
+        LEAVES = 6,
+        PLANKS = 7,
+        COBBLE = 8,
+        WATER = 9,
+        BEDROCK = 10;
+
+      // Texture atlas tile indices (4x4 grid of 16px tiles in a 64x64 atlas)
+      var T_GRASS_TOP = 0,
+        T_GRASS_SIDE = 1,
+        T_DIRT = 2,
+        T_STONE = 3,
+        T_SAND = 4,
+        T_LOG_SIDE = 5,
+        T_LOG_TOP = 6,
+        T_LEAVES = 7,
+        T_PLANKS = 8,
+        T_COBBLE = 9,
+        T_WATER = 10,
+        T_BEDROCK = 11;
+
+      // Per-block face tiles: [top, side, bottom]
+      var BLOCK_TILES = {};
+      BLOCK_TILES[GRASS] = [T_GRASS_TOP, T_GRASS_SIDE, T_DIRT];
+      BLOCK_TILES[DIRT] = [T_DIRT, T_DIRT, T_DIRT];
+      BLOCK_TILES[STONE] = [T_STONE, T_STONE, T_STONE];
+      BLOCK_TILES[SAND] = [T_SAND, T_SAND, T_SAND];
+      BLOCK_TILES[LOG] = [T_LOG_TOP, T_LOG_SIDE, T_LOG_TOP];
+      BLOCK_TILES[LEAVES] = [T_LEAVES, T_LEAVES, T_LEAVES];
+      BLOCK_TILES[PLANKS] = [T_PLANKS, T_PLANKS, T_PLANKS];
+      BLOCK_TILES[COBBLE] = [T_COBBLE, T_COBBLE, T_COBBLE];
+      BLOCK_TILES[WATER] = [T_WATER, T_WATER, T_WATER];
+      BLOCK_TILES[BEDROCK] = [T_BEDROCK, T_BEDROCK, T_BEDROCK];
+
+      var BLOCK_NAMES = {};
+      BLOCK_NAMES[GRASS] = 'Grass';
+      BLOCK_NAMES[DIRT] = 'Dirt';
+      BLOCK_NAMES[STONE] = 'Stone';
+      BLOCK_NAMES[SAND] = 'Sand';
+      BLOCK_NAMES[LOG] = 'Wood';
+      BLOCK_NAMES[LEAVES] = 'Leaves';
+      BLOCK_NAMES[PLANKS] = 'Planks';
+      BLOCK_NAMES[COBBLE] = 'Cobblestone';
+
+      var HOTBAR_BLOCKS = [GRASS, DIRT, STONE, SAND, LOG, LEAVES, PLANKS, COBBLE];
+
+      var EYE_HEIGHT = 1.62;
+      var PLAYER_HALF = 0.3;
+      var PLAYER_HEIGHT = 1.8;
+      var GRAVITY = 24;
+      var JUMP_SPEED = 8.2;
+      var WALK_SPEED = 4.5;
+      var REACH = 7;
+
+      // ============================================================
+      // WORLD STATE
+      // ============================================================
+      var world = new Uint8Array(SX * SY * SZ);
+      var worldSeed = DEFAULT_SEED;
+
+      function idx(x, y, z) {
+        return x + z * SX + y * SX * SZ;
+      }
+
+      function inBounds(x, y, z) {
+        return x >= 0 && y >= 0 && z >= 0 && x < SX && y < SY && z < SZ;
+      }
+
+      function getBlock(x, y, z) {
+        if (!inBounds(x, y, z)) return AIR;
+        return world[idx(x, y, z)];
+      }
+
+      function setBlock(x, y, z, id) {
+        if (!inBounds(x, y, z)) return;
+        world[idx(x, y, z)] = id;
+      }
+
+      function isOpaque(id) {
+        return id !== AIR && id !== WATER;
+      }
+
+      function isSolid(id) {
+        return id !== AIR && id !== WATER;
+      }
+
+      // ============================================================
+      // NOISE (seeded value noise, 2 octaves)
+      // ============================================================
+      function hash2(ix, iz, s) {
+        var h = (ix * 374761393 + iz * 668265263 + s * 1442695041) | 0;
+        h = ((h ^ (h >> 13)) * 1274126177) | 0;
+        h = h ^ (h >> 16);
+        return (h >>> 0) / 4294967295;
+      }
+
+      function smooth(t) {
+        return t * t * (3 - 2 * t);
+      }
+
+      function valueNoise(x, z, s) {
+        var ix = Math.floor(x),
+          iz = Math.floor(z);
+        var fx = x - ix,
+          fz = z - iz;
+        var a = hash2(ix, iz, s);
+        var b = hash2(ix + 1, iz, s);
+        var c = hash2(ix, iz + 1, s);
+        var d = hash2(ix + 1, iz + 1, s);
+        var u = smooth(fx),
+          v = smooth(fz);
+        return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
+      }
+
+      function terrainHeight(x, z, s) {
+        var n = valueNoise(x / 22, z / 22, s) * 0.65 + valueNoise(x / 7, z / 7, s + 7) * 0.35;
+        return Math.max(3, Math.min(SY - 14, Math.round(8 + n * 20)));
+      }
+
+      // ============================================================
+      // WORLD GENERATION
+      // ============================================================
+      function generateWorld(s) {
+        worldSeed = s;
+        world.fill(AIR);
+
+        for (var x = 0; x < SX; x++) {
+          for (var z = 0; z < SZ; z++) {
+            var h = terrainHeight(x, z, s);
+            for (var y = 0; y <= h; y++) {
+              var b;
+              if (y === 0) b = BEDROCK;
+              else if (y < h - 3) b = STONE;
+              else if (y < h) b = DIRT;
+              else b = h <= SEA + 1 ? SAND : GRASS;
+              setBlock(x, y, z, b);
+            }
+            for (var w = h + 1; w <= SEA; w++) {
+              setBlock(x, w, z, WATER);
+            }
+          }
+        }
+
+        // Trees on grass, away from the world edge
+        for (var tx = 3; tx < SX - 3; tx++) {
+          for (var tz = 3; tz < SZ - 3; tz++) {
+            var th = terrainHeight(tx, tz, s);
+            if (getBlock(tx, th, tz) !== GRASS) continue;
+            if (hash2(tx, tz, s + 99) > 0.012) continue;
+            var trunk = 4 + Math.floor(hash2(tx, tz, s + 123) * 2);
+            if (th + trunk + 3 >= SY) continue;
+            for (var ty = 1; ty <= trunk; ty++) setBlock(tx, th + ty, tz, LOG);
+            for (var lx = -2; lx <= 2; lx++) {
+              for (var lz = -2; lz <= 2; lz++) {
+                for (var ly = trunk - 1; ly <= trunk + 2; ly++) {
+                  var r = Math.abs(lx) + Math.abs(lz) + Math.max(0, ly - trunk);
+                  if (r > 3) continue;
+                  if (lx === 0 && lz === 0 && ly <= trunk) continue;
+                  if (getBlock(tx + lx, th + ly, tz + lz) === AIR) {
+                    setBlock(tx + lx, th + ly, tz + lz, LEAVES);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      function surfaceHeight(x, z) {
+        for (var y = SY - 1; y >= 0; y--) {
+          if (isSolid(getBlock(x, y, z))) return y;
+        }
+        return 0;
+      }
+
+      // ============================================================
+      // TEXTURE ATLAS (procedurally drawn)
+      // ============================================================
+      var ATLAS = 64,
+        TILE = 16;
+      var atlasCanvas = document.createElement('canvas');
+      atlasCanvas.width = ATLAS;
+      atlasCanvas.height = ATLAS;
+
+      var texSeed = 42;
+      function trand() {
+        texSeed = (texSeed * 1664525 + 1013904223) >>> 0;
+        return texSeed / 4294967296;
+      }
+
+      function drawTile(ctx, tile, base, jitter, painter) {
+        var ox = (tile % 4) * TILE;
+        var oy = Math.floor(tile / 4) * TILE;
+        for (var y = 0; y < TILE; y++) {
+          for (var x = 0; x < TILE; x++) {
+            var j = (trand() - 0.5) * 2 * jitter;
+            var c = painter ? painter(x, y, j) : null;
+            if (!c) {
+              c = [base[0] + j, base[1] + j, base[2] + j * 0.7];
+            }
+            ctx.fillStyle =
+              'rgb(' +
+              Math.max(0, Math.min(255, Math.round(c[0]))) +
+              ',' +
+              Math.max(0, Math.min(255, Math.round(c[1]))) +
+              ',' +
+              Math.max(0, Math.min(255, Math.round(c[2]))) +
+              ')';
+            ctx.fillRect(ox + x, oy + y, 1, 1);
+          }
+        }
+      }
+
+      function buildAtlas() {
+        var ctx = atlasCanvas.getContext('2d');
+        texSeed = 42;
+
+        drawTile(ctx, T_GRASS_TOP, [98, 160, 58], 16);
+        drawTile(ctx, T_GRASS_SIDE, [116, 84, 54], 14, function (x, y, j) {
+          if (y < 3 + (x % 3 === 0 ? 1 : 0)) return [96 + j, 152 + j, 56 + j * 0.5];
+          return null;
+        });
+        drawTile(ctx, T_DIRT, [116, 84, 54], 16);
+        drawTile(ctx, T_STONE, [125, 125, 125], 13);
+        drawTile(ctx, T_SAND, [214, 202, 150], 10);
+        drawTile(ctx, T_LOG_SIDE, [102, 78, 44], 8, function (x, y, j) {
+          var stripe = x % 4 === 0 ? -22 : 0;
+          return [102 + j + stripe, 78 + j + stripe, 44 + j * 0.5 + stripe];
+        });
+        drawTile(ctx, T_LOG_TOP, [156, 126, 74], 8, function (x, y, j) {
+          var dx = x - 7.5,
+            dy = y - 7.5;
+          var ring = Math.floor(Math.sqrt(dx * dx + dy * dy)) % 3 === 0 ? -30 : 0;
+          return [156 + j + ring, 126 + j + ring, 74 + j * 0.5 + ring];
+        });
+        drawTile(ctx, T_LEAVES, [46, 110, 34], 24);
+        drawTile(ctx, T_PLANKS, [160, 128, 78], 8, function (x, y, j) {
+          var seam = y % 4 === 3 ? -36 : 0;
+          return [160 + j + seam, 128 + j + seam, 78 + j * 0.5 + seam];
+        });
+        drawTile(ctx, T_COBBLE, [110, 110, 110], 10, function (x, y, j) {
+          var blob = ((x >> 2) + (y >> 2)) % 2 === 0 ? 16 : -12;
+          return [110 + j + blob, 110 + j + blob, 110 + j + blob];
+        });
+        drawTile(ctx, T_WATER, [48, 84, 190], 14, function (x, y, j) {
+          var wave = (x + y * 2) % 8 < 2 ? 22 : 0;
+          return [48 + j + wave, 84 + j + wave, 190 + j];
+        });
+        drawTile(ctx, T_BEDROCK, [58, 58, 58], 22);
+      }
+
+      // ============================================================
+      // MAT4 HELPERS (column-major)
+      // ============================================================
+      function mat4Identity() {
+        return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+      }
+
+      function mat4Multiply(a, b) {
+        var out = new Float32Array(16);
+        for (var c = 0; c < 4; c++) {
+          for (var r = 0; r < 4; r++) {
+            var sum = 0;
+            for (var k = 0; k < 4; k++) sum += a[k * 4 + r] * b[c * 4 + k];
+            out[c * 4 + r] = sum;
+          }
+        }
+        return out;
+      }
+
+      function mat4Perspective(fovy, aspect, near, far) {
+        var f = 1 / Math.tan(fovy / 2);
+        var out = new Float32Array(16);
+        out[0] = f / aspect;
+        out[5] = f;
+        out[10] = (far + near) / (near - far);
+        out[11] = -1;
+        out[14] = (2 * far * near) / (near - far);
+        return out;
+      }
+
+      function mat4RotX(a) {
+        var c = Math.cos(a),
+          s = Math.sin(a);
+        var m = mat4Identity();
+        m[5] = c;
+        m[6] = s;
+        m[9] = -s;
+        m[10] = c;
+        return m;
+      }
+
+      function mat4RotY(a) {
+        var c = Math.cos(a),
+          s = Math.sin(a);
+        var m = mat4Identity();
+        m[0] = c;
+        m[2] = -s;
+        m[8] = s;
+        m[10] = c;
+        return m;
+      }
+
+      function mat4Translate(x, y, z) {
+        var m = mat4Identity();
+        m[12] = x;
+        m[13] = y;
+        m[14] = z;
+        return m;
+      }
+
+      // ============================================================
+      // WEBGL SETUP
+      // ============================================================
+      var canvas = document.getElementById('glCanvas');
+      var gl = null;
+      var glOk = false;
+      var mainProgram = null,
+        lineProgram = null;
+      var mainLocs = {},
+        lineLocs = {};
+      var opaqueBuffer = null,
+        waterBuffer = null,
+        lineBuffer = null;
+      var opaqueVerts = 0,
+        waterVerts = 0;
+      var atlasTexture = null;
+
+      var VERT_SRC = [
+        'attribute vec3 aPos;',
+        'attribute vec2 aUV;',
+        'attribute float aLight;',
+        'uniform mat4 uMVP;',
+        'uniform vec3 uCam;',
+        'varying vec2 vUV;',
+        'varying float vLight;',
+        'varying float vDist;',
+        'void main() {',
+        '  vUV = aUV;',
+        '  vLight = aLight;',
+        '  vDist = distance(aPos, uCam);',
+        '  gl_Position = uMVP * vec4(aPos, 1.0);',
+        '}',
+      ].join('\n');
+
+      var FRAG_SRC = [
+        'precision mediump float;',
+        'uniform sampler2D uTex;',
+        'uniform vec3 uFogColor;',
+        'uniform float uAlpha;',
+        'varying vec2 vUV;',
+        'varying float vLight;',
+        'varying float vDist;',
+        'void main() {',
+        '  vec4 c = texture2D(uTex, vUV);',
+        '  c.rgb *= vLight;',
+        '  float fog = smoothstep(38.0, 60.0, vDist);',
+        '  c.rgb = mix(c.rgb, uFogColor, fog);',
+        '  c.a *= uAlpha;',
+        '  gl_FragColor = c;',
+        '}',
+      ].join('\n');
+
+      var LINE_VERT_SRC = [
+        'attribute vec3 aPos;',
+        'uniform mat4 uMVP;',
+        'uniform vec3 uOffset;',
+        'void main() {',
+        '  gl_Position = uMVP * vec4(aPos + uOffset, 1.0);',
+        '}',
+      ].join('\n');
+
+      var LINE_FRAG_SRC = [
+        'precision mediump float;',
+        'void main() { gl_FragColor = vec4(0.05, 0.05, 0.05, 1.0); }',
+      ].join('\n');
+
+      function compileShader(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+          throw new Error('Shader compile failed: ' + gl.getShaderInfoLog(sh));
+        }
+        return sh;
+      }
+
+      function linkProgram(vsSrc, fsSrc) {
+        var p = gl.createProgram();
+        gl.attachShader(p, compileShader(gl.VERTEX_SHADER, vsSrc));
+        gl.attachShader(p, compileShader(gl.FRAGMENT_SHADER, fsSrc));
+        gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+          throw new Error('Program link failed: ' + gl.getProgramInfoLog(p));
+        }
+        return p;
+      }
+
+      function initGL() {
+        gl =
+          canvas.getContext('webgl', { antialias: false }) ||
+          canvas.getContext('experimental-webgl');
+        if (!gl) return false;
+
+        mainProgram = linkProgram(VERT_SRC, FRAG_SRC);
+        mainLocs.aPos = gl.getAttribLocation(mainProgram, 'aPos');
+        mainLocs.aUV = gl.getAttribLocation(mainProgram, 'aUV');
+        mainLocs.aLight = gl.getAttribLocation(mainProgram, 'aLight');
+        mainLocs.uMVP = gl.getUniformLocation(mainProgram, 'uMVP');
+        mainLocs.uCam = gl.getUniformLocation(mainProgram, 'uCam');
+        mainLocs.uTex = gl.getUniformLocation(mainProgram, 'uTex');
+        mainLocs.uFogColor = gl.getUniformLocation(mainProgram, 'uFogColor');
+        mainLocs.uAlpha = gl.getUniformLocation(mainProgram, 'uAlpha');
+
+        lineProgram = linkProgram(LINE_VERT_SRC, LINE_FRAG_SRC);
+        lineLocs.aPos = gl.getAttribLocation(lineProgram, 'aPos');
+        lineLocs.uMVP = gl.getUniformLocation(lineProgram, 'uMVP');
+        lineLocs.uOffset = gl.getUniformLocation(lineProgram, 'uOffset');
+
+        opaqueBuffer = gl.createBuffer();
+        waterBuffer = gl.createBuffer();
+
+        // Unit-cube wireframe, slightly inflated to avoid z-fighting
+        var lo = -0.003,
+          hi = 1.003;
+        var cubeEdges = [
+          [lo, lo, lo, hi, lo, lo],
+          [hi, lo, lo, hi, lo, hi],
+          [hi, lo, hi, lo, lo, hi],
+          [lo, lo, hi, lo, lo, lo],
+          [lo, hi, lo, hi, hi, lo],
+          [hi, hi, lo, hi, hi, hi],
+          [hi, hi, hi, lo, hi, hi],
+          [lo, hi, hi, lo, hi, lo],
+          [lo, lo, lo, lo, hi, lo],
+          [hi, lo, lo, hi, hi, lo],
+          [hi, lo, hi, hi, hi, hi],
+          [lo, lo, hi, lo, hi, hi],
+        ];
+        var lineVerts = [];
+        cubeEdges.forEach(function (e) {
+          lineVerts.push(e[0], e[1], e[2], e[3], e[4], e[5]);
+        });
+        lineBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVerts), gl.STATIC_DRAW);
+
+        buildAtlas();
+        atlasTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, atlasTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlasCanvas);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+        gl.clearColor(0.55, 0.75, 0.98, 1);
+        return true;
+      }
+
+      // ============================================================
+      // MESH BUILDING
+      // ============================================================
+      // Face corner layout per direction. Corners are counter-clockwise when
+      // viewed from outside the block (so back-face culling works).
+      // dir: 0 +x, 1 -x, 2 +y (top), 3 -y (bottom), 4 +z, 5 -z
+      var FACES = [
+        {
+          n: [1, 0, 0],
+          c: [
+            [1, 0, 1],
+            [1, 0, 0],
+            [1, 1, 0],
+            [1, 1, 1],
+          ],
+          light: 0.8,
+        },
+        {
+          n: [-1, 0, 0],
+          c: [
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 1, 1],
+            [0, 1, 0],
+          ],
+          light: 0.8,
+        },
+        {
+          n: [0, 1, 0],
+          c: [
+            [0, 1, 1],
+            [1, 1, 1],
+            [1, 1, 0],
+            [0, 1, 0],
+          ],
+          light: 1.0,
+        },
+        {
+          n: [0, -1, 0],
+          c: [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 0, 1],
+            [0, 0, 1],
+          ],
+          light: 0.5,
+        },
+        {
+          n: [0, 0, 1],
+          c: [
+            [0, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+          ],
+          light: 0.65,
+        },
+        {
+          n: [0, 0, -1],
+          c: [
+            [1, 0, 0],
+            [0, 0, 0],
+            [0, 1, 0],
+            [1, 1, 0],
+          ],
+          light: 0.65,
+        },
+      ];
+
+      function tileUV(tile) {
+        var pad = 0.5 / ATLAS;
+        var tx = (tile % 4) * 0.25;
+        var ty = Math.floor(tile / 4) * 0.25;
+        return [tx + pad, ty + pad, tx + 0.25 - pad, ty + 0.25 - pad];
+      }
+
+      function pushFace(arr, x, y, z, face, tile, light) {
+        var uv = tileUV(tile);
+        var u0 = uv[0],
+          v0 = uv[1],
+          u1 = uv[2],
+          v1 = uv[3];
+        var c = face.c;
+        // Two triangles: 0-1-2, 0-2-3
+        var corners = [c[0], c[1], c[2], c[0], c[2], c[3]];
+        var uvs = [
+          [u0, v1],
+          [u1, v1],
+          [u1, v0],
+          [u0, v1],
+          [u1, v0],
+          [u0, v0],
+        ];
+        for (var i = 0; i < 6; i++) {
+          arr.push(
+            x + corners[i][0],
+            y + corners[i][1],
+            z + corners[i][2],
+            uvs[i][0],
+            uvs[i][1],
+            light
+          );
+        }
+      }
+
+      function rebuildMesh() {
+        if (!glOk) return;
+        var opaque = [];
+        var water = [];
+
+        for (var y = 0; y < SY; y++) {
+          for (var z = 0; z < SZ; z++) {
+            for (var x = 0; x < SX; x++) {
+              var b = world[idx(x, y, z)];
+              if (b === AIR) continue;
+              var tiles = BLOCK_TILES[b];
+              for (var d = 0; d < 6; d++) {
+                var f = FACES[d];
+                var nb = getBlock(x + f.n[0], y + f.n[1], z + f.n[2]);
+                if (b === WATER) {
+                  if (nb !== AIR) continue;
+                  pushFace(water, x, y, z, f, tiles[1], f.light);
+                } else {
+                  if (isOpaque(nb)) continue;
+                  var tile = d === 2 ? tiles[0] : d === 3 ? tiles[2] : tiles[1];
+                  pushFace(opaque, x, y, z, f, tile, f.light);
+                }
+              }
+            }
+          }
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, opaqueBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(opaque), gl.DYNAMIC_DRAW);
+        opaqueVerts = opaque.length / 6;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, waterBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(water), gl.DYNAMIC_DRAW);
+        waterVerts = water.length / 6;
+      }
+
+      // ============================================================
+      // PLAYER
+      // ============================================================
+      var player = {
+        x: SX / 2 + 0.5,
+        y: 30,
+        z: SZ / 2 + 0.5,
+        vx: 0,
+        vy: 0,
+        vz: 0,
+        yaw: Math.PI / 4,
+        pitch: -0.15,
+        onGround: false,
+      };
+
+      var keys = {};
+      var selectedSlot = 0;
+
+      function spawnPlayer() {
+        var sx = Math.floor(SX / 2),
+          sz = Math.floor(SZ / 2);
+        var top = surfaceHeight(sx, sz);
+        player.x = sx + 0.5;
+        player.y = top + 1;
+        player.z = sz + 0.5;
+        player.vx = 0;
+        player.vy = 0;
+        player.vz = 0;
+        player.yaw = Math.PI / 4;
+        player.pitch = -0.15;
+      }
+
+      function collides(px, py, pz) {
+        var x0 = Math.floor(px - PLAYER_HALF),
+          x1 = Math.floor(px + PLAYER_HALF);
+        var y0 = Math.floor(py),
+          y1 = Math.floor(py + PLAYER_HEIGHT);
+        var z0 = Math.floor(pz - PLAYER_HALF),
+          z1 = Math.floor(pz + PLAYER_HALF);
+        for (var x = x0; x <= x1; x++) {
+          for (var y = y0; y <= y1; y++) {
+            for (var z = z0; z <= z1; z++) {
+              if (isSolid(getBlock(x, y, z))) return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function inWater() {
+        return (
+          getBlock(Math.floor(player.x), Math.floor(player.y + 0.4), Math.floor(player.z)) === WATER
+        );
+      }
+
+      function updatePhysics(dt) {
+        var swim = inWater();
+
+        var fx = -Math.sin(player.yaw),
+          fz = -Math.cos(player.yaw);
+        var rx = Math.cos(player.yaw),
+          rz = -Math.sin(player.yaw);
+
+        var mx = 0,
+          mz = 0;
+        if (keys['KeyW']) {
+          mx += fx;
+          mz += fz;
+        }
+        if (keys['KeyS']) {
+          mx -= fx;
+          mz -= fz;
+        }
+        if (keys['KeyD']) {
+          mx += rx;
+          mz += rz;
+        }
+        if (keys['KeyA']) {
+          mx -= rx;
+          mz -= rz;
+        }
+        var len = Math.hypot(mx, mz);
+        if (len > 0) {
+          mx /= len;
+          mz /= len;
+        }
+        var speed = swim ? WALK_SPEED * 0.6 : WALK_SPEED;
+        player.vx = mx * speed;
+        player.vz = mz * speed;
+
+        if (swim) {
+          player.vy -= GRAVITY * 0.25 * dt;
+          player.vy *= 0.9;
+          if (keys['Space']) player.vy = 3.2;
+        } else {
+          player.vy -= GRAVITY * dt;
+          if (keys['Space'] && player.onGround) {
+            player.vy = JUMP_SPEED;
+            player.onGround = false;
+          }
+        }
+        if (player.vy < -50) player.vy = -50;
+
+        // Move and resolve axis by axis
+        var nx = player.x + player.vx * dt;
+        if (!collides(nx, player.y, player.z)) player.x = nx;
+
+        var nz = player.z + player.vz * dt;
+        if (!collides(player.x, player.y, nz)) player.z = nz;
+
+        var ny = player.y + player.vy * dt;
+        if (!collides(player.x, ny, player.z)) {
+          player.y = ny;
+          player.onGround = false;
+        } else {
+          if (player.vy < 0) player.onGround = true;
+          player.vy = 0;
+        }
+
+        // Safety net: never fall out of the world
+        if (player.y < -10) spawnPlayer();
+      }
+
+      // ============================================================
+      // RAYCAST (Amanatides & Woo voxel traversal)
+      // ============================================================
+      function raycast() {
+        var cp = Math.cos(player.pitch);
+        var dx = -Math.sin(player.yaw) * cp;
+        var dy = Math.sin(player.pitch);
+        var dz = -Math.cos(player.yaw) * cp;
+
+        var ox = player.x,
+          oy = player.y + EYE_HEIGHT,
+          oz = player.z;
+        var x = Math.floor(ox),
+          y = Math.floor(oy),
+          z = Math.floor(oz);
+
+        var stepX = dx > 0 ? 1 : -1;
+        var stepY = dy > 0 ? 1 : -1;
+        var stepZ = dz > 0 ? 1 : -1;
+
+        var tDeltaX = dx !== 0 ? Math.abs(1 / dx) : Infinity;
+        var tDeltaY = dy !== 0 ? Math.abs(1 / dy) : Infinity;
+        var tDeltaZ = dz !== 0 ? Math.abs(1 / dz) : Infinity;
+
+        var tMaxX = dx !== 0 ? (dx > 0 ? x + 1 - ox : ox - x) * tDeltaX : Infinity;
+        var tMaxY = dy !== 0 ? (dy > 0 ? y + 1 - oy : oy - y) * tDeltaY : Infinity;
+        var tMaxZ = dz !== 0 ? (dz > 0 ? z + 1 - oz : oz - z) * tDeltaZ : Infinity;
+
+        var face = [0, 0, 0];
+        for (var i = 0; i < 128; i++) {
+          var b = getBlock(x, y, z);
+          if (b !== AIR && b !== WATER) {
+            return { x: x, y: y, z: z, block: b, face: face };
+          }
+          if (tMaxX < tMaxY && tMaxX < tMaxZ) {
+            if (tMaxX > REACH) return null;
+            x += stepX;
+            tMaxX += tDeltaX;
+            face = [-stepX, 0, 0];
+          } else if (tMaxY < tMaxZ) {
+            if (tMaxY > REACH) return null;
+            y += stepY;
+            tMaxY += tDeltaY;
+            face = [0, -stepY, 0];
+          } else {
+            if (tMaxZ > REACH) return null;
+            z += stepZ;
+            tMaxZ += tDeltaZ;
+            face = [0, 0, -stepZ];
+          }
+        }
+        return null;
+      }
+
+      function breakBlock() {
+        var hit = raycast();
+        if (!hit || hit.block === BEDROCK) return false;
+        setBlock(hit.x, hit.y, hit.z, AIR);
+        // Let water flow into the hole from any adjacent water block
+        var nearWater = FACES.some(function (f) {
+          return getBlock(hit.x + f.n[0], hit.y + f.n[1], hit.z + f.n[2]) === WATER;
+        });
+        if (nearWater && hit.y <= SEA) setBlock(hit.x, hit.y, hit.z, WATER);
+        rebuildMesh();
+        return true;
+      }
+
+      function placeBlock() {
+        var hit = raycast();
+        if (!hit) return false;
+        var px = hit.x + hit.face[0],
+          py = hit.y + hit.face[1],
+          pz = hit.z + hit.face[2];
+        if (!inBounds(px, py, pz)) return false;
+        var target = getBlock(px, py, pz);
+        if (target !== AIR && target !== WATER) return false;
+        // Don't place a block inside the player
+        var overlapsPlayer =
+          px + 1 > player.x - PLAYER_HALF &&
+          px < player.x + PLAYER_HALF &&
+          pz + 1 > player.z - PLAYER_HALF &&
+          pz < player.z + PLAYER_HALF &&
+          py + 1 > player.y &&
+          py < player.y + PLAYER_HEIGHT;
+        if (overlapsPlayer) return false;
+        setBlock(px, py, pz, HOTBAR_BLOCKS[selectedSlot]);
+        rebuildMesh();
+        return true;
+      }
+
+      // ============================================================
+      // RENDER LOOP
+      // ============================================================
+      var lastTime = 0;
+      var fpsCount = 0,
+        fpsTime = 0,
+        fps = 0;
+
+      // Keep the drawing buffer matched to the element size (the shell can
+      // resize or maximize the window around us).
+      function syncCanvasSize() {
+        var w = canvas.clientWidth,
+          h = canvas.clientHeight;
+        if (w > 0 && h > 0 && (canvas.width !== w || canvas.height !== h)) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+      }
+
+      function render(now) {
+        var dt = Math.min(0.05, (now - lastTime) / 1000 || 0.016);
+        lastTime = now;
+
+        syncCanvasSize();
+
+        updatePhysics(dt);
+        updateStatus();
+
+        fpsCount++;
+        fpsTime += dt;
+        if (fpsTime >= 1) {
+          fps = fpsCount;
+          fpsCount = 0;
+          fpsTime = 0;
+          document.getElementById('statusFps').textContent = fps + ' fps';
+        }
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        var eyeX = player.x,
+          eyeY = player.y + EYE_HEIGHT,
+          eyeZ = player.z;
+        var proj = mat4Perspective((70 * Math.PI) / 180, canvas.width / canvas.height, 0.08, 120);
+        var view = mat4Multiply(
+          mat4RotX(-player.pitch),
+          mat4Multiply(mat4RotY(-player.yaw), mat4Translate(-eyeX, -eyeY, -eyeZ))
+        );
+        var mvp = mat4Multiply(proj, view);
+
+        gl.useProgram(mainProgram);
+        gl.uniformMatrix4fv(mainLocs.uMVP, false, mvp);
+        gl.uniform3f(mainLocs.uCam, eyeX, eyeY, eyeZ);
+        gl.uniform3f(mainLocs.uFogColor, 0.55, 0.75, 0.98);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, atlasTexture);
+        gl.uniform1i(mainLocs.uTex, 0);
+
+        // Opaque pass
+        gl.uniform1f(mainLocs.uAlpha, 1);
+        drawMeshBuffer(opaqueBuffer, opaqueVerts);
+
+        // Highlight targeted block
+        var hit = raycast();
+        if (hit) {
+          gl.useProgram(lineProgram);
+          gl.uniformMatrix4fv(lineLocs.uMVP, false, mvp);
+          gl.uniform3f(lineLocs.uOffset, hit.x, hit.y, hit.z);
+          gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+          gl.enableVertexAttribArray(lineLocs.aPos);
+          gl.vertexAttribPointer(lineLocs.aPos, 3, gl.FLOAT, false, 12, 0);
+          gl.drawArrays(gl.LINES, 0, 24);
+        }
+
+        // Water pass (translucent, after everything else)
+        if (waterVerts > 0) {
+          gl.useProgram(mainProgram);
+          gl.enable(gl.BLEND);
+          gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+          gl.depthMask(false);
+          gl.disable(gl.CULL_FACE);
+          gl.uniform1f(mainLocs.uAlpha, 0.55);
+          drawMeshBuffer(waterBuffer, waterVerts);
+          gl.enable(gl.CULL_FACE);
+          gl.depthMask(true);
+          gl.disable(gl.BLEND);
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      function drawMeshBuffer(buffer, count) {
+        if (count === 0) return;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.enableVertexAttribArray(mainLocs.aPos);
+        gl.vertexAttribPointer(mainLocs.aPos, 3, gl.FLOAT, false, 24, 0);
+        gl.enableVertexAttribArray(mainLocs.aUV);
+        gl.vertexAttribPointer(mainLocs.aUV, 2, gl.FLOAT, false, 24, 12);
+        gl.enableVertexAttribArray(mainLocs.aLight);
+        gl.vertexAttribPointer(mainLocs.aLight, 1, gl.FLOAT, false, 24, 20);
+        gl.drawArrays(gl.TRIANGLES, 0, count);
+      }
+
+      function updateStatus() {
+        document.getElementById('statusPos').textContent =
+          'x: ' +
+          Math.floor(player.x) +
+          '  y: ' +
+          Math.floor(player.y) +
+          '  z: ' +
+          Math.floor(player.z);
+      }
+
+      // ============================================================
+      // HOTBAR UI
+      // ============================================================
+      function buildHotbar() {
+        var hotbar = document.getElementById('hotbar');
+        hotbar.innerHTML = '';
+        var actx = atlasCanvas.getContext('2d');
+        HOTBAR_BLOCKS.forEach(function (block, i) {
+          var slot = document.createElement('div');
+          slot.className = 'hotbar-slot' + (i === selectedSlot ? ' selected' : '');
+          slot.id = 'hotbarSlot' + i;
+          slot.title = BLOCK_NAMES[block];
+
+          var key = document.createElement('span');
+          key.className = 'slot-key';
+          key.textContent = String(i + 1);
+          slot.appendChild(key);
+
+          var thumb = document.createElement('canvas');
+          thumb.width = TILE;
+          thumb.height = TILE;
+          var tile = BLOCK_TILES[block][1];
+          var tctx = thumb.getContext('2d');
+          tctx.putImageData(
+            actx.getImageData((tile % 4) * TILE, Math.floor(tile / 4) * TILE, TILE, TILE),
+            0,
+            0
+          );
+          slot.appendChild(thumb);
+
+          slot.addEventListener('click', function () {
+            selectSlot(i);
+          });
+          hotbar.appendChild(slot);
+        });
+      }
+
+      function selectSlot(i) {
+        selectedSlot = ((i % HOTBAR_BLOCKS.length) + HOTBAR_BLOCKS.length) % HOTBAR_BLOCKS.length;
+        document.querySelectorAll('.hotbar-slot').forEach(function (el, j) {
+          el.classList.toggle('selected', j === selectedSlot);
+        });
+        document.getElementById('statusBlock').textContent =
+          BLOCK_NAMES[HOTBAR_BLOCKS[selectedSlot]];
+      }
+
+      // ============================================================
+      // INPUT
+      // ============================================================
+      var pointerLocked = false;
+
+      function requestLock() {
+        if (canvas.requestPointerLock) canvas.requestPointerLock();
+      }
+
+      document.addEventListener('pointerlockchange', function () {
+        pointerLocked = document.pointerLockElement === canvas;
+        document.getElementById('playOverlay').classList.toggle('show', !pointerLocked && glOk);
+        if (!pointerLocked) keys = {};
+      });
+
+      document.getElementById('playPanel').addEventListener('click', function () {
+        if (glOk) requestLock();
+      });
+
+      canvas.addEventListener('mousedown', function (e) {
+        if (!glOk) return;
+        if (!pointerLocked) {
+          requestLock();
+          return;
+        }
+        if (e.button === 0) breakBlock();
+        else if (e.button === 2) placeBlock();
+      });
+
+      canvas.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!pointerLocked) return;
+        var sens = 0.0026;
+        player.yaw -= e.movementX * sens;
+        player.pitch -= e.movementY * sens;
+        var maxPitch = Math.PI / 2 - 0.01;
+        if (player.pitch > maxPitch) player.pitch = maxPitch;
+        if (player.pitch < -maxPitch) player.pitch = -maxPitch;
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (document.getElementById('aboutDialog').classList.contains('show')) return;
+        keys[e.code] = true;
+        if (e.code >= 'Digit1' && e.code <= 'Digit8') {
+          selectSlot(parseInt(e.code.slice(5), 10) - 1);
+        }
+        if (e.code === 'Space') e.preventDefault();
+      });
+
+      document.addEventListener('keyup', function (e) {
+        keys[e.code] = false;
+      });
+
+      document.addEventListener(
+        'wheel',
+        function (e) {
+          if (!pointerLocked) return;
+          selectSlot(selectedSlot + (e.deltaY > 0 ? 1 : -1));
+        },
+        { passive: true }
+      );
+
+      // ============================================================
+      // MENUS & DIALOGS
+      // ============================================================
+      var openDropdown = null;
+
+      function closeMenus() {
+        document.querySelectorAll('.menu-dropdown').forEach(function (d) {
+          d.classList.remove('open');
+        });
+        document.querySelectorAll('.menu-title').forEach(function (t) {
+          t.classList.remove('open');
+        });
+        openDropdown = null;
+      }
+
+      document.querySelectorAll('.menu-title').forEach(function (title) {
+        title.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var dd = document.getElementById(title.dataset.menu);
+          var wasOpen = dd.classList.contains('open');
+          closeMenus();
+          if (!wasOpen) {
+            dd.classList.add('open');
+            title.classList.add('open');
+            openDropdown = dd;
+          }
+        });
+      });
+
+      document.addEventListener('click', function () {
+        if (openDropdown) closeMenus();
+      });
+
+      function newWorld(seed) {
+        generateWorld(seed === undefined ? (Math.random() * 1e9) >>> 0 : seed);
+        spawnPlayer();
+        rebuildMesh();
+      }
+
+      document.getElementById('menuNewWorld').addEventListener('click', function () {
+        closeMenus();
+        newWorld();
+      });
+
+      document.getElementById('menuControls').addEventListener('click', function () {
+        closeMenus();
+        if (document.exitPointerLock) document.exitPointerLock();
+        document.getElementById('playOverlay').classList.add('show');
+      });
+
+      function showAbout(show) {
+        document.getElementById('aboutDialog').classList.toggle('show', show);
+      }
+
+      document.getElementById('menuAbout').addEventListener('click', function () {
+        closeMenus();
+        if (document.exitPointerLock) document.exitPointerLock();
+        showAbout(true);
+      });
+
+      document.getElementById('aboutCloseBtn').addEventListener('click', function () {
+        showAbout(false);
+      });
+
+      document.getElementById('aboutCloseX').addEventListener('click', function () {
+        showAbout(false);
+      });
+
+      document.getElementById('closeBtn').addEventListener('click', function () {
+        window.history.back();
+      });
+
+      // ============================================================
+      // EMBEDDED (IFRAME) MODE
+      // ============================================================
+      if (window.self !== window.top) {
+        document.body.classList.add('embedded');
+      }
+
+      // ============================================================
+      // INIT
+      // ============================================================
+      generateWorld(DEFAULT_SEED);
+      spawnPlayer();
+
+      try {
+        glOk = initGL();
+      } catch (err) {
+        glOk = false;
+      }
+
+      buildAtlas(); // ensure atlas exists even without GL (hotbar thumbnails)
+      buildHotbar();
+      selectSlot(0);
+
+      if (glOk) {
+        rebuildMesh();
+        requestAnimationFrame(render);
+      } else {
+        var hint = document.getElementById('overlayHint');
+        hint.textContent = 'WebGL is not available on this system.';
+        document.getElementById('playPanel').style.cursor = 'default';
+      }
+
+      // ============================================================
+      // TEST HOOKS (used by the Playwright suite)
+      // ============================================================
+      window.MinecraftTest = {
+        ready: true,
+        glOk: glOk,
+        worldSize: { x: SX, y: SY, z: SZ },
+        seed: function () {
+          return worldSeed;
+        },
+        getBlock: getBlock,
+        setBlock: function (x, y, z, id) {
+          setBlock(x, y, z, id);
+          rebuildMesh();
+        },
+        countBlocks: function (id) {
+          var n = 0;
+          for (var i = 0; i < world.length; i++) if (world[i] === id) n++;
+          return n;
+        },
+        getPlayer: function () {
+          return { x: player.x, y: player.y, z: player.z, yaw: player.yaw, pitch: player.pitch };
+        },
+        setPlayer: function (x, y, z) {
+          player.x = x;
+          player.y = y;
+          player.z = z;
+          player.vx = 0;
+          player.vy = 0;
+          player.vz = 0;
+        },
+        setLook: function (yaw, pitch) {
+          player.yaw = yaw;
+          player.pitch = pitch;
+        },
+        getSelected: function () {
+          return selectedSlot;
+        },
+        surfaceHeight: surfaceHeight,
+        breakBlock: breakBlock,
+        placeBlock: placeBlock,
+        newWorld: newWorld,
+      };
+    </script>
+  </body>
+</html>

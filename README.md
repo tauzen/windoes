@@ -16,6 +16,7 @@ https://tauzen.github.io/windoes/
 - Virtual file system and explorer-style navigation (`virtual-fs.ts`, `fs-explorer.jsx`)
 - Built-in applications under `windoes/public/applications/`:
   - ASCII Runner
+  - Minecraft
   - Minesweeper
   - Solitaire
   - Winamp Player
