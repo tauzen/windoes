@@ -3,9 +3,11 @@
 _Originally authored: 2026-05-31 · Branch: `claude/amazing-hypatia-0daRl` · Commit: `d0e9ecc`_
 
 _Last verified against `main`: 2026-07-23 · `0b0a957` — **Phases 1–4 complete**
-(roadmap items 1–12). All numbered roadmap items have landed; the remaining
-open work is the long-term `WindoesApp.*` bridge burn-down and broadening
-`strict` typing to the whole shell (tracked under §5, not the numbered roadmap).
+(roadmap items 1–12). The structural roadmap work has landed, but item 4 is
+only partially complete: embedded-app JavaScript is linted while standalone HTML
+apps are outside lint/format enforcement. The remaining work also includes the
+long-term `WindoesApp.*` bridge burn-down and broadening `strict` typing to the
+whole shell (tracked under §5, not the numbered roadmap).
 Per-item progress is annotated inline below._
 
 A Windows-98-inspired desktop simulator (React 19 + JS/JSX, two `.ts` modules,
@@ -28,8 +30,9 @@ closed).
 
 The project is in **good baseline health**. Tooling is wired up and green, the
 state core (reducer + virtual filesystem) is well designed and tested, and the
-codebase is small (~3k LOC of shell + ~1.7k LOC for the largest app). The main
-quality risk called out at authoring time — **architectural drift** from the
+codebase is modest-sized, with six embedded apps; the largest is now the
+Winamp standalone HTML app (2,479 lines). The main quality risk called out at
+authoring time — **architectural drift** from the
 in-progress `window.WindoesApp.*` → React/reducer migration — has since been
 substantially paid down: the four imperative subsystems flagged in Phase 3 now
 live in the reducer, lint/type coverage has been tightened, and the previously
@@ -47,7 +50,7 @@ remain documented in the findings where they establish the initial baseline).
 | `npm run build`                                   | ✅ production build succeeds                                       |
 | `npm audit --omit=dev --audit-level=high`         | ✅ 0 production vulnerabilities                                    |
 | CI (typecheck + lint + unit + integration + apps) | ✅ configured (`.github/workflows/test.yml`)                       |
-| Lint/format coverage of embedded apps             | ✅ six apps now linted (ignore removed)                            |
+| Embedded-app lint/format coverage                 | ⚠️ JavaScript linted; standalone HTML app files remain uncovered   |
 | `WindoesApp.*` imperative bridge                  | ⚠️ 225 dotted references across 22 shell files                     |
 | Module-level `let` declarations in shell          | ⚠️ 13 across 8 files; needs classification before a burn-down goal |
 | Docs referenced but missing                       | ✅ none known (all referenced docs live under `docs/`)             |
@@ -56,10 +59,12 @@ ESLint is clean at this revision. The `react-hooks/exhaustive-deps` rule remains
 intentionally non-blocking (`warn`) so dependency guidance can be surfaced
 without masking failures from the error-level rules.
 
-**Overall grade: A−.** Roadmap items 1–12 are complete (all of Phases 1–4); the
-foundation is now backed by stricter gates, a documented state contract,
-filesystem errors that surface through the dialog UI, and keyboard-navigable
-menus. The remaining work is the long-term `WindoesApp.*` burn-down and
+**Overall grade: A−.** The state, lifecycle, error-surfacing, and accessibility
+roadmap work is complete; embedded-app JavaScript is linted, but standalone HTML
+apps are still outside lint/format enforcement. The foundation is backed by
+stricter gates, a documented state contract, filesystem errors that surface
+through the dialog UI, and keyboard-navigable menus. Remaining work includes
+embedded-app HTML coverage, the long-term `WindoesApp.*` burn-down, and
 whole-shell `strict` typing (tracked under §5).
 
 ---
@@ -156,9 +161,9 @@ unchecked end to end.
 
 ### 3.4 Lint/type coverage excludes the largest code
 
-`eslint.config.mjs` ignores `windoes/public/applications/**` entirely, and the
-embedded apps are not in `tsconfig`. That leaves the **single largest source
-file** — `windoes/public/applications/ascii-runner/game.js` (**1,706 lines**) —
+At authoring, `eslint.config.mjs` ignored `windoes/public/applications/**` entirely,
+and the embedded apps were not in `tsconfig`. That left the then-largest source
+file — `windoes/public/applications/ascii-runner/game.js` (**1,706 lines**) —
 with no lint and no type checking, plus four other apps. Their only gate is a
 per-app smoke `test` script.
 
@@ -167,13 +172,16 @@ The ESLint ruleset itself is minimal: five rules, **all set to `warn`**
 `no-implicit-globals`, `consistent-return`). Nothing fails the build, and there
 is no `eslint-plugin-react-hooks` despite heavy hook/effect usage.
 
-- _Resolved (roadmap items 2 & 4):_ the `windoes/public/applications/**`
-  ESLint ignore was removed, so `game.js` and the embedded apps now share the
-  shell's baseline (the dead state it surfaced was cleared).
-  `no-unused-vars`, `react/jsx-key`, and `no-implicit-globals` were promoted
-  from `warn` to **`error`**, and `eslint-plugin-react-hooks` was added
-  (`rules-of-hooks: error`, `exhaustive-deps: warn`). Lint passes with no
-  blocking errors.
+- _Partially resolved (roadmap items 2 & 4):_ the
+  `windoes/public/applications/**` ESLint ignore was removed, so JavaScript files
+  such as `game.js` use the shell's baseline (and the dead state it surfaced was
+  cleared). `no-unused-vars`, `react/jsx-key`, and `no-implicit-globals` were
+  promoted from `warn` to **`error`**, and `eslint-plugin-react-hooks` was added
+  (`rules-of-hooks: error`, `exhaustive-deps: warn`). **Gap:** the flat ESLint
+  config only targets JS-family extensions and `lint-staged` excludes HTML, so
+  standalone embedded-app `index.html` files and their inline script/style are
+  neither linted nor format-checked. Add HTML-aware lint/format tooling before
+  considering item 4 complete.
 
 ### 3.5 Magic numbers & hardcoded strings
 
@@ -246,16 +254,27 @@ gap: `writeFile` did not surface IndexedDB quota errors distinctly — now
 addressed: `describeFsError` maps the browser's `QuotaExceededError` to a
 dedicated "not enough free space" message as part of roadmap item 11.)
 
-### 3.10 Current browser and iframe security boundary (verified)
+### 3.10 Browser and iframe security boundary
 
-The current shell does not use `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
-`eval`, or `new Function`. IE navigation accepts only `http(s)`, `about:blank`,
-or a normalized VirtualFS path (`browser-url.mjs`); user-created local HTML is
+The shell does not use `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval`,
+or `new Function`. IE navigation accepts only `http(s)`, `about:blank`, or a
+normalized VirtualFS path (`browser-url.mjs`); user-created local HTML is
 rendered through `srcdoc` with `sandbox="allow-scripts"`, intentionally omitting
-`allow-same-origin` (`ie-window.jsx`). The app-frame `message` handler checks
-both the sending iframe window and `event.origin` before acting
-(`app-windows.jsx`). No new security issue was identified in this refresh; the
-one GitHub security-audit issue (#117) is closed.
+`allow-same-origin` (`ie-window.jsx`).
+
+**Medium — embedded-app iframes are trusted, not isolated.** The first-party app
+frames use both `allow-scripts` and `allow-same-origin`, while the shell exposes
+`window.WindoesApp`; a compromised same-origin app could access its parent and
+origin-scoped storage. Treat every embedded app as trusted code, or move apps to
+a separate origin and remove `allow-same-origin` while replacing direct access
+with capability-scoped `postMessage` RPC.
+
+**Low — Paint VFS RPC is authorized too broadly.** The message handler validates
+origin and accepts a source from any registered app iframe before processing
+Paint file read/write/chooser messages. Restrict those message types to
+`paintFrame.contentWindow`, validate a strict message schema and request IDs,
+and retain source/origin checks. No high-severity shell issue was identified;
+GitHub issue #117 (Security audit) is closed.
 
 ---
 
@@ -277,11 +296,14 @@ gates are green — but it's the path to keeping it maintainable as it grows.
 3. **✅ Extract magic constants** (boot delay, IE loading timeout, taskbar-label
    truncation budgets, default Notepad save path) into `windoes/constants.js`.
 
-### Phase 2 — Coverage of the blind spots (days) — ✅ Done
+### Phase 2 — Coverage of the blind spots (days) — items 5–6 ✅; item 4 ⚠️ partial
 
-4. **✅ Lint + format the embedded apps.** Removed the
-   `windoes/public/applications/**` ignore, so `game.js` and friends share the
-   shell baseline; the dead code it surfaced was cleared.
+4. **⚠️ Partially lint the embedded apps.** Removed the
+   `windoes/public/applications/**` ignore, so embedded-app JavaScript files
+   share the shell ESLint baseline; the dead code it surfaced was cleared.
+   Standalone `index.html` files (and their inline scripts/styles) remain outside
+   both ESLint and the staged Prettier file set. Add HTML-aware lint/format
+   enforcement to complete this item.
 5. **✅ Tighten TypeScript.** Flipped `strict: true` for the checked modules
    (added `@types/react`/`@types/react-dom`; `_ensureInit` returns the live DB
    so VFS transactions narrow off `IDBDatabase | null`). Broadening `strict`
@@ -391,7 +413,9 @@ Status at the 2026-07-23 verification (☑ met, ☐ outstanding):
 - ☐ `tsconfig` `files`/`include` covering the whole shell with `strict: true`.
   `strict: true` is on for the checked `.ts` modules; broadening coverage to
   the rest of the `.jsx`/`.js` shell is still open.
-- ☑ Embedded apps under lint and included in `npm run test:all`.
+- ☐ Complete embedded-app lint/format coverage. JavaScript is covered and all
+  six apps run in `npm run test:all`, but standalone HTML files and inline
+  scripts/styles are currently outside both ESLint and staged Prettier.
 - ☑ Zero dangling doc references.
 - ☑ Full local quality gate passed: lint, typecheck, 77 unit tests, 10
   Playwright integration suites, six app smoke suites (165 checks), production
