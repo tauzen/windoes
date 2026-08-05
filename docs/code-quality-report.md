@@ -2,16 +2,25 @@
 
 _Originally authored: 2026-05-31 · Branch: `claude/amazing-hypatia-0daRl` · Commit: `d0e9ecc`_
 
-_Last synced with codebase: 2026-06-04 — **Phases 1–4 complete** (roadmap items
-1–12). All roadmap items have landed; the remaining open work is the long-term
-`WindoesApp.*` burn-down and broadening `strict` typing to the whole shell
-(tracked under §5, not the numbered roadmap). Per-item progress is annotated
-inline below._
+_Last verified against `main`: 2026-07-23 · `0b0a957` — **Phases 1–4 complete**
+(roadmap items 1–12). All numbered roadmap items have landed; the remaining
+open work is the long-term `WindoesApp.*` bridge burn-down and broadening
+`strict` typing to the whole shell (tracked under §5, not the numbered roadmap).
+Per-item progress is annotated inline below._
 
 A Windows-98-inspired desktop simulator (React 19 + JS/JSX, two `.ts` modules,
-Vite 8, Playwright). Shell code lives in `windoes/`; five embedded apps live
+Vite 8, Playwright). Shell code lives in `windoes/`; six embedded apps live
 under `windoes/public/applications/`. This report covers maintainability, not
 runtime correctness.
+
+### Verification scope (2026-07-23)
+
+This refresh cross-checked the report against merged PRs #93–123, the full
+commit history since the prior sync, and GitHub issues. The Phase 1–4 work
+landed in PRs #94–106; later merged changes added Paint file workflows, shared
+file chooser support, local HTML viewing in IE, Minecraft, and the Winamp skin.
+There are no open GitHub issues at this revision (the sole issue, #117, is
+closed).
 
 ---
 
@@ -27,23 +36,25 @@ live in the reducer, lint/type coverage has been tightened, and the previously
 missing docs now exist. The remaining `WindoesApp.*` bridge is the legacy
 compatibility layer described in the ADR, burned down one subsystem at a time.
 
-The table below shows the signals as measured at the 2026-06-04 sync (originals
-in parentheses where they have moved).
+The table below shows the signals as re-measured on 2026-07-23 (original values
+remain documented in the findings where they establish the initial baseline).
 
-| Signal                                           | Result                                                 |
-| ------------------------------------------------ | ------------------------------------------------------ |
-| `npm run lint` (eslint)                          | ✅ clean, with only non-blocking hook warnings         |
-| `npm run typecheck` (tsc, `strict: true`)        | ✅ clean                                               |
-| `TODO`/`FIXME`/`console.log`/`debugger` in shell | ✅ none                                                |
-| Reducer unit tests                               | ✅ expanded reducer coverage                           |
-| CI (lint + unit + integration + typecheck)       | ✅ configured (`.github/workflows/test.yml`)           |
-| Lint/format coverage of embedded apps            | ✅ now linted (ignore removed)                         |
-| `WindoesApp.*` imperative bridge                 | ⚠️ still present as the legacy bridge described by ADR |
-| Docs referenced but missing                      | ✅ none known (all referenced docs live under `docs/`) |
+| Signal                                            | Result                                                             |
+| ------------------------------------------------- | ------------------------------------------------------------------ |
+| `npm run lint` (eslint)                           | ✅ clean                                                           |
+| `npm run typecheck` (tsc, `strict: true`)         | ✅ clean for the two configured `.ts` modules                      |
+| `npm run test:all`                                | ✅ 77 unit tests, 10 Playwright suites, and 165 app checks pass    |
+| `npm run build`                                   | ✅ production build succeeds                                       |
+| `npm audit --omit=dev --audit-level=high`         | ✅ 0 production vulnerabilities                                    |
+| CI (typecheck + lint + unit + integration + apps) | ✅ configured (`.github/workflows/test.yml`)                       |
+| Lint/format coverage of embedded apps             | ✅ six apps now linted (ignore removed)                            |
+| `WindoesApp.*` imperative bridge                  | ⚠️ 225 dotted references across 22 shell files                     |
+| Module-level `let` declarations in shell          | ⚠️ 13 across 8 files; needs classification before a burn-down goal |
+| Docs referenced but missing                       | ✅ none known (all referenced docs live under `docs/`)             |
 
-The remaining ESLint output is limited to non-blocking
-`react-hooks/exhaustive-deps` guidance surfaced by the newly-added
-`eslint-plugin-react-hooks`.
+ESLint is clean at this revision. The `react-hooks/exhaustive-deps` rule remains
+intentionally non-blocking (`warn`) so dependency guidance can be surfaced
+without masking failures from the error-level rules.
 
 **Overall grade: A−.** Roadmap items 1–12 are complete (all of Phases 1–4); the
 foundation is now backed by stricter gates, a documented state contract,
@@ -84,21 +95,27 @@ whole-shell `strict` typing (tracked under §5).
 
 ### 3.1 Incomplete imperative→React migration (highest-impact)
 
-The README itself flags this: _"`WindoesApp` should be treated as a temporary
-bridge for legacy integration only."_ In practice the bridge is **pervasive,
-not temporary**:
+The original 2026-05-31 scan found the bridge **pervasive, not temporary**:
 
 - **143** references to runtime-filled `WindoesApp.*` namespaces
   (`open`, `startMenu`, `ui`, `WindowManager`, `browser`, …) across **21**
   files.
-- **27** module-level `let` mutable variables in shell files hold state that
-  lives outside the reducer (e.g. IE history stack in `ie-window.jsx`, an
-  `fsReady` flag and notepad file path in `utility-windows.jsx`, a paint-FS init
-  promise cache in `app-windows.jsx`).
-- Window state effectively exists in **three** representations: the reducer
+- **27** module-level `let` mutable variables in shell files held state outside
+  the reducer (e.g. IE history stack in `ie-window.jsx`, an `fsReady` flag and
+  notepad file path in `utility-windows.jsx`, a paint-FS init promise cache in
+  `app-windows.jsx`).
+- Window state effectively existed in **three** representations: the reducer
   (`windows.byId`), the `WindowManager` imperative layer, and direct DOM
-  mutations (e.g. `appWindowTitle.textContent = title` in `app-windows.jsx:58`,
-  `textarea.dataset.filePath` in the notepad flow).
+  mutations.
+
+The Phase 3/4 migrations retired the specific state and DOM-as-state examples
+above. **Current follow-up measurement (2026-07-23):** the shell has **225**
+dotted `WindoesApp.*` references across **22** files and **13** top-level `let`
+declarations across **8** files. The bridge count is not a reliable progress
+metric by itself: newer features added bridge consumers while the report's
+stateful subsystems were removed. Future work should classify handles as
+compatibility API, event service, or mutable state before treating the number as
+a burn-down target.
 
 **Why it matters:** the two models can desync, the same behavior is expressed
 two ways depending on the file, and onboarding requires understanding both. This
@@ -229,6 +246,17 @@ gap: `writeFile` did not surface IndexedDB quota errors distinctly — now
 addressed: `describeFsError` maps the browser's `QuotaExceededError` to a
 dedicated "not enough free space" message as part of roadmap item 11.)
 
+### 3.10 Current browser and iframe security boundary (verified)
+
+The current shell does not use `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
+`eval`, or `new Function`. IE navigation accepts only `http(s)`, `about:blank`,
+or a normalized VirtualFS path (`browser-url.mjs`); user-created local HTML is
+rendered through `srcdoc` with `sandbox="allow-scripts"`, intentionally omitting
+`allow-same-origin` (`ie-window.jsx`). The app-frame `message` handler checks
+both the sending iframe window and `event.origin` before acting
+(`app-windows.jsx`). No new security issue was identified in this refresh; the
+one GitHub security-audit issue (#117) is closed.
+
 ---
 
 ## 4. Improvement roadmap
@@ -351,21 +379,20 @@ gates are green — but it's the path to keeping it maintainable as it grows.
 
 ## 5. Suggested "done" metrics
 
-Status at the 2026-06-04 sync (☑ met, ☐ outstanding):
+Status at the 2026-07-23 verification (☑ met, ☐ outstanding):
 
-- ☐ `WindoesApp.*` references continuing to trend down. The four Phase 3
-  subsystems were migrated off the bridge, but it remains the sanctioned legacy
-  compatibility layer; full removal is long-term work.
-- ☐ Module-level `let` state in shell continuing to trend down. Reduced by the
-  Phase 3 migrations (e.g. IE history, notepad path, FS-init guards); a handful
-  of legitimate non-state `let`s remain.
+- ☐ Classify then reduce the `WindoesApp.*` bridge. The four Phase 3 subsystems
+  were migrated off it, but **225** dotted references across 22 shell files
+  remain. Count compatibility handles, event services, and mutable state
+  separately before setting a numeric target.
+- ☐ Classify then reduce top-level `let` state. The shell now has **13** such
+  declarations across 8 files; some are legitimate timer, listener-ref, or
+  renderer-cache values rather than application state.
 - ☐ `tsconfig` `files`/`include` covering the whole shell with `strict: true`.
   `strict: true` is on for the checked `.ts` modules; broadening coverage to
   the rest of the `.jsx`/`.js` shell is still open.
-- ☑ Embedded apps under lint.
+- ☑ Embedded apps under lint and included in `npm run test:all`.
 - ☑ Zero dangling doc references.
-- ☑ Reducer unit-test coverage has grown, with new suites for the single-flight
-  memoizer (`once.test.js`), the data-driven Start-menu config
-  (`start-menu-config.test.js`), the filesystem-error mapper
-  (`fs-errors.test.js`), and the menu keyboard-navigation helpers
-  (`menu-keyboard.test.js`).
+- ☑ Full local quality gate passed: lint, typecheck, 77 unit tests, 10
+  Playwright integration suites, six app smoke suites (165 checks), production
+  build, and a production dependency audit with zero reported vulnerabilities.
