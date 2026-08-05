@@ -21,8 +21,6 @@ This refresh cross-checked the report against merged PRs #93–123, the full
 commit history since the prior sync, and GitHub issues. The Phase 1–4 work
 landed in PRs #94–106; later merged changes added Paint file workflows, shared
 file chooser support, local HTML viewing in IE, Minecraft, and the Winamp skin.
-There are no open GitHub issues at this revision (the sole issue, #117, is
-closed).
 
 ---
 
@@ -273,8 +271,8 @@ with capability-scoped `postMessage` RPC.
 origin and accepts a source from any registered app iframe before processing
 Paint file read/write/chooser messages. Restrict those message types to
 `paintFrame.contentWindow`, validate a strict message schema and request IDs,
-and retain source/origin checks. No high-severity shell issue was identified;
-GitHub issue #117 (Security audit) is closed.
+and retain source/origin checks. No high-severity shell issue was identified in
+this refresh.
 
 ---
 
