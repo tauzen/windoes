@@ -14,6 +14,7 @@ const desktopIconDefs = [
   { id: 'iconSolitaire', className: 'icon-solitaire', label: 'Solitaire' },
   { id: 'iconMinecraft', className: 'icon-minecraft', label: 'Minecraft' },
   { id: 'iconPaint', className: 'icon-paint', label: 'Paint' },
+  { id: 'iconVirtualBoks', className: 'icon-virtualboks', label: 'VirtualBoks' },
 ];
 
 const dedicatedHandlers = {
@@ -25,6 +26,7 @@ const dedicatedHandlers = {
   iconSolitaire: () => WindoesApp.open.solitaire?.(),
   iconMinecraft: () => WindoesApp.open.minecraft?.(),
   iconPaint: () => WindoesApp.open.paint?.(),
+  iconVirtualBoks: () => WindoesApp.open.virtualboks?.(),
 };
 
 const experimentApps = WindoesApp.config.experimentApps || [

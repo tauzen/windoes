@@ -56,6 +56,12 @@ export const SUBMENUS = [
       },
       { id: 'subPaint', icon: 'paint', label: 'Paint', action: { kind: 'open', app: 'paint' } },
       {
+        id: 'subVirtualBoks',
+        icon: 'virtualboks',
+        label: 'VirtualBoks',
+        action: { kind: 'open', app: 'virtualboks' },
+      },
+      {
         id: 'subWordPad',
         icon: 'wordpad',
         label: 'WordPad',

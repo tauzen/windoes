@@ -13,5 +13,8 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      # `npm ci` stages these from postinstall and only warns on failure; the
+      # VirtualBoks suite boots a guest, so here they have to be present.
+      - run: npm run assets:vm
       - run: npx playwright install --with-deps chromium
       - run: npm run test:all

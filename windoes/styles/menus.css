@@ -217,6 +217,9 @@
 .submenu-icon-minecraft {
   background-image: url('/icons/minecraft.png');
 }
+.submenu-icon-virtualboks {
+  background-image: url('/icons/virtualboks.svg');
+}
 .submenu-icon-ascii-runner {
   background-image: url('/icons/display.png');
 }

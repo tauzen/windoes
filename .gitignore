@@ -19,5 +19,8 @@ playwright-report/
 # Build output
 dist/
 
+# Emulator core + firmware staged by scripts/fetch-vm-assets.mjs
+windoes/public/applications/virtualboks/vendor/
+
 # Claude Code
 .claude/

@@ -81,6 +81,9 @@ const config = {
     'pbrush.exe': 'openPaint',
     mspaint: 'openPaint',
     'mspaint.exe': 'openPaint',
+    virtualboks: 'openVirtualBoks',
+    'virtualboks.exe': 'openVirtualBoks',
+    vbox: 'openVirtualBoks',
   },
 };
 
