@@ -19,6 +19,7 @@ https://tauzen.github.io/windoes/
   - Minecraft
   - Minesweeper
   - Solitaire
+  - VirtualBoks (boots a real guest OS in an emulated PC)
   - Winamp Player
 
 ## Project structure
@@ -37,9 +38,45 @@ windoes/
     icons/               desktop/start menu icon assets
     img/                 boot screen assets
     applications/        embedded app bundles + app-level tests
+scripts/                 build-time asset staging
 tests/                   top-level simulator test suite
 .github/workflows/       CI + deploy workflows
 ```
+
+## VirtualBoks
+
+VirtualBoks boots a real operating system inside the desktop. It embeds the
+[v86](https://github.com/copy/v86) x86 emulator, so the guest kernel executes on
+an emulated CPU in the page — nothing runs on a server, and nothing is recorded.
+
+The emulator core and its firmware are staged into
+`windoes/public/applications/virtualboks/vendor/` by
+`scripts/fetch-vm-assets.mjs`, which runs automatically from `postinstall`. That
+directory is git-ignored; re-stage it at any time with:
+
+```bash
+npm run assets:vm
+```
+
+Guest disk images are far too large to ship here, so a machine points at one of
+two things:
+
+- **A URL.** The built-in machines use the image host the v86 project documents
+  for its own demos, and any other URL can be entered under **New**. The host has
+  to allow cross-origin requests; if it does not, the download fails and the
+  status bar says so.
+- **A file on your computer.** Pick any ISO, floppy or disk image under **New >
+  Media from > File**. Nothing is uploaded. Files chosen this way are not
+  remembered between sessions, so re-attach them via **Settings** before
+  starting.
+
+The built-in **Self-Test** machine boots a boot sector assembled in the page and
+downloads nothing, which makes it a quick way to confirm the emulator itself is
+working.
+
+Booting needs a real HTTP origin, because the emulator fetches its WebAssembly
+core — `npm run dev` or a built deployment both work, opening `index.html` from
+the filesystem does not.
 
 ## Architecture contract (React shell migration)
 
@@ -99,6 +136,10 @@ Run embedded app tests:
 ```bash
 npm run test:apps
 ```
+
+The VirtualBoks suite boots a guest on the emulated CPU and asserts it reaches
+the emulated screen. It needs the staged emulator assets, so run `npm ci` (or
+`npm run assets:vm`) first.
 
 Run everything:
 

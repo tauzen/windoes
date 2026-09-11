@@ -17,6 +17,7 @@ export default function RunDialog() {
     openSolitaire: () => WindoesApp.open.solitaire(),
     openMinecraft: () => WindoesApp.open.minecraft(),
     openPaint: () => WindoesApp.open.paint(),
+    openVirtualBoks: () => WindoesApp.open.virtualboks(),
   };
 
   function openDialog() {

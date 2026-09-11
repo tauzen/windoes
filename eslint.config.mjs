@@ -4,7 +4,9 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['node_modules/**', 'dist/**'],
+    // `virtualboks/vendor` holds the third-party v86 build staged by
+    // `scripts/fetch-vm-assets.mjs`; it is not our source to lint.
+    ignores: ['node_modules/**', 'dist/**', 'windoes/public/applications/virtualboks/vendor/**'],
   },
   {
     files: ['**/*.{js,jsx,mjs,cjs}'],

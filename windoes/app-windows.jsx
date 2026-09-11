@@ -279,6 +279,48 @@ function openMinecraft() {
 }
 
 // ══════════════════════════════════════════════
+// VirtualBoks Window
+// ══════════════════════════════════════════════
+// The guest console is whatever size the guest picks, so the window stays
+// resizable and maximizable and VirtualBoks scrolls its own console pane.
+// `allow-downloads` is what lets the Screenshot button hand over a PNG.
+WindoesApp.WindowManager.register('virtualboks', {
+  template: {
+    id: 'virtualboksWindow',
+    ariaLabel: 'VirtualBoks',
+    title: 'VirtualBoks',
+    titleIcon: 'titlelogo-virtualboks',
+    titlebarId: 'virtualboksTitlebar',
+    minimizeBtnId: 'virtualboksMinBtn',
+    maximizeBtn: true,
+    closeBtnId: 'virtualboksCloseBtn',
+    style:
+      'left: 140px; top: 32px; width: 720px; height: 520px; min-width: unset; min-height: unset;',
+    view: (
+      <iframe
+        id="virtualboksFrame"
+        title="VirtualBoks"
+        referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-downloads"
+      ></iframe>
+    ),
+    useSharedWindowComponent: true,
+  },
+  taskButton: {
+    id: 'virtualboksTaskBtn',
+    icon: 'task-icon-virtualboks',
+    label: 'VirtualBoks',
+  },
+  iframeId: 'virtualboksFrame',
+  iframeSrc: './applications/virtualboks/index.html',
+  hasChrome: false,
+});
+
+function openVirtualBoks() {
+  openWindowBoilerplate('virtualboks');
+}
+
+// ══════════════════════════════════════════════
 // Paint Window
 // ══════════════════════════════════════════════
 const paintConfig = WindoesApp.WindowManager.register('paint', {
@@ -513,6 +555,7 @@ WindoesApp.open.minesweeper = openMinesweeper;
 WindoesApp.open.solitaire = openSolitaire;
 WindoesApp.open.minecraft = openMinecraft;
 WindoesApp.open.paint = openPaint;
+WindoesApp.open.virtualboks = openVirtualBoks;
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {

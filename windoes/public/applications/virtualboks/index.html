@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VirtualBoks</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #c0c0c0;
+        font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+        font-size: 11px;
+        color: #000;
+        height: 100vh;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* ===== SHELL LAYOUT ===== */
+      .vb {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .vb-body {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+      }
+
+      /* ===== TOOLBAR ===== */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px;
+        border-bottom: 1px solid #808080;
+        box-shadow: inset 0 -1px 0 #fff;
+        flex-wrap: wrap;
+      }
+
+      .tb-btn {
+        font: inherit;
+        background: #c0c0c0;
+        border: 1px solid;
+        border-color: #fff #808080 #808080 #fff;
+        padding: 3px 8px;
+        cursor: pointer;
+        min-width: 28px;
+      }
+      .tb-btn:active:not(:disabled) {
+        border-color: #808080 #fff #fff #808080;
+        padding: 4px 7px 2px 9px;
+      }
+      .tb-btn:disabled {
+        color: #808080;
+        text-shadow: 1px 1px 0 #fff;
+        cursor: default;
+      }
+      .tb-btn:focus-visible {
+        outline: 1px dotted #000;
+        outline-offset: -4px;
+      }
+
+      .tb-sep {
+        width: 2px;
+        align-self: stretch;
+        margin: 1px 3px;
+        border-left: 1px solid #808080;
+        border-right: 1px solid #fff;
+      }
+
+      /* ===== MACHINE LIST ===== */
+      .pane-list {
+        width: 190px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #808080;
+        box-shadow: inset -1px 0 0 #fff;
+      }
+
+      .pane-head {
+        padding: 3px 6px;
+        font-weight: bold;
+        border-bottom: 1px solid #808080;
+        box-shadow: inset 0 -1px 0 #fff;
+      }
+
+      .vm-list {
+        flex: 1;
+        list-style: none;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid;
+        border-color: #808080 #fff #fff #808080;
+        margin: 3px;
+      }
+
+      .vm-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 5px;
+        cursor: default;
+      }
+      .vm-item[aria-selected='true'] {
+        background: #000080;
+        color: #fff;
+      }
+
+      .vm-state-dot {
+        width: 8px;
+        height: 8px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #808080;
+        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.35);
+      }
+      .vm-item[data-state='running'] .vm-state-dot {
+        background: #00c000;
+      }
+      .vm-item[data-state='error'] .vm-state-dot {
+        background: #c00000;
+      }
+
+      .vm-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* ===== MAIN PANE ===== */
+      .pane-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .details {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
+      }
+
+      .details h2 {
+        font-size: 11px;
+        background: #000080;
+        color: #fff;
+        padding: 2px 5px;
+        margin-bottom: 4px;
+      }
+
+      .details section {
+        margin-bottom: 10px;
+      }
+
+      .detail-row {
+        display: flex;
+        gap: 6px;
+        padding: 1px 5px;
+      }
+      .detail-row dt {
+        width: 92px;
+        flex-shrink: 0;
+        color: #404040;
+      }
+      .detail-row dd {
+        word-break: break-all;
+      }
+
+      .note {
+        margin: 0 5px;
+        padding: 5px 7px;
+        background: #ffffe1;
+        border: 1px solid #808080;
+      }
+
+      /* ===== CONSOLE ===== */
+      .console {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 2px;
+        padding: 3px 3px 0;
+      }
+
+      .tab {
+        font: inherit;
+        background: #c0c0c0;
+        border: 1px solid;
+        border-color: #fff #808080 #c0c0c0 #fff;
+        padding: 3px 10px 4px;
+        cursor: pointer;
+      }
+      .tab[aria-selected='true'] {
+        font-weight: bold;
+        padding-bottom: 5px;
+        margin-bottom: -1px;
+      }
+
+      .console-body {
+        flex: 1;
+        min-height: 0;
+        margin: 3px;
+        border: 1px solid;
+        border-color: #808080 #fff #fff #808080;
+        background: #000;
+        overflow: auto;
+        position: relative;
+      }
+
+      /* v86 requires this exact shape: a text-mode <div> and a graphical
+         <canvas> as the two children of the screen container. */
+      #vmScreen {
+        color: #fff;
+      }
+      #vmScreen > div {
+        white-space: pre;
+        font:
+          14px / 14px 'Lucida Console',
+          'DejaVu Sans Mono',
+          monospace;
+      }
+      #vmScreen > canvas {
+        display: block;
+      }
+
+      #vmSerial {
+        display: block;
+        width: 100%;
+        height: 100%;
+        resize: none;
+        border: 0;
+        background: #000;
+        color: #c0c0c0;
+        font:
+          12px / 1.25 'Lucida Console',
+          'DejaVu Sans Mono',
+          monospace;
+        padding: 4px;
+      }
+      #vmSerial:focus {
+        outline: none;
+      }
+
+      .hint {
+        padding: 4px 6px;
+        color: #404040;
+      }
+
+      /* ===== STATUS BAR ===== */
+      .statusbar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 3px;
+        border-top: 1px solid #fff;
+      }
+
+      .status-text {
+        flex: 1;
+        padding: 2px 5px;
+        border: 1px solid;
+        border-color: #808080 #fff #fff #808080;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .progress {
+        width: 120px;
+        height: 16px;
+        flex-shrink: 0;
+        border: 1px solid;
+        border-color: #808080 #fff #fff #808080;
+        padding: 2px;
+        visibility: hidden;
+      }
+      .progress[data-active='true'] {
+        visibility: visible;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0;
+        background: #000080;
+      }
+
+      /* ===== DIALOG ===== */
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgb(0 0 0 / 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      }
+      .backdrop[hidden] {
+        display: none;
+      }
+
+      .dialog {
+        width: min(400px, 94vw);
+        max-height: 94vh;
+        overflow-y: auto;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #dfdfdf #404040 #404040 #dfdfdf;
+        box-shadow: 2px 2px 0 rgb(0 0 0 / 0.4);
+      }
+
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(to right, #000080, #1084d0);
+        color: #fff;
+        font-weight: bold;
+        padding: 2px 3px 2px 4px;
+      }
+
+      .dialog-close {
+        font:
+          11px 'MS Sans Serif',
+          sans-serif;
+        width: 16px;
+        height: 14px;
+        line-height: 11px;
+        background: #c0c0c0;
+        color: #000;
+        border: 1px solid;
+        border-color: #fff #808080 #808080 #fff;
+        cursor: pointer;
+      }
+
+      .dialog-body {
+        padding: 10px;
+        display: grid;
+        grid-template-columns: 82px 1fr;
+        gap: 6px 8px;
+        align-items: center;
+      }
+
+      .dialog-body label {
+        justify-self: end;
+        text-align: right;
+      }
+
+      .dialog-body input[type='text'],
+      .dialog-body input[type='number'],
+      .dialog-body select {
+        font: inherit;
+        width: 100%;
+        padding: 2px 3px;
+        background: #fff;
+        border: 1px solid;
+        border-color: #808080 #fff #fff #808080;
+      }
+
+      .dialog-body input[type='file'] {
+        font: inherit;
+        width: 100%;
+      }
+
+      .span-2 {
+        grid-column: 1 / -1;
+      }
+
+      .dialog-error {
+        grid-column: 1 / -1;
+        color: #800000;
+        min-height: 13px;
+      }
+
+      .dialog-buttons {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .dialog-buttons .tb-btn {
+        min-width: 68px;
+        padding: 4px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vb">
+      <div class="toolbar" role="toolbar" aria-label="VirtualBoks actions">
+        <button class="tb-btn" id="btnNew" type="button">New</button>
+        <button class="tb-btn" id="btnSettings" type="button">Settings</button>
+        <button class="tb-btn" id="btnRemove" type="button">Remove</button>
+        <span class="tb-sep" aria-hidden="true"></span>
+        <button class="tb-btn" id="btnStart" type="button">Start</button>
+        <button class="tb-btn" id="btnPowerOff" type="button">Power Off</button>
+        <button class="tb-btn" id="btnReset" type="button">Reset</button>
+        <span class="tb-sep" aria-hidden="true"></span>
+        <button class="tb-btn" id="btnCad" type="button">Ctrl+Alt+Del</button>
+        <button class="tb-btn" id="btnScreenshot" type="button">Screenshot</button>
+      </div>
+
+      <div class="vb-body">
+        <div class="pane-list">
+          <div class="pane-head" id="listHeading">Machines</div>
+          <ul class="vm-list" id="vmList" role="listbox" aria-labelledby="listHeading"></ul>
+        </div>
+
+        <div class="pane-main">
+          <div class="details" id="detailsPane"></div>
+
+          <div class="console" id="consolePane" hidden>
+            <div class="tabs" role="tablist" aria-label="Console view">
+              <button class="tab" id="tabDisplay" type="button" role="tab" data-tab="display">
+                Display
+              </button>
+              <button class="tab" id="tabSerial" type="button" role="tab" data-tab="serial">
+                Serial
+              </button>
+            </div>
+            <div class="console-body" id="consoleBody">
+              <div id="screenHost">
+                <div id="vmScreen">
+                  <div></div>
+                  <canvas></canvas>
+                </div>
+              </div>
+              <textarea
+                id="vmSerial"
+                spellcheck="false"
+                autocomplete="off"
+                aria-label="Serial console"
+                hidden
+              ></textarea>
+            </div>
+            <div class="hint" id="consoleHint">
+              Click the console to give the virtual machine your keyboard.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="statusbar">
+        <span class="status-text" id="statusText" role="status">Ready.</span>
+        <span class="progress" id="progress">
+          <span class="progress-bar" id="progressBar"></span>
+        </span>
+      </div>
+    </div>
+
+    <div class="backdrop" id="dialogBackdrop" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+        <div class="dialog-title">
+          <span id="dialogTitle">New Virtual Machine</span>
+          <button class="dialog-close" id="dialogClose" type="button" aria-label="Close">
+            &times;
+          </button>
+        </div>
+        <form class="dialog-body" id="vmForm">
+          <label for="fName">Name</label>
+          <input type="text" id="fName" required maxlength="48" />
+
+          <label for="fMemory">Memory</label>
+          <select id="fMemory">
+            <option value="32">32 MB</option>
+            <option value="64">64 MB</option>
+            <option value="128" selected>128 MB</option>
+            <option value="256">256 MB</option>
+            <option value="512">512 MB</option>
+          </select>
+
+          <label for="fKind">Attach as</label>
+          <select id="fKind">
+            <option value="cdrom">CD-ROM (.iso)</option>
+            <option value="fda">Floppy (.img)</option>
+            <option value="hda">Hard disk (.img)</option>
+            <option value="bzimage">Linux kernel (bzImage)</option>
+          </select>
+
+          <label for="fSource">Media from</label>
+          <select id="fSource">
+            <option value="url">URL</option>
+            <option value="file">File on this computer</option>
+          </select>
+
+          <label for="fUrl" id="lblUrl">Image URL</label>
+          <input type="text" id="fUrl" placeholder="https://example.com/linux.iso" />
+
+          <label for="fFile" id="lblFile">Image file</label>
+          <input type="file" id="fFile" />
+
+          <label for="fCmdline" id="lblCmdline">Kernel args</label>
+          <input type="text" id="fCmdline" />
+
+          <p class="dialog-error" id="formError" role="alert"></p>
+
+          <div class="dialog-buttons">
+            <button class="tb-btn" type="submit" id="formOk">OK</button>
+            <button class="tb-btn" type="button" id="formCancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="./virtualboks.js"></script>
+  </body>
+</html>

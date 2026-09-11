@@ -1,0 +1,7 @@
+{
+  "name": "virtualboks",
+  "private": true,
+  "scripts": {
+    "test": "node tests/test-virtualboks.js"
+  }
+}

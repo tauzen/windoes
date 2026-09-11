@@ -23,6 +23,9 @@
 .titlelogo-minecraft {
   background-image: url('/icons/minecraft.png');
 }
+.titlelogo-virtualboks {
+  background-image: url('/icons/virtualboks.svg');
+}
 .titlelogo-paint {
   background-image: url('/icons/paint.png');
 }

@@ -7,6 +7,7 @@
     "windoes/public/applications/minesweeper",
     "windoes/public/applications/paint",
     "windoes/public/applications/solitaire",
+    "windoes/public/applications/virtualboks",
     "windoes/public/applications/winamp-player"
   ],
   "scripts": {
@@ -14,6 +15,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "husky",
+    "postinstall": "node scripts/fetch-vm-assets.mjs",
+    "assets:vm": "node scripts/fetch-vm-assets.mjs --strict",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
@@ -27,13 +30,15 @@
     "test:minesweeper": "npm run -w ./windoes/public/applications/minesweeper test",
     "test:paint": "npm run -w ./windoes/public/applications/paint test",
     "test:solitaire": "npm run -w ./windoes/public/applications/solitaire test",
+    "test:virtualboks": "npm run -w ./windoes/public/applications/virtualboks test",
     "test:winamp-player": "npm run -w ./windoes/public/applications/winamp-player test",
-    "test:apps": "npm run test:ascii-runner && npm run test:minecraft && npm run test:minesweeper && npm run test:paint && npm run test:solitaire && npm run test:winamp-player",
+    "test:apps": "npm run test:ascii-runner && npm run test:minecraft && npm run test:minesweeper && npm run test:paint && npm run test:solitaire && npm run test:virtualboks && npm run test:winamp-player",
     "test:all": "npm run typecheck && npm test && npm run test:apps"
   },
   "dependencies": {
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "v86": "0.5.458"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",

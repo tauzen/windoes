@@ -6,6 +6,28 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- **VirtualBoks**, a virtual machine manager that boots a real guest operating
+  system inside the desktop. It wraps the [v86](https://github.com/copy/v86)
+  x86 emulator: an emulated PC runs in the application iframe, executing an
+  actual kernel on an emulated CPU rather than replaying a recording. The
+  manager lists machines VirtualBox-style with a details pane (memory, attached
+  media, guest), and **New**/**Settings**/**Remove** manage machines that
+  persist in local storage. **Start**, **Power Off**, **Reset**,
+  **Ctrl+Alt+Del** and **Screenshot** drive a running guest, whose output shows
+  in a console pane with **Display** (VGA) and **Serial** tabs and a download
+  progress bar in the status bar. Built-in machines cover Linux 2.6, Buildroot
+  6.8, Tiny Core 11 and FreeDOS; guest images are fetched from the host the v86
+  project documents, or a disk image can be attached from your own computer.
+  A built-in **Self-Test** machine boots a boot sector assembled in the page, so
+  the emulator can be exercised with no download at all. Launches from the
+  desktop icon, **Programs > VirtualBoks**, or `virtualboks` in the Run dialog.
+  Covered by `tests/test-virtualboks-launch.js` and the application's own suite,
+  which boots a guest and asserts it reaches the emulated screen.
+- `scripts/fetch-vm-assets.mjs` (run from `postinstall`, or `npm run assets:vm`)
+  stages the v86 emulator core from npm and its SeaBIOS/VGABIOS firmware from
+  upstream into `windoes/public/applications/virtualboks/vendor/`, which is
+  git-ignored. The firmware is pinned by SHA-256. A failure here never breaks
+  `npm ci`: VirtualBoks explains how to retry instead of booting.
 - HTML file support: files ending in `.html`/`.htm` are treated as web pages
   and open in Internet Explorer, which renders VirtualFS documents in its
   content frame (local documents render sandboxed without `allow-same-origin`).
