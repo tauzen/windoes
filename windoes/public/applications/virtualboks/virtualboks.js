@@ -18,6 +18,11 @@
   var ENGINE_SRC = VENDOR + 'libv86.js';
   var STORAGE_KEY = 'virtualboks.machines.v1';
 
+  // A guest image lives on someone else's server, so both numbers are about
+  // giving a slow-but-working host room while still failing visibly.
+  var PROBE_TIMEOUT_MS = 15000;
+  var STALL_TIMEOUT_MS = 45000;
+
   var ENGINE_MISSING =
     'Emulator core not found in applications/virtualboks/vendor/. ' +
     'Run `npm run assets:vm` to download it, then reopen VirtualBoks.';
@@ -172,6 +177,8 @@
   /** The running guest, or null. Files picked from disk live only in memory. */
   var session = null;
   var attachedFiles = Object.create(null);
+  /** machine id -> the message from its last failed start. */
+  var machineErrors = Object.create(null);
   var enginePromise = null;
 
   function allMachines() {
@@ -278,8 +285,8 @@
   }
 
   function machineState(machine) {
-    if (runningId() !== machine.id) return 'off';
-    return session.failed ? 'error' : 'running';
+    if (runningId() === machine.id) return 'running';
+    return machineErrors[machine.id] ? 'error' : 'off';
   }
 
   function renderMainPane() {
@@ -453,6 +460,77 @@
     return options;
   }
 
+  /**
+   * Check that a guest image is actually fetchable before handing the URL to
+   * the emulator.
+   *
+   * v86's loader treats every failed request as retryable and backs off
+   * forever without reporting anything, so a blocked or missing image leaves
+   * the UI saying "Starting..." indefinitely. A plain GET (no custom headers,
+   * so no CORS preflight) tells us the real answer; the body is abandoned as
+   * soon as the headers land, so nothing is downloaded twice.
+   */
+  function probeImage(url) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () {
+      controller.abort();
+    }, PROBE_TIMEOUT_MS);
+
+    return fetch(url, { signal: controller.signal, redirect: 'follow' }).then(
+      function (response) {
+        clearTimeout(timer);
+        controller.abort();
+        if (!response.ok) {
+          throw new Error(
+            'The image host answered ' + response.status + ' ' + response.statusText + ' for ' + url
+          );
+        }
+      },
+      function (error) {
+        clearTimeout(timer);
+        if (error && error.name === 'AbortError') {
+          throw new Error('Timed out reaching ' + url + '. The host may be down.');
+        }
+        // fetch rejects with a TypeError both for a blocked cross-origin
+        // response and for an unreachable host; the browser deliberately hides
+        // which, so name both and point at the console for the specifics.
+        throw new Error(
+          'Could not fetch ' +
+            url +
+            ' — the host is unreachable, or it does not send the ' +
+            'Access-Control-Allow-Origin header this page needs. Check the browser ' +
+            'console for the exact failure, or attach an image from your computer ' +
+            'with Settings instead.'
+        );
+      }
+    );
+  }
+
+  /**
+   * Guard against the same silent retry loop once a download is under way:
+   * if the emulator stops reporting progress, say so instead of hanging.
+   */
+  function armStallWatchdog(machineName) {
+    clearStallWatchdog();
+    var machineId = session.machineId;
+    session.stallTimer = setTimeout(function () {
+      if (!session || !session.starting) return;
+      failStart(
+        machineId,
+        machineName +
+          ' stopped making progress. The image host may be refusing the download — ' +
+          'check the browser console, or attach an image from your computer.'
+      );
+    }, STALL_TIMEOUT_MS);
+  }
+
+  function clearStallWatchdog() {
+    if (session && session.stallTimer) {
+      clearTimeout(session.stallTimer);
+      session.stallTimer = null;
+    }
+  }
+
   function startMachine() {
     var machine = selectedMachine();
     if (!machine || runningId() === machine.id) return;
@@ -468,7 +546,8 @@
     powerOff();
 
     consoleTab = machine.consoleTab === 'serial' ? 'serial' : 'display';
-    session = { machineId: machine.id, emulator: null, starting: true, failed: false };
+    delete machineErrors[machine.id];
+    session = { machineId: machine.id, emulator: null, starting: true };
     el.serial.value = '';
     render();
     setStatus('Starting ' + machine.name + '…');
@@ -476,10 +555,20 @@
 
     var startedFor = machine.id;
 
+    var remoteUrl = machine.media && machine.media.source === 'url' ? machine.media.url : null;
+
     loadEngine()
       .then(function (V86) {
+        if (!session || session.machineId !== startedFor) return null;
+        if (!remoteUrl) return V86;
+        setStatus('Contacting ' + new URL(remoteUrl, window.location.href).host + '\u2026');
+        return probeImage(remoteUrl).then(function () {
+          return V86;
+        });
+      })
+      .then(function (V86) {
         // A second Start (or a Power Off) while the engine was loading wins.
-        if (!session || session.machineId !== startedFor) return;
+        if (!V86 || !session || session.machineId !== startedFor) return;
 
         var config = {
           wasm_path: VENDOR + 'v86.wasm',
@@ -499,20 +588,17 @@
         var emulator = new V86(config);
         session.emulator = emulator;
         wireEmulatorEvents(emulator, machine);
+        armStallWatchdog(machine.name);
       })
       .catch(function (error) {
-        if (!session || session.machineId !== startedFor) return;
-        session.starting = false;
-        session.failed = true;
-        setProgress(null);
-        setStatus(error.message || String(error));
-        render();
+        failStart(startedFor, error.message || String(error));
       });
   }
 
   function wireEmulatorEvents(emulator, machine) {
     emulator.add_listener('download-progress', function (event) {
       if (!session || session.machineId !== machine.id) return;
+      armStallWatchdog(machine.name);
       var name = String(event.file_name || '')
         .split('/')
         .pop();
@@ -533,20 +619,17 @@
     });
 
     emulator.add_listener('download-error', function (event) {
-      if (!session || session.machineId !== machine.id) return;
-      session.starting = false;
-      session.failed = true;
-      setProgress(null);
-      setStatus(
+      failStart(
+        machine.id,
         'Could not download ' +
           String(event.file_name || 'the guest image') +
           '. The host may be unreachable or may not allow cross-origin requests.'
       );
-      render();
     });
 
     emulator.add_listener('emulator-started', function () {
       if (!session || session.machineId !== machine.id) return;
+      clearStallWatchdog();
       session.starting = false;
       setProgress(null);
       setStatus(machine.name + ' is running.');
@@ -559,8 +642,34 @@
     });
   }
 
+  /**
+   * Abandon a start that never reached a running guest. The session has to go
+   * or the machine keeps looking like it is running — Start and Remove would
+   * stay disabled with only Power Off to escape.
+   */
+  function failStart(machineId, message) {
+    if (!session || session.machineId !== machineId) return;
+    clearStallWatchdog();
+    var emulator = session.emulator;
+    session = null;
+
+    if (emulator) {
+      try {
+        emulator.destroy();
+      } catch {
+        // Nothing was built yet; there is nothing to tear down.
+      }
+    }
+
+    machineErrors[machineId] = message;
+    setProgress(null);
+    setStatus(message);
+    render();
+  }
+
   function powerOff() {
     if (!session) return;
+    clearStallWatchdog();
     var emulator = session.emulator;
     var name = (findMachine(session.machineId) || {}).name || 'The machine';
     session = null;

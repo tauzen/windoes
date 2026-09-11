@@ -230,6 +230,49 @@ async function runTests() {
       { timeout: BOOT_TIMEOUT_MS }
     );
     assert(true, 'A second boot of the same machine reaches the guest again');
+    await page.click('#btnPowerOff');
+    await page.waitForFunction(() => document.getElementById('consolePane').hidden);
+
+    // ── Test 11: An unreachable guest image reports instead of hanging ───
+    // v86 retries a failed download forever without surfacing anything, so a
+    // blocked or missing image used to leave the UI stuck on "Starting...".
+    // The manager probes the URL itself; this asserts the probe speaks up.
+    console.log('\nTest 11: An unreachable guest image reports instead of hanging');
+    await page.route('**/unreachable-guest.iso', (route) => route.abort('failed'));
+
+    await page.click('#btnNew');
+    await page.waitForSelector('#dialogBackdrop:not([hidden])');
+    await page.fill('#fName', 'Broken Image');
+    await page.fill('#fUrl', `${baseUrl}/unreachable-guest.iso`);
+    await page.click('#formOk');
+    await page.waitForFunction(() => document.getElementById('dialogBackdrop').hidden);
+
+    await page.click('#btnStart');
+    await page.waitForFunction(
+      () => {
+        const status = document.getElementById('statusText').textContent;
+        return status.includes('Could not fetch') || status.includes('image host answered');
+      },
+      { timeout: 30000 }
+    );
+    assert(true, 'A failed image fetch is reported in the status bar');
+
+    const failed = await page.evaluate(() => ({
+      state: document.querySelector('.vm-item[aria-selected="true"]').dataset.state,
+      status: document.getElementById('statusText').textContent,
+      startEnabled: !document.getElementById('btnStart').disabled,
+      consoleHidden: document.getElementById('consolePane').hidden,
+    }));
+
+    assert(failed.state === 'error', 'The machine is flagged as errored in the list');
+    assert(
+      failed.status.includes('Access-Control-Allow-Origin') || failed.status.includes('answered'),
+      `The message names a likely cause (got: ${failed.status.slice(0, 90)})`
+    );
+    assert(failed.startEnabled, 'Start becomes available again after the failure');
+    assert(failed.consoleHidden, 'The console pane is not left showing a dead guest');
+
+    await page.click('#btnRemove');
   } finally {
     await ctx.close();
     await browser.close();
