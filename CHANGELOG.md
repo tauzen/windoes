@@ -6,6 +6,17 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- VirtualBoks now reports a guest image it cannot fetch instead of hanging.
+  v86 treats every failed download as retryable and backs off forever without
+  surfacing anything, so a blocked or missing image left the window stuck on
+  "Starting...". The manager now probes the image URL itself before starting
+  the emulator and names the likely cause (unreachable host, a missing
+  `Access-Control-Allow-Origin` header, or an HTTP error), and a watchdog
+  catches a download that stalls part-way through. A start that never reaches a
+  running guest is also torn down properly: the machine returns to powered off
+  with **Start** and **Remove** usable again, and is flagged in the machine
+  list rather than appearing to still be running.
+
 - **VirtualBoks**, a virtual machine manager that boots a real guest operating
   system inside the desktop. It wraps the [v86](https://github.com/copy/v86)
   x86 emulator: an emulated PC runs in the application iframe, executing an
