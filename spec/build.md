@@ -14,7 +14,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 ## TRACK
 
 - Code-quality fixes from the issue #127 analysis: gate CI and deploy, then close the app sandbox holes. Changes must keep every app suite in `test:all` green.
-- F003 starts as a survey (`notes.md`, no code); its code change waits for F002, because both edit `onAppMessage`.
+- F003 starts as a survey (`notes.md`, no code); its code change also closes the same-origin bypass of the Paint path grants.
 
 ## NOW
 

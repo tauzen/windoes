@@ -25,8 +25,9 @@ The app iframes load from the shell's own origin with `sandbox="allow-scripts al
 - No app iframe has both `allow-scripts` and `allow-same-origin` on a same-origin document.
 - The Chromium "can escape its sandboxing" warning no longer appears in the integration run.
 - A test shows that script in an app frame cannot read `window.parent.document`.
+- A test shows that script in the Paint frame cannot grant itself a file path by calling `parent.WindoesApp.open.paint` (the gap left open by the Paint path grants).
 - Every app suite in `npm run test:all` passes, including saved state that survives a reload.
 
 ## Notes
 
-Sequenced after the Paint path grants land: both edit `onAppMessage`.
+The Paint path grants have landed in `onAppMessage`; keep them working.
