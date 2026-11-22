@@ -75,6 +75,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- CI now gates pull requests and deploys. The test workflow runs on pull
+  requests to `main` as well as branch pushes, and runs `npm run lint`,
+  `npm run typecheck`, `npx prettier --check .` and `npm run test:all`, in that
+  order. The GitHub Pages deploy calls the same workflow and deploys only after
+  it passes on that commit. The tool-owned Limen loaders under `.omp/` and
+  `.pi/` are excluded from Prettier.
 - Code-quality Phase 4 (item 10): decomposed the 629-line `StartMenu.jsx` into a
   data-driven menu model (`windoes/shell/start-menu-config.js`) plus small
   presentational components (`windoes/shell/MenuItems.jsx` — `MenuItem`,

@@ -24,3 +24,4 @@ windoes/public/applications/virtualboks/vendor/
 
 # Claude Code
 .claude/
+/.limen/
