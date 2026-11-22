@@ -3,3 +3,7 @@ dist
 
 # Staged by scripts/fetch-vm-assets.mjs — third-party binaries, never reformat
 windoes/public/applications/virtualboks/vendor
+
+# Limen loaders, written and owned by the Limen tool — never reformat
+.omp/extensions
+.pi/extensions

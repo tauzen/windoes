@@ -3,6 +3,10 @@ name: Run Tests
 on:
   push:
     branches-ignore: [main]
+  pull_request:
+    branches: [main]
+  # deploy.yml calls this workflow so a deploy runs only after the same checks pass.
+  workflow_call:
 
 jobs:
   test:
@@ -13,6 +17,9 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npx prettier --check .
       # `npm ci` stages these from postinstall and only warns on failure; the
       # VirtualBoks suite boots a guest, so here they have to be present.
       - run: npm run assets:vm
