@@ -21,7 +21,6 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
 - `F003-embedded-apps-run-in-a-real-sandbox` (🟠 ACTIVE): Embedded apps run in a real sandbox
-- `F002-paint-reads-and-writes-only-files-the-user-picked` (🟠 ACTIVE): Paint reads and writes only files the user picked
 
 ## NEXT
 
@@ -31,5 +30,6 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 <!-- Generated from spec/features/done/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F002-paint-reads-and-writes-only-files-the-user-picked` (🟢 PROVEN): Paint reads and writes only files the user picked; landed 2026-11-22
 - `F001-ci-blocks-untested-changes-before-merge-and-deploy` (🟢 PROVEN): CI blocks untested changes before merge and deploy; landed 2026-11-22
-- 2026-11: 1 landed. spec/features/done/2026-11/
+- 2026-11: 2 landed. spec/features/done/2026-11/

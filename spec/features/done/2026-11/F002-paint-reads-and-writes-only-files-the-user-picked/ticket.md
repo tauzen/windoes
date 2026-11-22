@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-22
+landed: 2026-11-22
 ---
 
 # F002 · Paint reads and writes only files the user picked
