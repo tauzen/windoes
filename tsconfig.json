@@ -10,5 +10,6 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "files": ["windoes/app-state.ts", "windoes/virtual-fs.ts"]
+  "files": ["windoes/app-state.ts", "windoes/virtual-fs.ts"],
+  "include": ["windoes/public/applications/*/app.js"]
 }
