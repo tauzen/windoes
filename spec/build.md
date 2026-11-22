@@ -13,15 +13,20 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- <!-- Current stretch: intended outcome, why it matters, and material constraint. At most three bullets. -->
+- Code-quality fixes from the issue #127 analysis: gate CI and deploy, then close the app sandbox holes. Changes must keep every app suite in `test:all` green.
+- F003 starts as a survey (`notes.md`, no code); its code change waits for F002, because both edit `onAppMessage`.
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F003-embedded-apps-run-in-a-real-sandbox` (🟠 ACTIVE): Embedded apps run in a real sandbox
+- `F002-paint-reads-and-writes-only-files-the-user-picked` (🟠 ACTIVE): Paint reads and writes only files the user picked
+- `F001-ci-blocks-untested-changes-before-merge-and-deploy` (🟠 ACTIVE): CI blocks untested changes before merge and deploy
+
 ## NEXT
 
-- `FNNN-slug` (PLANNED): <!-- One clause: likely outcome, dependency, or sequencing reason. -->
+- `F004-app-code-is-covered-by-lint-and-type-checks` (PLANNED): moves inline app scripts into checked modules; waits for F003's sandbox design.
 
 ## PROVEN
 
