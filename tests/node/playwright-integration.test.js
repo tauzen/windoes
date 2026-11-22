@@ -16,6 +16,7 @@ const integrationScripts = [
   'test-notepad-file-menu.js',
   'test-file-chooser-overwrite.js',
   'test-html-file-open.js',
+  'test-paint-app.js',
   'test-virtual-fs.js',
   'test-axe-accessibility.js',
 ];
