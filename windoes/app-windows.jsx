@@ -9,7 +9,7 @@ import {
   APP_TASK_LABEL_TRUNCATE_LEN,
   VIEW_BORDER_PX,
 } from './constants.js';
-import { VirtualFS } from './virtual-fs.js';
+import { VirtualFS, normalizePath } from './virtual-fs.js';
 import { once } from './once.mjs';
 
 // App-window title, status, and task-button label render reactively from the
@@ -355,6 +355,7 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
   iframeSrc: './applications/paint/index.html',
   hasChrome: false,
   setup: retainAppMessageListener,
+  onClose: () => paintFileGrants.clear(),
 });
 
 function buildPaintSrc(filePath = '') {
@@ -370,6 +371,11 @@ function openPaint(options = {}) {
   const config = WindoesApp.WindowManager.get('paint');
   const nextSrc = buildPaintSrc(filePath);
   config.iframeSrc = nextSrc;
+
+  // A new Paint document starts a new session: it may reach only the file it
+  // was opened with (picked in Explorer) until the user chooses another.
+  paintFileGrants.clear();
+  if (filePath) grantPaintFile(filePath, 'open');
 
   const isAlreadyOpen = !!WindoesApp.state.get().windows?.byId?.paint?.open;
   if (isAlreadyOpen && config.iframe) {
@@ -397,6 +403,41 @@ const minesweeperFrame = minesweeperConfig.el.querySelector('#minesweeperFrame')
 const solitaireFrame = solitaireConfig.el.querySelector('#solitaireFrame');
 const paintFrame = paintConfig.el.querySelector('#paintFrame');
 const paintFs = new VirtualFS();
+
+// Paint may load or save only files the user picked for the current Paint
+// session, so code in the Paint frame cannot reach the rest of the VFS.
+// Normalized path -> true when the path may be loaded (picked to open), false
+// when it may only be saved (picked as a Save As target). Any grant allows a
+// save, so re-saving an opened file works.
+const paintFileGrants = new Map();
+
+function paintGrantKey(path) {
+  const trimmed = String(path || '').trim();
+  if (!trimmed) throw new Error('A file path is required.');
+  return normalizePath(trimmed);
+}
+
+function grantPaintFile(path, mode) {
+  const key = paintGrantKey(path);
+  paintFileGrants.set(key, mode === 'open' || paintFileGrants.get(key) === true);
+}
+
+function requirePaintGrant(path, mode) {
+  const key = paintGrantKey(path);
+  const canLoad = paintFileGrants.get(key);
+  if (canLoad === undefined || (mode === 'open' && !canLoad)) {
+    throw new Error(
+      mode === 'open'
+        ? 'Paint can only open a file chosen in the Open dialog.'
+        : 'Paint can only save to a file chosen in the Open or Save As dialog.'
+    );
+  }
+  return key;
+}
+
+function isPaintFrameSource(source) {
+  return !!source && paintFrame?.contentWindow === source;
+}
 
 async function ensureDir(path) {
   if (!(await paintFs.exists(path))) {
@@ -463,14 +504,13 @@ function onAppMessage(e) {
         : title;
     WindoesApp.state.dispatch({ type: 'PAINT_SET_TITLE', title, taskLabel });
   }
-  if (e.data.type === 'paint-vfs-save') {
+  if (e.data.type === 'paint-vfs-save' && isPaintFrameSource(e.source)) {
     const requestId = e.data.requestId;
     Promise.resolve()
       .then(async () => {
+        const path = requirePaintGrant(e.data.path, 'save');
         await ensurePaintFs();
         const dataUrl = String(e.data.dataUrl || '');
-        const path = String(e.data.path || '').trim();
-        if (!path) throw new Error('A file path is required.');
         if (!dataUrl.startsWith('data:image/png;base64,')) {
           throw new Error('Paint only supports PNG data.');
         }
@@ -483,7 +523,7 @@ function onAppMessage(e) {
         e.source?.postMessage({ type: 'paint-vfs-save-result', requestId, ...result }, e.origin);
       });
   }
-  if (e.data.type === 'paint-request-file-path') {
+  if (e.data.type === 'paint-request-file-path' && isPaintFrameSource(e.source)) {
     const requestId = e.data.requestId;
     Promise.resolve()
       .then(async () => {
@@ -501,6 +541,7 @@ function onAppMessage(e) {
           defaultExtension: '.png',
           allowCreateFolder: mode !== 'open',
         });
+        if (path) grantPaintFile(path, mode);
         return { ok: true, path: path || null };
       })
       .catch((error) => ({ ok: false, error: error?.message || String(error) }))
@@ -511,13 +552,12 @@ function onAppMessage(e) {
         );
       });
   }
-  if (e.data.type === 'paint-vfs-load') {
+  if (e.data.type === 'paint-vfs-load' && isPaintFrameSource(e.source)) {
     const requestId = e.data.requestId;
     Promise.resolve()
       .then(async () => {
+        const path = requirePaintGrant(e.data.path, 'open');
         await ensurePaintFs();
-        const path = String(e.data.path || '').trim();
-        if (!path) throw new Error('A file path is required.');
         const content = await paintFs.readFile(path);
         if (!(content instanceof Blob)) {
           throw new Error('Selected file is not an image blob.');
