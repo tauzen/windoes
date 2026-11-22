@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # Planning files (board, tickets, reviews) are pushed straight to main and
+    # do not change the site, so they must not redeploy it.
+    paths-ignore: ['spec/**']
 
 permissions:
   contents: read
