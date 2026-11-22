@@ -555,6 +555,7 @@
       </div>
     </div>
 
+    <script src="../shared/app-storage.js"></script>
     <script>
       // ============================================================
       // GAME STATE
@@ -581,16 +582,29 @@
         pressedCell: null,
       };
 
-      // Best times storage
+      // Best times storage. Saved state may come from the shell (when
+      // framed), so it loads once at start and is kept in memory.
+      const BEST_TIMES_KEY = 'ms_best';
+      let bestTimes = {};
+      WindoesAppStorage.load(BEST_TIMES_KEY).then(
+        (raw) => {
+          try {
+            const parsed = JSON.parse(raw || '{}');
+            if (parsed && typeof parsed === 'object') bestTimes = parsed;
+          } catch {
+            // Corrupt saved state reads as no best times.
+          }
+        },
+        (error) => console.warn('Best times could not be loaded:', error)
+      );
       function loadBestTimes() {
-        try {
-          return JSON.parse(localStorage.getItem('ms_best') || '{}');
-        } catch {
-          return {};
-        }
+        return { ...bestTimes };
       }
       function saveBestTimes(bt) {
-        localStorage.setItem('ms_best', JSON.stringify(bt));
+        bestTimes = { ...bt };
+        WindoesAppStorage.save(BEST_TIMES_KEY, JSON.stringify(bestTimes)).catch((error) =>
+          console.warn('Best times could not be saved:', error)
+        );
       }
 
       // ============================================================

@@ -73,7 +73,15 @@ let distance = 0;
 let coins = 0;
 let combo = 0;
 let comboTimer = 0;
-let highScore = parseInt(localStorage.getItem('asciiRunnerHighScore')) || 0;
+const HIGH_SCORE_KEY = 'asciiRunnerHighScore';
+let highScore = 0;
+// Saved state may come from the shell (when framed), so it loads after start.
+WindoesAppStorage.load(HIGH_SCORE_KEY).then(
+  (saved) => {
+    highScore = Math.max(highScore, parseInt(saved) || 0);
+  },
+  (error) => console.warn('High score could not be loaded:', error)
+);
 
 // Screen effects
 let screenShake = 0;
@@ -1431,7 +1439,9 @@ function triggerDeath() {
   // Update high score
   if (score > highScore) {
     highScore = score;
-    localStorage.setItem('asciiRunnerHighScore', highScore);
+    WindoesAppStorage.save(HIGH_SCORE_KEY, String(highScore)).catch((error) =>
+      console.warn('High score could not be saved:', error)
+    );
   }
 
   gameOver();

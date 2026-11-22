@@ -170,7 +170,7 @@
   };
 
   // ── State ────────────────────────────────────────────────────────────
-  var userMachines = loadMachines();
+  var userMachines = [];
   var selectedId = BUILT_INS[0].id;
   var consoleTab = 'display';
 
@@ -206,11 +206,27 @@
   }
 
   // ── Persistence ──────────────────────────────────────────────────────
+  // Saved machines may come from the shell (when framed), so they load after
+  // the manager is up. Machines added meanwhile are kept.
   function loadMachines() {
+    WindoesAppStorage.load(STORAGE_KEY).then(
+      function (raw) {
+        var saved = parseMachines(raw).filter(function (machine) {
+          return indexOfUserMachine(machine.id) === -1;
+        });
+        if (!saved.length) return;
+        userMachines = saved.concat(userMachines);
+        render();
+      },
+      function () {
+        setStatus('Saved machines could not be loaded — this browser is blocking storage.');
+      }
+    );
+  }
+
+  function parseMachines(raw) {
     try {
-      var raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      var parsed = JSON.parse(raw);
+      var parsed = JSON.parse(raw || '[]');
       return Array.isArray(parsed) ? parsed.filter(isUsableMachine) : [];
     } catch {
       return [];
@@ -222,11 +238,9 @@
   }
 
   function saveMachines() {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(userMachines));
-    } catch {
+    WindoesAppStorage.save(STORAGE_KEY, JSON.stringify(userMachines)).catch(function () {
       setStatus('Machines could not be saved — this browser is blocking storage.');
-    }
+    });
   }
 
   // ── Status bar ───────────────────────────────────────────────────────
@@ -926,4 +940,5 @@
   // ── Boot the manager ─────────────────────────────────────────────────
   render();
   setStatus('Select a machine and press Start.');
+  loadMachines();
 })();

@@ -1,6 +1,10 @@
 // ══════════════════════════════════════════════
 // App Window (experiment apps)
 // ══════════════════════════════════════════════
+// Every app frame is sandboxed without `allow-same-origin`, so the app runs in
+// an opaque origin: it cannot read the shell's DOM or storage, or call into
+// `WindoesApp`. It reaches the shell only through the messages that
+// `onAppMessage` validates (sender frame identity, origin "null").
 import WindoesApp from './app-state.js';
 import { makeDraggable } from './dragging.js';
 import { closeStartMenuBoilerplate, openWindowBoilerplate } from './launch-helpers.js';
@@ -56,7 +60,7 @@ const appConfig = WindoesApp.WindowManager.register('app', {
         id="appFrame"
         title="Application content"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
         allow="autoplay"
       ></iframe>
     ),
@@ -136,7 +140,7 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
           id="winampFrame"
           title="Winamp"
           referrerPolicy="no-referrer"
-          sandbox="allow-scripts allow-same-origin"
+          sandbox="allow-scripts"
           allow="autoplay"
         ></iframe>
       </>
@@ -188,7 +192,7 @@ const minesweeperConfig = WindoesApp.WindowManager.register('minesweeper', {
         id="minesweeperFrame"
         title="Minesweeper"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
       ></iframe>
     ),
     useSharedWindowComponent: true,
@@ -224,7 +228,7 @@ const solitaireConfig = WindoesApp.WindowManager.register('solitaire', {
         id="solitaireFrame"
         title="Solitaire"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
       ></iframe>
     ),
     useSharedWindowComponent: true,
@@ -263,7 +267,7 @@ WindoesApp.WindowManager.register('minecraft', {
         id="minecraftFrame"
         title="Minecraft"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+        sandbox="allow-scripts allow-pointer-lock"
       ></iframe>
     ),
     useSharedWindowComponent: true,
@@ -283,8 +287,10 @@ function openMinecraft() {
 // ══════════════════════════════════════════════
 // The guest console is whatever size the guest picks, so the window stays
 // resizable and maximizable and VirtualBoks scrolls its own console pane.
-// `allow-downloads` is what lets the Screenshot button hand over a PNG.
-WindoesApp.WindowManager.register('virtualboks', {
+// `allow-downloads` is what lets the Screenshot button hand over a PNG, and
+// `allow-forms` lets the New/Settings dialog submit (its handler stays in the
+// frame; the opaque origin keeps the submission away from the shell).
+const virtualboksConfig = WindoesApp.WindowManager.register('virtualboks', {
   template: {
     id: 'virtualboksWindow',
     ariaLabel: 'VirtualBoks',
@@ -301,7 +307,7 @@ WindoesApp.WindowManager.register('virtualboks', {
         id="virtualboksFrame"
         title="VirtualBoks"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-downloads"
+        sandbox="allow-scripts allow-downloads allow-forms"
       ></iframe>
     ),
     useSharedWindowComponent: true,
@@ -314,6 +320,7 @@ WindoesApp.WindowManager.register('virtualboks', {
   iframeId: 'virtualboksFrame',
   iframeSrc: './applications/virtualboks/index.html',
   hasChrome: false,
+  setup: retainAppMessageListener,
 });
 
 function openVirtualBoks() {
@@ -340,7 +347,7 @@ const paintConfig = WindoesApp.WindowManager.register('paint', {
         id="paintFrame"
         title="Paint"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-downloads allow-modals"
+        sandbox="allow-scripts allow-downloads allow-modals"
       ></iframe>
     ),
     useSharedWindowComponent: true,
@@ -402,6 +409,7 @@ const winampFrame = winampConfig.el.querySelector('#winampFrame');
 const minesweeperFrame = minesweeperConfig.el.querySelector('#minesweeperFrame');
 const solitaireFrame = solitaireConfig.el.querySelector('#solitaireFrame');
 const paintFrame = paintConfig.el.querySelector('#paintFrame');
+const virtualboksFrame = virtualboksConfig.el.querySelector('#virtualboksFrame');
 const paintFs = new VirtualFS();
 
 // Paint may load or save only files the user picked for the current Paint
@@ -460,21 +468,132 @@ function blobToDataUrl(blob) {
   });
 }
 
-function isAllowedMessageSource(source) {
-  if (!source) return false;
-  return [appFrame, winampFrame, minesweeperFrame, solitaireFrame, paintFrame].some(
-    (iframe) => iframe?.contentWindow === source
-  );
+// Frames whose messages the shell handles. Minecraft sends none.
+const messagingFrames = [
+  appFrame,
+  winampFrame,
+  minesweeperFrame,
+  solitaireFrame,
+  paintFrame,
+  virtualboksFrame,
+];
+
+function frameOfSource(source) {
+  if (!source) return null;
+  return messagingFrames.find((iframe) => iframe?.contentWindow === source) || null;
 }
 
+// The sender is identified by its window (`e.source`), never by the payload.
+// App frames have an opaque origin, so their messages carry origin "null";
+// anything else did not come from a sandboxed app document.
 function isTrustedMessageEvent(e) {
-  if (!isAllowedMessageSource(e.source)) return false;
-  return e.origin === window.location.origin;
+  return e.origin === 'null' && !!frameOfSource(e.source);
+}
+
+// Replies go to the sender window that `isTrustedMessageEvent` verified. Its
+// origin is opaque and postMessage cannot target "null", so the target is '*'.
+function replyToApp(e, message, transfer = []) {
+  e.source?.postMessage(message, { targetOrigin: '*', transfer });
+}
+
+function errorResult(error) {
+  return { ok: false, error: error?.message || String(error) };
+}
+
+// Apps that keep saved state cannot use storage in an opaque origin, so the
+// shell keeps it for them. Each app owns one key in the shell's localStorage:
+// the key it used before it was sandboxed, so existing saved state carries
+// over. The app is the one the shell loaded into the sending frame; a request
+// must name that app's key and reaches no other.
+const APP_STORAGE_KEYS = {
+  'ascii-runner': 'asciiRunnerHighScore',
+  minesweeper: 'ms_best',
+  virtualboks: 'virtualboks.machines.v1',
+};
+
+function storageKeyForFrame(iframe) {
+  let url;
+  try {
+    url = new URL(iframe.src);
+  } catch {
+    return null;
+  }
+  if (url.origin !== window.location.origin) return null;
+  const app = /\/applications\/([^/]+)\/[^/]*$/.exec(url.pathname)?.[1];
+  return app && Object.hasOwn(APP_STORAGE_KEYS, app) ? APP_STORAGE_KEYS[app] : null;
+}
+
+function handleAppStorage(e, iframe) {
+  const { type, requestId, key, value } = e.data;
+  let result;
+  try {
+    const ownKey = storageKeyForFrame(iframe);
+    if (!ownKey || key !== ownKey) {
+      throw new Error('This app has no saved state under that key.');
+    }
+    if (type === 'app-storage-load') {
+      result = { ok: true, value: localStorage.getItem(ownKey) };
+    } else {
+      if (typeof value !== 'string') throw new Error('Saved state must be a string.');
+      localStorage.setItem(ownKey, value);
+      result = { ok: true };
+    }
+  } catch (error) {
+    result = errorResult(error);
+  }
+  replyToApp(e, { type: `${type}-result`, requestId, ...result });
+}
+
+// The remote-track Worker accepts requests only from the shell's origin, so
+// the shell signs and downloads a track for the Winamp frame and hands over
+// the bytes. Only keys in the shell's own copy of the manifest are fetched,
+// so the frame cannot use the shell to fetch arbitrary URLs.
+const loadWinampManifest = once(async () => {
+  const res = await fetch('./applications/winamp-player/tracks.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error(`tracks.json request failed: ${res.status}`);
+  return res.json();
+});
+
+async function fetchWinampTrack(key) {
+  const manifest = await loadWinampManifest();
+  const endpoint = String(manifest?.signEndpoint || '').replace(/\/+$/, '');
+  const listed =
+    Array.isArray(manifest?.tracks) && manifest.tracks.some((track) => track?.key === key);
+  if (!endpoint || !key || !listed) throw new Error('Unknown track.');
+
+  const signRes = await fetch(`${endpoint}/sign?key=${encodeURIComponent(key)}`, {
+    credentials: 'omit',
+  });
+  if (!signRes.ok) throw new Error(`sign request failed: ${signRes.status}`);
+  const { url } = await signRes.json();
+  const trackRes = await fetch(url, { credentials: 'omit' });
+  if (!trackRes.ok) throw new Error(`track request failed: ${trackRes.status}`);
+  return {
+    buffer: await trackRes.arrayBuffer(),
+    mimeType: trackRes.headers.get('Content-Type') || 'audio/mpeg',
+  };
+}
+
+function handleWinampTrackFetch(e) {
+  const requestId = e.data.requestId;
+  const type = 'winamp-track-fetch-result';
+  fetchWinampTrack(e.data.key).then(
+    ({ buffer, mimeType }) =>
+      replyToApp(e, { type, requestId, ok: true, buffer, mimeType }, [buffer]),
+    (error) => replyToApp(e, { type, requestId, ...errorResult(error) })
+  );
 }
 
 function onAppMessage(e) {
   if (!isTrustedMessageEvent(e) || !e.data) return;
+  const iframe = frameOfSource(e.source);
 
+  if (e.data.type === 'app-storage-load' || e.data.type === 'app-storage-save') {
+    handleAppStorage(e, iframe);
+  }
+  if (e.data.type === 'winamp-track-fetch' && iframe === winampFrame) {
+    handleWinampTrackFetch(e);
+  }
   if (e.data.type === 'winamp-close') {
     WindoesApp.WindowManager.close('winamp');
   }
@@ -518,9 +637,9 @@ function onAppMessage(e) {
         await paintFs.writeFile(path, blob);
         return { ok: true, path };
       })
-      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .catch(errorResult)
       .then((result) => {
-        e.source?.postMessage({ type: 'paint-vfs-save-result', requestId, ...result }, e.origin);
+        replyToApp(e, { type: 'paint-vfs-save-result', requestId, ...result });
       });
   }
   if (e.data.type === 'paint-request-file-path' && isPaintFrameSource(e.source)) {
@@ -544,12 +663,9 @@ function onAppMessage(e) {
         if (path) grantPaintFile(path, mode);
         return { ok: true, path: path || null };
       })
-      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .catch(errorResult)
       .then((result) => {
-        e.source?.postMessage(
-          { type: 'paint-request-file-path-result', requestId, ...result },
-          e.origin
-        );
+        replyToApp(e, { type: 'paint-request-file-path-result', requestId, ...result });
       });
   }
   if (e.data.type === 'paint-vfs-load' && isPaintFrameSource(e.source)) {
@@ -565,9 +681,9 @@ function onAppMessage(e) {
         const dataUrl = await blobToDataUrl(content);
         return { ok: true, path, dataUrl };
       })
-      .catch((error) => ({ ok: false, error: error?.message || String(error) }))
+      .catch(errorResult)
       .then((result) => {
-        e.source?.postMessage({ type: 'paint-vfs-load-result', requestId, ...result }, e.origin);
+        replyToApp(e, { type: 'paint-vfs-load-result', requestId, ...result });
       });
   }
 }

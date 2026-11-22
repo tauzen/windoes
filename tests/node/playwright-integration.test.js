@@ -17,6 +17,7 @@ const integrationScripts = [
   'test-file-chooser-overwrite.js',
   'test-html-file-open.js',
   'test-paint-app.js',
+  'test-app-sandbox.js',
   'test-virtual-fs.js',
   'test-axe-accessibility.js',
 ];
