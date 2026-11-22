@@ -10,6 +10,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 - Models: every role (worker, review, GitHub doorbell review, keeper, scout, quality, picture, research, judge) runs `--engine omp --provider anthropic --model claude-opus-5-5 --thinking high`. This seat has only an Anthropic login; never use the package default `openai-codex/gpt-6-astra` or another provider.
 - Quota: if the Anthropic model cannot run, preserve the work and ask the owner. Do not substitute a model.
+- Publish: after each landing, push `limen/work` to `origin` and keep one open pull request into `main`; the owner merges it. Never push to `main` directly (a push to `main` deploys GitHub Pages).
 
 ## TRACK
 
