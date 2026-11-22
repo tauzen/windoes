@@ -486,6 +486,11 @@ function frameOfSource(source) {
 // The sender is identified by its window (`e.source`), never by the payload.
 // App frames have an opaque origin, so their messages carry origin "null";
 // anything else did not come from a sandboxed app document.
+//
+// Invariant: trust follows the frame, not the document. Any document loaded in
+// an app frame inherits that app's bridge rights (its storage key, Paint
+// grants, Winamp track fetch), so an app document must never navigate to
+// foreign content: no outbound links, redirects or `location` assignments.
 function isTrustedMessageEvent(e) {
   return e.origin === 'null' && !!frameOfSource(e.source);
 }

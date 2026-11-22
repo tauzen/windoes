@@ -281,16 +281,14 @@ function onHomeClick() {
   navigate(homePage);
 }
 
+// Refresh reloads through `navigate`, so the typed URL gets the same
+// normalization and sandbox rule as Go; setting `frame.src` directly would keep
+// the previous page's sandbox flags.
 function onRefreshClick() {
+  const url = addressInput.value;
+  if (!url || url === 'about:blank') return;
+  navigate(url, false);
   WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Refreshing...' });
-  const localPath = vfsPathFromBrowserInput(addressInput.value);
-  if (localPath) {
-    navigateToLocalFile(localPath, false);
-    return;
-  }
-  if (addressInput.value && addressInput.value !== 'about:blank') {
-    frame.src = addressInput.value;
-  }
 }
 
 function onStopClick() {

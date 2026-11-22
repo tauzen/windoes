@@ -453,6 +453,22 @@ async function runTests() {
       'A message from a non-app frame does not reach the storage bridge'
     );
 
+    // Refresh with a typed shell-origin URL must apply the same rule as Go,
+    // not keep the remote page's flags.
+    await page.fill('#addressInput', `${baseUrl}/applications/solitaire/index.html`);
+    await page.click('#refreshBtn');
+    const ieRefreshFrame = await waitForIeFrame(page, /applications\/solitaire\/index\.html/);
+    const ieRefreshSandbox = await page.getAttribute('#browserFrame', 'sandbox');
+    assert(
+      ieRefreshSandbox === 'allow-scripts',
+      `Refresh to a shell-origin page gets "${ieRefreshSandbox}"`
+    );
+    const ieRefreshAccess = await ieRefreshFrame.evaluate(probeShellAccess);
+    assert(
+      ieRefreshAccess.parentDocumentError === 'SecurityError',
+      'A shell-origin page loaded by Refresh cannot read window.parent.document'
+    );
+
     // ── Test 9: Dev server CORS covers app files only ──────────────────────
     console.log('\nTest 9: Dev server allows cross-origin reads of app files only');
     const appFile = await ctx.request.get(`${baseUrl}/applications/winamp-player/tracks.json`, {
