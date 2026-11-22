@@ -206,43 +206,40 @@ async function runTests() {
 
     console.log('\nTest 3: Paint content area adapts when parent window is resized');
 
-    const resizeState = await page.evaluate(async () => {
-      const paintWindow = document.getElementById('paintWindow');
-      const frame = document.getElementById('paintFrame');
-      if (!paintWindow || !frame || !frame.contentWindow) {
-        return { ok: false, reason: 'paint window or iframe unavailable' };
-      }
-
-      const frameDoc = frame.contentWindow.document;
-      const windowEl = frameDoc.querySelector('.window');
-      const canvasWrapEl = frameDoc.getElementById('canvasWrap');
-      if (!windowEl || !canvasWrapEl) {
-        return { ok: false, reason: 'paint content nodes unavailable' };
-      }
-
-      const measure = () => ({
-        windowWidth: windowEl.getBoundingClientRect().width,
-        windowHeight: windowEl.getBoundingClientRect().height,
-        wrapWidth: canvasWrapEl.getBoundingClientRect().width,
-        wrapHeight: canvasWrapEl.getBoundingClientRect().height,
+    // The Paint frame has an opaque origin, so the shell page cannot read its
+    // document: resize from the shell, measure from inside the frame.
+    const paintContent = await (await page.$('#paintFrame')).contentFrame();
+    const measurePaint = () =>
+      paintContent.evaluate(() => {
+        const windowEl = document.querySelector('.window');
+        const canvasWrapEl = document.getElementById('canvasWrap');
+        if (!windowEl || !canvasWrapEl) return null;
+        return {
+          windowWidth: windowEl.getBoundingClientRect().width,
+          windowHeight: windowEl.getBoundingClientRect().height,
+          wrapWidth: canvasWrapEl.getBoundingClientRect().width,
+          wrapHeight: canvasWrapEl.getBoundingClientRect().height,
+        };
       });
+    const resizePaintWindow = async (width, height) => {
+      await page.evaluate(
+        ({ width, height }) => {
+          const paintWindow = document.getElementById('paintWindow');
+          paintWindow.style.width = width;
+          paintWindow.style.height = height;
+        },
+        { width, height }
+      );
+      await page.waitForTimeout(120);
+      return measurePaint();
+    };
 
-      paintWindow.style.width = '900px';
-      paintWindow.style.height = '650px';
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      const bigger = measure();
-
-      paintWindow.style.width = '560px';
-      paintWindow.style.height = '420px';
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      const smaller = measure();
-
-      return {
-        ok: true,
-        bigger,
-        smaller,
-      };
-    });
+    const bigger = await resizePaintWindow('900px', '650px');
+    const smaller = await resizePaintWindow('560px', '420px');
+    const resizeState =
+      bigger && smaller
+        ? { ok: true, bigger, smaller }
+        : { ok: false, reason: 'paint content nodes unavailable' };
 
     assert(resizeState.ok, `Paint resize probe succeeded (${resizeState.reason || 'ok'})`);
     assert(
