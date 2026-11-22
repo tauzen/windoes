@@ -22,11 +22,11 @@ About 5,400 lines of app logic live in inline `<script>` blocks in the `index.ht
 
 ## Acceptance
 
-- Each migrated app's `index.html` has no inline script beyond a module loader tag.
+- Each migrated app's `index.html` has no inline script beyond one external `<script src="app.js">` tag.
 - `npm run lint` and `npm run typecheck` cover the new files (seen in `tsc --listFilesOnly` and an ESLint run on one file).
 - Each migrated app's suite passes unchanged.
 - `npm run build` exits 0 and the built app loads.
 
 ## Notes
 
-Sequenced after the sandbox change, which may change how apps load and store data.
+The loader is a classic script, not a module: the app suites open `index.html` over `file://`, where Chromium blocks module scripts. Module tags wait until the suites stop using `file://`.
