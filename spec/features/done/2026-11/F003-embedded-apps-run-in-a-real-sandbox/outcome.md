@@ -1,0 +1,3 @@
+# Outcome
+
+Every embedded app now runs in an opaque-origin sandbox and reaches the shell only through the validated message channel; saved app data moved behind a shell storage bridge under the same keys, and the shell fetches Winamp tracks. Merged in PR #130 (`63f58dc`) after `review-1.md` failed on an IE Refresh escape and `review-2.md` passed the repair. The real Winamp track Worker on GitHub Pages was not tested. Accepted gap: a remote IE page can navigate its own frame to a shell-origin page and keep both flags. Trust follows the frame, so an app must never navigate to foreign content (comment at `isTrustedMessageEvent`).

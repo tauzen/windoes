@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-22
+landed: 2026-11-22
 ---
 
 # F003 · Embedded apps run in a real sandbox
