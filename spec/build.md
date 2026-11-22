@@ -14,16 +14,18 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- Code-quality fixes from the issue #127 analysis: gate CI and deploy, then close the app sandbox holes. Changes must keep every app suite in `test:all` green.
-- F003 starts as a survey (`notes.md`, no code); its code change also closes the same-origin bypass of the Paint path grants.
+- Code-quality fixes from the issue #127 analysis: CI gates, Paint file grants and the app sandbox are merged; the last step moves inline app scripts into checked modules. Changes must keep every app suite in `test:all` green.
+- F004 runs one app per slice and one PR per slice; each slice keeps the sandbox storage bridge and frame-trust rule intact.
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F004-app-code-is-covered-by-lint-and-type-checks` (🟠 ACTIVE): App code is covered by lint and type checks
+
 ## NEXT
 
-- `F004-app-code-is-covered-by-lint-and-type-checks` (PLANNED): moves inline app scripts into checked modules; waits for F003's sandbox design.
+- <!-- One clause per planned ticket. -->
 
 ## PROVEN
 
