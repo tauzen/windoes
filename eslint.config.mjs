@@ -42,4 +42,15 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
+  {
+    // An app's own code lives in `<app>/app.js`, loaded by a classic
+    // `<script src="app.js">` tag in the app's `index.html`. Script mode makes
+    // `no-implicit-globals` flag top-level names that would leak onto
+    // `window`. The same glob is in `tsconfig.json`, so the type check covers
+    // these files too.
+    files: ['windoes/public/applications/*/app.js'],
+    languageOptions: {
+      sourceType: 'script',
+    },
+  },
 ];
