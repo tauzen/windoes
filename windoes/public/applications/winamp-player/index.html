@@ -1717,10 +1717,22 @@
         // Tracks loaded from tracks.json carry a `key` (R2 object path) instead
         // of a direct `url`. We fetch a short-lived signed URL from the Worker
         // just before playback and cache it until it's about to expire.
+        //
+        // Inside the Windoes shell the player runs in an opaque-origin sandbox,
+        // and the Worker accepts only the shell's origin. There the shell signs
+        // and downloads the track and hands over its bytes; the player plays
+        // them from a blob: URL it owns. Only the current track's blob is kept.
         const SIGN_REFRESH_MARGIN_MS = 30_000;
+        const SHELL_FETCH_TIMEOUT_MS = 120_000;
+        const framed = window.self !== window.top;
         let signEndpoint = '';
+        let shellTrack = null;
+        let nextShellRequestId = 0;
 
         async function resolveTrackUrl(track) {
+          if (framed && track.key && signEndpoint) {
+            return resolveTrackViaShell(track);
+          }
           const stillValid =
             track.url &&
             track.signedExpiresAt &&
@@ -1740,6 +1752,44 @@
           track.url = url;
           track.signedExpiresAt = expiresAt;
           return url;
+        }
+
+        async function resolveTrackViaShell(track) {
+          if (shellTrack && shellTrack.track === track) return shellTrack.url;
+          const { buffer, mimeType } = await fetchTrackFromShell(track.key);
+          if (shellTrack) URL.revokeObjectURL(shellTrack.url);
+          const url = URL.createObjectURL(new Blob([buffer], { type: mimeType }));
+          shellTrack = { track, url };
+          return url;
+        }
+
+        function fetchTrackFromShell(key) {
+          return new Promise((resolve, reject) => {
+            const requestId = `winamp-track-${++nextShellRequestId}`;
+            const timer = setTimeout(() => {
+              window.removeEventListener('message', onMessage);
+              reject(new Error('The shell did not deliver the track.'));
+            }, SHELL_FETCH_TIMEOUT_MS);
+
+            function onMessage(event) {
+              if (event.source !== window.parent || !event.data) return;
+              if (event.data.type !== 'winamp-track-fetch-result') return;
+              if (event.data.requestId !== requestId) return;
+              clearTimeout(timer);
+              window.removeEventListener('message', onMessage);
+              if (event.data.ok && event.data.buffer instanceof ArrayBuffer) {
+                resolve({ buffer: event.data.buffer, mimeType: event.data.mimeType });
+              } else {
+                reject(new Error(event.data.error || 'track fetch failed'));
+              }
+            }
+
+            window.addEventListener('message', onMessage);
+            window.parent.postMessage(
+              { type: 'winamp-track-fetch', requestId, key },
+              window.location.origin
+            );
+          });
         }
 
         // ===== PLAYBACK =====

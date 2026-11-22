@@ -72,10 +72,34 @@ function bootAssetsPlugin() {
   };
 }
 
+/**
+ * App frames run in an opaque origin (no `allow-same-origin`), so their own
+ * `fetch`/XHR calls for files next to them (Winamp's `tracks.json`, the
+ * VirtualBoks emulator core and firmware) are cross-origin. GitHub Pages
+ * answers every file with `Access-Control-Allow-Origin: *`; this does the same
+ * for the app files on the dev and preview servers. It is limited to
+ * `applications/` so the dev server's source modules stay closed to other
+ * sites (unlike `server.cors: true`).
+ */
+function appsCorsPlugin() {
+  const allowAppFiles = (server) => {
+    const prefix = `${server.config.base}applications/`;
+    server.middlewares.use((req, res, next) => {
+      if (req.url?.startsWith(prefix)) res.setHeader('Access-Control-Allow-Origin', '*');
+      next();
+    });
+  };
+  return {
+    name: 'apps-cors',
+    configureServer: allowAppFiles,
+    configurePreviewServer: allowAppFiles,
+  };
+}
+
 export default defineConfig({
   root: 'windoes',
   base: '/windoes/',
-  plugins: [react(), bootAssetsPlugin()],
+  plugins: [react(), bootAssetsPlugin(), appsCorsPlugin()],
   build: {
     outDir: '../dist',
     emptyOutDir: true,

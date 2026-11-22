@@ -62,6 +62,10 @@ IndexedDB: no app opens IndexedDB. The VirtualFS lives in the shell and is not a
 - **Winamp remote tracks**: the Worker accepts only `Origin: https://tauzen.github.io` on `/sign` and `/stream` (curl: 403 for `null`, for no Origin, and for another origin). Recommended: the shell performs the sign and stream fetch for the Winamp frame and transfers the `ArrayBuffer`. Winamp plays it from a `blob:` URL that it creates itself, which keeps the WebAudio EQ and visualizer working. Cost: playback starts after the whole file has downloaded (10,974,848 bytes for the first track). Alternative: the owner adds `null` to the Worker allowlist. That allows any sandboxed frame on any site, which defeats the allowlist. Not recommended.
 - **Acceptance test for the escape**: inside the app frame, `window.parent.document` must throw `SecurityError` (`FRAME_PROBE` in `probe.cjs` shows the shape). In the same run, assert that no console message matches `/escape its sandboxing/`.
 
-## Open question
+## Decisions taken in implementation
 
-- IE remote pages: keep `allow-same-origin` for other origins (with the same-origin guard above), or drop it for all of them? This is a product call. Recommended: keep it with the guard.
+- IE remote pages (owner): a page on another origin keeps `allow-same-origin`; a page on the shell's origin, or `about:blank`, gets `allow-scripts` only. The rule applies to the URL the shell navigates to. A remote page that later navigates its own frame to the shell's origin keeps the remote flags; that page can only load the shell's own documents there.
+- Winamp (owner): the shell fetches remote tracks. The shell reads `signEndpoint` and the track keys from its own copy of `tracks.json`, and refuses any key not listed there.
+- Storage bridge: one shared client, `applications/shared/app-storage.js` (`WindoesAppStorage.load/save`). The shell maps the app folder of the frame's `src` to its single key. A request that names another key gets `ok: false`.
+- VirtualBoks also gets `allow-forms`. Without it Chromium blocks the New/Settings dialog submit in the shell; this was already true before F003 and surfaced in the new reload test.
+- Tests: `tests/test-app-sandbox.js` (in `test:integration`) covers every acceptance line in the shell, including reload, the Paint self-grant, Winamp through a stand-in Worker, IE, dev CORS, and the escape warning.

@@ -92,7 +92,7 @@ const ieConfig = WindoesApp.WindowManager.register('ie', {
         id="browserFrame"
         title="Internet Explorer content"
         referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
       ></iframe>
     ),
     statusBar: (
@@ -121,11 +121,24 @@ const addressInput = ieConfig.el.querySelector('#addressInput');
 const homePage = 'https://example.com';
 let bodyLoadingTimeoutId = null;
 
-// Remote pages keep the historical sandbox; local VFS documents render via
-// `srcdoc`, which would otherwise inherit the shell's origin, so they get an
-// opaque origin (no allow-same-origin) to keep their scripts boxed in.
+// Local VFS documents render via `srcdoc`, which would otherwise inherit the
+// shell's origin, so they get an opaque origin (no allow-same-origin) to keep
+// their scripts boxed in. Remote pages on another origin keep
+// allow-same-origin so they can use their own storage; a page on the shell's
+// own origin (or about:blank, which inherits it) gets the opaque sandbox too,
+// because both flags on a same-origin document let it remove its sandbox.
 const REMOTE_SANDBOX = 'allow-scripts allow-same-origin';
 const LOCAL_SANDBOX = 'allow-scripts';
+
+function sandboxForUrl(url) {
+  let origin;
+  try {
+    origin = new URL(url).origin;
+  } catch {
+    return LOCAL_SANDBOX;
+  }
+  return origin === 'null' || origin === window.location.origin ? LOCAL_SANDBOX : REMOTE_SANDBOX;
+}
 
 const ieFs = new VirtualFS();
 const ensureIeFs = once(() => ieFs.init());
@@ -190,7 +203,7 @@ function navigate(url, pushHistory = true) {
   const finalUrl = normalizeBrowserUrl(url, homePage);
   body_loading(true);
 
-  frame.setAttribute('sandbox', REMOTE_SANDBOX);
+  frame.setAttribute('sandbox', sandboxForUrl(finalUrl));
   frame.removeAttribute('srcdoc');
   if (finalUrl === 'about:blank') {
     frame.src = '';
@@ -268,16 +281,14 @@ function onHomeClick() {
   navigate(homePage);
 }
 
+// Refresh reloads through `navigate`, so the typed URL gets the same
+// normalization and sandbox rule as Go; setting `frame.src` directly would keep
+// the previous page's sandbox flags.
 function onRefreshClick() {
+  const url = addressInput.value;
+  if (!url || url === 'about:blank') return;
+  navigate(url, false);
   WindoesApp.state.dispatch({ type: 'BROWSER_SET_STATUS', status: 'Refreshing...' });
-  const localPath = vfsPathFromBrowserInput(addressInput.value);
-  if (localPath) {
-    navigateToLocalFile(localPath, false);
-    return;
-  }
-  if (addressInput.value && addressInput.value !== 'about:blank') {
-    frame.src = addressInput.value;
-  }
 }
 
 function onStopClick() {
