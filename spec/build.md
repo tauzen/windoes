@@ -14,8 +14,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- Code-quality fixes from the issue #127 analysis: CI gates, Paint file grants and the app sandbox are merged; the last step moves inline app scripts into checked modules. Changes must keep every app suite in `test:all` green.
-- F004 runs one app per slice and one PR per slice; each slice keeps the sandbox storage bridge and frame-trust rule intact.
+- The issue #127 code-quality stretch is complete (F001–F004 merged). Next direction waits on the owner; `spec/vision.md` is still empty.
 
 ## NOW
 
