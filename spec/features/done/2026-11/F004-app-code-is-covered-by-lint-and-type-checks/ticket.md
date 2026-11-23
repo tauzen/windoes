@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-22
+landed: 2026-11-23
 ---
 
 # F004 · App code is covered by lint and type checks
