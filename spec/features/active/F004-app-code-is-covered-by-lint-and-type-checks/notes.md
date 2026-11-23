@@ -31,7 +31,7 @@ Inline `<script>` lines in each app's `index.html` before the move, measured 202
 - `required(value, what)` throws on `null`/`undefined`, for `getContext('2d')`, `parentElement`, `querySelector` results that the markup guarantees.
 - Prefer the captured element over `e.target` in listeners; set `input.value` with a string (`String(n)`), read it with `Number(...)` / `parseFloat(...)`.
 - Narrow casts (`/** @type {NodeListOf<HTMLInputElement>} */ (...)`) only for `querySelectorAll` results and vendor-prefixed globals.
-- Apps that use `../shared/app-storage.js` (minesweeper, solitaire, paint, ascii-runner) read a global it sets. Their slice must declare that global's type for the type check; winamp-player does not use it.
+- Apps that load `../shared/app-storage.js` (ascii-runner, minesweeper, virtualboks) read a global it sets; a migrated app declares that global's type inside its own `app.js`. Paint, Solitaire, Minecraft and Winamp do not load it.
 
 ## Proof that the app still loads in the shell
 
