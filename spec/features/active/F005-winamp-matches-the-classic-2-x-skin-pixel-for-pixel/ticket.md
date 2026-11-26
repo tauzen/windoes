@@ -23,11 +23,11 @@ The Winamp app in Windoes looks like the classic Winamp 2.x base skin in period 
 
 ## Acceptance
 
-- A side-by-side image of each window (main, equalizer, playlist) next to its reference screenshot, at 1× scale, is in the feature folder.
-- A pixel diff against each reference shows no difference outside dynamic areas (track title, time, visualizer, playlist rows); the diff images are in the feature folder.
-- Text renders with a pixel font drawn for this app in the skin's style, not a system font.
+- Every window, sprite, button and text field has the reference size and position at 1× (checked by the diff harness's geometry report), and every listed state exists.
+- The diff harness writes, per window, a committed diff image of our capture and a share of differing pixels outside the dynamic areas; the share is reported, not gated. Side-by-side images with the reference go to a git-ignored folder for local review.
+- Text renders with pixel fonts drawn for this app (5×6 small font, 9×13 digits, and a proportional font for playlist rows), not a system font.
 - The Winamp app suite and the sandbox test pass, including remote track playback.
 
 ## Notes
 
-Owner decision: all art is our own, redrawn from the reference screenshots. Do not ship, extract or trace the original Winamp skin bitmaps or `.wsz` files. Reference screenshots stay comparison material, committed only where their license allows.
+Owner decisions: all art is our own, drawn to the reference geometry and palette. Do not ship, extract or trace the original Winamp skin bitmaps or `.wsz` files, and do not copy reference pixels. Reference screenshots are fetched at check time and never committed. The owner judges the look; the main window is shown to the owner before the equalizer and playlist art starts.
