@@ -8,12 +8,12 @@ Coordinates below are `x,y wxh` in pixels, relative to the top-left corner of th
 
 No reference screenshot found has a license that allows us to commit it. All of them show Nullsoft's skin art. `references/` holds only our own screenshots of the current app.
 
-| Image | URL | Shows | Version | Scale | License | Committed |
-|---|---|---|---|---|---|---|
-| Skin Museum screenshot of `base-2.91.wsz` | https://r2.webampskins.org/screenshots/5e4f10275dcb1fb211d4a8b4f1bda236.png (page: https://skins.webamp.org/skin/5e4f10275dcb1fb211d4a8b4f1bda236) | main + EQ + playlist stacked, 275x348, playing, track 1 at 00:03 | base skin 2.91, rendered by Webamp | 1x | none stated; art is Nullsoft's | no, URL only |
-| Internet Archive copy | https://archive.org/download/winampskins_base-2.91/base-2.91.png (item: https://archive.org/details/winampskins_base-2.91) | same composition, 275x348 | base skin 2.91, Webamp render; uploaded by the Webamp author 2023-07-30 | 1x | no license field in item metadata | no, URL only |
-| Wikipedia `File:Winamp2.PNG` | https://upload.wikimedia.org/wikipedia/en/b/bc/Winamp2.PNG (page: https://en.wikipedia.org/wiki/File:Winamp2.PNG) | main + EQ + playlist stacked, 275x348, playing | real Winamp 2.x; an older base skin than 2.91 (playlist buttons `+FILE -FILE SEL ALL FILE INF LOAD LIST`, EQ labels `+20db/-20db`) [INFERENCE from the labels] | 1x | non-free, fair use on en.wikipedia only | no, URL only |
-| Wikimedia Commons `File:Webamp_screenshot.png` | https://commons.wikimedia.org/wiki/File:Webamp_screenshot.png | Webamp with a third-party Xbox skin, 640x306 | not the base skin | 1x | CC BY-SA 4.0 | no, wrong skin |
+| Image                                          | URL                                                                                                                                                | Shows                                                            | Version                                                                                                                                                        | Scale | License                                 | Committed      |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | --------------------------------------- | -------------- |
+| Skin Museum screenshot of `base-2.91.wsz`      | https://r2.webampskins.org/screenshots/5e4f10275dcb1fb211d4a8b4f1bda236.png (page: https://skins.webamp.org/skin/5e4f10275dcb1fb211d4a8b4f1bda236) | main + EQ + playlist stacked, 275x348, playing, track 1 at 00:03 | base skin 2.91, rendered by Webamp                                                                                                                             | 1x    | none stated; art is Nullsoft's          | no, URL only   |
+| Internet Archive copy                          | https://archive.org/download/winampskins_base-2.91/base-2.91.png (item: https://archive.org/details/winampskins_base-2.91)                         | same composition, 275x348                                        | base skin 2.91, Webamp render; uploaded by the Webamp author 2023-07-30                                                                                        | 1x    | no license field in item metadata       | no, URL only   |
+| Wikipedia `File:Winamp2.PNG`                   | https://upload.wikimedia.org/wikipedia/en/b/bc/Winamp2.PNG (page: https://en.wikipedia.org/wiki/File:Winamp2.PNG)                                  | main + EQ + playlist stacked, 275x348, playing                   | real Winamp 2.x; an older base skin than 2.91 (playlist buttons `+FILE -FILE SEL ALL FILE INF LOAD LIST`, EQ labels `+20db/-20db`) [INFERENCE from the labels] | 1x    | non-free, fair use on en.wikipedia only | no, URL only   |
+| Wikimedia Commons `File:Webamp_screenshot.png` | https://commons.wikimedia.org/wiki/File:Webamp_screenshot.png                                                                                      | Webamp with a third-party Xbox skin, 640x306                     | not the base skin                                                                                                                                              | 1x    | CC BY-SA 4.0                            | no, wrong skin |
 
 SHA-256 at survey time: Museum PNG `6c6b81a825036fbff4ed4ca3c0008566157a5100a59a56e8c4bf261e2fa8f47c` (Last-Modified 2022-10-08); archive.org PNG `468fe16a…3a3231` (bytes differ from the Museum PNG; pixel identity not checked); Wikipedia PNG `22f58ced…ac7e5d`.
 
@@ -45,58 +45,58 @@ Current geometry was measured in the shell at 1x with `getBoundingClientRect` (s
 
 ### Main window
 
-| Item | Current | Reference (2.91) |
-|---|---|---|
-| Size | 275x145 | 275x116 |
-| Background | flat dark grey `rgb(35,35,41)` panels | blue-grey bitmap with bevelled frame, recessed display boxes, printed labels |
-| Title bar | 14 px; lightning icon; spaced text `W I N A M P` on dark-blue gradient with thin gold lines; two text buttons `_` `×` at 252,3 | 14 px; options button 6,3; gold ribbed bars; bold pixel `WINAMP`; minimize 244,3, shade 254,3, close 264,3, each 9x9; active and inactive bitmaps |
-| Display | one black box 8,20 259x58 | separate boxes drawn in the background art |
-| Clutter bar | 9,21 8x56, letters O A I D V as text | 10,22 8x43 bitmap |
-| Time | Courier New 26 px green text `00:00` at 31,25 88x26 | four 9x13 digit sprites at 39+(9,21,39,51),26; minus sign 5x1; colon is background art |
-| Play indicator | text `▶` 7 px at 21,34 | 9x9 sprite at 26,28 (play, pause, stop) plus 3x9 work indicator at 24,28 |
-| Visualizer | canvas 76x32 at 24,52; 16 bars 4 px wide, 1 px gap, 2 px segments; the display box ends at y78 | 76x16 at 24,43; 19 bars 3 px wide, 1 px gap, 16-step colour ramp, grey peak dots; oscilloscope mode |
-| Marquee | Courier New 8 px at 125,25 136x14; empty when stopped | 154x6 at 111,24; 5x6 pixel font, upper case |
-| kbps / kHz | Courier New 8 px in boxes at 128,63 and 171,63; labels as dim text | 5x6 font, 15x6 at 111,43 and 10x6 at 156,43; labels are background art |
-| mono / stereo | Courier New 7 px text at 214,65 | 27x12 and 29x12 sprites at 212,41 and 239,41, lit and unlit |
-| Seek bar | range input 8,86 259x10; gold thumb | 248x10 at 16,72; 29x10 thumb, normal and pressed |
-| Volume | range input 8,107 130x10; segmented green-yellow-red LED bar; thumb 14x10 | 68x13 at 107,57; background colour shifts with level (28 frames); thumb 14x11 normal and pressed |
-| Balance | range input 141,107 87x10; segmented bar | 38x13 at 177,57; 28 frames; thumb 14x11 |
-| EQ / PL toggles | 16x15 at 233,104 and 251,104; Arial 6 px text | 23x12 at 219,58 and 242,58; LED; four states each |
-| Transport | five 23x18 buttons at y122, x 7,30,53,76,99; icons drawn with CSS | y88, x 16,39,62,85 (23x18) and 108 (22x18); bitmap icons; normal and pressed |
-| Eject | 23x18 at 128,122 | 22x16 at 136,89 |
-| Shuffle | 55x15 at 157,124 with a checkbox | 47x15 at 164,89 with LED; four states |
-| Repeat | 16x15 at 214,124 | 28x15 at 210,89; four states |
-| Logo | lightning glyph near 255,128 | 13x15 about button at 253,91 |
-| Fonts | Arial, Arial Narrow, Courier New; on Linux these resolve to fallback fonts | no system font in the main window |
+| Item            | Current                                                                                                                        | Reference (2.91)                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size            | 275x145                                                                                                                        | 275x116                                                                                                                                           |
+| Background      | flat dark grey `rgb(35,35,41)` panels                                                                                          | blue-grey bitmap with bevelled frame, recessed display boxes, printed labels                                                                      |
+| Title bar       | 14 px; lightning icon; spaced text `W I N A M P` on dark-blue gradient with thin gold lines; two text buttons `_` `×` at 252,3 | 14 px; options button 6,3; gold ribbed bars; bold pixel `WINAMP`; minimize 244,3, shade 254,3, close 264,3, each 9x9; active and inactive bitmaps |
+| Display         | one black box 8,20 259x58                                                                                                      | separate boxes drawn in the background art                                                                                                        |
+| Clutter bar     | 9,21 8x56, letters O A I D V as text                                                                                           | 10,22 8x43 bitmap                                                                                                                                 |
+| Time            | Courier New 26 px green text `00:00` at 31,25 88x26                                                                            | four 9x13 digit sprites at 39+(9,21,39,51),26; minus sign 5x1; colon is background art                                                            |
+| Play indicator  | text `▶` 7 px at 21,34                                                                                                         | 9x9 sprite at 26,28 (play, pause, stop) plus 3x9 work indicator at 24,28                                                                          |
+| Visualizer      | canvas 76x32 at 24,52; 16 bars 4 px wide, 1 px gap, 2 px segments; the display box ends at y78                                 | 76x16 at 24,43; 19 bars 3 px wide, 1 px gap, 16-step colour ramp, grey peak dots; oscilloscope mode                                               |
+| Marquee         | Courier New 8 px at 125,25 136x14; empty when stopped                                                                          | 154x6 at 111,24; 5x6 pixel font, upper case                                                                                                       |
+| kbps / kHz      | Courier New 8 px in boxes at 128,63 and 171,63; labels as dim text                                                             | 5x6 font, 15x6 at 111,43 and 10x6 at 156,43; labels are background art                                                                            |
+| mono / stereo   | Courier New 7 px text at 214,65                                                                                                | 27x12 and 29x12 sprites at 212,41 and 239,41, lit and unlit                                                                                       |
+| Seek bar        | range input 8,86 259x10; gold thumb                                                                                            | 248x10 at 16,72; 29x10 thumb, normal and pressed                                                                                                  |
+| Volume          | range input 8,107 130x10; segmented green-yellow-red LED bar; thumb 14x10                                                      | 68x13 at 107,57; background colour shifts with level (28 frames); thumb 14x11 normal and pressed                                                  |
+| Balance         | range input 141,107 87x10; segmented bar                                                                                       | 38x13 at 177,57; 28 frames; thumb 14x11                                                                                                           |
+| EQ / PL toggles | 16x15 at 233,104 and 251,104; Arial 6 px text                                                                                  | 23x12 at 219,58 and 242,58; LED; four states each                                                                                                 |
+| Transport       | five 23x18 buttons at y122, x 7,30,53,76,99; icons drawn with CSS                                                              | y88, x 16,39,62,85 (23x18) and 108 (22x18); bitmap icons; normal and pressed                                                                      |
+| Eject           | 23x18 at 128,122                                                                                                               | 22x16 at 136,89                                                                                                                                   |
+| Shuffle         | 55x15 at 157,124 with a checkbox                                                                                               | 47x15 at 164,89 with LED; four states                                                                                                             |
+| Repeat          | 16x15 at 214,124                                                                                                               | 28x15 at 210,89; four states                                                                                                                      |
+| Logo            | lightning glyph near 255,128                                                                                                   | 13x15 about button at 253,91                                                                                                                      |
+| Fonts           | Arial, Arial Narrow, Courier New; on Linux these resolve to fallback fonts                                                     | no system font in the main window                                                                                                                 |
 
 ### Equalizer
 
-| Item | Current | Reference (2.91) |
-|---|---|---|
-| Size | 275x155 | 275x116 |
-| Title bar | dark-blue gradient, gold lines, no buttons | 14 px bitmap, active and inactive; shade 254,3 and close 264,3 |
-| ON | 22x15 at 9,21, green text | 26x12 at 14,18 with LED; four states |
-| AUTO | 32x15 at 34,21 | 32x12 at 40,18; four states |
-| PRESETS | 47x11 at 219,23 | 44x12 at 217,18; normal and pressed |
-| Graph | canvas 115x21 at 85,18; green curve on black | 113x19 at 86,17; grid background, curve colour depends on height, preamp line 113x1 |
-| Preamp slider | range input 14x90 at 14,50; red-yellow-green track; gold thumb 16x6 | 14x63 at 21,38; coloured bar background (28 frames); thumb 11x11 normal and pressed |
-| Band sliders | ten range inputs, 90 px tall, area 65,43 201x97 | ten 14x63 at x 78+18n, y38 |
-| dB labels | small grey text `+12dB`, `0dB`, `-12dB` | gold pixel text `+12 db`, `+0 db`, `-12 db` at 45,36 / 45,64 / 45,95, in background art |
-| Frequency labels | grey text `70 180 320 600 1K 3K 6K 12K 14K 16K` along y144 | `60 170 310 600 1K 3K 6K 12K 14K 16K` in background art. The current labels also disagree with the app's own filters (`EQ_FREQUENCIES` in `app.js` is 60, 170, 310, …) |
+| Item             | Current                                                             | Reference (2.91)                                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size             | 275x155                                                             | 275x116                                                                                                                                                                |
+| Title bar        | dark-blue gradient, gold lines, no buttons                          | 14 px bitmap, active and inactive; shade 254,3 and close 264,3                                                                                                         |
+| ON               | 22x15 at 9,21, green text                                           | 26x12 at 14,18 with LED; four states                                                                                                                                   |
+| AUTO             | 32x15 at 34,21                                                      | 32x12 at 40,18; four states                                                                                                                                            |
+| PRESETS          | 47x11 at 219,23                                                     | 44x12 at 217,18; normal and pressed                                                                                                                                    |
+| Graph            | canvas 115x21 at 85,18; green curve on black                        | 113x19 at 86,17; grid background, curve colour depends on height, preamp line 113x1                                                                                    |
+| Preamp slider    | range input 14x90 at 14,50; red-yellow-green track; gold thumb 16x6 | 14x63 at 21,38; coloured bar background (28 frames); thumb 11x11 normal and pressed                                                                                    |
+| Band sliders     | ten range inputs, 90 px tall, area 65,43 201x97                     | ten 14x63 at x 78+18n, y38                                                                                                                                             |
+| dB labels        | small grey text `+12dB`, `0dB`, `-12dB`                             | gold pixel text `+12 db`, `+0 db`, `-12 db` at 45,36 / 45,64 / 45,95, in background art                                                                                |
+| Frequency labels | grey text `70 180 320 600 1K 3K 6K 12K 14K 16K` along y144          | `60 170 310 600 1K 3K 6K 12K 14K 16K` in background art. The current labels also disagree with the app's own filters (`EQ_FREQUENCIES` in `app.js` is 60, 170, 310, …) |
 
 ### Playlist
 
-| Item | Current | Reference (2.91) |
-|---|---|---|
-| Size | 275x107 (last row clipped by the shell frame) | 275x116 at default size; resizable in 25x29 steps |
-| Title bar | 14 px, gradient and gold lines, no buttons | 20 px: corners 25x20, tiles 25x20, centre title 100x20; active and inactive; shade and close 9x9 at right |
-| Side frame | 4 px margins | left tile 12 px; right tile 20 px holding the scrollbar (handle 8x18, normal and pressed) |
-| Rows | Courier New, 14 px pitch; current track has blue background and white text | proportional system font, 13 px pitch; Arial, normal text `#00FF00`, current track `#FFFFFF`, background `#000000`, selected row `#0000C6` (Webamp's `defaultPlaylistStyle` in `packages/webamp/js/selectors.ts`) |
-| Bottom bar | buttons ADD REM SEL MISC as Arial 7 px text, 27x11 etc. at y86; LIST OPTS 22x16 | 38 px: left 125x38 with four 22x18 buttons at x 14,43,72,101, y86; right 150x38 with LIST OPTS 22x18, running time, mini transport and resize grip; 25x38 tile between |
-| Info | `15:46` total length and `0:00:00:00` LED clock, Courier New | running time `4:00/12:16` (selected/total) at 7,10 and mini time `00:03` at 66,23 of the right block, 5x6 font |
-| Mini transport | 36x6 strip of CSS glyphs | six 10x10 hit areas at 3,22 of the right block, art in background |
-| Menus | ADD/REM/SEL/MISC act directly | each opens a vertical sprite menu (3 to 4 buttons of 22x18 plus a 3 px bar). Adding menus is new behaviour and outside this ticket unless the owner asks |
-| Visualizer slot | none | 75x38 block between left and right parts when the window is wider than 275 |
+| Item            | Current                                                                         | Reference (2.91)                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size            | 275x107 (last row clipped by the shell frame)                                   | 275x116 at default size; resizable in 25x29 steps                                                                                                                                                                 |
+| Title bar       | 14 px, gradient and gold lines, no buttons                                      | 20 px: corners 25x20, tiles 25x20, centre title 100x20; active and inactive; shade and close 9x9 at right                                                                                                         |
+| Side frame      | 4 px margins                                                                    | left tile 12 px; right tile 20 px holding the scrollbar (handle 8x18, normal and pressed)                                                                                                                         |
+| Rows            | Courier New, 14 px pitch; current track has blue background and white text      | proportional system font, 13 px pitch; Arial, normal text `#00FF00`, current track `#FFFFFF`, background `#000000`, selected row `#0000C6` (Webamp's `defaultPlaylistStyle` in `packages/webamp/js/selectors.ts`) |
+| Bottom bar      | buttons ADD REM SEL MISC as Arial 7 px text, 27x11 etc. at y86; LIST OPTS 22x16 | 38 px: left 125x38 with four 22x18 buttons at x 14,43,72,101, y86; right 150x38 with LIST OPTS 22x18, running time, mini transport and resize grip; 25x38 tile between                                            |
+| Info            | `15:46` total length and `0:00:00:00` LED clock, Courier New                    | running time `4:00/12:16` (selected/total) at 7,10 and mini time `00:03` at 66,23 of the right block, 5x6 font                                                                                                    |
+| Mini transport  | 36x6 strip of CSS glyphs                                                        | six 10x10 hit areas at 3,22 of the right block, art in background                                                                                                                                                 |
+| Menus           | ADD/REM/SEL/MISC act directly                                                   | each opens a vertical sprite menu (3 to 4 buttons of 22x18 plus a 3 px bar). Adding menus is new behaviour and outside this ticket unless the owner asks                                                          |
+| Visualizer slot | none                                                                            | 75x38 block between left and right parts when the window is wider than 275                                                                                                                                        |
 
 ## 4. Plan for our own pixel art (path b)
 
@@ -106,59 +106,59 @@ Sizes come from the reference screenshots and the Webamp layout code (section 2)
 
 Main window:
 
-| Sprite | Size | States | Count |
-|---|---|---|---|
-| Background (frame, display boxes, labels `kbps` `kHz`, colon) | 275x116 | 1 | 1 |
-| Title bar | 275x14 | active, inactive | 2 |
-| Title buttons: options, minimize, shade, close | 9x9 | normal, pressed | 8 |
-| Clutter bar | 8x43 | normal, disabled | 2 |
-| Play / pause / stop indicator | 9x9 | 3 | 3 |
-| Work indicator | 3x9 | on, off | 2 |
-| Large digits 0–9, minus, blank | 9x13 | 1 | 12 |
-| Mono, stereo | 27x12, 29x12 | lit, unlit | 4 |
-| Seek background | 248x10 | 1 | 1 |
-| Seek thumb | 29x10 | normal, pressed | 2 |
-| Volume background | 68x13 (+2 px pitch) | 28 level frames | 28, generated |
-| Volume thumb | 14x11 | normal, pressed | 2 |
-| Balance background | 38x13 | 28 frames | 28, generated |
-| Balance thumb | 14x11 | normal, pressed | 2 |
-| Previous, play, pause, stop | 23x18 | normal, pressed | 8 |
-| Next | 22x18 | normal, pressed | 2 |
-| Eject | 22x16 | normal, pressed | 2 |
-| Shuffle | 47x15 | off, off-pressed, on, on-pressed | 4 |
-| Repeat | 28x15 | same four | 4 |
-| EQ, PL toggles | 23x12 | same four | 8 |
+| Sprite                                                        | Size                | States                           | Count         |
+| ------------------------------------------------------------- | ------------------- | -------------------------------- | ------------- |
+| Background (frame, display boxes, labels `kbps` `kHz`, colon) | 275x116             | 1                                | 1             |
+| Title bar                                                     | 275x14              | active, inactive                 | 2             |
+| Title buttons: options, minimize, shade, close                | 9x9                 | normal, pressed                  | 8             |
+| Clutter bar                                                   | 8x43                | normal, disabled                 | 2             |
+| Play / pause / stop indicator                                 | 9x9                 | 3                                | 3             |
+| Work indicator                                                | 3x9                 | on, off                          | 2             |
+| Large digits 0–9, minus, blank                                | 9x13                | 1                                | 12            |
+| Mono, stereo                                                  | 27x12, 29x12        | lit, unlit                       | 4             |
+| Seek background                                               | 248x10              | 1                                | 1             |
+| Seek thumb                                                    | 29x10               | normal, pressed                  | 2             |
+| Volume background                                             | 68x13 (+2 px pitch) | 28 level frames                  | 28, generated |
+| Volume thumb                                                  | 14x11               | normal, pressed                  | 2             |
+| Balance background                                            | 38x13               | 28 frames                        | 28, generated |
+| Balance thumb                                                 | 14x11               | normal, pressed                  | 2             |
+| Previous, play, pause, stop                                   | 23x18               | normal, pressed                  | 8             |
+| Next                                                          | 22x18               | normal, pressed                  | 2             |
+| Eject                                                         | 22x16               | normal, pressed                  | 2             |
+| Shuffle                                                       | 47x15               | off, off-pressed, on, on-pressed | 4             |
+| Repeat                                                        | 28x15               | same four                        | 4             |
+| EQ, PL toggles                                                | 23x12               | same four                        | 8             |
 
 Equalizer:
 
-| Sprite | Size | States | Count |
-|---|---|---|---|
-| Background (frame, dB and frequency labels) | 275x116 | 1 | 1 |
-| Title bar | 275x14 | active, inactive | 2 |
-| Shade, close | 9x9 | normal, pressed | 4 |
-| ON | 26x12 | off, off-pressed, on, on-pressed | 4 |
-| AUTO | 32x12 | same four | 4 |
-| PRESETS | 44x12 | normal, pressed | 2 |
-| Graph background | 113x19 | 1 | 1 |
-| Graph line colour ramp | 1x19 | 1 | 1 |
-| Preamp line | 113x1 | 1 | 1 |
-| Slider bar (preamp and 10 bands) | 14x63 | 28 level frames | 28, generated |
-| Slider thumb | 11x11 | normal, pressed | 2 |
+| Sprite                                      | Size    | States                           | Count         |
+| ------------------------------------------- | ------- | -------------------------------- | ------------- |
+| Background (frame, dB and frequency labels) | 275x116 | 1                                | 1             |
+| Title bar                                   | 275x14  | active, inactive                 | 2             |
+| Shade, close                                | 9x9     | normal, pressed                  | 4             |
+| ON                                          | 26x12   | off, off-pressed, on, on-pressed | 4             |
+| AUTO                                        | 32x12   | same four                        | 4             |
+| PRESETS                                     | 44x12   | normal, pressed                  | 2             |
+| Graph background                            | 113x19  | 1                                | 1             |
+| Graph line colour ramp                      | 1x19    | 1                                | 1             |
+| Preamp line                                 | 113x1   | 1                                | 1             |
+| Slider bar (preamp and 10 bands)            | 14x63   | 28 level frames                  | 28, generated |
+| Slider thumb                                | 11x11   | normal, pressed                  | 2             |
 
 Playlist:
 
-| Sprite | Size | States | Count |
-|---|---|---|---|
-| Top-left corner, top tile, top-right corner | 25x20 | active, inactive | 6 |
-| Title | 100x20 | active, inactive | 2 |
-| Left tile | 12x29 | 1 | 1 |
-| Right tile (scroll track) | 20x29 | 1 | 1 |
-| Scroll handle | 8x18 | normal, pressed | 2 |
-| Bottom-left block (ADD REM SEL MISC art) | 125x38 | 1 | 1 |
-| Bottom tile | 25x38 | 1 | 1 |
-| Bottom-right block (LIST OPTS, time box, mini transport, grip) | 150x38 | 1 | 1 |
-| Bottom button pressed states: ADD, REM, SEL, MISC, LIST OPTS | 22x18 | pressed | 5 |
-| Close, shade | 9x9 | pressed | 2 |
+| Sprite                                                         | Size   | States           | Count |
+| -------------------------------------------------------------- | ------ | ---------------- | ----- |
+| Top-left corner, top tile, top-right corner                    | 25x20  | active, inactive | 6     |
+| Title                                                          | 100x20 | active, inactive | 2     |
+| Left tile                                                      | 12x29  | 1                | 1     |
+| Right tile (scroll track)                                      | 20x29  | 1                | 1     |
+| Scroll handle                                                  | 8x18   | normal, pressed  | 2     |
+| Bottom-left block (ADD REM SEL MISC art)                       | 125x38 | 1                | 1     |
+| Bottom tile                                                    | 25x38  | 1                | 1     |
+| Bottom-right block (LIST OPTS, time box, mini transport, grip) | 150x38 | 1                | 1     |
+| Bottom button pressed states: ADD, REM, SEL, MISC, LIST OPTS   | 22x18  | pressed          | 5     |
+| Close, shade                                                   | 9x9    | pressed          | 2     |
 
 Deferred (shade mode, menus, playlist visualizer slot): main shade background 275x14 x2, shade position bar 17x7 and thumbs 3x7 x3, EQ shade 275x14 x2 and its sliders 3x7 x6, playlist shade 25x14/50x14 x4, 16 menu items 22x18 x2 states, 5 menu bars 3x54/3x72, visualizer slot 75x38.
 
