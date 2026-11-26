@@ -3,7 +3,7 @@ mode background
 width 108
 size 9x13
 color . none
-color X #00E000
+color X #00FF00
 
 glyph 0
 .XXXXXXX.

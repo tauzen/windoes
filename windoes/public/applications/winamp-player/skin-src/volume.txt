@@ -1,0 +1,55 @@
+# Volume: 68x13 track, 28 level frames whose fill shifts from green (silent)
+# to red (loud), and a 14x11 thumb (normal, pressed). Drawn for Windoes.
+mode background
+width 68
+color K #000000
+color a #08080E
+color b #2D2D45
+color l #62627F
+color F #A8A8BC
+color E #E4E4EE
+color L #C8C8D8
+color S #6C6C84
+color P #8C8CA2
+ramp Z #1E9A1E #D8C020 #D82810
+
+levels level 28
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaal
+aKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKZZZZZZZZZl
+aKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKZZZZZZZZZZZZZZZZZZZZZZZZZl
+aKKKKKKKKKKKKKKKKKKKKKKKKKZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZl
+aKKKKKKKKKZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZl
+aZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZl
+llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+frame thumb
+EEEEEEEEEEEEEa
+ELLLLLLLLLLLSa
+ELFFFFFFFFFFSa
+ELFFFSEFSEFFSa
+ELFFFSEFSEFFSa
+ELFFFSEFSEFFSa
+ELFFFSEFSEFFSa
+ELFFFSEFSEFFSa
+ELFFFFFFFFFFSa
+ESSSSSSSSSSSSa
+aaaaaaaaaaaaaa
+
+frame thumb-pressed
+SSSSSSSSSSSSSE
+SPPPPPPPPPPPPE
+SPPPPPPPPPPPPE
+SPPPPSEPSEPPPE
+SPPPPSEPSEPPPE
+SPPPPSEPSEPPPE
+SPPPPSEPSEPPPE
+SPPPPSEPSEPPPE
+SPPPPPPPPPPPPE
+SPPPPPPPPPPPPE
+EEEEEEEEEEEEEE

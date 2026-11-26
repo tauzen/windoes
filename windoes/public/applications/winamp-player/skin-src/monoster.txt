@@ -1,0 +1,62 @@
+# Mono, 27x12, and stereo, 29x12, each lit and unlit, on the display panel. Drawn for Windoes.
+mode background
+width 56
+color d #191927
+color G #00FF00
+color u #16401A
+
+frame mono-on
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddGdddGdGGddGddGddGGddddd
+ddddGGdGGGddGdGGdGdGddGdddd
+ddddGdGdGGddGdGdGGdGddGdddd
+ddddGdddGGddGdGddGdGddGdddd
+ddddGdddGdGGddGddGddGGddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+
+frame mono-off
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+dddduddduduudduddudduuddddd
+dddduuduuudduduudududdudddd
+ddddududuuddududuududdudddd
+dddduddduuddududdududdudddd
+dddduddduduudduddudduuddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddd
+
+frame stereo-on
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+dGGGdGGGddGGGGdGGGddGGGGddGGd
+GdddddGdddGddddGddGdGddddGddG
+dGGdddGdddGGGddGGGddGGGddGddG
+dddGddGdddGddddGdGddGddddGddG
+GGGdddGdddGGGGdGddGdGGGGddGGd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+
+frame stereo-off
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+duuuduuudduuuuduuudduuuudduud
+udddddudddudddduddududddduddu
+duuddduddduuudduuudduuudduddu
+dddudduddduddddududdudddduddu
+uuuddduddduuuududduduuuudduud
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddddd

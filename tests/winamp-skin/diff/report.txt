@@ -5,48 +5,48 @@ Reference SHA-256: 6c6b81a825036fbff4ed4ca3c0008566157a5100a59a56e8c4bf261e2fa8f
 Capture: shell at 1024x768, device scale factor 1, 275x348 from the top-left of #winamp
 
 Pixels outside the masks whose RGB differs from the reference (tolerance 0; reported, not gated)
-  main       24752 of 26212 (94.4%)
-  equalizer  31857 of 31900 (99.9%)
-  playlist   17146 of 17296 (99.1%)
+  main       24990 of 26212 (95.3%)
+  equalizer  31900 of 31900 (100.0%)
+  playlist   16602 of 17296 (96.0%)
 
 Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, items to their window)
   [main]
-  off     main window       0,0 275x116     0,0 275x145
-  off     title bar         0,0 275x14      1,1 273x14
-  missing options           6,3 9x9         -
-  missing minimize          244,3 9x9       -
-  missing shade             254,3 9x9       -
-  missing close             264,3 9x9       -
-  missing clutter bar       10,22 8x43      -
-  off     play indicator    26,28 9x9       21,34 8x8
-  missing work indicator    24,28 3x9       -
-  missing time digit 1      48,26 9x13      -
-  missing time digit 2      60,26 9x13      -
-  missing time digit 3      78,26 9x13      -
-  missing time digit 4      90,26 9x13      -
-  missing time minus        ?,? 5x1         -
-  off     visualizer        24,43 76x16     24,52 76x32
-  off     marquee           111,24 154x6    280.49,27 169.63x9
-  off     kbps              111,43 15x6     128,63 14.41x9
-  off     kHz               156,43 10x6     171.22,63 9.61x9
-  off     mono              212,41 27x12    213.97,65 16.81x8
-  off     stereo            239,41 29x12    235.78,65 25.22x8
-  off     seek bar          16,72 248x10    8,86 259x10
-  off     volume            107,57 68x13    8,106.50 130.20x10
-  off     balance           177,57 38x13    141.20,106.50 86.80x10
-  off     EQ toggle         219,58 23x12    233,104 16x15
-  off     PL toggle         242,58 23x12    251,104 16x15
-  off     previous          16,88 23x18     7,122 23x18
-  off     play              39,88 23x18     30,122 23x18
-  off     pause             62,88 23x18     53,122 23x18
-  off     stop              85,88 23x18     76,122 23x18
-  off     next              108,88 22x18    99,122 23x18
-  off     eject             136,89 22x16    128,122 23x18
-  off     shuffle           164,89 47x15    157,123.50 54.78x15
-  off     repeat            210,89 28x15    213.78,123.50 16x15
-  missing about             253,91 13x15    -
+  ok      main window       0,0 275x116     0,0 275x116
+  ok      title bar         0,0 275x14      0,0 275x14
+  ok      options           6,3 9x9         6,3 9x9
+  ok      minimize          244,3 9x9       244,3 9x9
+  ok      shade             254,3 9x9       254,3 9x9
+  ok      close             264,3 9x9       264,3 9x9
+  ok      clutter bar       10,22 8x43      10,22 8x43
+  ok      play indicator    26,28 9x9       26,28 9x9
+  ok      work indicator    24,28 3x9       24,28 3x9
+  ok      time digit 1      48,26 9x13      48,26 9x13
+  ok      time digit 2      60,26 9x13      60,26 9x13
+  ok      time digit 3      78,26 9x13      78,26 9x13
+  ok      time digit 4      90,26 9x13      90,26 9x13
+  ok      time minus        ?,? 5x1         39,32 5x1
+  ok      visualizer        24,43 76x16     24,43 76x16
+  ok      marquee           111,24 154x6    111,24 154x6
+  ok      kbps              111,43 15x6     111,43 15x6
+  ok      kHz               156,43 10x6     156,43 10x6
+  ok      mono              212,41 27x12    212,41 27x12
+  ok      stereo            239,41 29x12    239,41 29x12
+  ok      seek bar          16,72 248x10    16,72 248x10
+  ok      volume            107,57 68x13    107,57 68x13
+  ok      balance           177,57 38x13    177,57 38x13
+  ok      EQ toggle         219,58 23x12    219,58 23x12
+  ok      PL toggle         242,58 23x12    242,58 23x12
+  ok      previous          16,88 23x18     16,88 23x18
+  ok      play              39,88 23x18     39,88 23x18
+  ok      pause             62,88 23x18     62,88 23x18
+  ok      stop              85,88 23x18     85,88 23x18
+  ok      next              108,88 22x18    108,88 22x18
+  ok      eject             136,89 22x16    136,89 22x16
+  ok      shuffle           164,89 47x15    164,89 47x15
+  ok      repeat            210,89 28x15    210,89 28x15
+  ok      about             253,91 13x15    253,91 13x15
   [equalizer]
-  off     equalizer window  0,116 275x116   0,145 275x155
+  off     equalizer window  0,116 275x116   0,116 275x155
   missing title bar         0,0 275x14      -
   missing shade             254,3 9x9       -
   missing close             264,3 9x9       -
@@ -66,7 +66,7 @@ Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, i
   off     band 9            222,38 14x63    229.69,43 14x90
   off     band 10           240,38 14x63    250,43 14x90
   [playlist]
-  off     playlist window   0,232 275x116   0,300 275x107
+  off     playlist window   0,232 275x116   0,271 275x107
   missing title bar         0,0 275x20      -
   off     rows              12,20 243x58    4,17 267x60
   off     ADD               14,86 22x18     5,85.50 27.17x11
@@ -76,36 +76,9 @@ Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, i
   off     LIST OPTS         ?,? 22x18       249.52,83 21.63x16
   missing running time      132,88 ?x6      -
   missing mini time         191,101 ?x6     -
-  0 of 63 rects match
+  34 of 63 rects match
 
 Skin frames each item needs and the build does not have yet
-  main background: main-background
-  main title bar: titlebar-active titlebar-inactive
-  main options: titlebar-options titlebar-options-pressed
-  main minimize: titlebar-minimize titlebar-minimize-pressed
-  main shade: titlebar-shade titlebar-shade-pressed
-  main close: titlebar-close titlebar-close-pressed
-  main clutter bar: titlebar-clutter titlebar-clutter-disabled
-  main play indicator: playpaus-play playpaus-pause playpaus-stop
-  main work indicator: playpaus-work-on playpaus-work-off
-  main mono: monoster-mono-on monoster-mono-off
-  main stereo: monoster-stereo-on monoster-stereo-off
-  main seek bar: posbar-background
-  main seek thumb: posbar-thumb posbar-thumb-pressed
-  main volume: volume-level-0 volume-level-1 volume-level-2 volume-level-3 volume-level-4 volume-level-5 volume-level-6 volume-level-7 volume-level-8 volume-level-9 volume-level-10 volume-level-11 volume-level-12 volume-level-13 volume-level-14 volume-level-15 volume-level-16 volume-level-17 volume-level-18 volume-level-19 volume-level-20 volume-level-21 volume-level-22 volume-level-23 volume-level-24 volume-level-25 volume-level-26 volume-level-27
-  main volume thumb: volume-thumb volume-thumb-pressed
-  main balance: balance-level-0 balance-level-1 balance-level-2 balance-level-3 balance-level-4 balance-level-5 balance-level-6 balance-level-7 balance-level-8 balance-level-9 balance-level-10 balance-level-11 balance-level-12 balance-level-13 balance-level-14 balance-level-15 balance-level-16 balance-level-17 balance-level-18 balance-level-19 balance-level-20 balance-level-21 balance-level-22 balance-level-23 balance-level-24 balance-level-25 balance-level-26 balance-level-27
-  main balance thumb: balance-thumb balance-thumb-pressed
-  main EQ toggle: shufrep-eq-off shufrep-eq-off-pressed shufrep-eq-on shufrep-eq-on-pressed
-  main PL toggle: shufrep-pl-off shufrep-pl-off-pressed shufrep-pl-on shufrep-pl-on-pressed
-  main previous: cbuttons-previous cbuttons-previous-pressed
-  main play: cbuttons-play cbuttons-play-pressed
-  main pause: cbuttons-pause cbuttons-pause-pressed
-  main stop: cbuttons-stop cbuttons-stop-pressed
-  main next: cbuttons-next cbuttons-next-pressed
-  main eject: cbuttons-eject cbuttons-eject-pressed
-  main shuffle: shufrep-shuffle-off shufrep-shuffle-off-pressed shufrep-shuffle-on shufrep-shuffle-on-pressed
-  main repeat: shufrep-repeat-off shufrep-repeat-off-pressed shufrep-repeat-on shufrep-repeat-on-pressed
   equalizer background: eqmain-background
   equalizer title bar: eqmain-title-active eqmain-title-inactive
   equalizer shade: eqmain-shade eqmain-shade-pressed
@@ -127,4 +100,4 @@ Skin frames each item needs and the build does not have yet
   playlist SEL: pledit-sel-pressed
   playlist MISC: pledit-misc-pressed
   playlist LIST OPTS: pledit-list-opts-pressed
-  172 of 357 frames present
+  285 of 357 frames present

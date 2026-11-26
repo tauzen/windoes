@@ -84,6 +84,14 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- The Winamp main window is our own pixel art at the classic 2.x layout:
+  275x116, with every button, slider, indicator and text field at its reference
+  size and position, and every state drawn (pressed buttons, lit and unlit
+  LEDs, active and inactive title bar, 28 volume and balance levels). Text uses
+  the 5x6 font and 9x13 digits; the title scrolls when it does not fit, a click
+  on the time switches to remaining time, and the visualizer draws 19 bars with
+  peak dots or an oscilloscope. Range inputs stay native for keyboard use. The
+  equalizer and playlist keep their look for now.
 - CI now gates pull requests and deploys. The test workflow runs on pull
   requests to `main` as well as branch pushes, and runs `npm run lint`,
   `npm run typecheck`, `npx prettier --check .` and `npm run test:all`, in that
