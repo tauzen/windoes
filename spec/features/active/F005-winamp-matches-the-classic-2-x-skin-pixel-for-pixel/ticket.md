@@ -25,9 +25,9 @@ The Winamp app in Windoes looks like the classic Winamp 2.x base skin in period 
 
 - A side-by-side image of each window (main, equalizer, playlist) next to its reference screenshot, at 1× scale, is in the feature folder.
 - A pixel diff against each reference shows no difference outside dynamic areas (track title, time, visualizer, playlist rows); the diff images are in the feature folder.
-- Text renders with the skin's bitmap font, not a system font.
+- Text renders with a pixel font drawn for this app in the skin's style, not a system font.
 - The Winamp app suite and the sandbox test pass, including remote track playback.
 
 ## Notes
 
-Open owner question: use the original base-skin bitmaps (as Webamp does), or redraw the art ourselves from the screenshots. This decides the asset source and its license.
+Owner decision: all art is our own, redrawn from the reference screenshots. Do not ship, extract or trace the original Winamp skin bitmaps or `.wsz` files. Reference screenshots stay comparison material, committed only where their license allows.
