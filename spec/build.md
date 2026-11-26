@@ -20,6 +20,8 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F005-winamp-matches-the-classic-2-x-skin-pixel-for-pixel` (🟠 ACTIVE): Winamp matches the classic 2.x skin pixel for pixel
+
 ## NEXT
 
 - <!-- One clause per planned ticket. -->
