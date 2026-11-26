@@ -195,6 +195,15 @@ In-scope total: 125 main, 50 EQ and 22 playlist bitmaps, 197 in all, plus 65 fon
 - Fidelity: geometry, layout and every state can match exactly. Pixel content can reach zero diff against the reference only by copying the reference pixel values one by one. See open question 1.
 - Risk: states that no reference shows (pressed, inactive, LED off, 27 of 28 level frames) have to be designed by us, so they are unverified by any diff. Playlist rows in a system font cannot be made identical across operating systems. A shell window at a fractional position, or a display with a device scale factor other than 1, will blur or rescale the art; the check runs at 1x only.
 
+## 5. Pipeline and harness
+
+- Sources: `winamp-player/skin-src/<sheet>.txt`, format documented at the top of `scripts/build-winamp-skin.mjs` (`mode`, `width`, `size`, `color`, `ramp`, `frame`, `glyph`, `levels`). Grid rows must not start with `#` (comment marker), so ink characters are letters.
+- Output: `skin/<sheet>.png` plus `skin/skin.css`, one class `.wa-<sheet>-<frame>` per frame. Glyph frames are named by decimal code point (`.wa-font-small-65` is `A`). `--check` compares decoded pixels, not PNG bytes, so a zlib upgrade cannot fail it. `skin/` is in `.prettierignore`.
+- Fonts: `font-small` and `font-digits` are background sprites with one ink colour, `#00E000`, chosen by us and not sampled from any reference; the main-window slice sets the real palette. `font-playlist` is an alpha mask filled with `currentColor`, so row colours (normal, current, selected) come from CSS. Its glyphs are 9 rows (capitals 0-6, x-height 2-6, descenders 7-8) and include one spacing column.
+- Text renderer seam: mapping lower case to upper case, `<>{}` to `[]` and unknown characters to space for `font-small` belongs in `app.js`, next to the code that writes the marquee, time and kbps.
+- Harness: `npm run test:winamp-skin-diff` (`tests/winamp-skin/diff.mjs`). `tests/winamp-skin/layout.mjs` is the contract each art slice fills: rects, the element ids the reskinned app is to use (`#btn-close`, `#time-digit-1`, …) and the frame names every state needs. A slice that names frames or ids differently edits `layout.mjs` in the same commit. Geometry and frames are reported, not gated; a slice that reaches full geometry can add a gate.
+- Capture state: Webamp's defaults per its MIT source (`js/reducers/media.ts`, `equalizer.ts`): volume 78, balance 0, EQ on, AUTO off, all EQ sliders centred, shuffle and repeat off, playing a stubbed silent track.
+
 ## Open questions for the owner
 
 1. Pixel-exact against a screenshot means our art equals Nullsoft's art pixel for pixel, even if it is redrawn by hand. Is that what "redrawn from the reference screenshots" allows, or should the acceptance allow a tolerance (exact geometry and states, colours within a limit, a capped share of differing pixels)? Recommended: keep exact geometry and states, and set a pixel tolerance that the owner picks.

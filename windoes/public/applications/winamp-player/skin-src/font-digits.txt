@@ -1,0 +1,186 @@
+# Large time digits: 9x13 cells, segment style. Drawn for Windoes.
+mode background
+width 108
+size 9x13
+color . none
+color X #00E000
+
+glyph 0
+.XXXXXXX.
+X.XXXXX.X
+XX.....XX
+XX.....XX
+XX.....XX
+X.......X
+.........
+X.......X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+
+glyph 1
+.........
+........X
+.......XX
+.......XX
+.......XX
+........X
+.........
+........X
+.......XX
+.......XX
+.......XX
+........X
+.........
+
+glyph 2
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+..XXXXX.X
+.XXXXXXX.
+X.XXXXX..
+XX.......
+XX.......
+XX.......
+X.XXXXX..
+.XXXXXXX.
+
+glyph 3
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+..XXXXX.X
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+..XXXXX.X
+.XXXXXXX.
+
+glyph 4
+.........
+X.......X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+........X
+.........
+
+glyph 5
+.XXXXXXX.
+X.XXXXX..
+XX.......
+XX.......
+XX.......
+X.XXXXX..
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+..XXXXX.X
+.XXXXXXX.
+
+glyph 6
+.XXXXXXX.
+X.XXXXX..
+XX.......
+XX.......
+XX.......
+X.XXXXX..
+.XXXXXXX.
+X.XXXXX.X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+
+glyph 7
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+........X
+.........
+........X
+.......XX
+.......XX
+.......XX
+........X
+.........
+
+glyph 8
+.XXXXXXX.
+X.XXXXX.X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+X.XXXXX.X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+
+glyph 9
+.XXXXXXX.
+X.XXXXX.X
+XX.....XX
+XX.....XX
+XX.....XX
+X.XXXXX.X
+.XXXXXXX.
+..XXXXX.X
+.......XX
+.......XX
+.......XX
+..XXXXX.X
+.XXXXXXX.
+
+glyph -
+.........
+.........
+.........
+.........
+.........
+..XXXXX..
+.XXXXXXX.
+..XXXXX..
+.........
+.........
+.........
+.........
+.........
+
+glyph space
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........
+.........

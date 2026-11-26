@@ -141,6 +141,17 @@ The VirtualBoks suite boots a guest on the emulated CPU and asserts it reaches
 the emulated screen. It needs the staged emulator assets, so run `npm ci` (or
 `npm run assets:vm`) first.
 
+The Winamp skin is drawn as text pixel files in
+`windoes/public/applications/winamp-player/skin-src/`. After editing them, run
+`node scripts/build-winamp-skin.mjs` and commit the regenerated `skin/`; the
+Winamp suite fails while `skin/` is out of date. Add `--preview out.png` to
+also draw every font at 1x for review.
+
+`npm run test:winamp-skin-diff` compares Winamp in the shell with a reference
+screenshot of the classic skin, fetched at run time (network needed). It
+rewrites `tests/winamp-skin/diff/` (diff images and a geometry report, for
+commit) and `tests/winamp-skin/side-by-side/` (git-ignored, for local review).
+
 Run everything:
 
 ```bash

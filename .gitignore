@@ -25,3 +25,8 @@ windoes/public/applications/virtualboks/vendor/
 # Claude Code
 .claude/
 /.limen/
+
+# Winamp skin diff: fetched reference screenshots and side-by-side images
+# hold Nullsoft's skin art and are never committed (F005)
+tests/winamp-skin/.cache/
+tests/winamp-skin/side-by-side/
