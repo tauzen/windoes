@@ -1,0 +1,65 @@
+# Play indicator, 9x9 (play, pause, stop), and work indicator, 3x9 (on, off).
+# The work indicator overlaps the play indicator by one column; its last column is black.
+# Drawn for Windoes.
+mode background
+width 40
+color K #000000
+color G #00FF00
+color u #16401A
+color A #E8B040
+color R #D83820
+
+frame play
+KKKKKKKKK
+KKGKKKKKK
+KKGGKKKKK
+KKGGGKKKK
+KKGGGGKKK
+KKGGGKKKK
+KKGGKKKKK
+KKGKKKKKK
+KKKKKKKKK
+
+frame pause
+KKKKKKKKK
+KKAAKAAKK
+KKAAKAAKK
+KKAAKAAKK
+KKAAKAAKK
+KKAAKAAKK
+KKAAKAAKK
+KKAAKAAKK
+KKKKKKKKK
+
+frame stop
+KKKKKKKKK
+KKKKKKKKK
+KKRRRRRKK
+KKRRRRRKK
+KKRRRRRKK
+KKRRRRRKK
+KKRRRRRKK
+KKKKKKKKK
+KKKKKKKKK
+
+frame work-on
+KKK
+GGK
+GGK
+GGK
+GGK
+GGK
+GGK
+GGK
+KKK
+
+frame work-off
+KKK
+uuK
+uuK
+uuK
+uuK
+uuK
+uuK
+uuK
+KKK

@@ -38,6 +38,64 @@
     return value;
   }
 
+  // ===== SKIN SPRITES =====
+  // skin/skin.css has one `.wa-<sheet>-<frame>` class per frame of the main
+  // window art; an element shows one frame at a time.
+
+  /**
+   * Shows `frame` (`<sheet>-<frame>`, e.g. `cbuttons-play-pressed`) on `el`.
+   * @param {Element} el
+   * @param {string} frame
+   */
+  function setSprite(el, frame) {
+    const name = 'wa-' + frame;
+    if (el.classList.contains(name)) return;
+    for (const c of Array.from(el.classList)) {
+      if (c.startsWith('wa-')) el.classList.remove(c);
+    }
+    el.classList.add(name);
+  }
+
+  // Glyphs of the 5x6 small font (skin-src/font-small.txt).
+  const SMALL_FONT = new Set('ABCDEFGHIJKLMNOPQRSTUVWXYZ"@ 0123456789….:()-\'!_+\\/[]^&%,=$#ÅÖÄ?*');
+  /** @type {Record<string, string>} */
+  const SMALL_FONT_ALIASES = { '<': '[', '>': ']', '{': '[', '}': ']' };
+  const GLYPH_WIDTH = 5;
+
+  /**
+   * The small-font glyph that draws `char`: upper case, `<>{}` as brackets,
+   * any other character as a space.
+   * @param {string} char
+   */
+  function smallFontGlyph(char) {
+    const upper = char.toUpperCase();
+    const glyph = SMALL_FONT_ALIASES[upper] ?? upper;
+    return SMALL_FONT.has(glyph) ? glyph : ' ';
+  }
+
+  /**
+   * Draws text in `el` as small-font glyph sprites, with the plain text for
+   * screen readers beside them. Returns the row of glyphs.
+   * @param {HTMLElement} el
+   * @param {string} text what screen readers get
+   * @param {string} [shown] what the glyphs draw, when it is not `text`
+   */
+  function writeSmallText(el, text, shown = text) {
+    const label = document.createElement('span');
+    label.className = 'sr-only';
+    label.textContent = text;
+    const row = document.createElement('span');
+    row.className = 'glyphs';
+    row.setAttribute('aria-hidden', 'true');
+    for (const char of shown) {
+      const glyph = document.createElement('span');
+      setSprite(glyph, 'font-small-' + smallFontGlyph(char).codePointAt(0));
+      row.append(glyph);
+    }
+    el.replaceChildren(label, row);
+    return row;
+  }
+
   // ===== STATE =====
   const state = {
     playlist: /** @type {Track[]} */ ([]),
@@ -334,11 +392,10 @@
     const current = audioElement.currentTime;
     const duration = audioElement.duration || 0;
 
-    byId('time-display', HTMLElement).textContent = formatTime(current);
+    renderTime(current);
     if (duration > 0) {
-      const pct = (current / duration) * 100;
-      byId('seek-bar', HTMLInputElement).value = String(pct);
-      byId('seek-fill', HTMLElement).style.width = pct + '%';
+      seekBar.value = String((current / duration) * 100);
+      paintSeek();
     }
 
     updatePlaylistTimeDisplay();
@@ -361,7 +418,7 @@
   /** @param {Event} e */
   function onAudioError(e) {
     console.error('Audio error:', e);
-    byId('scrolling-title', HTMLElement).textContent = '*** Error loading track ***';
+    setMarquee('*** Error loading track ***');
   }
 
   // ===== PLAYLIST MANAGEMENT =====
@@ -409,8 +466,7 @@
    */
   function updateScrollingTitle(track, index) {
     const durationStr = track.duration ? formatTime(track.duration) : '--:--';
-    const el = byId('scrolling-title', HTMLElement);
-    el.textContent = `${index + 1}. ${track.name} (${durationStr})`;
+    setMarquee(`${index + 1}. ${track.name} (${durationStr})`);
   }
 
   function renderPlaylist() {
@@ -449,19 +505,29 @@
     byId('btn-pause', HTMLElement).classList.toggle('active', state.isPaused);
     highlightTrack(state.currentTrack);
 
-    const indicator = byId('play-indicator', HTMLElement);
-    if (state.isPlaying) {
-      indicator.textContent = '\u25B6';
-    } else if (state.isPaused) {
-      indicator.textContent = '\u275A\u275A';
-    } else {
-      indicator.textContent = '';
-    }
+    const status = state.isPlaying ? 'play' : state.isPaused ? 'pause' : 'stop';
+    const loaded = status !== 'stop';
+    setSprite(byId('play-indicator', HTMLElement), 'playpaus-' + status);
+    setSprite(
+      byId('work-indicator', HTMLElement),
+      state.isPlaying ? 'playpaus-work-on' : 'playpaus-work-off'
+    );
+    // The player cannot read a stream's bit rate; it shows the nominal rate
+    // of the tracks, and the rate the browser plays at.
+    writeSmallText(byId('bitrate-val', HTMLElement), loaded ? NOMINAL_KBPS : '');
+    const khz = audioContext ? String(Math.round(audioContext.sampleRate / 1000)).slice(-2) : '';
+    writeSmallText(byId('freq-val', HTMLElement), loaded ? khz : '');
+    setSprite(byId('mono-indicator', HTMLElement), 'monoster-mono-off');
+    setSprite(
+      byId('stereo-indicator', HTMLElement),
+      loaded ? 'monoster-stereo-on' : 'monoster-stereo-off'
+    );
+    seekThumb.hidden = !loaded;
 
-    if (!state.isPlaying && !state.isPaused && audioElement && audioElement.src) {
-      byId('time-display', HTMLElement).textContent = '00:00';
-      byId('seek-bar', HTMLInputElement).value = '0';
-      byId('seek-fill', HTMLElement).style.width = '0%';
+    if (!loaded && audioElement && audioElement.src) {
+      renderTime(0);
+      seekBar.value = '0';
+      paintSeek();
     }
   }
 
@@ -558,103 +624,255 @@
     });
   }
 
-  // ===== VISUALIZER =====
-  const visCanvas = byId('visualizer', HTMLCanvasElement);
-  visCanvas.width = 76;
-  visCanvas.height = 32;
-  const visCtx = required(visCanvas.getContext('2d'), 'visualizer 2D context');
-  let visMode = 0;
+  // ===== MAIN WINDOW DISPLAY =====
+  const NOMINAL_KBPS = '128';
 
-  // Visualizer bar rendering config
-  const VIS_BAR_COUNT = 16;
-  const VIS_BAR_WIDTH = 4;
-  const VIS_BAR_GAP = 1;
-  const VIS_SEG_HEIGHT = 2;
-  const VIS_SEG_GAP = 1;
-  const VIS_SEG_STEP = VIS_SEG_HEIGHT + VIS_SEG_GAP;
-  const VIS_MAX_SEGS = Math.floor(visCanvas.height / VIS_SEG_STEP);
+  // Marquee: a title wider than the field scrolls one glyph per step.
+  const MARQUEE_STEP_MS = 200;
+  const MARQUEE_GAP = '  ***  ';
+  const marquee = byId('scrolling-title', HTMLElement);
+  /** @type {ReturnType<typeof setInterval> | undefined} */
+  let marqueeTimer;
+
+  /** @param {string} text */
+  function setMarquee(text) {
+    clearInterval(marqueeTimer);
+    const length = [...text].length;
+    if (length * GLYPH_WIDTH <= marquee.clientWidth) {
+      writeSmallText(marquee, text);
+      return;
+    }
+    const loop = text + MARQUEE_GAP;
+    const period = [...loop].length;
+    const row = writeSmallText(marquee, text, loop + loop);
+    let step = 0;
+    marqueeTimer = setInterval(() => {
+      step = (step + 1) % period;
+      row.style.transform = `translateX(${-step * GLYPH_WIDTH}px)`;
+    }, MARQUEE_STEP_MS);
+  }
+
+  // Time: four 9x13 digits; a click switches between elapsed and remaining.
+  const timeDigits = [1, 2, 3, 4].map((n) => byId(`time-digit-${n}`, HTMLElement));
+  let showRemaining = false;
+
+  /** @param {number} elapsed seconds into the track */
+  function renderTime(elapsed) {
+    const duration = audioElement?.duration || 0;
+    const remaining = showRemaining && duration > 0;
+    const text = formatTime(remaining ? Math.max(0, duration - elapsed) : elapsed);
+    const digits = text.replace(':', '').slice(-4);
+    timeDigits.forEach((el, i) => setSprite(el, 'font-digits-' + digits.codePointAt(i)));
+    byId('time-minus', HTMLElement).hidden = !remaining;
+    byId('time-text', HTMLElement).textContent = (remaining ? '-' : '') + text;
+  }
+
+  byId('time-display', HTMLElement).addEventListener('click', () => {
+    showRemaining = !showRemaining;
+    renderTime(state.isPlaying || state.isPaused ? audioElement?.currentTime || 0 : 0);
+  });
+
+  // Sliders: the native range input takes the input; the sprite thumb and the
+  // level frame of the track follow its value.
+  const LEVEL_FRAMES = 28;
+  const seekBar = byId('seek-bar', HTMLInputElement);
+  const seekThumb = byId('seek-thumb', HTMLElement);
+  const volumeSlider = byId('volume-slider', HTMLInputElement);
+  const volumeThumb = byId('volume-thumb', HTMLElement);
+  const balanceSlider = byId('balance-slider', HTMLInputElement);
+  const balanceThumb = byId('balance-thumb', HTMLElement);
 
   /**
-   * @param {number} seg
-   * @param {number} totalSegs
+   * @param {HTMLInputElement} input
+   * @param {HTMLElement} thumb
    */
-  function getSegColor(seg, totalSegs) {
-    const ratio = seg / totalSegs;
-    if (ratio < 0.55) {
-      return '#22cc22';
-    } else if (ratio < 0.75) {
-      return '#88cc22';
-    } else if (ratio < 0.88) {
-      return '#cccc22';
+  function placeThumb(input, thumb) {
+    const min = Number(input.min);
+    const fraction = (Number(input.value) - min) / (Number(input.max) - min);
+    const travel = input.offsetWidth - thumb.offsetWidth;
+    thumb.style.left = input.offsetLeft + Math.round(fraction * travel) + 'px';
+  }
+
+  /** @param {number} fraction 0 to 1 */
+  function level(fraction) {
+    return Math.round(fraction * (LEVEL_FRAMES - 1));
+  }
+
+  function paintSeek() {
+    placeThumb(seekBar, seekThumb);
+  }
+
+  function paintVolume() {
+    setSprite(volumeSlider, 'volume-level-' + level(Number(volumeSlider.value) / 100));
+    placeThumb(volumeSlider, volumeThumb);
+  }
+
+  function paintBalance() {
+    setSprite(balanceSlider, 'balance-level-' + level(Math.abs(Number(balanceSlider.value)) / 100));
+    placeThumb(balanceSlider, balanceThumb);
+  }
+
+  // Buttons and thumbs: `data-sprite` names the frame, `data-toggle` the
+  // frames of an on/off button (state in its `active` class); either shows
+  // its `-pressed` frame while the pointer is down on it.
+  /** @type {Set<HTMLElement>} */
+  const pressed = new Set();
+
+  /** @param {HTMLElement} el */
+  function paint(el) {
+    const suffix = pressed.has(el) ? '-pressed' : '';
+    const toggle = el.dataset.toggle;
+    if (toggle) {
+      const on = el.classList.contains('active');
+      setSprite(el, `${toggle}-${on ? 'on' : 'off'}${suffix}`);
+      el.setAttribute('aria-pressed', String(on));
     } else {
-      return '#cc6622';
+      setSprite(el, el.dataset.sprite + suffix);
     }
   }
 
-  /** @param {number[]} heights */
-  function drawBars(heights) {
-    visCtx.fillStyle = '#000';
-    visCtx.fillRect(0, 0, visCanvas.width, visCanvas.height);
-    for (let i = 0; i < heights.length; i++) {
-      const segs = Math.round((heights[i] / 32) * VIS_MAX_SEGS);
-      const x = i * (VIS_BAR_WIDTH + VIS_BAR_GAP);
-      for (let s = 0; s < segs; s++) {
-        const y = visCanvas.height - s * VIS_SEG_STEP - VIS_SEG_HEIGHT;
-        visCtx.fillStyle = getSegColor(s, VIS_MAX_SEGS);
-        visCtx.fillRect(x, y, VIS_BAR_WIDTH, VIS_SEG_HEIGHT);
+  /**
+   * Shows `el` pressed while a pointer that went down on `target` is down.
+   * @param {HTMLElement} target
+   * @param {HTMLElement} el
+   */
+  function pressOnPointer(target, el) {
+    target.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      const release = () => {
+        pressed.delete(el);
+        paint(el);
+        window.removeEventListener('pointerup', release);
+        window.removeEventListener('pointercancel', release);
+      };
+      pressed.add(el);
+      paint(el);
+      window.addEventListener('pointerup', release);
+      window.addEventListener('pointercancel', release);
+    });
+  }
+
+  /** @type {NodeListOf<HTMLElement>} */ (
+    document.querySelectorAll('#main-window button[data-sprite], #main-window [data-toggle]')
+  ).forEach((el) => {
+    pressOnPointer(el, el);
+    paint(el);
+  });
+  pressOnPointer(seekBar, seekThumb);
+  pressOnPointer(volumeSlider, volumeThumb);
+  pressOnPointer(balanceSlider, balanceThumb);
+
+  // Title bar: lit while the player has focus.
+  const titleBar = byId('title-bar', HTMLElement);
+  function paintTitleBar() {
+    setSprite(titleBar, document.hasFocus() ? 'titlebar-active' : 'titlebar-inactive');
+  }
+  window.addEventListener('focus', paintTitleBar);
+  window.addEventListener('blur', paintTitleBar);
+
+  // ===== VISUALIZER =====
+  // 19 bars, 3 px wide with a 1 px gap, over a dotted grid; a click switches
+  // to the oscilloscope.
+  const VIS_COLORS = {
+    background: '#000000',
+    dots: '#182129',
+    // Bar colour per pixel row, top (loud) to bottom.
+    bars: [
+      '#ef3110',
+      '#ce2910',
+      '#d65a00',
+      '#d66600',
+      '#d67300',
+      '#c67b08',
+      '#dea518',
+      '#d6b521',
+      '#bdde29',
+      '#94de21',
+      '#29ce10',
+      '#32be10',
+      '#39b510',
+      '#319c08',
+      '#299400',
+      '#188408',
+    ],
+    // Oscilloscope dot colour, by distance from the centre line.
+    scope: ['#ffffff', '#d6d6de', '#b5bdbd', '#a0aaaf', '#949ca5'],
+    peak: '#969696',
+  };
+  const VIS_BARS = 19;
+  const VIS_BAR_WIDTH = 3;
+  const VIS_BAR_STEP = 4;
+  const VIS_PEAK_FALL = 0.2; // pixels per frame
+
+  const visCanvas = byId('visualizer', HTMLCanvasElement);
+  const visCtx = required(visCanvas.getContext('2d'), 'visualizer 2D context');
+  const visWidth = visCanvas.width;
+  const visHeight = visCanvas.height;
+  const visGrid = document.createElement('canvas');
+  visGrid.width = visWidth;
+  visGrid.height = visHeight;
+  const gridCtx = required(visGrid.getContext('2d'), 'visualizer grid 2D context');
+  gridCtx.fillStyle = VIS_COLORS.background;
+  gridCtx.fillRect(0, 0, visWidth, visHeight);
+  gridCtx.fillStyle = VIS_COLORS.dots;
+  for (let y = 1; y < visHeight; y += 2) {
+    for (let x = 1; x < visWidth; x += 2) gridCtx.fillRect(x, y, 1, 1);
+  }
+  const peaks = new Float32Array(VIS_BARS);
+  let visData = new Uint8Array(0);
+  let visMode = 0;
+
+  /** @param {Uint8Array} spectrum */
+  function drawBars(spectrum) {
+    const bins = spectrum.length;
+    for (let i = 0; i < VIS_BARS; i++) {
+      // Bars spread over the bins on a log scale, as pitch is heard.
+      const from = Math.floor(Math.pow(bins, i / VIS_BARS));
+      const to = Math.max(from + 1, Math.floor(Math.pow(bins, (i + 1) / VIS_BARS)));
+      let loudest = 0;
+      for (let b = from; b < to && b < bins; b++) loudest = Math.max(loudest, spectrum[b]);
+      const height = Math.round((loudest / 255) * visHeight);
+      const x = i * VIS_BAR_STEP;
+      for (let y = visHeight - height; y < visHeight; y++) {
+        visCtx.fillStyle = VIS_COLORS.bars[y];
+        visCtx.fillRect(x, y, VIS_BAR_WIDTH, 1);
+      }
+      peaks[i] = Math.max(peaks[i] - VIS_PEAK_FALL, height);
+      if (peaks[i] >= 1) {
+        visCtx.fillStyle = VIS_COLORS.peak;
+        visCtx.fillRect(x, visHeight - Math.ceil(peaks[i]), VIS_BAR_WIDTH, 1);
       }
     }
   }
 
-  const staticBarHeights = new Array(VIS_BAR_COUNT).fill(0);
+  /** @param {Uint8Array} wave */
+  function drawScope(wave) {
+    const centre = (visHeight - 1) / 2;
+    for (let x = 0; x < visWidth; x++) {
+      const sample = wave[Math.floor((x * wave.length) / visWidth)];
+      const y = Math.min(visHeight - 1, Math.floor((sample / 256) * visHeight));
+      const shade = Math.min(VIS_COLORS.scope.length - 1, Math.floor(Math.abs(y - centre) / 2));
+      visCtx.fillStyle = VIS_COLORS.scope[shade];
+      visCtx.fillRect(x, y, 1, 1);
+    }
+  }
 
   function drawVisualizer() {
     requestAnimationFrame(drawVisualizer);
-
+    visCtx.drawImage(visGrid, 0, 0);
     if (!analyserNode || !state.isPlaying) {
-      drawBars(staticBarHeights);
+      peaks.fill(0);
       return;
     }
-
-    const bufferLength = analyserNode.frequencyBinCount;
-
+    if (visData.length !== analyserNode.frequencyBinCount) {
+      visData = new Uint8Array(analyserNode.frequencyBinCount);
+    }
     if (visMode === 0) {
-      const dataArray = new Uint8Array(bufferLength);
-      analyserNode.getByteFrequencyData(dataArray);
-
-      const heights = [];
-      for (let i = 0; i < VIS_BAR_COUNT; i++) {
-        const dataIndex = Math.floor((i * bufferLength) / VIS_BAR_COUNT);
-        heights.push((dataArray[dataIndex] / 255) * visCanvas.height);
-      }
-      drawBars(heights);
+      analyserNode.getByteFrequencyData(visData);
+      drawBars(visData);
     } else {
-      const dataArray = new Uint8Array(bufferLength);
-      analyserNode.getByteTimeDomainData(dataArray);
-
-      visCtx.fillStyle = '#000';
-      visCtx.fillRect(0, 0, visCanvas.width, visCanvas.height);
-
-      visCtx.lineWidth = 1;
-      visCtx.strokeStyle = '#00cc00';
-      visCtx.beginPath();
-
-      const sliceWidth = visCanvas.width / bufferLength;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = (v * visCanvas.height) / 2;
-
-        if (i === 0) {
-          visCtx.moveTo(x, y);
-        } else {
-          visCtx.lineTo(x, y);
-        }
-        x += sliceWidth;
-      }
-
-      visCtx.stroke();
+      analyserNode.getByteTimeDomainData(visData);
+      drawScope(visData);
     }
   }
 
@@ -676,26 +894,20 @@
     fileInput.value = '';
   });
 
-  // Volume (track art is a static gradient bar like the classic skin)
-  const volumeSlider = byId('volume-slider', HTMLInputElement);
+  // Volume
   volumeSlider.addEventListener('input', () => {
     state.volume = Number(volumeSlider.value) / 100;
     if (gainNode) gainNode.gain.value = state.volume;
+    paintVolume();
   });
 
   // Balance
-  const balanceSlider = byId('balance-slider', HTMLInputElement);
   balanceSlider.addEventListener('input', () => {
     if (pannerNode) pannerNode.pan.value = Number(balanceSlider.value) / 100;
+    paintBalance();
   });
 
   // Seek
-  const seekBar = byId('seek-bar', HTMLInputElement);
-  const seekFill = byId('seek-fill', HTMLElement);
-  function updateSeekFill() {
-    seekFill.style.width = seekBar.value + '%';
-  }
-  updateSeekFill();
   seekBar.addEventListener('mousedown', () => {
     state.seekDragging = true;
   });
@@ -703,7 +915,7 @@
     if (audioElement && audioElement.duration) {
       audioElement.currentTime = (Number(seekBar.value) / 100) * audioElement.duration;
     }
-    updateSeekFill();
+    paintSeek();
   });
   seekBar.addEventListener('mouseup', () => {
     state.seekDragging = false;
@@ -719,13 +931,13 @@
   byId('btn-shuffle', HTMLElement).addEventListener('click', function () {
     state.shuffle = !state.shuffle;
     this.classList.toggle('active', state.shuffle);
-    byId('shuffle-check', HTMLElement).classList.toggle('checked', state.shuffle);
+    paint(this);
   });
 
   byId('btn-repeat', HTMLElement).addEventListener('click', function () {
     state.repeat = !state.repeat;
     this.classList.toggle('active', state.repeat);
-    byId('repeat-check', HTMLElement).classList.toggle('checked', state.repeat);
+    paint(this);
   });
 
   // EQ toggle
@@ -734,6 +946,7 @@
     const isVisible = eq.style.display !== 'none';
     eq.style.display = isVisible ? 'none' : 'block';
     this.classList.toggle('active', !isVisible);
+    paint(this);
   });
 
   // PL toggle
@@ -742,6 +955,7 @@
     const isVisible = pl.style.display !== 'none';
     pl.style.display = isVisible ? 'none' : 'block';
     this.classList.toggle('active', !isVisible);
+    paint(this);
   });
 
   // EQ on/off
@@ -819,22 +1033,26 @@
         state.volume = Math.min(1, state.volume + 0.05);
         if (gainNode) gainNode.gain.value = state.volume;
         volumeSlider.value = String(state.volume * 100);
+        paintVolume();
         break;
       case 'ArrowDown':
         state.volume = Math.max(0, state.volume - 0.05);
         if (gainNode) gainNode.gain.value = state.volume;
         volumeSlider.value = String(state.volume * 100);
+        paintVolume();
         break;
     }
   });
 
   // ===== ABOUT =====
+  function showAbout() {
+    byId('about-overlay', HTMLElement).classList.add('visible');
+  }
+  byId('btn-about', HTMLElement).addEventListener('click', showAbout);
   // The about dialog's close buttons call `closeAbout()` from inline
   // `onclick` attributes in index.html.
   Object.assign(window, {
-    showAbout: function () {
-      byId('about-overlay', HTMLElement).classList.add('visible');
-    },
+    showAbout,
     closeAbout: function () {
       byId('about-overlay', HTMLElement).classList.remove('visible');
     },
@@ -894,6 +1112,11 @@
   buildEQ();
   drawEqGraph();
   drawVisualizer();
+  paintTitleBar();
+  paintVolume();
+  paintBalance();
+  updateUI();
+  renderTime(0);
 
   renderPlaylist();
 
@@ -937,17 +1160,10 @@ if (window.self !== window.top) {
     winampEl.style.left = '0';
   }
 
-  // Wire close buttons to notify parent
-  /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.title-btn')).forEach(
-    (btn) => {
-      if (btn.title === 'Close') {
-        btn.style.visibility = 'visible';
-        btn.addEventListener('click', () => {
-          window.parent.postMessage({ type: 'winamp-close' }, '*');
-        });
-      }
-    }
-  );
+  // The close button asks the shell to close the window.
+  document.getElementById('btn-close')?.addEventListener('click', () => {
+    window.parent.postMessage({ type: 'winamp-close' }, '*');
+  });
 
   // Report size to parent so iframe window can match
   function reportSize() {

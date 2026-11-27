@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Winamp Player Clone</title>
+    <link rel="stylesheet" href="skin/skin.css" />
     <style>
       * {
         margin: 0;
@@ -29,48 +30,277 @@
         gap: 0;
       }
 
-      /* ===== MAIN WINDOW ===== */
-      .winamp-main {
-        width: 275px;
-        background: #232329;
-        border-top: 1px solid #3a3a42;
-        border-left: 1px solid #3a3a42;
-        border-right: 1px solid #0e0e12;
-        border-bottom: 1px solid #0e0e12;
+      /* ===== MAIN WINDOW =====
+         Pixel art comes from skin/skin.css, one .wa-<sheet>-<frame> class per
+         sprite, built from skin-src/ by scripts/build-winamp-skin.mjs. This
+         block only places the sprites, at the reference layout in
+         tests/winamp-skin/layout.mjs. app.js swaps the .wa-* classes for
+         states (pressed, on/off, levels, glyphs). */
+      #main-window {
+        position: relative;
+        overflow: hidden;
+        cursor: default;
+      }
+
+      #main-window > *,
+      #title-bar > *,
+      #time-display > * {
+        position: absolute;
+        display: block;
+      }
+      /* A hidden sprite keeps its place, so the layout stays measurable. */
+      #main-window [hidden] {
+        display: block;
+        visibility: hidden;
+      }
+
+      #main-window button,
+      #main-window input {
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+        cursor: pointer;
+      }
+      #main-window :focus {
+        outline: none;
+      }
+      #main-window :focus-visible {
+        outline: 1px dotted #fff;
+        outline-offset: -1px;
+      }
+
+      /* Visible to screen readers only: the text behind a row of glyph sprites. */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      /* A row of font glyph sprites. */
+      .glyphs {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+      }
+      .glyphs > span {
+        flex: none;
+      }
+
+      #title-bar {
+        left: 0;
+        top: 0;
+      }
+      #btn-options {
+        left: 6px;
+        top: 3px;
+      }
+      #btn-minimize {
+        left: 244px;
+        top: 3px;
+      }
+      #btn-shade {
+        left: 254px;
+        top: 3px;
+      }
+      #btn-close {
+        left: 264px;
+        top: 3px;
+      }
+
+      #clutter-bar {
+        left: 10px;
+        top: 22px;
+      }
+      #play-indicator {
+        left: 26px;
+        top: 28px;
+      }
+      /* Overlaps the play indicator's first column, as in the reference. */
+      #work-indicator {
+        left: 24px;
+        top: 28px;
+      }
+
+      #time-display {
+        left: 36px;
+        top: 26px;
+        width: 63px;
+        height: 13px;
+        cursor: pointer;
+      }
+      #time-minus {
+        left: 3px;
+        top: 6px;
+      }
+      #time-digit-1 {
+        left: 12px;
+      }
+      #time-digit-2 {
+        left: 24px;
+      }
+      #time-digit-3 {
+        left: 42px;
+      }
+      #time-digit-4 {
+        left: 54px;
+      }
+
+      #visualizer {
+        left: 24px;
+        top: 43px;
+        width: 76px;
+        height: 16px;
+        image-rendering: pixelated;
+        cursor: pointer;
+      }
+
+      #scrolling-title {
+        left: 111px;
+        top: 24px;
+        width: 154px;
+        height: 6px;
         overflow: hidden;
       }
-
-      /* Title bar */
-      .title-bar {
-        background: linear-gradient(180deg, #384868 0%, #2a3a55 30%, #1e2e48 60%, #162440 100%);
-        height: 14px;
-        display: flex;
-        align-items: center;
-        padding: 0 3px;
-        cursor: default;
-        border-bottom: 1px solid #0a0a10;
-        gap: 3px;
+      #bitrate-val {
+        left: 111px;
+        top: 43px;
+        width: 15px;
+        height: 6px;
+      }
+      #freq-val {
+        left: 156px;
+        top: 43px;
+        width: 10px;
+        height: 6px;
+      }
+      #mono-indicator {
+        left: 212px;
+        top: 41px;
+      }
+      #stereo-indicator {
+        left: 239px;
+        top: 41px;
       }
 
-      .title-bar-text {
-        font-size: 8px;
-        color: #d8dce8;
-        font-weight: bold;
-        letter-spacing: 4px;
-        text-shadow: 1px 1px 0 #000;
-        text-align: center;
-        font-family: 'Arial Narrow', Arial, sans-serif;
-        padding: 0 6px;
-        line-height: 10px;
+      /* Native range inputs keep mouse and keyboard behaviour; their own track
+         and thumb are transparent. The sprite thumbs beside them follow the
+         value (app.js) and let pointer events through. */
+      #main-window input[type='range'] {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      #main-window input[type='range']::-webkit-slider-runnable-track {
+        height: 100%;
+        background: transparent;
+        border: 0;
+      }
+      #main-window input[type='range']::-moz-range-track {
+        height: 100%;
+        background: transparent;
+        border: 0;
+      }
+      #main-window input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 100%;
+        background: transparent;
+        border: 0;
+      }
+      #main-window input[type='range']::-moz-range-thumb {
+        width: 14px;
+        height: 100%;
+        background: transparent;
+        border: 0;
+      }
+      #main-window #seek-bar::-webkit-slider-thumb {
+        width: 29px;
+      }
+      #main-window #seek-bar::-moz-range-thumb {
+        width: 29px;
+      }
+      .thumb {
+        pointer-events: none;
       }
 
-      /* Decorative groove lines flanking title text */
-      .winamp-title-bar {
-        display: flex;
-        align-items: center;
-        gap: 0;
+      #seek-bar,
+      #seek-thumb {
+        left: 16px;
+        top: 72px;
+      }
+      #volume-slider,
+      #volume-thumb {
+        left: 107px;
+        top: 57px;
+      }
+      #balance-slider,
+      #balance-thumb {
+        left: 177px;
+        top: 57px;
+      }
+      #volume-thumb,
+      #balance-thumb {
+        margin-top: 1px;
       }
 
+      #btn-eq {
+        left: 219px;
+        top: 58px;
+      }
+      #btn-pl {
+        left: 242px;
+        top: 58px;
+      }
+
+      #btn-prev,
+      #btn-play,
+      #btn-pause,
+      #btn-stop,
+      #btn-next {
+        top: 88px;
+      }
+      #btn-prev {
+        left: 16px;
+      }
+      #btn-play {
+        left: 39px;
+      }
+      #btn-pause {
+        left: 62px;
+      }
+      #btn-stop {
+        left: 85px;
+      }
+      #btn-next {
+        left: 108px;
+      }
+      #btn-open {
+        left: 136px;
+        top: 89px;
+      }
+      #btn-shuffle {
+        left: 164px;
+        top: 89px;
+      }
+      /* Covers the shuffle button's last column, as in the reference. */
+      #btn-repeat {
+        left: 210px;
+        top: 89px;
+      }
+      /* The logo is part of the background art; the button is the hit area. */
+      #btn-about {
+        left: 253px;
+        top: 91px;
+        width: 13px;
+        height: 15px;
+      }
+
+      /* ===== SHARED BY THE EQUALIZER (until its own art lands) ===== */
       .title-bar-line {
         flex: 1;
         height: 7px;
@@ -86,268 +316,7 @@
         min-width: 8px;
       }
 
-      .title-icon {
-        width: 10px;
-        height: 10px;
-        flex-shrink: 0;
-        background: linear-gradient(180deg, #f0d888 0%, #c8a44a 55%, #8a6a20 100%);
-        clip-path: polygon(62% 0, 14% 56%, 42% 56%, 34% 100%, 86% 40%, 55% 40%);
-      }
-
-      .title-btn {
-        width: 9px;
-        height: 9px;
-        border: 1px solid;
-        border-color: #505868 #1a1a24 #1a1a24 #505868;
-        background: linear-gradient(180deg, #3a4258, #2a3248);
-        font-size: 6px;
-        color: #8090a8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        line-height: 1;
-      }
-      .title-btn:hover {
-        background: linear-gradient(180deg, #4a5268, #3a4258);
-        color: #b0c0d8;
-      }
-      .title-btn:active {
-        border-color: #1a1a24 #505868 #505868 #1a1a24;
-      }
-      .title-buttons {
-        display: flex;
-        gap: 1px;
-      }
-
-      /* ===== DISPLAY AREA ===== */
-      .display-area {
-        background: #000;
-        margin: 5px 7px 0 7px;
-        border: 1px solid;
-        border-color: #0a0a10 #2a2a32 #2a2a32 #0a0a10;
-        padding: 4px 5px;
-        height: 58px;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .display-content {
-        display: flex;
-        height: 100%;
-        gap: 0;
-      }
-
-      /* Left column: visualizer + time */
-      .display-left {
-        display: flex;
-        flex-direction: column;
-        width: 106px;
-        flex-shrink: 0;
-        padding-right: 4px;
-      }
-
-      /* Clutterbar - vertical strip of mini buttons */
-      .clutterbar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        z-index: 3;
-        background: linear-gradient(90deg, #9a8446 0%, #6a5628 60%, #4a3a18 100%);
-        border-right: 1px solid #14100a;
-        padding-top: 3px;
-        align-items: center;
-      }
-
-      .clutterbar-btn {
-        width: 8px;
-        height: 6px;
-        font-size: 5px;
-        color: #3a2e10;
-        text-align: center;
-        line-height: 6px;
-        cursor: pointer;
-        font-family: 'Arial', sans-serif;
-        font-weight: bold;
-        text-shadow: 0 1px 0 rgba(255, 232, 160, 0.35);
-      }
-
-      .clutterbar-btn:hover {
-        color: #14100a;
-      }
-
-      #visualizer {
-        width: 76px;
-        height: 32px;
-        image-rendering: pixelated;
-        flex-shrink: 0;
-        margin-left: 10px;
-        margin-top: 1px;
-      }
-
-      .display-time-section {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        margin-left: 7px;
-      }
-
-      .play-indicator {
-        font-size: 7px;
-        color: #00cc00;
-        text-shadow: 0 0 3px rgba(0, 200, 0, 0.5);
-        width: 8px;
-        flex-shrink: 0;
-      }
-
-      .display-time {
-        font-size: 26px;
-        color: #00cc00;
-        font-family: 'Courier New', monospace;
-        text-shadow: 0 0 6px rgba(0, 200, 0, 0.25);
-        letter-spacing: 2px;
-        line-height: 1;
-        font-weight: bold;
-      }
-
-      /* Dim "background" segments for LED effect */
-      .display-time-bg {
-        position: absolute;
-        font-size: 26px;
-        color: #0a2a0a;
-        font-family: 'Courier New', monospace;
-        letter-spacing: 2px;
-        line-height: 1;
-        font-weight: bold;
-        pointer-events: none;
-      }
-
-      /* Right column: title + bitrate + stereo */
-      .display-right {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding-left: 5px;
-        justify-content: space-between;
-        overflow: hidden;
-      }
-
-      .display-title-area {
-        flex: 0 0 auto;
-        overflow: hidden;
-        position: relative;
-        height: 14px;
-      }
-
-      .scrolling-title {
-        font-size: 8px;
-        color: #00cc00;
-        font-family: 'Courier New', monospace;
-        white-space: nowrap;
-        position: absolute;
-        top: 2px;
-        text-shadow: 0 0 4px rgba(0, 200, 0, 0.3);
-        animation: scroll-title 12s linear infinite;
-        letter-spacing: 0.5px;
-      }
-
-      @keyframes scroll-title {
-        0% {
-          transform: translateX(100%);
-        }
-        100% {
-          transform: translateX(-100%);
-        }
-      }
-
-      .display-meta-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-      }
-
-      .display-bitrate {
-        font-size: 7px;
-        color: #00aa00;
-        font-family: 'Courier New', monospace;
-        display: flex;
-        gap: 4px;
-        align-items: center;
-      }
-
-      .bitrate-box {
-        display: inline-flex;
-        align-items: center;
-        gap: 2px;
-        padding: 0 2px;
-        height: 11px;
-        background: #14141a;
-        border: 1px solid;
-        border-color: #3a3a44 #0c0c10 #0c0c10 #3a3a44;
-      }
-
-      .bitrate-box .value {
-        color: #00cc00;
-        font-weight: bold;
-        font-size: 8px;
-        text-shadow: 0 0 3px rgba(0, 200, 0, 0.2);
-      }
-
-      .bitrate-box .unit {
-        color: #006600;
-        font-size: 7px;
-      }
-
-      .display-stereo {
-        font-size: 7px;
-        font-family: 'Courier New', monospace;
-        display: flex;
-        gap: 5px;
-      }
-
-      .display-stereo .active {
-        color: #00cc00;
-        text-shadow: 0 0 4px rgba(0, 200, 0, 0.4);
-        font-weight: bold;
-      }
-
-      .display-stereo .inactive {
-        color: #0a2a0a;
-      }
-
-      /* ===== SEEK BAR ===== */
-      .seek-container {
-        padding: 4px 7px 3px;
-        position: relative;
-      }
-
-      .seek-track {
-        position: absolute;
-        left: 7px;
-        right: 7px;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 5px;
-        background: linear-gradient(180deg, #0a0a0e, #16161c, #0a0a0e);
-        border-top: 1px solid #060608;
-        border-bottom: 1px solid #2a2a32;
-        z-index: 0;
-        overflow: hidden;
-      }
-
-      .seek-fill {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(180deg, #b89850, #8a7040, #6a5430);
-      }
-
-      /* Shared slider styles */
-      input[type='range'] {
+      .winamp-eq input[type='range'] {
         -webkit-appearance: none;
         appearance: none;
         width: 100%;
@@ -357,7 +326,7 @@
         outline: none;
       }
 
-      input[type='range']::-webkit-slider-runnable-track {
+      .winamp-eq input[type='range']::-webkit-slider-runnable-track {
         height: 3px;
         background: linear-gradient(180deg, #0e0e12, #1a1a22, #0e0e12);
         border-top: 1px solid #060608;
@@ -365,7 +334,7 @@
         border-radius: 0;
       }
 
-      input[type='range']::-webkit-slider-thumb {
+      .winamp-eq input[type='range']::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 14px;
         height: 10px;
@@ -378,14 +347,14 @@
         cursor: pointer;
       }
 
-      input[type='range']::-moz-range-track {
+      .winamp-eq input[type='range']::-moz-range-track {
         height: 3px;
         background: linear-gradient(180deg, #0e0e12, #1a1a22, #0e0e12);
         border-top: 1px solid #060608;
         border-bottom: 1px solid #2a2a32;
       }
 
-      input[type='range']::-moz-range-thumb {
+      .winamp-eq input[type='range']::-moz-range-thumb {
         width: 14px;
         height: 10px;
         background: linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
@@ -396,361 +365,6 @@
         cursor: pointer;
       }
 
-      /* Seek bar specific */
-      #seek-bar {
-        height: 10px;
-        position: relative;
-        z-index: 1;
-        background: transparent !important;
-      }
-      #seek-bar::-webkit-slider-runnable-track {
-        height: 5px;
-        background: transparent;
-      }
-      #seek-bar::-moz-range-track {
-        height: 5px;
-        background: transparent;
-      }
-
-      #seek-bar::-webkit-slider-thumb {
-        width: 29px;
-        height: 10px;
-        background: linear-gradient(180deg, #9a8858 0%, #7a6a48 30%, #5e5238 70%, #4a4230 100%);
-        border-top: 1px solid #a09060;
-        border-left: 1px solid #a09060;
-        border-right: 1px solid #2a2218;
-        border-bottom: 1px solid #2a2218;
-        margin-top: -4px;
-        border-radius: 0;
-      }
-
-      #seek-bar::-moz-range-thumb {
-        width: 29px;
-        height: 10px;
-        background: linear-gradient(180deg, #9a8858 0%, #7a6a48 30%, #5e5238 70%, #4a4230 100%);
-        border-top: 1px solid #a09060;
-        border-left: 1px solid #a09060;
-        border-right: 1px solid #2a2218;
-        border-bottom: 1px solid #2a2218;
-        border-radius: 0;
-      }
-
-      /* ===== VOLUME & BALANCE + EQ/PL ===== */
-      .controls-row-top {
-        display: flex;
-        align-items: center;
-        padding: 1px 7px 1px;
-        gap: 3px;
-      }
-
-      .slider-wrapper {
-        position: relative;
-        height: 14px;
-        display: flex;
-        align-items: center;
-      }
-
-      .slider-wrapper.volume-wrap {
-        flex: 1.2;
-      }
-
-      .slider-wrapper.balance-wrap {
-        flex: 0.8;
-      }
-
-      /* Volume track: classic green-to-red gradient bar with ridges */
-      .volume-wedge {
-        position: absolute;
-        left: 2px;
-        right: 2px;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 8px;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
-        border: 1px solid;
-        border-color: #0a0a0e #2e2e38 #2e2e38 #0a0a0e;
-      }
-
-      .volume-wedge-fill {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          #00a800 0%,
-          #66c000 30%,
-          #ccc000 55%,
-          #cc7a00 75%,
-          #cc1e00 100%
-        );
-      }
-
-      .volume-wedge::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(
-          90deg,
-          transparent 0px,
-          transparent 2px,
-          rgba(0, 0, 0, 0.55) 2px,
-          rgba(0, 0, 0, 0.55) 3px
-        );
-      }
-
-      .volume-wedge-bg {
-        display: none;
-      }
-
-      /* Balance track: red at edges, green at center */
-      .slider-wrapper.balance-wrap::before {
-        content: '';
-        position: absolute;
-        left: 2px;
-        right: 2px;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 8px;
-        pointer-events: none;
-        z-index: 0;
-        border: 1px solid;
-        border-color: #0a0a0e #2e2e38 #2e2e38 #0a0a0e;
-        background:
-          repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            transparent 2px,
-            rgba(0, 0, 0, 0.55) 2px,
-            rgba(0, 0, 0, 0.55) 3px
-          ),
-          linear-gradient(90deg, #cc1e00 0%, #ccc000 30%, #00a800 50%, #ccc000 70%, #cc1e00 100%);
-      }
-
-      .slider-wrapper input[type='range'] {
-        position: relative;
-        z-index: 1;
-      }
-
-      .slider-wrapper input[type='range']::-webkit-slider-runnable-track {
-        background: transparent;
-        border: none;
-        height: 2px;
-      }
-
-      .slider-wrapper input[type='range']::-moz-range-track {
-        background: transparent;
-        border: none;
-        height: 2px;
-      }
-
-      .slider-wrapper input[type='range']::-webkit-slider-thumb {
-        width: 14px;
-        height: 10px;
-        margin-top: -5px;
-        background:
-          linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0) 0 4px,
-            #c8a848 4px 6px,
-            #8a6f28 6px 9px,
-            rgba(0, 0, 0, 0) 9px
-          ),
-          linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
-      }
-      .slider-wrapper input[type='range']::-moz-range-thumb {
-        width: 14px;
-        height: 10px;
-        background:
-          linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0) 0 4px,
-            #c8a848 4px 6px,
-            #8a6f28 6px 9px,
-            rgba(0, 0, 0, 0) 9px
-          ),
-          linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
-      }
-
-      .controls-toggles {
-        display: flex;
-        gap: 2px;
-        margin-left: 2px;
-      }
-
-      /* ===== COMBINED CONTROLS BAR (transport + toggles) ===== */
-      .controls-bar {
-        display: flex;
-        align-items: center;
-        padding: 2px 6px 4px;
-        gap: 0;
-      }
-
-      .transport-group {
-        display: flex;
-        gap: 0;
-      }
-
-      .transport-btn {
-        width: 23px;
-        height: 18px;
-        background: linear-gradient(
-          180deg,
-          #6a6a72 0%,
-          #52525a 25%,
-          #42424a 50%,
-          #32323a 75%,
-          #28282e 100%
-        );
-        border-top: 1px solid #82828a;
-        border-left: 1px solid #82828a;
-        border-right: 1px solid #16161c;
-        border-bottom: 1px solid #16161c;
-        color: #1e1e24;
-        font-size: 1px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-      }
-
-      .transport-btn:hover {
-        background: linear-gradient(
-          180deg,
-          #7a7a82 0%,
-          #62626a 25%,
-          #52525a 50%,
-          #42424a 75%,
-          #38383e 100%
-        );
-      }
-
-      .transport-btn:active {
-        border-top: 1px solid #16161c;
-        border-left: 1px solid #16161c;
-        border-right: 1px solid #82828a;
-        border-bottom: 1px solid #82828a;
-        background: linear-gradient(180deg, #28282e 0%, #32323a 50%, #52525a 100%);
-      }
-
-      .transport-btn.active {
-        border-top: 1px solid #16161c;
-        border-left: 1px solid #16161c;
-        border-right: 1px solid #5a5a62;
-        border-bottom: 1px solid #5a5a62;
-        background: linear-gradient(180deg, #28282e 0%, #32323a 50%, #42424a 100%);
-      }
-      .transport-btn.active .icon-play {
-        border-left-color: #00cc00;
-      }
-      .transport-btn.active .icon-pause-bar {
-        background: #00cc00;
-      }
-      .transport-btn.active .icon-stop-box {
-        background: #00cc00;
-      }
-      .transport-btn.active .icon-prev-bar,
-      .transport-btn.active .icon-prev-tri {
-        border-right-color: #00cc00;
-      }
-      .transport-btn.active .icon-prev-bar {
-        background: #00cc00;
-      }
-      .transport-btn.active .icon-next-tri {
-        border-left-color: #00cc00;
-      }
-      .transport-btn.active .icon-next-bar {
-        background: #00cc00;
-      }
-
-      .eject-btn {
-        margin-left: 6px;
-      }
-
-      /* CSS-drawn transport icons */
-      .icon-prev {
-        display: flex;
-        align-items: center;
-        gap: 0;
-      }
-      .icon-prev-bar {
-        width: 2px;
-        height: 7px;
-        background: #1e1e24;
-      }
-      .icon-prev-tri {
-        width: 0;
-        height: 0;
-        border-right: 5px solid #1e1e24;
-        border-top: 3.5px solid transparent;
-        border-bottom: 3.5px solid transparent;
-      }
-
-      .icon-play {
-        width: 0;
-        height: 0;
-        border-left: 7px solid #1e1e24;
-        border-top: 4.5px solid transparent;
-        border-bottom: 4.5px solid transparent;
-        margin-left: 2px;
-      }
-
-      .icon-pause {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-      }
-      .icon-pause-bar {
-        width: 2px;
-        height: 7px;
-        background: #1e1e24;
-      }
-
-      .icon-stop-box {
-        width: 7px;
-        height: 7px;
-        background: #1e1e24;
-      }
-
-      .icon-next {
-        display: flex;
-        align-items: center;
-        gap: 0;
-      }
-      .icon-next-tri {
-        width: 0;
-        height: 0;
-        border-left: 5px solid #1e1e24;
-        border-top: 3.5px solid transparent;
-        border-bottom: 3.5px solid transparent;
-      }
-      .icon-next-bar {
-        width: 2px;
-        height: 7px;
-        background: #1e1e24;
-      }
-
-      .icon-eject {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1px;
-      }
-      .icon-eject-tri {
-        width: 0;
-        height: 0;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-bottom: 5px solid #1e1e24;
-      }
-      .icon-eject-bar {
-        width: 8px;
-        height: 2px;
-        background: #1e1e24;
-      }
-
-      /* Toggle buttons in the bar */
       .toggle-btn {
         height: 15px;
         font-size: 7px;
@@ -780,51 +394,6 @@
       }
       .toggle-btn.active:hover {
         color: #00cc00;
-      }
-
-      .shuffle-group {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        margin-left: 6px;
-      }
-
-      /* Winamp lightning bolt logo */
-      .winamp-logo {
-        width: 12px;
-        height: 15px;
-        margin-left: auto;
-        background: linear-gradient(180deg, #f0d888 0%, #c09a3a 60%, #8a6a20 100%);
-        clip-path: polygon(64% 0, 12% 58%, 42% 58%, 34% 100%, 88% 40%, 56% 40%);
-      }
-
-      .toggle-small {
-        width: 16px;
-        height: 15px;
-        font-size: 6px;
-        padding: 0;
-        justify-content: center;
-      }
-
-      .shuffle-check {
-        width: 7px;
-        height: 7px;
-        border: 1px solid #6a6a72;
-        border-right-color: #16161c;
-        border-bottom-color: #16161c;
-        background: #2a2a32;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-
-      .shuffle-check.checked::after {
-        content: '\2713';
-        color: #00cc00;
-        font-size: 6px;
-        line-height: 1;
-        text-shadow: 0 0 3px rgba(0, 200, 0, 0.4);
       }
 
       /* ===== EQUALIZER WINDOW ===== */
@@ -1421,135 +990,160 @@
     </div>
 
     <div id="winamp">
-      <!-- Main Player Window -->
-      <div class="winamp-main" id="main-window">
-        <div class="title-bar" id="title-bar">
-          <div class="title-icon"></div>
-          <div class="title-bar-line"></div>
-          <span class="title-bar-text">WINAMP</span>
-          <div class="title-bar-line"></div>
-          <div class="title-buttons">
-            <div class="title-btn" title="Minimize">_</div>
-            <div class="title-btn" title="Close">×</div>
-          </div>
+      <!-- Main Player Window: sprites from skin/skin.css, placed at the reference layout. -->
+      <div class="wa-main-background" id="main-window">
+        <div class="wa-titlebar-active" id="title-bar">
+          <button
+            type="button"
+            class="wa-titlebar-options"
+            id="btn-options"
+            data-sprite="titlebar-options"
+            title="Options"
+          ></button>
+          <button
+            type="button"
+            class="wa-titlebar-minimize"
+            id="btn-minimize"
+            data-sprite="titlebar-minimize"
+            title="Minimize"
+          ></button>
+          <button
+            type="button"
+            class="wa-titlebar-shade"
+            id="btn-shade"
+            data-sprite="titlebar-shade"
+            title="Window shade"
+          ></button>
+          <button
+            type="button"
+            class="wa-titlebar-close"
+            id="btn-close"
+            data-sprite="titlebar-close"
+            title="Close"
+          ></button>
         </div>
 
-        <!-- Display -->
-        <div class="display-area">
-          <div class="display-content">
-            <!-- Clutterbar -->
-            <div class="clutterbar">
-              <div class="clutterbar-btn">O</div>
-              <div class="clutterbar-btn">A</div>
-              <div class="clutterbar-btn">I</div>
-              <div class="clutterbar-btn">D</div>
-              <div class="clutterbar-btn">V</div>
-            </div>
-            <!-- Left column: time + visualizer -->
-            <div class="display-left">
-              <div class="display-time-section">
-                <span class="play-indicator" id="play-indicator">▶</span>
-                <span class="display-time" id="time-display">00:00</span>
-              </div>
-              <canvas id="visualizer" width="76" height="32"></canvas>
-            </div>
-            <!-- Right column: title + bitrate + stereo -->
-            <div class="display-right">
-              <div class="display-title-area">
-                <span class="scrolling-title" id="scrolling-title">4. Crusher-P - Echo (3:50)</span>
-              </div>
-              <div class="display-meta-row">
-                <div class="display-bitrate">
-                  <span class="bitrate-box"
-                    ><span class="value" id="bitrate-val">128</span>
-                    <span class="unit">kbps</span></span
-                  >
-                  <span class="bitrate-box"
-                    ><span class="value" id="freq-val">48</span> <span class="unit">kHz</span></span
-                  >
-                </div>
-                <div class="display-stereo">
-                  <span class="inactive" id="mono-indicator">mono</span>
-                  <span class="active" id="stereo-indicator">stereo</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="wa-titlebar-clutter" id="clutter-bar"></div>
+        <div class="wa-playpaus-stop" id="play-indicator"></div>
+        <div class="wa-playpaus-work-off" id="work-indicator"></div>
+        <div id="time-display" role="timer" title="Elapsed / remaining time">
+          <span class="sr-only" id="time-text">00:00</span>
+          <span class="wa-main-time-minus" id="time-minus" hidden></span>
+          <span class="wa-font-digits-48" id="time-digit-1"></span>
+          <span class="wa-font-digits-48" id="time-digit-2"></span>
+          <span class="wa-font-digits-48" id="time-digit-3"></span>
+          <span class="wa-font-digits-48" id="time-digit-4"></span>
         </div>
+        <canvas id="visualizer" width="76" height="16" title="Visualizer"></canvas>
+        <div id="scrolling-title"></div>
+        <div id="bitrate-val" title="kbps"></div>
+        <div id="freq-val" title="kHz"></div>
+        <div class="wa-monoster-mono-off" id="mono-indicator"></div>
+        <div class="wa-monoster-stereo-off" id="stereo-indicator"></div>
 
-        <!-- Seek bar -->
-        <div class="seek-container">
-          <div class="seek-track">
-            <div class="seek-fill" id="seek-fill"></div>
-          </div>
-          <input type="range" id="seek-bar" min="0" max="100" value="0" title="Seek" />
-        </div>
+        <input
+          type="range"
+          class="wa-posbar-background"
+          id="seek-bar"
+          min="0"
+          max="100"
+          value="0"
+          title="Seek"
+        />
+        <div class="thumb wa-posbar-thumb" id="seek-thumb" data-sprite="posbar-thumb"></div>
+        <input
+          type="range"
+          class="wa-volume-level-20"
+          id="volume-slider"
+          min="0"
+          max="100"
+          value="75"
+          title="Volume"
+        />
+        <div class="thumb wa-volume-thumb" id="volume-thumb" data-sprite="volume-thumb"></div>
+        <input
+          type="range"
+          class="wa-balance-level-0"
+          id="balance-slider"
+          min="-100"
+          max="100"
+          value="0"
+          title="Balance"
+        />
+        <div class="thumb wa-balance-thumb" id="balance-thumb" data-sprite="balance-thumb"></div>
 
-        <!-- Volume / Balance / EQ / PL -->
-        <div class="controls-row-top">
-          <div class="slider-wrapper volume-wrap">
-            <div class="volume-wedge">
-              <div class="volume-wedge-bg"></div>
-              <div class="volume-wedge-fill" id="volume-wedge-fill"></div>
-            </div>
-            <input type="range" id="volume-slider" min="0" max="100" value="75" title="Volume" />
-          </div>
-          <div class="slider-wrapper balance-wrap">
-            <input
-              type="range"
-              id="balance-slider"
-              min="-100"
-              max="100"
-              value="0"
-              title="Balance"
-            />
-          </div>
-          <div class="controls-toggles">
-            <button class="toggle-btn toggle-small active" id="btn-eq" title="Equalizer">EQ</button>
-            <button class="toggle-btn toggle-small active" id="btn-pl" title="Playlist">PL</button>
-          </div>
-        </div>
+        <button
+          type="button"
+          class="active wa-shufrep-eq-on"
+          id="btn-eq"
+          data-toggle="shufrep-eq"
+          title="Equalizer"
+        ></button>
+        <button
+          type="button"
+          class="active wa-shufrep-pl-on"
+          id="btn-pl"
+          data-toggle="shufrep-pl"
+          title="Playlist"
+        ></button>
 
-        <!-- Combined controls bar -->
-        <div class="controls-bar">
-          <div class="transport-group">
-            <button class="transport-btn" id="btn-prev" title="Previous">
-              <span class="icon-prev"
-                ><span class="icon-prev-bar"></span><span class="icon-prev-tri"></span
-              ></span>
-            </button>
-            <button class="transport-btn" id="btn-play" title="Play">
-              <span class="icon-play"></span>
-            </button>
-            <button class="transport-btn" id="btn-pause" title="Pause">
-              <span class="icon-pause"
-                ><span class="icon-pause-bar"></span><span class="icon-pause-bar"></span
-              ></span>
-            </button>
-            <button class="transport-btn" id="btn-stop" title="Stop">
-              <span class="icon-stop-box"></span>
-            </button>
-            <button class="transport-btn" id="btn-next" title="Next">
-              <span class="icon-next"
-                ><span class="icon-next-tri"></span><span class="icon-next-bar"></span
-              ></span>
-            </button>
-          </div>
-          <button class="transport-btn eject-btn" id="btn-open" title="Open file">
-            <span class="icon-eject"
-              ><span class="icon-eject-tri"></span><span class="icon-eject-bar"></span
-            ></span>
-          </button>
-          <div class="shuffle-group">
-            <button class="toggle-btn" id="btn-shuffle" title="Shuffle">
-              <span class="shuffle-check" id="shuffle-check"></span>SHUFFLE
-            </button>
-            <button class="toggle-btn toggle-small" id="btn-repeat" title="Repeat">
-              <span class="shuffle-check" id="repeat-check"></span>
-            </button>
-          </div>
-          <div class="winamp-logo" title="Winamp"></div>
-        </div>
+        <button
+          type="button"
+          class="wa-cbuttons-previous"
+          id="btn-prev"
+          data-sprite="cbuttons-previous"
+          title="Previous"
+        ></button>
+        <button
+          type="button"
+          class="wa-cbuttons-play"
+          id="btn-play"
+          data-sprite="cbuttons-play"
+          title="Play"
+        ></button>
+        <button
+          type="button"
+          class="wa-cbuttons-pause"
+          id="btn-pause"
+          data-sprite="cbuttons-pause"
+          title="Pause"
+        ></button>
+        <button
+          type="button"
+          class="wa-cbuttons-stop"
+          id="btn-stop"
+          data-sprite="cbuttons-stop"
+          title="Stop"
+        ></button>
+        <button
+          type="button"
+          class="wa-cbuttons-next"
+          id="btn-next"
+          data-sprite="cbuttons-next"
+          title="Next"
+        ></button>
+        <button
+          type="button"
+          class="wa-cbuttons-eject"
+          id="btn-open"
+          data-sprite="cbuttons-eject"
+          title="Open file"
+        ></button>
+        <button
+          type="button"
+          class="wa-shufrep-shuffle-off"
+          id="btn-shuffle"
+          data-toggle="shufrep-shuffle"
+          title="Shuffle"
+        ></button>
+        <button
+          type="button"
+          class="wa-shufrep-repeat-off"
+          id="btn-repeat"
+          data-toggle="shufrep-repeat"
+          title="Repeat"
+        ></button>
+        <button type="button" id="btn-about" title="About Winamp"></button>
       </div>
 
       <!-- Equalizer Window -->

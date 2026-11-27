@@ -4,7 +4,7 @@ mode background
 width 155
 size 5x6
 color . none
-color X #00E000
+color X #00FF00
 
 glyph A
 .XX..
