@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-26
+landed: 2026-11-27
 ---
 
 # F005 · Winamp matches the classic 2.x skin pixel for pixel
