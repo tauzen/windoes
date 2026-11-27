@@ -127,7 +127,6 @@
   let audioConnected = false;
 
   const EQ_FREQUENCIES = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
-  const EQ_LABELS = ['70', '180', '320', '600', '1K', '3K', '6K', '12K', '14K', '16K'];
 
   function initAudio() {
     if (audioContext) return;
@@ -157,6 +156,7 @@
       filter.Q.value = 1;
       eqFilters.push(filter);
     });
+    applyEq();
 
     audioElement.addEventListener('timeupdate', onTimeUpdate);
     audioElement.addEventListener('ended', onTrackEnded);
@@ -173,15 +173,13 @@
       return;
     }
 
+    // The filters stay in the chain; with EQ off, applyEq sets them flat.
     /** @type {AudioNode} */
     let chain = sourceNode;
-
-    if (state.eqEnabled) {
-      eqFilters.forEach((filter) => {
-        chain.connect(filter);
-        chain = filter;
-      });
-    }
+    eqFilters.forEach((filter) => {
+      chain.connect(filter);
+      chain = filter;
+    });
 
     chain.connect(gainNode);
     gainNode.connect(pannerNode);
@@ -545,83 +543,178 @@
   }
 
   // ===== EQUALIZER =====
+  // The preamp and the ten bands are vertical native range inputs (-12 to
+  // +12 dB): each shows the level frame of its value and a sprite thumb that
+  // follows it, as the main window's sliders do. The graph is drawn from the
+  // eqmain sheet: its background, the preamp line, and a curve through the
+  // bands whose pixels take the colour of their row.
+  const EQ_BAND_PITCH = 18;
+  const EQ_SLIDER_TRAVEL = 52; // 63 px slider minus the 11 px thumb
+  // Initial band values in dB: a gentle loudness curve.
+  const EQ_INITIAL = [3, 5, 4, 2, 0, -1, -2, -1, 1, 2];
+
   const eqGraphCanvas = byId('eq-graph', HTMLCanvasElement);
   const eqGraphCtx = required(eqGraphCanvas.getContext('2d'), 'EQ graph 2D context');
+  const preampSlider = byId('eq-preamp-slider', HTMLInputElement);
+  const preampThumb = byId('eq-preamp-thumb', HTMLElement);
+  const eqTitleBar = byId('eq-title-bar', HTMLElement);
+  /** @type {{ input: HTMLInputElement, thumb: HTMLElement }[]} */
+  const eqBands = [];
+
+  /**
+   * Where `frame` sits in its sprite sheet, as skin.css places it.
+   * @param {string} frame
+   */
+  function spriteSource(frame) {
+    const probe = document.createElement('span');
+    probe.className = 'wa-' + frame;
+    probe.hidden = true;
+    document.body.append(probe);
+    const style = getComputedStyle(probe);
+    const [x, y] = style.backgroundPosition.split(' ').map((v) => -parseFloat(v));
+    const url = required(/url\("?([^")]*)"?\)/.exec(style.backgroundImage), `${frame} sheet`)[1];
+    probe.remove();
+    return { url, x, y };
+  }
+
+  const EQ_GRAPH = {
+    background: spriteSource('eqmain-graph-background'),
+    colors: spriteSource('eqmain-graph-line-colors'),
+    preamp: spriteSource('eqmain-preamp-line'),
+  };
+  const eqSheet = new Image();
+  eqSheet.addEventListener('load', drawEqGraph);
+  eqSheet.src = EQ_GRAPH.background.url;
+
+  /**
+   * Graph row of a value in dB: 0 at +12, the bottom row at -12.
+   * @param {number} db
+   */
+  function graphRow(db) {
+    const last = eqGraphCanvas.height - 1;
+    return Math.max(0, Math.min(last, Math.round(((12 - db) / 24) * last)));
+  }
+
+  /**
+   * Catmull-Rom curve through `values` at position `pos` (0 to length - 1).
+   * @param {number[]} values
+   * @param {number} pos
+   */
+  function curveAt(values, pos) {
+    const i = Math.min(Math.floor(pos), values.length - 2);
+    const t = pos - i;
+    const at = (/** @type {number} */ k) => values[Math.max(0, Math.min(values.length - 1, k))];
+    const [p0, p1, p2, p3] = [at(i - 1), at(i), at(i + 1), at(i + 2)];
+    return (
+      0.5 *
+      (2 * p1 +
+        (p2 - p0) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+        (3 * p1 - p0 - 3 * p2 + p3) * t * t * t)
+    );
+  }
 
   function drawEqGraph() {
-    const w = eqGraphCanvas.width;
-    const h = eqGraphCanvas.height;
-    eqGraphCtx.fillStyle = '#000';
-    eqGraphCtx.fillRect(0, 0, w, h);
-
-    eqGraphCtx.fillStyle = '#3a3a1e';
-    eqGraphCtx.fillRect(0, Math.floor(h / 2), w, 1);
-
-    const sliders = /** @type {NodeListOf<HTMLInputElement>} */ (
-      document.querySelectorAll('#eq-bands .eq-slider')
-    );
-    if (!sliders.length) return;
-    const values = Array.from(sliders).map((s) => parseFloat(s.value));
-
-    eqGraphCtx.strokeStyle = '#00cc00';
-    eqGraphCtx.lineWidth = 1;
-    eqGraphCtx.beginPath();
+    if (!eqSheet.complete || !eqSheet.naturalWidth || !eqBands.length) return;
+    const { width: w, height: h } = eqGraphCanvas;
+    const { background, colors, preamp } = EQ_GRAPH;
+    eqGraphCtx.drawImage(eqSheet, background.x, background.y, w, h, 0, 0, w, h);
+    const preampRow = graphRow(Number(preampSlider.value));
+    eqGraphCtx.drawImage(eqSheet, preamp.x, preamp.y, w, 1, 0, preampRow, w, 1);
+    const values = eqBands.map(({ input }) => Number(input.value));
+    /** @type {number | null} */
+    let prev = null;
     for (let x = 0; x < w; x++) {
-      const pos = (x / (w - 1)) * (values.length - 1);
-      const i = Math.min(Math.floor(pos), values.length - 2);
-      const t = pos - i;
-      const v = values[i] * (1 - t) + values[i + 1] * t;
-      const y = h / 2 - (v / 12) * (h / 2 - 2);
-      if (x === 0) {
-        eqGraphCtx.moveTo(x + 0.5, y);
-      } else {
-        eqGraphCtx.lineTo(x + 0.5, y);
+      const row = graphRow(curveAt(values, (x / (w - 1)) * (values.length - 1)));
+      // Fill the column up to the previous row so the curve stays unbroken.
+      const top = prev === null ? row : Math.min(row, prev + 1);
+      const bottom = prev === null ? row : Math.max(row, prev - 1);
+      for (let y = top; y <= bottom; y++) {
+        eqGraphCtx.drawImage(eqSheet, colors.x, colors.y + y, 1, 1, x, y, 1, 1);
       }
+      prev = row;
     }
-    eqGraphCtx.stroke();
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   * @param {HTMLElement} thumb
+   */
+  function paintEqSlider(input, thumb) {
+    const min = Number(input.min);
+    const fraction = (Number(input.value) - min) / (Number(input.max) - min);
+    setSprite(input, 'eqmain-slider-level-' + level(fraction));
+    thumb.style.top = input.offsetTop + Math.round((1 - fraction) * EQ_SLIDER_TRAVEL) + 'px';
+  }
+
+  /** Filters and preamp from the sliders; with EQ off the sound stays flat. */
+  function applyEq() {
+    eqBands.forEach(({ input }, i) => {
+      if (eqFilters[i]) eqFilters[i].gain.value = state.eqEnabled ? Number(input.value) : 0;
+    });
+    if (gainNode) {
+      const preamp = state.eqEnabled ? Math.pow(10, Number(preampSlider.value) / 20) : 1;
+      gainNode.gain.value = state.volume * preamp;
+    }
+  }
+
+  function eqSliders() {
+    return [{ input: preampSlider, thumb: preampThumb }, ...eqBands];
+  }
+
+  function paintEq() {
+    for (const { input, thumb } of eqSliders()) paintEqSlider(input, thumb);
+    applyEq();
+    drawEqGraph();
+  }
+
+  function paintEqTitleBar() {
+    setSprite(eqTitleBar, document.hasFocus() ? 'eqmain-title-active' : 'eqmain-title-inactive');
   }
 
   function buildEQ() {
     const container = byId('eq-bands', HTMLElement);
-    container.innerHTML = '';
-
-    // Add dB labels between preamp and sliders
-    const eqBody = required(container.parentElement, 'EQ body');
-    let dbLabels = eqBody.querySelector('.eq-db-labels');
-    if (!dbLabels) {
-      dbLabels = document.createElement('div');
-      dbLabels.className = 'eq-db-labels';
-      dbLabels.innerHTML = '<span>+12dB</span><span>0dB</span><span>-12dB</span>';
-      eqBody.insertBefore(dbLabels, container);
-    }
-
-    // Initial slider positions for a natural curve
-    const initValues = [3, 5, 4, 2, 0, -1, -2, -1, 1, 2];
-
-    EQ_LABELS.forEach((label, i) => {
+    EQ_FREQUENCIES.forEach((freq, i) => {
       const band = document.createElement('div');
       band.className = 'eq-band';
-      band.innerHTML = `
-              <input type="range" class="eq-slider" min="-12" max="12" value="${initValues[i]}"
-                     data-band="${i}" title="${label}">
-          `;
-      const slider = required(band.querySelector('input'), 'EQ band slider');
-      slider.addEventListener('input', () => {
-        if (eqFilters[i]) {
-          eqFilters[i].gain.value = parseFloat(slider.value);
-        }
-        drawEqGraph();
-      });
-      container.appendChild(band);
+      band.style.left = i * EQ_BAND_PITCH + 'px';
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.min = '-12';
+      input.max = '12';
+      input.value = String(EQ_INITIAL[i]);
+      input.title = freq < 1000 ? `${freq} Hz` : `${freq / 1000} kHz`;
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      thumb.dataset.sprite = 'eqmain-thumb';
+      band.append(input, thumb);
+      container.append(band);
+      eqBands.push({ input, thumb });
     });
 
-    const labelsContainer = byId('eq-freq-labels', HTMLElement);
-    labelsContainer.innerHTML = '';
-    EQ_LABELS.forEach((label) => {
-      const span = document.createElement('span');
-      span.textContent = label;
-      labelsContainer.appendChild(span);
+    for (const { input, thumb } of eqSliders()) {
+      input.addEventListener('input', () => {
+        paintEqSlider(input, thumb);
+        applyEq();
+        drawEqGraph();
+      });
+      // Arrow keys move the focused slider only, not the player's volume and seek keys.
+      input.addEventListener('keydown', (e) => {
+        if (e.key.startsWith('Arrow')) e.stopPropagation();
+      });
+      pressOnPointer(input, thumb);
+      paint(thumb);
+    }
+    /** @type {NodeListOf<HTMLElement>} */ (
+      document.querySelectorAll('#eq-window button[data-sprite], #eq-window [data-toggle]')
+    ).forEach((el) => {
+      pressOnPointer(el, el);
+      paint(el);
     });
+    window.addEventListener('focus', paintEqTitleBar);
+    window.addEventListener('blur', paintEqTitleBar);
+    paintEqTitleBar();
+    paintEq();
   }
 
   // ===== MAIN WINDOW DISPLAY =====
@@ -958,38 +1051,23 @@
     paint(this);
   });
 
-  // EQ on/off
+  // EQ on/off: off leaves the sound flat and keeps the slider values.
   byId('eq-on-btn', HTMLElement).addEventListener('click', function () {
     state.eqEnabled = !state.eqEnabled;
     this.classList.toggle('active', state.eqEnabled);
+    paint(this);
+    applyEq();
   });
 
-  // EQ auto (reset to defaults)
-  byId('eq-auto-btn', HTMLElement).addEventListener('click', function () {
-    // Reset all EQ band sliders to 0
-    /** @type {NodeListOf<HTMLInputElement>} */ (
-      document.querySelectorAll('.eq-sliders-section .eq-slider')
-    ).forEach((slider, i) => {
-      slider.value = '0';
-      if (eqFilters[i]) {
-        eqFilters[i].gain.value = 0;
-      }
-    });
-    // Reset preamp
-    byId('eq-preamp-slider', HTMLInputElement).value = '0';
-    if (gainNode) {
-      gainNode.gain.value = state.volume;
-    }
-    drawEqGraph();
+  // EQ auto: resets the bands and the preamp to 0 dB.
+  byId('eq-auto-btn', HTMLElement).addEventListener('click', () => {
+    for (const { input } of eqSliders()) input.value = '0';
+    paintEq();
   });
 
-  // EQ preamp
-  const preampSlider = byId('eq-preamp-slider', HTMLInputElement);
-  preampSlider.addEventListener('input', () => {
-    if (gainNode) {
-      const preampGain = Math.pow(10, parseFloat(preampSlider.value) / 20);
-      gainNode.gain.value = state.volume * preampGain;
-    }
+  // The equalizer's close button hides it, as the main window's EQ toggle does.
+  byId('eq-btn-close', HTMLElement).addEventListener('click', () => {
+    byId('btn-eq', HTMLElement).click();
   });
 
   // Playlist buttons
@@ -1110,7 +1188,6 @@
 
   // ===== INIT =====
   buildEQ();
-  drawEqGraph();
   drawVisualizer();
   paintTitleBar();
   paintVolume();

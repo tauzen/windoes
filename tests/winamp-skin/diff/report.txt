@@ -7,7 +7,7 @@ Capture: shell at 1024x768, device scale factor 1, 275x348 from the top-left of 
 Pixels outside the masks whose RGB differs from the reference (tolerance 0; reported, not gated)
   main       24990 of 26212 (95.3%)
   equalizer  31900 of 31900 (100.0%)
-  playlist   16602 of 17296 (96.0%)
+  playlist   17222 of 17296 (99.6%)
 
 Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, items to their window)
   [main]
@@ -46,27 +46,27 @@ Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, i
   ok      repeat            210,89 28x15    210,89 28x15
   ok      about             253,91 13x15    253,91 13x15
   [equalizer]
-  off     equalizer window  0,116 275x116   0,116 275x155
-  missing title bar         0,0 275x14      -
-  missing shade             254,3 9x9       -
-  missing close             264,3 9x9       -
-  off     ON                14,18 26x12     9,21 21.50x15
-  off     AUTO              40,18 32x12     33.50,21 31.72x15
-  off     PRESETS           217,18 44x12    219.31,23 46.69x11
-  off     graph             86,17 113x19    84.77,18 115x21
-  off     preamp            21,38 14x63     14.06,50 14x90
-  off     band 1            78,38 14x63     67.14,43 14x90
-  off     band 2            96,38 14x63     87.45,43 14x90
-  off     band 3            114,38 14x63    107.78,43 14x90
-  off     band 4            132,38 14x63    128.09,43 14x90
-  off     band 5            150,38 14x63    148.41,43 14x90
-  off     band 6            168,38 14x63    168.73,43 14x90
-  off     band 7            186,38 14x63    189.05,43 14x90
-  off     band 8            204,38 14x63    209.36,43 14x90
-  off     band 9            222,38 14x63    229.69,43 14x90
-  off     band 10           240,38 14x63    250,43 14x90
+  ok      equalizer window  0,116 275x116   0,116 275x116
+  ok      title bar         0,0 275x14      0,0 275x14
+  ok      shade             254,3 9x9       254,3 9x9
+  ok      close             264,3 9x9       264,3 9x9
+  ok      ON                14,18 26x12     14,18 26x12
+  ok      AUTO              40,18 32x12     40,18 32x12
+  ok      PRESETS           217,18 44x12    217,18 44x12
+  ok      graph             86,17 113x19    86,17 113x19
+  ok      preamp            21,38 14x63     21,38 14x63
+  ok      band 1            78,38 14x63     78,38 14x63
+  ok      band 2            96,38 14x63     96,38 14x63
+  ok      band 3            114,38 14x63    114,38 14x63
+  ok      band 4            132,38 14x63    132,38 14x63
+  ok      band 5            150,38 14x63    150,38 14x63
+  ok      band 6            168,38 14x63    168,38 14x63
+  ok      band 7            186,38 14x63    186,38 14x63
+  ok      band 8            204,38 14x63    204,38 14x63
+  ok      band 9            222,38 14x63    222,38 14x63
+  ok      band 10           240,38 14x63    240,38 14x63
   [playlist]
-  off     playlist window   0,232 275x116   0,271 275x107
+  off     playlist window   0,232 275x116   0,232 275x107
   missing title bar         0,0 275x20      -
   off     rows              12,20 243x58    4,17 267x60
   off     ADD               14,86 22x18     5,85.50 27.17x11
@@ -76,19 +76,9 @@ Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, i
   off     LIST OPTS         ?,? 22x18       249.52,83 21.63x16
   missing running time      132,88 ?x6      -
   missing mini time         191,101 ?x6     -
-  34 of 63 rects match
+  53 of 63 rects match
 
 Skin frames each item needs and the build does not have yet
-  equalizer background: eqmain-background
-  equalizer title bar: eqmain-title-active eqmain-title-inactive
-  equalizer shade: eqmain-shade eqmain-shade-pressed
-  equalizer close: eqmain-close eqmain-close-pressed
-  equalizer ON: eqmain-on-off eqmain-on-off-pressed eqmain-on-on eqmain-on-on-pressed
-  equalizer AUTO: eqmain-auto-off eqmain-auto-off-pressed eqmain-auto-on eqmain-auto-on-pressed
-  equalizer PRESETS: eqmain-presets eqmain-presets-pressed
-  equalizer graph: eqmain-graph-background eqmain-graph-line-colors eqmain-preamp-line
-  equalizer preamp: eqmain-slider-level-0 eqmain-slider-level-1 eqmain-slider-level-2 eqmain-slider-level-3 eqmain-slider-level-4 eqmain-slider-level-5 eqmain-slider-level-6 eqmain-slider-level-7 eqmain-slider-level-8 eqmain-slider-level-9 eqmain-slider-level-10 eqmain-slider-level-11 eqmain-slider-level-12 eqmain-slider-level-13 eqmain-slider-level-14 eqmain-slider-level-15 eqmain-slider-level-16 eqmain-slider-level-17 eqmain-slider-level-18 eqmain-slider-level-19 eqmain-slider-level-20 eqmain-slider-level-21 eqmain-slider-level-22 eqmain-slider-level-23 eqmain-slider-level-24 eqmain-slider-level-25 eqmain-slider-level-26 eqmain-slider-level-27
-  equalizer slider thumb: eqmain-thumb eqmain-thumb-pressed
   playlist title bar: pledit-top-left-active pledit-top-left-inactive pledit-top-tile-active pledit-top-tile-inactive pledit-top-right-active pledit-top-right-inactive pledit-title-active pledit-title-inactive
   playlist close: pledit-close-pressed
   playlist shade: pledit-shade-pressed
@@ -100,4 +90,4 @@ Skin frames each item needs and the build does not have yet
   playlist SEL: pledit-sel-pressed
   playlist MISC: pledit-misc-pressed
   playlist LIST OPTS: pledit-list-opts-pressed
-  285 of 357 frames present
+  335 of 357 frames present
