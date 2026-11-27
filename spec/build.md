@@ -14,7 +14,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- The issue #127 code-quality stretch is complete (F001–F004 merged). Next direction waits on the owner; `spec/vision.md` is still empty.
+- The code-quality stretch (F001–F004) and the classic-skin Winamp redesign (F005) are complete. Next direction waits on the owner; `spec/vision.md` is still empty.
 
 ## NOW
 
@@ -22,7 +22,8 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## NEXT
 
-- <!-- One clause per planned ticket. -->
+- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (PLANNED): small Winamp audio fix found in the F005 equalizer slice.
+- `F007-winamp-title-bar-buttons-work-inside-the-shell` (PLANNED): shell overlay blocks Winamp's options, minimize and shade buttons; touches shell window code.
 
 ## PROVEN
 
