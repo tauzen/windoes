@@ -94,6 +94,111 @@
 .wa-cbuttons-eject { background-position: -90px -18px; width: 22px; height: 16px; }
 .wa-cbuttons-eject-pressed { background-position: -112px -18px; width: 22px; height: 16px; }
 
+.wa-eqmain-background,
+.wa-eqmain-title-active,
+.wa-eqmain-title-inactive,
+.wa-eqmain-shade,
+.wa-eqmain-shade-pressed,
+.wa-eqmain-close,
+.wa-eqmain-close-pressed,
+.wa-eqmain-on-off,
+.wa-eqmain-on-off-pressed,
+.wa-eqmain-on-on,
+.wa-eqmain-on-on-pressed,
+.wa-eqmain-auto-off,
+.wa-eqmain-auto-off-pressed,
+.wa-eqmain-auto-on,
+.wa-eqmain-auto-on-pressed,
+.wa-eqmain-presets,
+.wa-eqmain-presets-pressed,
+.wa-eqmain-graph-background,
+.wa-eqmain-graph-line-colors,
+.wa-eqmain-preamp-line,
+.wa-eqmain-thumb,
+.wa-eqmain-thumb-pressed,
+.wa-eqmain-slider-level-0,
+.wa-eqmain-slider-level-1,
+.wa-eqmain-slider-level-2,
+.wa-eqmain-slider-level-3,
+.wa-eqmain-slider-level-4,
+.wa-eqmain-slider-level-5,
+.wa-eqmain-slider-level-6,
+.wa-eqmain-slider-level-7,
+.wa-eqmain-slider-level-8,
+.wa-eqmain-slider-level-9,
+.wa-eqmain-slider-level-10,
+.wa-eqmain-slider-level-11,
+.wa-eqmain-slider-level-12,
+.wa-eqmain-slider-level-13,
+.wa-eqmain-slider-level-14,
+.wa-eqmain-slider-level-15,
+.wa-eqmain-slider-level-16,
+.wa-eqmain-slider-level-17,
+.wa-eqmain-slider-level-18,
+.wa-eqmain-slider-level-19,
+.wa-eqmain-slider-level-20,
+.wa-eqmain-slider-level-21,
+.wa-eqmain-slider-level-22,
+.wa-eqmain-slider-level-23,
+.wa-eqmain-slider-level-24,
+.wa-eqmain-slider-level-25,
+.wa-eqmain-slider-level-26,
+.wa-eqmain-slider-level-27 {
+  background-image: url(eqmain.png);
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.wa-eqmain-background { background-position: 0 0; width: 275px; height: 116px; }
+.wa-eqmain-title-active { background-position: 0 -116px; width: 275px; height: 14px; }
+.wa-eqmain-title-inactive { background-position: 0 -130px; width: 275px; height: 14px; }
+.wa-eqmain-shade { background-position: 0 -144px; width: 9px; height: 9px; }
+.wa-eqmain-shade-pressed { background-position: -9px -144px; width: 9px; height: 9px; }
+.wa-eqmain-close { background-position: -18px -144px; width: 9px; height: 9px; }
+.wa-eqmain-close-pressed { background-position: -27px -144px; width: 9px; height: 9px; }
+.wa-eqmain-on-off { background-position: -36px -144px; width: 26px; height: 12px; }
+.wa-eqmain-on-off-pressed { background-position: -62px -144px; width: 26px; height: 12px; }
+.wa-eqmain-on-on { background-position: -88px -144px; width: 26px; height: 12px; }
+.wa-eqmain-on-on-pressed { background-position: -114px -144px; width: 26px; height: 12px; }
+.wa-eqmain-auto-off { background-position: -140px -144px; width: 32px; height: 12px; }
+.wa-eqmain-auto-off-pressed { background-position: -172px -144px; width: 32px; height: 12px; }
+.wa-eqmain-auto-on { background-position: -204px -144px; width: 32px; height: 12px; }
+.wa-eqmain-auto-on-pressed { background-position: -236px -144px; width: 32px; height: 12px; }
+.wa-eqmain-presets { background-position: 0 -156px; width: 44px; height: 12px; }
+.wa-eqmain-presets-pressed { background-position: -44px -156px; width: 44px; height: 12px; }
+.wa-eqmain-graph-background { background-position: -88px -156px; width: 113px; height: 19px; }
+.wa-eqmain-graph-line-colors { background-position: -201px -156px; width: 1px; height: 19px; }
+.wa-eqmain-preamp-line { background-position: 0 -175px; width: 113px; height: 1px; }
+.wa-eqmain-thumb { background-position: -113px -175px; width: 11px; height: 11px; }
+.wa-eqmain-thumb-pressed { background-position: -124px -175px; width: 11px; height: 11px; }
+.wa-eqmain-slider-level-0 { background-position: -135px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-1 { background-position: -149px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-2 { background-position: -163px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-3 { background-position: -177px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-4 { background-position: -191px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-5 { background-position: -205px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-6 { background-position: -219px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-7 { background-position: -233px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-8 { background-position: -247px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-9 { background-position: -261px -175px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-10 { background-position: 0 -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-11 { background-position: -14px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-12 { background-position: -28px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-13 { background-position: -42px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-14 { background-position: -56px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-15 { background-position: -70px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-16 { background-position: -84px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-17 { background-position: -98px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-18 { background-position: -112px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-19 { background-position: -126px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-20 { background-position: -140px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-21 { background-position: -154px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-22 { background-position: -168px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-23 { background-position: -182px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-24 { background-position: -196px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-25 { background-position: -210px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-26 { background-position: -224px -238px; width: 14px; height: 63px; }
+.wa-eqmain-slider-level-27 { background-position: -238px -238px; width: 14px; height: 63px; }
+
 .wa-font-digits-48,
 .wa-font-digits-49,
 .wa-font-digits-50,

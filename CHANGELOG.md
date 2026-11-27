@@ -91,7 +91,17 @@ All notable changes to this project are documented in this file.
   the 5x6 font and 9x13 digits; the title scrolls when it does not fit, a click
   on the time switches to remaining time, and the visualizer draws 19 bars with
   peak dots or an oscilloscope. Range inputs stay native for keyboard use. The
-  equalizer and playlist keep their look for now.
+  playlist keeps its look for now.
+- The Winamp equalizer is our own pixel art at the classic 2.x layout: 275x116,
+  with the title bar (active and inactive), shade and close, ON and AUTO with
+  LEDs, PRESETS, the curve graph and the preamp and ten band sliders at their
+  reference size and position, and every state drawn (pressed buttons, 28
+  slider levels from green to red). The graph draws a smooth curve through the
+  bands, coloured by height, over the preamp line. The band labels now match
+  the filters (60 Hz to 16 kHz). ON now really switches the equalizer off and
+  on during playback, the band values apply from the first play, arrow keys on
+  a focused slider no longer also change the volume or seek, and the close
+  button hides the equalizer as the EQ toggle does.
 - CI now gates pull requests and deploys. The test workflow runs on pull
   requests to `main` as well as branch pushes, and runs `npm run lint`,
   `npm run typecheck`, `npx prettier --check .` and `npm run test:all`, in that

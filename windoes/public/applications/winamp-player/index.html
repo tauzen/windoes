@@ -316,365 +316,133 @@
         min-width: 8px;
       }
 
-      .winamp-eq input[type='range'] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 10px;
-        background: transparent;
+      /* ===== EQUALIZER WINDOW =====
+         Sprites from skin/skin.css (skin-src/eqmain.txt), placed at the
+         reference layout in tests/winamp-skin/layout.mjs, as in the main
+         window. app.js swaps the .wa-* classes for states and draws the graph
+         from the same sheet. */
+      #eq-window {
+        position: relative;
+        overflow: hidden;
+        cursor: default;
+      }
+
+      #eq-window > *,
+      #eq-title-bar > *,
+      .eq-band > * {
+        position: absolute;
+        display: block;
+      }
+
+      #eq-window button,
+      #eq-window input {
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
         cursor: pointer;
+      }
+      #eq-window :focus {
         outline: none;
       }
-
-      .winamp-eq input[type='range']::-webkit-slider-runnable-track {
-        height: 3px;
-        background: linear-gradient(180deg, #0e0e12, #1a1a22, #0e0e12);
-        border-top: 1px solid #060608;
-        border-bottom: 1px solid #2a2a32;
-        border-radius: 0;
+      #eq-window :focus-visible {
+        outline: 1px dotted #fff;
+        outline-offset: -1px;
       }
 
-      .winamp-eq input[type='range']::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 14px;
-        height: 10px;
-        background: linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
-        border-top: 1px solid #8a8a94;
-        border-left: 1px solid #8a8a94;
-        border-right: 1px solid #16161c;
-        border-bottom: 1px solid #16161c;
-        margin-top: -4px;
-        cursor: pointer;
+      #eq-title-bar {
+        left: 0;
+        top: 0;
       }
-
-      .winamp-eq input[type='range']::-moz-range-track {
-        height: 3px;
-        background: linear-gradient(180deg, #0e0e12, #1a1a22, #0e0e12);
-        border-top: 1px solid #060608;
-        border-bottom: 1px solid #2a2a32;
+      #eq-btn-shade {
+        left: 254px;
+        top: 3px;
       }
-
-      .winamp-eq input[type='range']::-moz-range-thumb {
-        width: 14px;
-        height: 10px;
-        background: linear-gradient(180deg, #7a7a84 0%, #5a5a64 30%, #3e3e46 70%, #2a2a32 100%);
-        border-top: 1px solid #8a8a94;
-        border-left: 1px solid #8a8a94;
-        border-right: 1px solid #16161c;
-        border-bottom: 1px solid #16161c;
-        cursor: pointer;
+      #eq-btn-close {
+        left: 264px;
+        top: 3px;
       }
-
-      .toggle-btn {
-        height: 15px;
-        font-size: 7px;
-        color: #5a5a64;
-        background: linear-gradient(180deg, #52525a 0%, #3a3a42 50%, #2a2a32 100%);
-        border-top: 1px solid #6a6a72;
-        border-left: 1px solid #6a6a72;
-        border-right: 1px solid #16161c;
-        border-bottom: 1px solid #16161c;
-        padding: 0 4px;
-        cursor: pointer;
-        font-family: 'Arial', sans-serif;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 2px;
+      #eq-on-btn {
+        left: 14px;
+        top: 18px;
       }
-
-      .toggle-btn.active {
-        color: #00cc00;
-        text-shadow: 0 0 4px rgba(0, 200, 0, 0.4);
+      #eq-auto-btn {
+        left: 40px;
+        top: 18px;
       }
-
-      .toggle-btn:hover {
-        color: #8a8a94;
+      #eq-presets-btn {
+        left: 217px;
+        top: 18px;
       }
-      .toggle-btn.active:hover {
-        color: #00cc00;
-      }
-
-      /* ===== EQUALIZER WINDOW ===== */
-      .winamp-eq {
-        width: 275px;
-        background: #232329;
-        border-left: 1px solid #3a3a42;
-        border-right: 1px solid #0e0e12;
-        border-bottom: 1px solid #0e0e12;
-        overflow: hidden;
-      }
-
-      .eq-title {
-        background: linear-gradient(180deg, #384868 0%, #2a3a55 30%, #1e2e48 60%, #162440 100%);
-        height: 14px;
-        display: flex;
-        align-items: center;
-        padding: 0 4px;
-        border-bottom: 1px solid #0a0a10;
-        gap: 3px;
-      }
-
-      .eq-title span {
-        font-size: 7px;
-        color: #d8dce8;
-        font-weight: bold;
-        letter-spacing: 1.5px;
-        text-shadow: 1px 1px 0 #000;
-        padding: 0 5px;
-        line-height: 10px;
-      }
-
-      .eq-header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 4px 8px 2px;
-      }
-
       #eq-graph {
-        background: #000;
-        border: 1px solid;
-        border-color: #0a0a10 #2a2a32 #2a2a32 #0a0a10;
+        left: 86px;
+        top: 17px;
+        width: 113px;
+        height: 19px;
         image-rendering: pixelated;
       }
 
-      .eq-header-left {
-        display: flex;
-        gap: 3px;
+      /* Sliders: vertical native range inputs (keyboard and pointer), their own
+         track and thumb transparent; the level frame is the input's background
+         and the sprite thumb beside it follows the value (app.js). */
+      #eq-preamp-slider {
+        left: 21px;
+        top: 38px;
       }
-
-      .eq-presets-btn {
-        font-size: 7px;
-        color: #8a8a94;
-        background: linear-gradient(180deg, #42424a, #2a2a32);
-        border-top: 1px solid #5a5a62;
-        border-left: 1px solid #5a5a62;
-        border-right: 1px solid #0e0e12;
-        border-bottom: 1px solid #0e0e12;
-        padding: 1px 6px;
-        cursor: pointer;
-        font-weight: bold;
+      #eq-bands {
+        left: 78px;
+        top: 38px;
+        width: 176px;
+        height: 63px;
       }
-
-      .eq-presets-btn:hover {
-        color: #c0c8d8;
-      }
-
-      .eq-body {
-        display: flex;
-        padding: 2px 8px 4px;
-        gap: 2px;
-        position: relative;
-      }
-
-      .eq-preamp-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1px;
-        padding-right: 6px;
-        border-right: 1px solid #1a1a22;
-        margin-right: 2px;
-        min-width: 28px;
-      }
-
-      .eq-preamp-section label {
-        font-size: 5px;
-        color: #6a6a72;
-        letter-spacing: 0.5px;
-      }
-
-      .eq-sliders-section {
-        display: flex;
-        flex: 1;
-        justify-content: space-between;
-        position: relative;
-        padding: 0 2px;
-      }
-
-      /* Each band gets its own classic red-to-green gradient track line */
-
-      .eq-db-labels {
-        height: 90px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        pointer-events: none;
-        z-index: 2;
-        padding: 0 2px;
-      }
-
-      .eq-db-labels span {
-        font-size: 5px;
-        color: #5a5a62;
-        font-family: 'Courier New', monospace;
-        white-space: nowrap;
-      }
-
       .eq-band {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1px;
-        z-index: 1;
-      }
-
-      .eq-band label {
-        font-size: 5px;
-        color: #6a6a72;
-        font-family: 'Arial', sans-serif;
-      }
-
-      input[type='range'].eq-slider {
-        writing-mode: vertical-lr;
-        direction: rtl;
-        height: 90px;
+        position: absolute;
+        top: 0;
         width: 14px;
+        height: 63px;
+      }
+      .eq-band > input {
+        left: 0;
+        top: 0;
+      }
+      #eq-window input[type='range'] {
         -webkit-appearance: none;
         appearance: none;
-        background: transparent;
-      }
-
-      input[type='range'].eq-slider::-webkit-slider-runnable-track {
-        width: 3px;
-        background: linear-gradient(
-          180deg,
-          #cc2200 0%,
-          #cc8800 25%,
-          #cccc00 45%,
-          #66cc00 60%,
-          #22aa00 75%,
-          #0a6600 100%
-        );
-        border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #0a0a0e;
-      }
-
-      input[type='range'].eq-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 16px !important;
-        height: 6px !important;
-        background:
-          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
-          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
-        border-top: 1px solid #e8d080;
-        border-left: 1px solid #e8d080;
-        border-bottom: 1px solid #3a2e10;
-        border-right: 1px solid #3a2e10;
-        margin-left: -7px;
-        cursor: pointer;
-      }
-
-      input[type='range'].eq-slider::-moz-range-track {
-        width: 3px;
-        background: linear-gradient(
-          180deg,
-          #cc2200 0%,
-          #cc8800 25%,
-          #cccc00 45%,
-          #66cc00 60%,
-          #22aa00 75%,
-          #0a6600 100%
-        );
-        border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #0a0a0e;
-      }
-
-      input[type='range'].eq-slider::-moz-range-thumb {
-        width: 16px !important;
-        height: 6px !important;
-        background:
-          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
-          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
-        border-top: 1px solid #e8d080;
-        border-left: 1px solid #e8d080;
-        border-bottom: 1px solid #3a2e10;
-        border-right: 1px solid #3a2e10;
-        cursor: pointer;
-      }
-
-      input#eq-preamp-slider {
         writing-mode: vertical-lr;
         direction: rtl;
-        height: 90px;
-        width: 14px;
-        -webkit-appearance: none;
-        appearance: none;
+      }
+      #eq-window input[type='range']::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 100%;
         background: transparent;
+        border: 0;
       }
-
-      input#eq-preamp-slider::-webkit-slider-runnable-track {
-        width: 3px;
-        background: linear-gradient(
-          180deg,
-          #cc2200 0%,
-          #cc8800 25%,
-          #cccc00 45%,
-          #66cc00 60%,
-          #22aa00 75%,
-          #0a6600 100%
-        );
-        border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #0a0a0e;
+      #eq-window input[type='range']::-moz-range-track {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: 0;
       }
-
-      input#eq-preamp-slider::-webkit-slider-thumb {
+      #eq-window input[type='range']::-webkit-slider-thumb {
         -webkit-appearance: none;
-        width: 16px;
-        height: 6px;
-        background:
-          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
-          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
-        border-top: 1px solid #e8d080;
-        border-left: 1px solid #e8d080;
-        border-bottom: 1px solid #3a2e10;
-        border-right: 1px solid #3a2e10;
-        margin-left: -7px;
-        cursor: pointer;
+        width: 14px;
+        height: 11px;
+        background: transparent;
+        border: 0;
       }
-
-      input#eq-preamp-slider::-moz-range-track {
-        width: 3px;
-        background: linear-gradient(
-          180deg,
-          #cc2200 0%,
-          #cc8800 25%,
-          #cccc00 45%,
-          #66cc00 60%,
-          #22aa00 75%,
-          #0a6600 100%
-        );
-        border-left: 1px solid #0a0a0e;
-        border-right: 1px solid #0a0a0e;
+      #eq-window input[type='range']::-moz-range-thumb {
+        width: 14px;
+        height: 11px;
+        background: transparent;
+        border: 0;
       }
-
-      input#eq-preamp-slider::-moz-range-thumb {
-        width: 16px;
-        height: 6px;
-        background:
-          linear-gradient(180deg, rgba(0, 0, 0, 0) 0 2px, #3a2e10 2px 4px, rgba(0, 0, 0, 0) 4px),
-          linear-gradient(180deg, #d0b060 0%, #a08038 50%, #705a20 100%);
-        border-top: 1px solid #e8d080;
-        border-left: 1px solid #e8d080;
-        border-bottom: 1px solid #3a2e10;
-        border-right: 1px solid #3a2e10;
-        cursor: pointer;
+      /* The 11 px thumb sits one pixel in from the 14 px slider's left edge. */
+      #eq-preamp-thumb {
+        left: 22px;
       }
-
-      .eq-freq-labels {
-        display: flex;
-        justify-content: space-between;
-        padding: 0 10px 4px 36px;
-      }
-
-      .eq-freq-labels span {
-        font-size: 5px;
-        color: #6a6a72;
-        font-family: 'Arial', sans-serif;
-        width: 18px;
-        text-align: center;
+      .eq-band > .thumb {
+        left: 1px;
       }
 
       /* ===== PLAYLIST WINDOW ===== */
@@ -1146,40 +914,58 @@
         <button type="button" id="btn-about" title="About Winamp"></button>
       </div>
 
-      <!-- Equalizer Window -->
-      <div class="winamp-eq" id="eq-window">
-        <div class="eq-title">
-          <div class="title-bar-line"></div>
-          <span>WINAMP EQUALIZER</span>
-          <div class="title-bar-line"></div>
+      <!-- Equalizer Window: sprites from skin/skin.css, placed at the reference layout. -->
+      <div class="wa-eqmain-background" id="eq-window">
+        <div class="wa-eqmain-title-active" id="eq-title-bar">
+          <button
+            type="button"
+            class="wa-eqmain-shade"
+            id="eq-btn-shade"
+            data-sprite="eqmain-shade"
+            title="Window shade"
+          ></button>
+          <button
+            type="button"
+            class="wa-eqmain-close"
+            id="eq-btn-close"
+            data-sprite="eqmain-close"
+            title="Close equalizer"
+          ></button>
         </div>
-        <div class="eq-header-row">
-          <div class="eq-header-left">
-            <button class="toggle-btn active" id="eq-on-btn">ON</button>
-            <button class="toggle-btn" id="eq-auto-btn">AUTO</button>
-          </div>
-          <canvas id="eq-graph" width="113" height="19"></canvas>
-          <button class="eq-presets-btn" id="eq-presets-btn">PRESETS</button>
-        </div>
-        <div class="eq-body">
-          <div class="eq-preamp-section">
-            <label>PREAMP</label>
-            <input
-              type="range"
-              id="eq-preamp-slider"
-              class="eq-slider"
-              min="-12"
-              max="12"
-              value="0"
-            />
-          </div>
-          <div class="eq-sliders-section" id="eq-bands">
-            <!-- Bands generated by JS -->
-          </div>
-        </div>
-        <div class="eq-freq-labels" id="eq-freq-labels">
-          <!-- Generated by JS -->
-        </div>
+        <button
+          type="button"
+          class="active wa-eqmain-on-on"
+          id="eq-on-btn"
+          data-toggle="eqmain-on"
+          title="Equalizer on"
+        ></button>
+        <button
+          type="button"
+          class="wa-eqmain-auto-off"
+          id="eq-auto-btn"
+          data-sprite="eqmain-auto-off"
+          title="Reset equalizer"
+        ></button>
+        <button
+          type="button"
+          class="wa-eqmain-presets"
+          id="eq-presets-btn"
+          data-sprite="eqmain-presets"
+          title="Presets"
+        ></button>
+        <canvas id="eq-graph" width="113" height="19" title="Equalizer curve"></canvas>
+        <input
+          type="range"
+          class="wa-eqmain-slider-level-14"
+          id="eq-preamp-slider"
+          min="-12"
+          max="12"
+          value="0"
+          title="Preamp"
+        />
+        <div class="thumb wa-eqmain-thumb" id="eq-preamp-thumb" data-sprite="eqmain-thumb"></div>
+        <!-- Ten bands, built by app.js: .eq-band > input + .thumb -->
+        <div id="eq-bands"></div>
       </div>
 
       <!-- Playlist Window -->
