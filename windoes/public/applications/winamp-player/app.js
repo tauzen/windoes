@@ -100,6 +100,7 @@
   const state = {
     playlist: /** @type {Track[]} */ ([]),
     currentTrack: -1,
+    selectedTrack: -1,
     isPlaying: false,
     isPaused: false,
     shuffle: false,
@@ -443,6 +444,11 @@
     } else if (state.currentTrack > index) {
       state.currentTrack--;
     }
+    if (state.selectedTrack === index) {
+      state.selectedTrack = -1;
+    } else if (state.selectedTrack > index) {
+      state.selectedTrack--;
+    }
     renderPlaylist();
   }
 
@@ -467,35 +473,115 @@
     setMarquee(`${index + 1}. ${track.name} (${durationStr})`);
   }
 
+  // ===== PLAYLIST =====
+  // Rows are glyphs of the playlist font (skin-src/font-playlist.txt), an
+  // alpha mask that CSS fills with the row colour. Each row has its text as
+  // its accessible name.
+  const trackList = byId('playlist-tracks', HTMLElement);
+  const scrollHandle = byId('playlist-scroll-handle', HTMLElement);
+  // The handle travels the 58 px scroll column less its own 18 px.
+  const SCROLL_TOP = 20;
+  const SCROLL_TRAVEL = 40;
+
+  /**
+   * The playlist-font code point that draws `char`: accents dropped, any
+   * other character outside printable ASCII as `?`.
+   * @param {string} char
+   */
+  function playlistGlyph(char) {
+    const code = char.normalize('NFD').codePointAt(0) ?? 0x3f;
+    return code >= 0x20 && code <= 0x7e ? code : 0x3f;
+  }
+
+  /**
+   * A span of playlist-font glyphs drawing `text`.
+   * @param {string} className
+   * @param {string} text
+   */
+  function playlistText(className, text) {
+    const row = document.createElement('span');
+    row.className = className;
+    for (const char of text) {
+      const glyph = document.createElement('span');
+      setSprite(glyph, 'font-playlist-' + playlistGlyph(char));
+      row.append(glyph);
+    }
+    return row;
+  }
+
   function renderPlaylist() {
-    const container = byId('playlist-tracks', HTMLElement);
-    container.innerHTML = '';
-
-    state.playlist.forEach((track, i) => {
+    const rows = state.playlist.map((track, i) => {
+      const name = `${i + 1}. ${track.name}`;
+      const duration = formatTimeDuration(track.duration);
       const el = document.createElement('div');
-      el.className = 'track-item' + (i === state.currentTrack ? ' active' : '');
-      el.innerHTML = `
-              <span class="track-num">${i + 1}.</span>
-              <span class="track-name">${escapeHtml(track.name)}</span>
-              <span class="track-duration">${track.duration ? formatTimeDuration(track.duration) : '--:--'}</span>
-          `;
-      el.addEventListener('dblclick', () => playTrack(i));
-      el.addEventListener('click', () => {
-        document.querySelectorAll('.track-item').forEach((t) => t.classList.remove('active'));
-        el.classList.add('active');
+      el.className = 'track-item';
+      el.id = `pl-track-${i}`;
+      el.setAttribute('role', 'option');
+      el.setAttribute('aria-label', `${name} ${duration}`);
+      el.append(playlistText('track-name', name), playlistText('track-duration', duration));
+      el.addEventListener('click', () => selectTrack(i));
+      el.addEventListener('dblclick', () => {
+        selectTrack(i);
+        playTrack(i);
       });
-      container.appendChild(el);
+      return el;
     });
+    trackList.replaceChildren(...rows);
+    highlightTrack(state.currentTrack);
+    selectTrack(state.selectedTrack);
+    placeScrollHandle();
+  }
 
+  /**
+   * Marks the current track (white text) and shows the playing track's time.
+   * @param {number} index
+   */
+  function highlightTrack(index) {
+    Array.from(trackList.children).forEach((el, i) => {
+      el.classList.toggle('current', i === index);
+    });
+    updatePlaylistTimeDisplay();
+  }
+
+  /**
+   * Selects a row (blue background); -1 selects none.
+   * @param {number} index
+   */
+  function selectTrack(index) {
+    state.selectedTrack = index;
+    Array.from(trackList.children).forEach((el, i) => {
+      el.classList.toggle('selected', i === index);
+      el.setAttribute('aria-selected', String(i === index));
+    });
+    const row = trackList.children[index];
+    if (row) {
+      trackList.setAttribute('aria-activedescendant', row.id);
+    } else {
+      trackList.removeAttribute('aria-activedescendant');
+    }
     updatePlaylistInfo();
   }
 
-  /** @param {number} index */
-  function highlightTrack(index) {
-    document.querySelectorAll('.track-item').forEach((el, i) => {
-      el.classList.toggle('active', i === index);
-      el.classList.toggle('playing', i === index && state.isPlaying);
-    });
+  /**
+   * Scrolls the list so row `index` is in view. Rows are scrolled here, not
+   * with scrollIntoView, which would also scroll the shell around the frame.
+   * @param {number} index
+   */
+  function revealTrack(index) {
+    const row = trackList.children[index];
+    if (!(row instanceof HTMLElement)) return;
+    const top = row.offsetTop;
+    const bottom = top + row.offsetHeight;
+    if (top < trackList.scrollTop) trackList.scrollTop = top;
+    else if (bottom > trackList.scrollTop + trackList.clientHeight) {
+      trackList.scrollTop = bottom - trackList.clientHeight;
+    }
+  }
+
+  function placeScrollHandle() {
+    const max = trackList.scrollHeight - trackList.clientHeight;
+    const offset = max > 0 ? Math.round((trackList.scrollTop / max) * SCROLL_TRAVEL) : 0;
+    scrollHandle.style.top = `${SCROLL_TOP + offset}px`;
   }
 
   function updateUI() {
@@ -529,17 +615,23 @@
     }
   }
 
+  // Running time: the selected track's length over the playlist's total.
   function updatePlaylistInfo() {
     const total = state.playlist.reduce((sum, t) => sum + (t.duration || 0), 0);
-    byId('playlist-total-length', HTMLElement).textContent = formatTimeLong(total);
+    const selected = state.playlist[state.selectedTrack]?.duration || 0;
+    writeSmallText(
+      byId('playlist-running-time', HTMLElement),
+      `${formatTimeLong(selected)}/${formatTimeLong(total)}`
+    );
   }
 
+  // Mini time: the playing or paused track's elapsed time; blank when stopped.
   function updatePlaylistTimeDisplay() {
-    if (audioElement && audioElement.currentTime) {
-      byId('playlist-total-time', HTMLElement).textContent = formatTimeWithHours(
-        audioElement.currentTime
-      );
-    }
+    const loaded = state.isPlaying || state.isPaused;
+    writeSmallText(
+      byId('playlist-mini-time', HTMLElement),
+      loaded && audioElement ? formatTime(audioElement.currentTime) : ''
+    );
   }
 
   // ===== EQUALIZER =====
@@ -807,7 +899,8 @@
 
   // Buttons and thumbs: `data-sprite` names the frame, `data-toggle` the
   // frames of an on/off button (state in its `active` class); either shows
-  // its `-pressed` frame while the pointer is down on it.
+  // its `-pressed` frame while the pointer is down on it. A button whose
+  // normal look is part of the window art names only its `data-pressed` frame.
   /** @type {Set<HTMLElement>} */
   const pressed = new Set();
 
@@ -819,6 +912,9 @@
       const on = el.classList.contains('active');
       setSprite(el, `${toggle}-${on ? 'on' : 'off'}${suffix}`);
       el.setAttribute('aria-pressed', String(on));
+    } else if (el.dataset.pressed) {
+      if (suffix) setSprite(el, el.dataset.pressed);
+      else el.classList.remove(...Array.from(el.classList).filter((c) => c.startsWith('wa-')));
     } else {
       setSprite(el, el.dataset.sprite + suffix);
     }
@@ -862,6 +958,24 @@
   }
   window.addEventListener('focus', paintTitleBar);
   window.addEventListener('blur', paintTitleBar);
+
+  // Playlist title bar: lit while the player has focus, as the main one.
+  /** @type {NodeListOf<HTMLElement>} */
+  const playlistTitlePieces = document.querySelectorAll('#playlist-title [data-frame]');
+  function paintPlaylistTitle() {
+    const lit = document.hasFocus() ? 'active' : 'inactive';
+    playlistTitlePieces.forEach((el) => setSprite(el, `${el.dataset.frame}-${lit}`));
+  }
+  window.addEventListener('focus', paintPlaylistTitle);
+  window.addEventListener('blur', paintPlaylistTitle);
+
+  /** @type {NodeListOf<HTMLElement>} */ (
+    document.querySelectorAll('#playlist-window [data-pressed]')
+  ).forEach((el) => {
+    pressOnPointer(el, el);
+    paint(el);
+  });
+  pressOnPointer(scrollHandle, scrollHandle);
 
   // ===== VISUALIZER =====
   // 19 bars, 3 px wide with a 1 px gap, over a dotted grid; a click switches
@@ -1075,11 +1189,70 @@
     byId('file-input', HTMLInputElement).click();
   });
   byId('pl-rem-btn', HTMLElement).addEventListener('click', () => {
-    const active = document.querySelector('.track-item.active');
-    if (active) {
-      const idx = Array.from(required(active.parentNode, 'track list').children).indexOf(active);
-      removeTrack(idx);
+    if (state.selectedTrack >= 0) removeTrack(state.selectedTrack);
+  });
+  // Closing the playlist is the main window's PL toggle turned off.
+  byId('pl-btn-close', HTMLElement).addEventListener('click', () => {
+    byId('btn-pl', HTMLElement).click();
+  });
+
+  // Playlist keys: arrows, Home and End select, Enter plays, Delete removes.
+  trackList.addEventListener('keydown', (e) => {
+    const last = state.playlist.length - 1;
+    const current = state.selectedTrack;
+    let next = current;
+    switch (e.key) {
+      case 'ArrowUp':
+        next = Math.max(0, current - 1);
+        break;
+      case 'ArrowDown':
+        next = Math.min(last, current + 1);
+        break;
+      case 'Home':
+        next = 0;
+        break;
+      case 'End':
+        next = last;
+        break;
+      case 'Enter':
+        if (current >= 0) playTrack(current);
+        break;
+      case 'Delete':
+        if (current >= 0) removeTrack(current);
+        break;
+      default:
+        return;
     }
+    // Keep the arrows from also changing the volume.
+    e.preventDefault();
+    e.stopPropagation();
+    if (next !== current && last >= 0) {
+      selectTrack(next);
+      revealTrack(next);
+    }
+  });
+
+  // Scrolling: the wheel and keys scroll the list; the handle follows, and
+  // dragging the handle scrolls the list.
+  trackList.addEventListener('scroll', placeScrollHandle);
+  scrollHandle.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const grab = e.clientY - scrollHandle.offsetTop;
+    /** @param {PointerEvent} move */
+    const drag = (move) => {
+      const max = trackList.scrollHeight - trackList.clientHeight;
+      const offset = Math.min(SCROLL_TRAVEL, Math.max(0, move.clientY - grab - SCROLL_TOP));
+      trackList.scrollTop = (offset / SCROLL_TRAVEL) * max;
+    };
+    const release = () => {
+      window.removeEventListener('pointermove', drag);
+      window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointercancel', release);
+    };
+    window.addEventListener('pointermove', drag);
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
   });
 
   // Playlist mini transport
@@ -1088,6 +1261,9 @@
   byId('pl-mini-pause', HTMLElement).addEventListener('click', pause);
   byId('pl-mini-stop', HTMLElement).addEventListener('click', stop);
   byId('pl-mini-next', HTMLElement).addEventListener('click', nextTrack);
+  byId('pl-mini-open', HTMLElement).addEventListener('click', () => {
+    byId('file-input', HTMLInputElement).click();
+  });
 
   // Visualizer click to toggle mode
   visCanvas.addEventListener('click', () => {
@@ -1161,31 +1337,6 @@
     return m + ':' + s.toString().padStart(2, '0');
   }
 
-  /** @param {number} seconds */
-  function formatTimeWithHours(seconds) {
-    if (!seconds || isNaN(seconds)) return '0:00:00:00';
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 100);
-    return (
-      h +
-      ':' +
-      m.toString().padStart(2, '0') +
-      ':' +
-      s.toString().padStart(2, '0') +
-      ':' +
-      ms.toString().padStart(2, '0')
-    );
-  }
-
-  /** @param {string} text */
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   // ===== INIT =====
   buildEQ();
   drawVisualizer();
@@ -1195,6 +1346,7 @@
   updateUI();
   renderTime(0);
 
+  paintPlaylistTitle();
   renderPlaylist();
 
   // Load external tracks manifest (metadata only; MP3s live behind a
@@ -1251,7 +1403,7 @@ if (window.self !== window.top) {
         {
           type: 'winamp-resize',
           width: Math.ceil(rect.width),
-          height: Math.ceil(rect.height) - 1,
+          height: Math.ceil(rect.height),
         },
         '*'
       );

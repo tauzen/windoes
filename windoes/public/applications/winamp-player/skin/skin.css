@@ -595,6 +595,55 @@
 .wa-playpaus-work-on { background-position: -27px 0; width: 3px; height: 9px; }
 .wa-playpaus-work-off { background-position: -30px 0; width: 3px; height: 9px; }
 
+.wa-pledit-top-left-active,
+.wa-pledit-top-tile-active,
+.wa-pledit-top-right-active,
+.wa-pledit-title-active,
+.wa-pledit-top-left-inactive,
+.wa-pledit-top-tile-inactive,
+.wa-pledit-top-right-inactive,
+.wa-pledit-title-inactive,
+.wa-pledit-shade-pressed,
+.wa-pledit-close-pressed,
+.wa-pledit-left-tile,
+.wa-pledit-right-tile,
+.wa-pledit-scroll-handle,
+.wa-pledit-scroll-handle-pressed,
+.wa-pledit-bottom-left,
+.wa-pledit-bottom-tile,
+.wa-pledit-bottom-right,
+.wa-pledit-add-pressed,
+.wa-pledit-rem-pressed,
+.wa-pledit-sel-pressed,
+.wa-pledit-misc-pressed,
+.wa-pledit-list-opts-pressed {
+  background-image: url(pledit.png);
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.wa-pledit-top-left-active { background-position: 0 0; width: 25px; height: 20px; }
+.wa-pledit-top-tile-active { background-position: -25px 0; width: 25px; height: 20px; }
+.wa-pledit-top-right-active { background-position: -50px 0; width: 25px; height: 20px; }
+.wa-pledit-title-active { background-position: -75px 0; width: 100px; height: 20px; }
+.wa-pledit-top-left-inactive { background-position: -175px 0; width: 25px; height: 20px; }
+.wa-pledit-top-tile-inactive { background-position: -200px 0; width: 25px; height: 20px; }
+.wa-pledit-top-right-inactive { background-position: -225px 0; width: 25px; height: 20px; }
+.wa-pledit-title-inactive { background-position: 0 -20px; width: 100px; height: 20px; }
+.wa-pledit-shade-pressed { background-position: -100px -20px; width: 9px; height: 9px; }
+.wa-pledit-close-pressed { background-position: -109px -20px; width: 9px; height: 9px; }
+.wa-pledit-left-tile { background-position: -118px -20px; width: 12px; height: 29px; }
+.wa-pledit-right-tile { background-position: -130px -20px; width: 20px; height: 29px; }
+.wa-pledit-scroll-handle { background-position: -150px -20px; width: 8px; height: 18px; }
+.wa-pledit-scroll-handle-pressed { background-position: -158px -20px; width: 8px; height: 18px; }
+.wa-pledit-bottom-left { background-position: 0 -49px; width: 125px; height: 38px; }
+.wa-pledit-bottom-tile { background-position: -125px -49px; width: 25px; height: 38px; }
+.wa-pledit-bottom-right { background-position: 0 -87px; width: 150px; height: 38px; }
+.wa-pledit-add-pressed { background-position: -150px -87px; width: 22px; height: 18px; }
+.wa-pledit-rem-pressed { background-position: -172px -87px; width: 22px; height: 18px; }
+.wa-pledit-sel-pressed { background-position: -194px -87px; width: 22px; height: 18px; }
+.wa-pledit-misc-pressed { background-position: -216px -87px; width: 22px; height: 18px; }
+.wa-pledit-list-opts-pressed { background-position: -238px -87px; width: 22px; height: 18px; }
+
 .wa-posbar-background,
 .wa-posbar-thumb,
 .wa-posbar-thumb-pressed {

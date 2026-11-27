@@ -5,7 +5,7 @@
  * - The committed skin/ matches a fresh build of skin-src/
  * - Page loads with all expected UI elements
  * - Transport controls are present and functional
- * - Playlist window is visible
+ * - Playlist rows are pixel-font glyphs; select, remove, keys and scrolling work
  * - Equalizer window is present
  * - Volume and seek controls exist
  * - Shuffle/repeat toggles work
@@ -87,20 +87,62 @@ async function runTests() {
   assert(sliders.balance, 'Balance slider exists');
   assert(sliders.seek, 'Seek bar exists');
 
-  // ── Test 4: Playlist window is present with tracks ───────────────────
-  console.log('\nTest 4: Playlist window is present');
+  // ── Test 4: Playlist rows, selection, removal, keys and scrolling ────
+  console.log('\nTest 4: Playlist rows, selection, removal, keys and scrolling');
 
-  const playlist = await page.evaluate(() => ({
-    window: !!document.getElementById('playlist-window'),
-    tracks: !!document.getElementById('playlist-tracks'),
-    addBtn: !!document.getElementById('pl-add-btn'),
-    remBtn: !!document.getElementById('pl-rem-btn'),
-  }));
+  await page.setInputFiles(
+    '#file-input',
+    Array.from({ length: 6 }, (_, i) => ({
+      name: `Tune ${i + 1}.wav`,
+      mimeType: 'audio/wav',
+      buffer: Buffer.alloc(44),
+    }))
+  );
+  const rows = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('#playlist-tracks > .track-item')].map((r) => ({
+        label: r.getAttribute('aria-label'),
+        glyphs: r.querySelectorAll('[class*="wa-font-playlist-"]').length,
+        text: r.textContent.trim(),
+        selected: r.classList.contains('selected'),
+      }))
+    );
+  const added = await rows();
+  assert(
+    added.length === 6 && added[0].label === '1. Tune 1 --:--',
+    `ADD lists the files as numbered rows (${added.map((r) => r.label)})`
+  );
+  assert(
+    added.every((r) => r.text === '' && r.glyphs === [...r.label].length - 1),
+    'Rows are drawn as playlist-font glyphs, not text'
+  );
 
-  assert(playlist.window, 'Playlist window exists');
-  assert(playlist.tracks, 'Playlist tracks container exists');
-  assert(playlist.addBtn, 'Playlist ADD button exists');
-  assert(playlist.remBtn, 'Playlist REM button exists');
+  await page.click('#pl-track-1');
+  await page.click('#pl-rem-btn');
+  const afterRem = (await rows()).map((r) => r.label);
+  assert(
+    afterRem.length === 5 && afterRem[1] === '2. Tune 3 --:--',
+    `REM removes the selected row (${afterRem})`
+  );
+
+  const volumeBefore = await page.inputValue('#volume-slider');
+  await page.focus('#playlist-tracks');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  const keyed = await rows();
+  assert(
+    keyed.findIndex((r) => r.selected) === 1 &&
+      (await page.inputValue('#volume-slider')) === volumeBefore,
+    'Arrow keys in the list move the selection and leave the volume alone'
+  );
+
+  const handleTop = await page.evaluate(() => {
+    const list = document.getElementById('playlist-tracks');
+    list.scrollTop = list.scrollHeight;
+    list.dispatchEvent(new Event('scroll'));
+    return document.getElementById('playlist-scroll-handle').style.top;
+  });
+  assert(handleTop === '60px', `The scroll handle follows the list to the bottom (${handleTop})`);
 
   // ── Test 5: Equalizer window is present ──────────────────────────────
   console.log('\nTest 5: Equalizer window is present');

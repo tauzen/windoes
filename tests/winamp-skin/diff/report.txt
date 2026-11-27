@@ -7,7 +7,7 @@ Capture: shell at 1024x768, device scale factor 1, 275x348 from the top-left of 
 Pixels outside the masks whose RGB differs from the reference (tolerance 0; reported, not gated)
   main       24990 of 26212 (95.3%)
   equalizer  31900 of 31900 (100.0%)
-  playlist   17222 of 17296 (99.6%)
+  playlist   16952 of 17296 (98.0%)
 
 Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, items to their window)
   [main]
@@ -66,28 +66,17 @@ Geometry: status, item, expected x,y wxh, actual (windows relative to #winamp, i
   ok      band 9            222,38 14x63    222,38 14x63
   ok      band 10           240,38 14x63    240,38 14x63
   [playlist]
-  off     playlist window   0,232 275x116   0,232 275x107
-  missing title bar         0,0 275x20      -
-  off     rows              12,20 243x58    4,17 267x60
-  off     ADD               14,86 22x18     5,85.50 27.17x11
-  off     REM               43,86 22x18     34.17,85.50 27.56x11
-  off     SEL               72,86 22x18     63.73,85.50 25.63x11
-  off     MISC              101,86 22x18    91.36,85.50 29.50x11
-  off     LIST OPTS         ?,? 22x18       249.52,83 21.63x16
-  missing running time      132,88 ?x6      -
-  missing mini time         191,101 ?x6     -
-  53 of 63 rects match
+  ok      playlist window   0,232 275x116   0,232 275x116
+  ok      title bar         0,0 275x20      0,0 275x20
+  ok      rows              12,20 243x58    12,20 243x58
+  ok      ADD               14,86 22x18     14,86 22x18
+  ok      REM               43,86 22x18     43,86 22x18
+  ok      SEL               72,86 22x18     72,86 22x18
+  ok      MISC              101,86 22x18    101,86 22x18
+  ok      LIST OPTS         ?,? 22x18       229,86 22x18
+  ok      running time      132,88 ?x6      132,88 55x6
+  ok      mini time         191,101 ?x6     191,101 30x6
+  63 of 63 rects match
 
 Skin frames each item needs and the build does not have yet
-  playlist title bar: pledit-top-left-active pledit-top-left-inactive pledit-top-tile-active pledit-top-tile-inactive pledit-top-right-active pledit-top-right-inactive pledit-title-active pledit-title-inactive
-  playlist close: pledit-close-pressed
-  playlist shade: pledit-shade-pressed
-  playlist side frame: pledit-left-tile pledit-right-tile
-  playlist scroll handle: pledit-scroll-handle pledit-scroll-handle-pressed
-  playlist bottom bar: pledit-bottom-left pledit-bottom-tile pledit-bottom-right
-  playlist ADD: pledit-add-pressed
-  playlist REM: pledit-rem-pressed
-  playlist SEL: pledit-sel-pressed
-  playlist MISC: pledit-misc-pressed
-  playlist LIST OPTS: pledit-list-opts-pressed
-  335 of 357 frames present
+  357 of 357 frames present

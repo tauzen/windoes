@@ -90,8 +90,7 @@ All notable changes to this project are documented in this file.
   LEDs, active and inactive title bar, 28 volume and balance levels). Text uses
   the 5x6 font and 9x13 digits; the title scrolls when it does not fit, a click
   on the time switches to remaining time, and the visualizer draws 19 bars with
-  peak dots or an oscilloscope. Range inputs stay native for keyboard use. The
-  playlist keeps its look for now.
+  peak dots or an oscilloscope. Range inputs stay native for keyboard use.
 - The Winamp equalizer is our own pixel art at the classic 2.x layout: 275x116,
   with the title bar (active and inactive), shade and close, ON and AUTO with
   LEDs, PRESETS, the curve graph and the preamp and ten band sliders at their
@@ -102,6 +101,15 @@ All notable changes to this project are documented in this file.
   on during playback, the band values apply from the first play, arrow keys on
   a focused slider no longer also change the volume or seek, and the close
   button hides the equalizer as the EQ toggle does.
+- The Winamp playlist is our own pixel art at the classic 2.x layout: 275x116,
+  with a 20 px title bar (active and inactive), side frames, a scroll handle
+  (normal and pressed), and the bottom bar with ADD, REM, SEL, MISC and LIST
+  OPTS (each with a pressed frame), the running time, a six-button mini
+  transport and a resize grip. Rows use the playlist pixel font at a 13 px
+  pitch: green, white for the current track, blue behind the selected row.
+  The list is a keyboard listbox (arrows, Home and End select, Enter plays,
+  Delete removes), and the close button turns the playlist off. The shell
+  window now shows the player's last pixel row, which it used to cut off.
 - CI now gates pull requests and deploys. The test workflow runs on pull
   requests to `main` as well as branch pushes, and runs `npm run lint`,
   `npm run typecheck`, `npx prettier --check .` and `npm run test:all`, in that
