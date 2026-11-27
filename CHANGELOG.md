@@ -6,6 +6,15 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Winamp skin tooling, ahead of the classic 2.x reskin. Pixel art lives as
+  plain-text grids in `winamp-player/skin-src/`, and
+  `scripts/build-winamp-skin.mjs` turns them into PNG sprite sheets and sprite
+  CSS in `winamp-player/skin/` with no image library. The first art is three
+  fonts drawn for Windoes: a 5x6 text font, 9x13 time digits and a
+  proportional playlist font. A diff harness (`npm run test:winamp-skin-diff`)
+  reports Winamp's geometry, missing skin frames and differing pixels against a
+  reference screenshot fetched at run time. Winamp looks unchanged for now.
+
 - VirtualBoks now reports a guest image it cannot fetch instead of hanging.
   v86 treats every failed download as retryable and backs off forever without
   surfacing anything, so a blocked or missing image left the window stuck on

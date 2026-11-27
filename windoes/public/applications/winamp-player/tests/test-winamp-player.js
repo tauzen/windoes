@@ -2,6 +2,7 @@
  * Playwright tests for the Winamp Player application.
  *
  * Validates:
+ * - The committed skin/ matches a fresh build of skin-src/
  * - Page loads with all expected UI elements
  * - Transport controls are present and functional
  * - Playlist window is visible
@@ -12,15 +13,25 @@
  */
 
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { launchBrowser } = require('../../../../../tests/launch-browser');
 const { createAssertTracker } = require('../../../../../tests/helpers/test-harness');
 
 const FILE_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
+const SKIN_BUILD = path.resolve(__dirname, '../../../../../scripts/build-winamp-skin.mjs');
 
 const tracker = createAssertTracker();
 const { assert } = tracker;
 
 async function runTests() {
+  // ── Test 0: Skin output is up to date ────────────────────────────────
+  console.log('\nTest 0: skin/ matches a fresh build of skin-src/');
+  const skinCheck = spawnSync(process.execPath, [SKIN_BUILD, '--check'], { encoding: 'utf8' });
+  assert(
+    skinCheck.status === 0,
+    `build-winamp-skin --check passes (${(skinCheck.stdout + skinCheck.stderr).trim()})`
+  );
+
   const browser = await launchBrowser();
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
