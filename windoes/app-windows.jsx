@@ -132,9 +132,6 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
       <>
         <div>
           <div className="headless-drag-handle"></div>
-          <button className="headless-close-btn" aria-label="Close">
-            ×
-          </button>
         </div>
         <iframe
           id="winampFrame"
@@ -155,14 +152,9 @@ const winampConfig = WindoesApp.WindowManager.register('winamp', {
   setup(config) {
     const releaseMessageListener = retainAppMessageListener();
     const handle = config.el.querySelector('.headless-drag-handle');
-    const closeBtn = config.el.querySelector('.headless-close-btn');
     const disposeDrag = makeDraggable(handle, config.el);
 
-    const onCloseClick = () => WindoesApp.WindowManager.close('winamp');
-    closeBtn.addEventListener('click', onCloseClick);
-
     return () => {
-      closeBtn.removeEventListener('click', onCloseClick);
       if (typeof disposeDrag === 'function') disposeDrag();
       releaseMessageListener();
     };
@@ -599,7 +591,12 @@ function onAppMessage(e) {
   if (e.data.type === 'winamp-track-fetch' && iframe === winampFrame) {
     handleWinampTrackFetch(e);
   }
-  if (e.data.type === 'winamp-close') {
+  // Winamp draws its own title-bar buttons; its minimize and close buttons
+  // ask the shell to act on the Winamp window.
+  if (e.data.type === 'winamp-minimize' && iframe === winampFrame) {
+    WindoesApp.WindowManager.minimize('winamp');
+  }
+  if (e.data.type === 'winamp-close' && iframe === winampFrame) {
     WindoesApp.WindowManager.close('winamp');
   }
   if (e.data.type === 'winamp-resize' && e.data.width > 0 && e.data.height > 0) {

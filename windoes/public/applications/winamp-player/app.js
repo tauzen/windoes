@@ -1389,7 +1389,10 @@ if (window.self !== window.top) {
     winampEl.style.left = '0';
   }
 
-  // The close button asks the shell to close the window.
+  // The minimize and close buttons ask the shell to minimize or close the window.
+  document.getElementById('btn-minimize')?.addEventListener('click', () => {
+    window.parent.postMessage({ type: 'winamp-minimize' }, '*');
+  });
   document.getElementById('btn-close')?.addEventListener('click', () => {
     window.parent.postMessage({ type: 'winamp-close' }, '*');
   });
