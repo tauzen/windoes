@@ -25,7 +25,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## NEXT
 
-- <!-- One clause per planned ticket. -->
+- `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): Windows 98 taskbar menu; closes a Winamp window whose page failed to load (F007 review finding). Merge with the UI fidelity backlog.
 
 ## PROVEN
 
