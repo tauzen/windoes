@@ -445,202 +445,181 @@
         left: 1px;
       }
 
-      /* ===== PLAYLIST WINDOW ===== */
-      .winamp-playlist {
+      /* ===== PLAYLIST WINDOW =====
+         Sprites from skin/skin.css (sheet pledit), placed at the reference
+         layout in tests/winamp-skin/layout.mjs, as for the main window.
+         Tiles repeat as one element per tile, placed inline in the markup;
+         a tile cut short shows its left part. */
+      #playlist-window {
+        position: relative;
         width: 275px;
-        background: #232329;
-        border-left: 1px solid #3a3a42;
-        border-right: 1px solid #0e0e12;
-        border-bottom: 1px solid #0e0e12;
+        height: 116px;
         overflow: hidden;
+        cursor: default;
       }
 
-      .playlist-title {
-        background: linear-gradient(180deg, #384868 0%, #2a3a55 30%, #1e2e48 60%, #162440 100%);
-        height: 14px;
-        display: flex;
-        align-items: center;
-        padding: 0 4px;
-        border-bottom: 1px solid #0a0a10;
-        gap: 3px;
+      #playlist-window > *,
+      #playlist-title > * {
+        position: absolute;
+        display: block;
       }
 
-      .playlist-title span {
-        font-size: 7px;
-        color: #d8dce8;
-        font-weight: bold;
-        letter-spacing: 1.5px;
-        text-shadow: 1px 1px 0 #000;
-        padding: 0 5px;
-        line-height: 10px;
+      #playlist-window button {
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+        cursor: pointer;
+      }
+      #playlist-window :focus {
+        outline: none;
+      }
+      #playlist-window :focus-visible {
+        outline: 1px dotted #fff;
+        outline-offset: -1px;
       }
 
-      .playlist-tracks {
-        background: #000;
-        margin: 3px 3px;
-        border: 1px solid;
-        border-color: #0a0a0e #1e1e24 #1e1e24 #0a0a0e;
-        max-height: 130px;
+      #playlist-title {
+        left: 0;
+        top: 0;
+        width: 275px;
+        height: 20px;
+      }
+      #playlist-title .pl-tile-12 {
+        width: 12px;
+      }
+      #playlist-title .pl-tile-13 {
+        width: 13px;
+      }
+      #pl-btn-shade,
+      #pl-btn-close {
+        top: 3px;
+        width: 9px;
+        height: 9px;
+      }
+      #pl-btn-shade {
+        left: 254px;
+      }
+      #pl-btn-close {
+        left: 264px;
+      }
+
+      /* Rows: 13 px pitch, glyphs of the playlist font (an alpha mask filled
+         with the row colour). The native scroll bar is hidden; the sprite
+         handle in the right tile follows the scroll position. */
+      #playlist-tracks {
+        left: 12px;
+        top: 20px;
+        width: 243px;
+        height: 58px;
+        overflow-x: hidden;
         overflow-y: auto;
-        padding: 1px 0;
+        scrollbar-width: none;
+        background: #000;
       }
-
-      .playlist-tracks::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .playlist-tracks::-webkit-scrollbar-track {
-        background: #0e0e12;
-        border-left: 1px solid #1e1e24;
-      }
-
-      .playlist-tracks::-webkit-scrollbar-thumb {
-        background: linear-gradient(90deg, #b89850, #8a7040);
-        border: 1px solid;
-        border-color: #d8b870 #4a3a18 #4a3a18 #d8b870;
+      #playlist-tracks::-webkit-scrollbar {
+        display: none;
       }
 
       .track-item {
-        padding: 1px 6px;
-        font-size: 8px;
-        font-family: 'Courier New', monospace;
-        color: #00cc00;
-        cursor: pointer;
         display: flex;
+        height: 13px;
+        padding: 2px 2px 0 2px;
         gap: 4px;
-        line-height: 1.5;
+        color: #00ff00;
       }
-
-      .track-item:hover {
-        background: #0a1a0a;
-      }
-
-      .track-item.active {
-        color: #ffffff;
-        background: #00008b;
-      }
-
-      .track-item.active .track-num,
-      .track-item.active .track-duration {
-        color: #ccccff;
-      }
-
-      .track-item.playing {
+      .track-item.current {
         color: #ffffff;
       }
-
-      .track-num {
-        color: #00cc00;
-        min-width: 16px;
-        text-align: right;
+      .track-item.selected {
+        background: #0000c6;
       }
-
+      .track-name,
+      .track-duration {
+        display: flex;
+        height: 9px;
+      }
       .track-name {
         flex: 1;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+      }
+      .track-name > span,
+      .track-duration > span {
+        flex: none;
       }
 
-      .track-duration {
-        color: #00cc00;
-        min-width: 32px;
-        text-align: right;
-      }
-
-      .playlist-bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 3px 4px 4px;
-      }
-
-      .playlist-buttons {
-        display: flex;
-        gap: 2px;
-      }
-
-      .pl-btn {
-        font-size: 7px;
-        color: #8a8a94;
-        background: linear-gradient(180deg, #42424a, #2a2a32);
-        border-top: 1px solid #5a5a62;
-        border-left: 1px solid #5a5a62;
-        border-right: 1px solid #0e0e12;
-        border-bottom: 1px solid #0e0e12;
-        padding: 1px 5px;
+      #playlist-scroll-handle {
+        left: 260px;
+        top: 20px;
         cursor: pointer;
-        font-weight: bold;
       }
 
-      .pl-btn:hover {
-        color: #c0c8d8;
+      #pl-add-btn,
+      #pl-rem-btn,
+      #pl-sel-btn,
+      #pl-misc-btn,
+      #pl-listopts-btn {
+        top: 86px;
+        width: 22px;
+        height: 18px;
+      }
+      #pl-add-btn {
+        left: 14px;
+      }
+      #pl-rem-btn {
+        left: 43px;
+      }
+      #pl-sel-btn {
+        left: 72px;
+      }
+      #pl-misc-btn {
+        left: 101px;
+      }
+      #pl-listopts-btn {
+        left: 229px;
       }
 
-      .playlist-info-section {
-        display: flex;
-        gap: 6px;
-        align-items: center;
+      /* Running time (selected / total) and the playing track's time, in
+         the 5x6 font; as wide as the longest text each shows. */
+      #playlist-running-time,
+      #playlist-mini-time {
+        height: 6px;
+      }
+      #playlist-running-time {
+        left: 132px;
+        top: 88px;
+        width: 55px;
+      }
+      #playlist-mini-time {
+        left: 191px;
+        top: 101px;
+        width: 30px;
       }
 
-      .playlist-info {
-        font-size: 7px;
-        color: #00cc00;
-        font-family: 'Courier New', monospace;
+      /* Mini transport: hit areas over the icons in the bottom-right art. */
+      #playlist-window .pl-mini {
+        top: 100px;
+        width: 10px;
+        height: 10px;
       }
-
-      .playlist-info-led {
-        font-size: 9px;
-        font-weight: bold;
-        text-shadow: 0 0 4px rgba(0, 200, 0, 0.35);
+      #pl-mini-prev {
+        left: 128px;
       }
-
-      .playlist-mini-transport {
-        display: flex;
-        gap: 3px;
-        align-items: center;
+      #pl-mini-play {
+        left: 138px;
       }
-
-      .pl-mini {
-        font-size: 6px;
-        color: #9a9aa4;
-        cursor: pointer;
-        line-height: 1;
-        font-family: 'Arial', sans-serif;
+      #pl-mini-pause {
+        left: 148px;
       }
-
-      .pl-mini:hover {
-        color: #ffffff;
+      #pl-mini-stop {
+        left: 158px;
       }
-
-      .pl-listopts {
-        font-size: 5px;
-        line-height: 1.2;
-        padding: 1px 3px;
-        text-align: center;
+      #pl-mini-next {
+        left: 168px;
       }
-
-      /* Playlist resize grip */
-      .playlist-resize-grip {
-        position: relative;
-        height: 3px;
-        cursor: s-resize;
-      }
-
-      .playlist-resize-grip::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        right: 2px;
-        width: 8px;
-        height: 3px;
-        background: repeating-linear-gradient(
-          45deg,
-          transparent,
-          transparent 1px,
-          #3a3a42 1px,
-          #3a3a42 2px
-        );
+      #pl-mini-open {
+        left: 178px;
       }
 
       /* File input hidden */
@@ -968,39 +947,118 @@
         <div id="eq-bands"></div>
       </div>
 
-      <!-- Playlist Window -->
-      <div class="winamp-playlist" id="playlist-window">
-        <div class="playlist-title">
-          <div class="title-bar-line"></div>
-          <span>WINAMP PLAYLIST</span>
-          <div class="title-bar-line"></div>
+      <!-- Playlist Window: sprites from skin/skin.css (sheet pledit), placed at the reference layout. -->
+      <div id="playlist-window">
+        <div id="playlist-title" title="Winamp Playlist">
+          <span class="wa-pledit-top-left-active" data-frame="pledit-top-left"></span>
+          <span
+            class="wa-pledit-top-tile-active"
+            data-frame="pledit-top-tile"
+            style="left: 25px"
+          ></span>
+          <span
+            class="wa-pledit-top-tile-active"
+            data-frame="pledit-top-tile"
+            style="left: 50px"
+          ></span>
+          <span
+            class="wa-pledit-top-tile-active pl-tile-12"
+            data-frame="pledit-top-tile"
+            style="left: 75px"
+          ></span>
+          <span class="wa-pledit-title-active" data-frame="pledit-title" style="left: 87px"></span>
+          <span
+            class="wa-pledit-top-tile-active"
+            data-frame="pledit-top-tile"
+            style="left: 187px"
+          ></span>
+          <span
+            class="wa-pledit-top-tile-active"
+            data-frame="pledit-top-tile"
+            style="left: 212px"
+          ></span>
+          <span
+            class="wa-pledit-top-tile-active pl-tile-13"
+            data-frame="pledit-top-tile"
+            style="left: 237px"
+          ></span>
+          <span
+            class="wa-pledit-top-right-active"
+            data-frame="pledit-top-right"
+            style="left: 250px"
+          ></span>
         </div>
-        <div class="playlist-tracks" id="playlist-tracks">
-          <!-- Tracks added dynamically -->
-        </div>
-        <div class="playlist-bottom">
-          <div class="playlist-buttons">
-            <button class="pl-btn" id="pl-add-btn" title="Add files">ADD</button>
-            <button class="pl-btn" id="pl-rem-btn" title="Remove selected">REM</button>
-            <button class="pl-btn" id="pl-sel-btn" title="Select">SEL</button>
-            <button class="pl-btn" id="pl-misc-btn" title="Misc">MISC</button>
-          </div>
-          <div class="playlist-info-section">
-            <span class="playlist-info" id="playlist-total-length">0:00</span>
-            <div class="playlist-mini-transport">
-              <span class="pl-mini" id="pl-mini-prev" title="Previous">&#9198;&#xFE0E;</span>
-              <span class="pl-mini" id="pl-mini-play" title="Play">&#9654;&#xFE0E;</span>
-              <span class="pl-mini" id="pl-mini-pause" title="Pause">&#9646;&#9646;&#xFE0E;</span>
-              <span class="pl-mini" id="pl-mini-stop" title="Stop">&#9632;&#xFE0E;</span>
-              <span class="pl-mini" id="pl-mini-next" title="Next">&#9197;&#xFE0E;</span>
-            </div>
-            <span class="playlist-info playlist-info-led" id="playlist-total-time">0:00:00:00</span>
-            <button class="pl-btn pl-listopts" id="pl-listopts-btn" title="List options">
-              LIST<br />OPTS
-            </button>
-          </div>
-        </div>
-        <div class="playlist-resize-grip"></div>
+        <button
+          type="button"
+          id="pl-btn-shade"
+          data-pressed="pledit-shade-pressed"
+          title="Window shade"
+        ></button>
+        <button
+          type="button"
+          id="pl-btn-close"
+          data-pressed="pledit-close-pressed"
+          title="Close playlist"
+        ></button>
+
+        <span class="wa-pledit-left-tile" style="left: 0; top: 20px"></span>
+        <span class="wa-pledit-left-tile" style="left: 0; top: 49px"></span>
+        <span class="wa-pledit-right-tile" style="left: 255px; top: 20px"></span>
+        <span class="wa-pledit-right-tile" style="left: 255px; top: 49px"></span>
+        <div
+          id="playlist-tracks"
+          role="listbox"
+          tabindex="0"
+          aria-label="Playlist"
+          title="Double-click a track to play it"
+        ></div>
+        <div
+          class="wa-pledit-scroll-handle"
+          id="playlist-scroll-handle"
+          data-sprite="pledit-scroll-handle"
+          aria-hidden="true"
+        ></div>
+
+        <span class="wa-pledit-bottom-left" style="left: 0; top: 78px"></span>
+        <span class="wa-pledit-bottom-right" style="left: 125px; top: 78px"></span>
+        <button
+          type="button"
+          id="pl-add-btn"
+          data-pressed="pledit-add-pressed"
+          title="Add files"
+        ></button>
+        <button
+          type="button"
+          id="pl-rem-btn"
+          data-pressed="pledit-rem-pressed"
+          title="Remove selected"
+        ></button>
+        <button
+          type="button"
+          id="pl-sel-btn"
+          data-pressed="pledit-sel-pressed"
+          title="Select"
+        ></button>
+        <button
+          type="button"
+          id="pl-misc-btn"
+          data-pressed="pledit-misc-pressed"
+          title="Misc"
+        ></button>
+        <div id="playlist-running-time" title="Selected / total length"></div>
+        <button type="button" class="pl-mini" id="pl-mini-prev" title="Previous"></button>
+        <button type="button" class="pl-mini" id="pl-mini-play" title="Play"></button>
+        <button type="button" class="pl-mini" id="pl-mini-pause" title="Pause"></button>
+        <button type="button" class="pl-mini" id="pl-mini-stop" title="Stop"></button>
+        <button type="button" class="pl-mini" id="pl-mini-next" title="Next"></button>
+        <button type="button" class="pl-mini" id="pl-mini-open" title="Open file"></button>
+        <div id="playlist-mini-time" role="timer" title="Elapsed time"></div>
+        <button
+          type="button"
+          id="pl-listopts-btn"
+          data-pressed="pledit-list-opts-pressed"
+          title="List options"
+        ></button>
       </div>
     </div>
 
