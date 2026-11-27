@@ -25,8 +25,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## NEXT
 
-- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (PLANNED): small Winamp audio fix found in the F005 equalizer slice.
-- `F007-winamp-title-bar-buttons-work-inside-the-shell` (PLANNED): shell overlay blocks Winamp's options, minimize and shade buttons; touches shell window code.
+- <!-- One clause per planned ticket. -->
 
 ## PROVEN
 
