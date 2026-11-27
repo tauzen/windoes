@@ -140,7 +140,6 @@
     audioElement.crossOrigin = 'anonymous';
 
     gainNode = context.createGain();
-    gainNode.gain.value = state.volume;
 
     analyserNode = context.createAnalyser();
     analyserNode.fftSize = 256;
@@ -744,10 +743,14 @@
     eqBands.forEach(({ input }, i) => {
       if (eqFilters[i]) eqFilters[i].gain.value = state.eqEnabled ? Number(input.value) : 0;
     });
-    if (gainNode) {
-      const preamp = state.eqEnabled ? Math.pow(10, Number(preampSlider.value) / 20) : 1;
-      gainNode.gain.value = state.volume * preamp;
-    }
+    applyGain();
+  }
+
+  /** Output gain: the volume, times the preamp while EQ is on. Every control that changes them calls this. */
+  function applyGain() {
+    if (!gainNode) return;
+    const preamp = state.eqEnabled ? Math.pow(10, Number(preampSlider.value) / 20) : 1;
+    gainNode.gain.value = state.volume * preamp;
   }
 
   function eqSliders() {
@@ -1104,7 +1107,7 @@
   // Volume
   volumeSlider.addEventListener('input', () => {
     state.volume = Number(volumeSlider.value) / 100;
-    if (gainNode) gainNode.gain.value = state.volume;
+    applyGain();
     paintVolume();
   });
 
@@ -1285,13 +1288,13 @@
         break;
       case 'ArrowUp':
         state.volume = Math.min(1, state.volume + 0.05);
-        if (gainNode) gainNode.gain.value = state.volume;
+        applyGain();
         volumeSlider.value = String(state.volume * 100);
         paintVolume();
         break;
       case 'ArrowDown':
         state.volume = Math.max(0, state.volume - 0.05);
-        if (gainNode) gainNode.gain.value = state.volume;
+        applyGain();
         volumeSlider.value = String(state.volume * 100);
         paintVolume();
         break;
