@@ -20,6 +20,9 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F007-winamp-title-bar-buttons-work-inside-the-shell` (🟠 ACTIVE): Winamp title-bar buttons work inside the shell
+- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (🟠 ACTIVE): Winamp keeps the EQ preamp boost when the volume changes
+
 ## NEXT
 
 - `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (PLANNED): small Winamp audio fix found in the F005 equalizer slice.
