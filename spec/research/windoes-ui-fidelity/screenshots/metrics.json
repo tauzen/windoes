@@ -1,0 +1,141 @@
+{
+  "viewport": {
+    "width": 800,
+    "height": 600
+  },
+  "deviceScaleFactor": 1,
+  "fonts": {
+    "desktop icon label": {
+      "selector": "#desktopIcons .icon-label",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "start button": {
+      "selector": "#startButton",
+      "computed": "700 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "clock": {
+      "selector": "#clock",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "start menu item": {
+      "selector": "#startMenu .menu-item",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "title bar text": {
+      "selector": "#notepadTitle",
+      "computed": "700 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "menu bar item": {
+      "selector": "#notepadWindow .menubar-item",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "notepad text": {
+      "selector": "#notepadText",
+      "computed": "400 13px \"Courier New\", \"Lucida Console\", monospace",
+      "rendered": []
+    },
+    "toolbar label": {
+      "selector": "#refreshBtn",
+      "computed": "400 10px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "dialog text": {
+      "selector": ".dialog-overlay.active .dialog-text",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    },
+    "dialog button": {
+      "selector": ".dialog-overlay.active .dialog-btn",
+      "computed": "400 11px \"MS Sans Serif\", \"Microsoft Sans Serif\", Tahoma, Arial, sans-serif",
+      "rendered": ["Liberation Sans"]
+    }
+  },
+  "geometry": {
+    "taskbar": {
+      "selector": "#theTaskbar",
+      "width": 800,
+      "height": 30
+    },
+    "start button": {
+      "selector": "#startButton",
+      "width": 60,
+      "height": 24
+    },
+    "desktop icon cell": {
+      "selector": "#desktopIcons .icon",
+      "width": 75,
+      "height": 57
+    },
+    "start menu root item": {
+      "selector": "#startMenu .menu-item",
+      "width": 194,
+      "height": 26
+    },
+    "start menu banner": {
+      "selector": "#startMenu .start-rail",
+      "width": 22,
+      "height": 151
+    },
+    "submenu item": {
+      "selector": ".programs-submenu.open .submenu-item",
+      "width": 196,
+      "height": 26
+    },
+    "context menu item": {
+      "selector": ".context-menu.open .context-menu-item",
+      "width": 156,
+      "height": 20
+    },
+    "title bar": {
+      "selector": "#notepadTitlebar",
+      "width": 470,
+      "height": 22
+    },
+    "caption button": {
+      "selector": "#notepadCloseBtn",
+      "width": 16,
+      "height": 14
+    },
+    "menu bar": {
+      "selector": "#notepadWindow .menubar",
+      "width": 470,
+      "height": 20
+    },
+    "menu bar item": {
+      "selector": "#notepadWindow .menubar-item",
+      "width": 30,
+      "height": 16
+    },
+    "dropdown menu item": {
+      "selector": "#notepadFileDropdown .context-menu-item",
+      "width": 156,
+      "height": 20
+    },
+    "task button": {
+      "selector": "#taskArea .task-button",
+      "width": 140,
+      "height": 22
+    },
+    "IE toolbar button": {
+      "selector": "#refreshBtn",
+      "width": 45,
+      "height": 36
+    },
+    "IE address input": {
+      "selector": "#addressInput",
+      "width": 648,
+      "height": 20
+    },
+    "dialog push button": {
+      "selector": ".dialog-overlay.active .dialog-btn",
+      "width": 75,
+      "height": 23
+    }
+  }
+}
