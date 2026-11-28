@@ -179,6 +179,13 @@ All notable changes to this project are documented in this file.
 - Phase 6 G4: adopted npm workspaces for embedded apps and removed per-app install workflow.
 - Added root `typecheck` script and included typecheck in `npm run test:all`.
 
+### Fixed
+
+- Winamp keeps the equalizer preamp when the volume changes. The volume slider
+  and the volume keys set the output gain to the volume alone, so a preamp
+  boost or cut was lost until the preamp moved again. One function now computes
+  the gain from the volume, the preamp and EQ ON, and every control calls it.
+
 ### Added
 
 - `CONTRIBUTING.md`

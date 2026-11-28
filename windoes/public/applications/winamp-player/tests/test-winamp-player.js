@@ -34,6 +34,15 @@ async function runTests() {
 
   const browser = await launchBrowser();
   const ctx = await browser.newContext();
+  // Keep the player's output gain node where the test can read it.
+  await ctx.addInitScript(() => {
+    const createGain = BaseAudioContext.prototype.createGain;
+    BaseAudioContext.prototype.createGain = function () {
+      const node = createGain.call(this);
+      window.__winampGains = [...(window.__winampGains || []), node];
+      return node;
+    };
+  });
   const page = await ctx.newPage();
 
   // ── Test 1: Page loads with core UI elements ─────────────────────────
@@ -198,18 +207,49 @@ async function runTests() {
   const plBtnExists = await page.evaluate(() => !!document.getElementById('btn-pl'));
   assert(plBtnExists, 'PL toggle button exists');
 
-  // ── Test 8: Volume slider responds to changes ────────────────────────
-  console.log('\nTest 8: Volume slider responds to changes');
+  // ── Test 8: Output gain follows volume, preamp and EQ ON ─────────────
+  console.log('\nTest 8: Output gain follows volume, preamp and EQ ON');
+
+  await page.click('#btn-play');
+  const gain = () => page.evaluate(() => window.__winampGains.map((g) => g.gain.value));
+  const preampFactor = Math.pow(10, 6 / 20);
+  const near = (/** @type {number[]} */ actual, /** @type {number} */ expected) =>
+    actual.length === 1 && Math.abs(actual[0] - expected) < 1e-4;
 
   await page.evaluate(() => {
-    const slider = document.getElementById('volume-slider');
-    slider.value = '30';
-    slider.dispatchEvent(new Event('input'));
+    for (const [id, value] of [
+      ['eq-preamp-slider', '6'],
+      ['volume-slider', '30'],
+    ]) {
+      const slider = document.getElementById(id);
+      slider.value = value;
+      slider.dispatchEvent(new Event('input'));
+    }
   });
-  await page.waitForTimeout(100);
+  const afterSlider = await gain();
+  assert(
+    near(afterSlider, 0.3 * preampFactor),
+    `With preamp +6 dB, the volume slider at 30 sets gain 0.3 x 10^(6/20) (${afterSlider})`
+  );
 
-  const newVolume = await page.evaluate(() => document.getElementById('volume-slider').value);
-  assert(newVolume === '30', `Volume slider changed to 30 (got: ${newVolume})`);
+  await page.evaluate(() => /** @type {HTMLElement} */ (document.activeElement)?.blur());
+  await page.keyboard.press('ArrowUp');
+  const afterKey = await gain();
+  assert(
+    near(afterKey, 0.35 * preampFactor) && (await page.inputValue('#volume-slider')) === '35',
+    `With preamp +6 dB, the volume-up key sets gain 0.35 x 10^(6/20) (${afterKey})`
+  );
+
+  await page.click('#eq-on-btn');
+  const eqOff = await gain();
+  assert(near(eqOff, 0.35), `With EQ ON off, the preamp leaves the gain at the volume (${eqOff})`);
+  await page.keyboard.press('ArrowDown');
+  const eqOffKey = await gain();
+  assert(
+    near(eqOffKey, 0.3),
+    `With EQ ON off, the volume-down key sets the gain to the volume (${eqOffKey})`
+  );
+  await page.click('#eq-on-btn');
 
   // ── Test 9: About dialog opens and closes ────────────────────────────
   console.log('\nTest 9: About dialog opens and closes');
