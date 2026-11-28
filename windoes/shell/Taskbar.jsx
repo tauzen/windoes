@@ -72,7 +72,7 @@ export default function Taskbar({ taskbarRef, startButtonRef }) {
           <span className="f3"></span>
           <span className="f4"></span>
         </span>
-        Start
+        <span>Start</span>
       </button>
       <div className="quick-launch" role="group" aria-label="Quick launch">
         <button

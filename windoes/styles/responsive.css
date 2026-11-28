@@ -1,5 +1,9 @@
 /* ── Responsive ── */
 @media (max-width: 700px) {
+  :root {
+    --taskbar-height: 44px;
+  }
+
   .desktop {
     padding-bottom: 48px;
   }
@@ -69,7 +73,7 @@
   }
 
   .taskbar {
-    height: 44px;
+    height: var(--taskbar-height);
   }
 
   .start-btn {
