@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F018 · The blue screen is laid out like a Windows 9x text-mode screen
