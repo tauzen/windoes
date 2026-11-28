@@ -84,6 +84,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Winamp's title-bar buttons work inside Windoes. The shell's drag area no
+  longer covers them: options, minimize, shade and close each show their
+  pressed frame, minimize sends Winamp to the taskbar, close closes it, and the
+  rest of the title bar still drags the window. The shell accepts Winamp's
+  minimize and close requests only from the Winamp frame.
 - The Winamp main window is our own pixel art at the classic 2.x layout:
   275x116, with every button, slider, indicator and text field at its reference
   size and position, and every state drawn (pressed buttons, lit and unlit
