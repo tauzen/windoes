@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F011 · Every raised and sunken edge uses the Windows 98 bevel
