@@ -66,10 +66,14 @@ export default function Desktop({ desktopRef }) {
       const wantedY = Number.isFinite(saved?.y) ? saved.y : baseY;
       let x = Math.max(0, Math.min(wantedX, bounds.width - current.width));
       let y = Math.max(0, Math.min(wantedY, bounds.height - current.height));
-      const overlaps = (left, top) => occupied.some((rect) =>
-        left < rect.x + current.width && left + current.width > rect.x &&
-        top < rect.y + current.height && top + current.height > rect.y
-      );
+      const overlaps = (left, top) =>
+        occupied.some(
+          (rect) =>
+            left < rect.x + current.width &&
+            left + current.width > rect.x &&
+            top < rect.y + current.height &&
+            top + current.height > rect.y
+        );
       if (current.width && current.height && overlaps(x, y)) {
         let found = false;
         for (let left = 0; left + current.width <= bounds.width && !found; left += current.width) {
@@ -102,8 +106,15 @@ export default function Desktop({ desktopRef }) {
       suppressClick = false;
       const bounds = iconsEl.getBoundingClientRect();
       const rect = icon.getBoundingClientRect();
-      drag = { icon, id: event.pointerId, startX: event.clientX, startY: event.clientY,
-        x: rect.left - bounds.left, y: rect.top - bounds.top, moved: false };
+      drag = {
+        icon,
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        x: rect.left - bounds.left,
+        y: rect.top - bounds.top,
+        moved: false,
+      };
       icon.setPointerCapture(event.pointerId);
     }
 
