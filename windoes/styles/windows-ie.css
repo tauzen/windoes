@@ -117,12 +117,15 @@
   height: calc(100vh - 36px) !important;
   min-width: 0 !important;
   min-height: 0 !important;
+  padding: 0;
+  box-shadow: none;
 }
 
-/* Title bar - blue gradient like Win ME */
+/* Windows 98 caption */
 .titlebar {
-  height: 22px;
-  background: linear-gradient(to right, #0a246a, #3a6ea5);
+  height: 18px;
+  flex-shrink: 0;
+  background: linear-gradient(to right, #000080, #1084d0);
   color: #fff;
   display: flex;
   align-items: center;
@@ -134,8 +137,10 @@
   touch-action: none;
 }
 
-.titlebar.inactive {
-  background: linear-gradient(to right, #808080, #b0b0b0);
+.titlebar.inactive,
+body:has(.dialog-overlay.active) .titlebar {
+  background: linear-gradient(to right, #808080, #c0c0c0);
+  color: #c0c0c0;
 }
 
 .title-left {
@@ -160,33 +165,58 @@
 
 .window-controls {
   display: flex;
-  gap: 2px;
+  gap: 0;
   flex-shrink: 0;
+}
+.window-controls .ctrl-btn[aria-label='Close'] {
+  margin-left: 2px;
 }
 
 .ctrl-btn {
   width: 16px;
   height: 14px;
   background: #c0c0c0;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-bottom: 1px solid #000;
-  border-right: 1px solid #000;
+  border: 0;
+  padding: 0;
+  box-shadow: var(--edge-raised);
   color: #000;
-  line-height: 1;
-  text-align: center;
-  font-weight: bold;
-  font-size: 10px;
+  font-size: 0;
   cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.ctrl-btn::after {
+  content: '';
+  display: block;
+  background: center / 100% 100% no-repeat;
+}
+.ctrl-btn[aria-label='Minimize']::after {
+  width: 6px;
+  height: 2px;
+  background-color: #000;
+  transform: translateY(3px);
+}
+.ctrl-btn[aria-label='Maximize']::after {
+  width: 9px;
+  height: 9px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h9v9H0z' fill='%23000'/%3E%3Cpath d='M1 2h7v6H1z' fill='%23c0c0c0'/%3E%3C/svg%3E");
+}
+.ctrl-btn[aria-label='Restore']::after {
+  width: 9px;
+  height: 9px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M3 0h6v6H7v3H0V3h3z'/%3E%3Cpath fill='%23c0c0c0' d='M4 2h4v3H7V3H4zM1 5h5v3H1z'/%3E%3C/svg%3E");
+}
+.ctrl-btn[aria-label='Close']::after {
+  width: 8px;
+  height: 7px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 7' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M0 0h2v1h1v1h2V1h1V0h2v2H7v1H6v1h1v1h1v2H6V6H5V5H3v1H2v1H0V5h1V4h1V3H1V2H0z'/%3E%3C/svg%3E");
+}
 .ctrl-btn:active {
-  border-top: 1px solid #000;
-  border-left: 1px solid #000;
-  border-bottom: 1px solid #fff;
-  border-right: 1px solid #fff;
+  box-shadow: var(--edge-sunken);
+}
+.ctrl-btn:active::after {
+  translate: 1px 1px;
 }
 
 /* Menu bar */
