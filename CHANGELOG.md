@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
   align at the right edge.
 - The taskbar uses Windows 98 active and inactive button states and a shared
   height, so maximized windows meet its top edge on desktop and touch layouts.
+- Error, warning and information boxes show Windoes' own 32x32 pixel icons in
+  the Windows 98 style, fit their width to the text up to 480 px, and centre
+  short text on the icon. The Run dialog's OK, Cancel and Browse sit at the right.
 
 ### Added
 
