@@ -100,16 +100,15 @@ body {
   background: var(--button-face);
 }
 
-/* ── Boot Screen ── */
+/* ── Boot Screen ──
+   The Windows 98 startup screen: the splash image fills the screen, and a
+   10 px colour band scrolls along the bottom edge. No bar, no text. */
 .boot-screen {
   position: fixed;
   inset: 0;
   background: #000;
   z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 }
 .boot-screen.hidden {
   display: none;
@@ -130,45 +129,48 @@ body {
   display: none;
 }
 
-.boot-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
 .boot-image {
-  width: 400px;
-  height: auto;
-  border-radius: 8px;
-}
-
-.boot-subtitle {
-  color: #c0c0c0;
-  font-size: 14px;
-  text-align: center;
-}
-
-.boot-progress-container {
-  width: 300px;
-  height: 20px;
-  background: #000;
-  border: 2px solid #333;
-  border-radius: 2px;
-  overflow: hidden;
-  margin-top: 20px;
-}
-.boot-progress-bar {
+  display: block;
+  width: 100%;
   height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #0040a0, #0070d0, #0040a0);
-  transition: width 0.3s;
+  object-fit: cover;
 }
 
-.boot-status {
-  color: #808080;
-  font-size: 11px;
-  margin-top: 8px;
+/* The gradient repeats every 400 px and starts and ends on the same colour, so
+   sliding it by exactly one period loops without a seam. */
+.boot-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10px;
+  background-image: linear-gradient(
+    90deg,
+    #0000a8,
+    #1084d0,
+    #00a8a8,
+    #f0f0f0,
+    #e86020,
+    #f8d000,
+    #40a040,
+    #0000a8
+  );
+  background-size: 400px 100%;
+  background-repeat: repeat-x;
+  animation: boot-band-scroll 2s linear infinite;
+}
+@keyframes boot-band-scroll {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 400px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-band {
+    animation: none;
+  }
 }
 
 /* ── BSOD ──

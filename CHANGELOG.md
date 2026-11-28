@@ -24,6 +24,10 @@ All notable changes to this project are documented in this file.
 - The blue screen is a centred 80-column text page like Windows 9x: a
   highlighted title and a centred footer prompt, grey body text with a white
   prompt, and monospace rows 16 px high.
+- The boot splash is the Windows 98 startup screen: the image fills the screen
+  with square corners and a thin colour band scrolls along the bottom, standing
+  still with reduced motion. The progress bar and status text are gone; the
+  splash still stays until the shell assets have loaded.
 
 ### Added
 

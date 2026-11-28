@@ -5,8 +5,6 @@
  * @property {'bios' | 'splash' | 'ready'} phase
  * @property {number} biosMemory
  * @property {string} biosStatus
- * @property {number} splashProgress
- * @property {string} splashStatus
  * @property {boolean} done
  */
 
@@ -117,11 +115,10 @@
  * narrows `action` to the exact shape inside each branch.
  *
  * @typedef {(
- *   | { type: 'BOOT_RESET', splashStatus?: string }
+ *   | { type: 'BOOT_RESET' }
  *   | { type: 'BOOT_BIOS_PROGRESS', value: number }
  *   | { type: 'BOOT_BIOS_STATUS', value: string }
- *   | { type: 'BOOT_PHASE_SPLASH', status?: string }
- *   | { type: 'BOOT_SPLASH_PROGRESS', progress: number, status?: string }
+ *   | { type: 'BOOT_PHASE_SPLASH' }
  *   | { type: 'BOOT_FINISH' }
  *   | { type: 'START_MENU_TOGGLE' }
  *   | { type: 'START_MENU_CLOSE' }
@@ -165,8 +162,6 @@ export const initialState = {
     phase: 'bios', // bios | splash | ready
     biosMemory: 0,
     biosStatus: 'Initializing Plug and Play Cards...',
-    splashProgress: 0,
-    splashStatus: 'Loading Windoes...',
     done: false,
   },
   menus: {
@@ -434,10 +429,7 @@ export function reduce(current, action) {
     case 'BOOT_RESET':
       return {
         ...current,
-        boot: {
-          ...initialState.boot,
-          splashStatus: action.splashStatus || initialState.boot.splashStatus,
-        },
+        boot: { ...initialState.boot },
       };
     case 'BOOT_BIOS_PROGRESS':
       return {
@@ -461,17 +453,6 @@ export function reduce(current, action) {
         boot: {
           ...current.boot,
           phase: 'splash',
-          splashProgress: 0,
-          splashStatus: action.status || current.boot.splashStatus,
-        },
-      };
-    case 'BOOT_SPLASH_PROGRESS':
-      return {
-        ...current,
-        boot: {
-          ...current.boot,
-          splashProgress: action.progress,
-          splashStatus: action.status || current.boot.splashStatus,
         },
       };
     case 'BOOT_FINISH':
@@ -480,7 +461,6 @@ export function reduce(current, action) {
         boot: {
           ...current.boot,
           phase: 'ready',
-          splashProgress: 100,
           done: true,
         },
       };

@@ -26,6 +26,11 @@ export const BOOT_MEMORY_TARGET_KB = 262144;
 // Gives the initial paint a beat before the BIOS animation kicks in.
 export const BOOT_SEQUENCE_DELAY_MS = 300;
 
+// Shortest time the boot splash stays on screen, in ms. Boot ends when this has
+// passed and the asset preload has settled, whichever comes last, so a warm
+// cache still shows the splash and its colour band for a moment.
+export const BOOT_SPLASH_MIN_MS = 2000;
+
 // How long the Internet Explorer window shows its busy/loading indicator
 // before clearing it automatically, in ms.
 export const IE_LOADING_INDICATOR_MS = 2000;

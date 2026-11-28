@@ -20,19 +20,8 @@ export default function BootScreens() {
       </div>
 
       <div className={bootScreenClass} id="bootScreen">
-        <div className="boot-logo">
-          <img src="img/boot.png" alt="Windoes XD" className="boot-image" />
-          <div className="boot-progress-container">
-            <div
-              className="boot-progress-bar"
-              id="bootProgress"
-              style={{ width: `${boot.splashProgress}%` }}
-            ></div>
-          </div>
-          <div className="boot-status" id="bootStatus">
-            {boot.splashStatus}
-          </div>
-        </div>
+        <img src="img/boot.png" alt="Windoes XD" className="boot-image" />
+        <div className="boot-band" id="bootBand" aria-hidden="true"></div>
       </div>
 
       <div className="bsod" id="bsod">

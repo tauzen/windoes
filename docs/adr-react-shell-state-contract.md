@@ -72,7 +72,7 @@ was completed as Phase 2 of the code-quality roadmap
 Action types in use today, grouped by slice:
 
 - **boot**: `BOOT_RESET`, `BOOT_BIOS_PROGRESS`, `BOOT_BIOS_STATUS`,
-  `BOOT_PHASE_SPLASH`, `BOOT_SPLASH_PROGRESS`, `BOOT_FINISH`
+  `BOOT_PHASE_SPLASH`, `BOOT_FINISH`
 - **menus**: `START_MENU_TOGGLE`, `START_MENU_CLOSE`, `MENU_SUBMENUS_KEEP`
 - **windows**: `WINDOW_REGISTER`, `WINDOW_OPEN`, `WINDOW_CLOSE`,
   `WINDOW_FOCUS`, `WINDOW_MINIMIZE`, `WINDOW_RESTORE`, `WINDOW_MAXIMIZE_TOGGLE`
