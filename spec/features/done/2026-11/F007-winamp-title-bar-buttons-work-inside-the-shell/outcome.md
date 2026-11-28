@@ -1,0 +1,3 @@
+# Outcome
+
+Inside the shell, all four Winamp title-bar buttons respond: options and shade show their pressed frame, minimize sends Winamp to the taskbar, close closes it, and the title bar still drags through a clip-path drag area. The shell's own close button is gone; `winamp-minimize` and `winamp-close` are accepted only from `winampFrame`, where any trusted app frame could close Winamp before. Merged in PR #143 (`235e5c9`) after an independent PASS (`review-1.md`). Known gap: a Winamp window whose page fails to load has no close control until reload; the taskbar right-click menu (F008) closes it.

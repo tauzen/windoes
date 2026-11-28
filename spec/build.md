@@ -14,17 +14,19 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- The code-quality stretch (F001–F004) and the classic-skin Winamp redesign (F005) are complete. Next direction waits on the owner; `spec/vision.md` is still empty.
+- Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. F011's shared edge rules land before the chrome tickets that reuse them.
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F016-desktop-icons-behave-like-windows-98-desktop-icons` (🟠 ACTIVE): Desktop icons behave like Windows 98 desktop icons
+- `F011-every-raised-and-sunken-edge-uses-the-windows-98-bevel` (🟠 ACTIVE): Every raised and sunken edge uses the Windows 98 bevel
+
 ## NEXT
 
 Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work. F011 lands first; F009, F010, F012 and F014 reuse its edge rules.
 
-- `F011-every-raised-and-sunken-edge-uses-the-windows-98-bevel` (PLANNED): shared four-colour 98 edge rules; base for the chrome tickets.
 - `F009-window-title-bars-and-frames-match-windows-98` (PLANNED): 18 px caption, 98 active and inactive gradients, drawn caption glyphs; after F011.
 - `F010-taskbar-buttons-show-windows-98-active-and-inactive-states` (PLANNED): 28 px taskbar, bold dithered active button; after F011, next to F008.
 - `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): 98 taskbar menu; closes a Winamp window whose page failed to load.
@@ -32,7 +34,6 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 - `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
 - `F014-menus-look-and-behave-like-windows-98-menus` (PLANNED): framed menu bar items, no shadow, embossed disabled items; after F011.
 - `F015-the-start-menu-opens-like-the-windows-98-start-menu` (PLANNED): 98 row sizes, banner and 400 ms submenu delay.
-- `F016-desktop-icons-behave-like-windows-98-desktop-icons` (PLANNED): no label shadow or hover, tinted selection, 75 px grid.
 - `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and drawn radios.
 - `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (PLANNED): centred 80-column text page.
 - `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar.
