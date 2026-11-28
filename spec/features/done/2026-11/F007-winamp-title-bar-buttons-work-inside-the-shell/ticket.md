@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-27
+landed: 2026-11-28
 ---
 
 # F007 · Winamp title-bar buttons work inside the shell
