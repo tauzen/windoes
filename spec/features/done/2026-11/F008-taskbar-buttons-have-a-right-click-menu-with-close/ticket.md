@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-27
+landed: 2026-11-28
 ---
 
 # F008 · Taskbar buttons have a right-click menu with Close
