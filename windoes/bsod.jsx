@@ -5,6 +5,7 @@ import WindoesApp from './app-state.js';
 
 const bsod = document.querySelector('#bsod');
 const bsodText = document.querySelector('#bsodText');
+const bsodFooter = document.querySelector('#bsodFooter');
 
 const bsodMessages = WindoesApp.config.bsodMessages || [
   'An exception 0E has occurred at 0028:C0011E36 in VxD VMM(01) +\n00010E36. This was called from 0028:C001747B in VxD VMM(01) +\n0001647B. It may be possible to continue normally.\n\n* Press any key to attempt to continue.\n* Press CTRL+ALT+DEL to restart your computer. You will\n  lose any unsaved information in all applications.\n\nPress any key to continue _',
@@ -17,6 +18,16 @@ let bsodActive = false;
 let randomBsodTimerId = null;
 let randomErrorTimerId = null;
 
+// The closing "Press any key to continue" line is the centred footer of the
+// text-mode page; everything before it is the left-aligned body.
+const FOOTER_PROMPT = /\n*(Press any key to continue[^\n]*)\s*$/;
+
+function splitMessage(message) {
+  const match = FOOTER_PROMPT.exec(message);
+  if (!match) return { body: message, footer: '' };
+  return { body: message.slice(0, match.index), footer: match[1] };
+}
+
 function clearTimer(timerId) {
   if (timerId) {
     window.clearTimeout(timerId);
@@ -26,7 +37,11 @@ function clearTimer(timerId) {
 function triggerBSOD() {
   if (bsodActive) return;
   bsodActive = true;
-  bsodText.textContent = bsodMessages[Math.floor(Math.random() * bsodMessages.length)];
+  const { body, footer } = splitMessage(
+    bsodMessages[Math.floor(Math.random() * bsodMessages.length)]
+  );
+  bsodText.textContent = body;
+  bsodFooter.textContent = footer;
   bsod.classList.add('active');
   WindoesApp.sound.playBeep(200, 0.5, 'sawtooth');
 }

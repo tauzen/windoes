@@ -171,34 +171,54 @@ body {
   margin-top: 8px;
 }
 
-/* ── BSOD ── */
+/* ── BSOD ──
+   A Win9x text-mode page: 80 columns of 16 px rows, centred on the screen.
+   Body text is VGA light grey (#AAAAAA); the footer prompt is white. */
 .bsod {
+  --bsod-row: 16px;
   position: fixed;
   inset: 0;
   background: #0000aa;
-  color: #fff;
-  font-family: 'Lucida Console', 'Courier New', monospace;
+  color: #aaaaaa;
+  font-family:
+    'Perfect DOS VGA 437', 'Px437 IBM VGA 8x16', 'Lucida Console', 'Courier New', monospace;
   font-size: 14px;
-  padding: 40px;
+  line-height: var(--bsod-row);
   z-index: 99999;
   display: none;
+  overflow: auto;
   cursor: default;
-  line-height: 1.6;
 }
 .bsod.active {
-  display: block;
+  display: flex;
+}
+.bsod-page {
+  /* Auto margins centre the page and keep its top reachable when it overflows. */
+  margin: auto;
+  width: 80ch;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--bsod-row) 5ch;
+}
+.bsod-title,
+.bsod-footer {
+  text-align: center;
+  white-space: pre;
 }
 .bsod-header {
   background: #aaaaaa;
   color: #0000aa;
-  display: inline;
-  padding: 0 8px;
-  font-weight: bold;
 }
-.bsod pre {
-  margin-top: 20px;
+.bsod-body {
+  margin: var(--bsod-row) 0;
   white-space: pre-wrap;
-  font-family: inherit;
+  font: inherit;
+}
+.bsod-footer {
+  color: #ffffff;
+}
+.bsod-footer:empty {
+  display: none;
 }
 
 #dragOverlay {
