@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F010 · Taskbar buttons show Windows 98 active and inactive states
