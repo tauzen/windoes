@@ -84,6 +84,7 @@ const WindowManager = {
 
     if (config.taskButton) {
       config.taskBtn = this._buildTaskBtn(config.taskButton);
+      config.taskBtn.dataset.windowId = id;
     }
 
     if (config.iframeId && config.el) {

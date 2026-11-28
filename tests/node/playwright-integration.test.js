@@ -8,6 +8,7 @@ const testsDir = path.resolve(repoRoot, 'tests');
 
 const integrationScripts = [
   'test-window-manager.js',
+  'test-taskbar-menu.js',
   'test-duplicate-windows.js',
   'test-virtualboks-launch.js',
   'test-icons.js',

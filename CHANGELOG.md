@@ -18,6 +18,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Taskbar buttons have a window menu with Restore, Minimize, Maximize and Close.
+  Open it with right-click, the menu key or Shift+F10, even when an app page fails.
+
 - Winamp skin tooling, ahead of the classic 2.x reskin. Pixel art lives as
   plain-text grids in `winamp-player/skin-src/`, and
   `scripts/build-winamp-skin.mjs` turns them into PNG sprite sheets and sprite
