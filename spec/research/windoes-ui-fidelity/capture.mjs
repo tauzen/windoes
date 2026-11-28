@@ -281,12 +281,17 @@ try {
   await page.keyboard.press('Escape');
   await settle();
 
-  // Shut Down dialog.
+  // Shut Down dialog; then the keyboard focus on a radio option; then Cancel.
   await app(() => window.WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_OPEN' }));
   await settle();
   await shot('29-shutdown-dialog');
-  await app(() => window.WindoesApp.state.dispatch({ type: 'SHUTDOWN_DIALOG_CLOSE' }));
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('ArrowDown');
   await settle();
+  await shotEl('29-shutdown-radio-focus', '.shutdown-dialog .shutdown-options', 2);
+  await page.click('#shutdownCancelBtn');
+  await settle();
+  await shot('29-shutdown-cancelled');
 
   // Blue screen.
   await app(() => window.WindoesApp.bsod.triggerBSOD());

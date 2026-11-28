@@ -32,6 +32,13 @@ function focusPanelItemSoon(panelEl, index = 0) {
 // its submenu opens, or before the open submenu switches to another item's.
 const MENU_SHOW_DELAY_MS = 400;
 
+// The Shut Down dialog's radio options, in 98 order.
+const SHUTDOWN_OPTIONS = [
+  { value: 'shutdown', label: 'Shut down' },
+  { value: 'restart', label: 'Restart' },
+  { value: 'msdos', label: 'Restart in MS-DOS mode' },
+];
+
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
   games: {},
@@ -395,36 +402,18 @@ export default function StartMenu({ startButtonRef }) {
               <div className="dialog-text">What do you want the computer to do?</div>
             </div>
             <div className="shutdown-options">
-              <label>
-                <input
-                  type="radio"
-                  name="shutdownOption"
-                  value="shutdown"
-                  checked={shutdownOption === 'shutdown'}
-                  onChange={() => setShutdownOption('shutdown')}
-                />{' '}
-                Shut down
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="shutdownOption"
-                  value="restart"
-                  checked={shutdownOption === 'restart'}
-                  onChange={() => setShutdownOption('restart')}
-                />{' '}
-                Restart
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="shutdownOption"
-                  value="msdos"
-                  checked={shutdownOption === 'msdos'}
-                  onChange={() => setShutdownOption('msdos')}
-                />{' '}
-                Restart in MS-DOS mode
-              </label>
+              {SHUTDOWN_OPTIONS.map(({ value, label }) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="shutdownOption"
+                    value={value}
+                    checked={shutdownOption === value}
+                    onChange={() => setShutdownOption(value)}
+                  />
+                  <span className="shutdown-option-label">{label}</span>
+                </label>
+              ))}
             </div>
           </div>
           <div className="dialog-buttons">
