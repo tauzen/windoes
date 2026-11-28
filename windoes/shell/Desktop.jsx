@@ -44,6 +44,123 @@ export default function Desktop({ desktopRef }) {
 
     const experimentAppsById = new Map(experimentApps.map((app) => [app.id, app]));
 
+    const storageKey = 'windoes.desktopIconPositions';
+    let positions = {};
+    try {
+      positions = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+    } catch {
+      // Unavailable or invalid storage must not prevent desktop use.
+    }
+    let drag = null;
+    let suppressClick = false;
+
+    function placeIcon(icon, occupied = []) {
+      const bounds = iconsEl.getBoundingClientRect();
+      const current = icon.getBoundingClientRect();
+      const previousX = Number(icon.dataset.translateX || 0);
+      const previousY = Number(icon.dataset.translateY || 0);
+      const baseX = current.left - bounds.left - previousX;
+      const baseY = current.top - bounds.top - previousY;
+      const saved = positions[icon.id];
+      const wantedX = Number.isFinite(saved?.x) ? saved.x : baseX;
+      const wantedY = Number.isFinite(saved?.y) ? saved.y : baseY;
+      let x = Math.max(0, Math.min(wantedX, bounds.width - current.width));
+      let y = Math.max(0, Math.min(wantedY, bounds.height - current.height));
+      const overlaps = (left, top) =>
+        occupied.some(
+          (rect) =>
+            left < rect.x + current.width &&
+            left + current.width > rect.x &&
+            top < rect.y + current.height &&
+            top + current.height > rect.y
+        );
+      if (current.width && current.height && overlaps(x, y)) {
+        let found = false;
+        for (let left = 0; left + current.width <= bounds.width && !found; left += current.width) {
+          for (let top = 0; top + current.height <= bounds.height; top += current.height) {
+            if (!overlaps(left, top)) {
+              x = left;
+              y = top;
+              found = true;
+              break;
+            }
+          }
+        }
+      }
+      const dx = x - baseX;
+      const dy = y - baseY;
+      icon.dataset.translateX = dx;
+      icon.dataset.translateY = dy;
+      icon.style.transform = `translate(${dx}px, ${dy}px)`;
+      occupied.push({ x, y });
+    }
+
+    function placeIcons() {
+      const occupied = [];
+      iconsEl.querySelectorAll('.icon').forEach((icon) => placeIcon(icon, occupied));
+    }
+
+    function onPointerDown(event) {
+      const icon = event.target.closest('.icon');
+      if (!icon || !iconsEl.contains(icon) || !event.isPrimary || event.button !== 0) return;
+      suppressClick = false;
+      const bounds = iconsEl.getBoundingClientRect();
+      const rect = icon.getBoundingClientRect();
+      drag = {
+        icon,
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        x: rect.left - bounds.left,
+        y: rect.top - bounds.top,
+        moved: false,
+      };
+      icon.setPointerCapture(event.pointerId);
+    }
+
+    function onPointerMove(event) {
+      if (!drag || drag.id !== event.pointerId) return;
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
+      if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+      drag.moved = true;
+      positions[drag.icon.id] = { x: drag.x + dx, y: drag.y + dy };
+      placeIcon(drag.icon);
+    }
+
+    function onPointerEnd(event) {
+      if (!drag || drag.id !== event.pointerId) return;
+      if (drag.moved) {
+        const bounds = iconsEl.getBoundingClientRect();
+        const rect = drag.icon.getBoundingClientRect();
+        positions[drag.icon.id] = { x: rect.left - bounds.left, y: rect.top - bounds.top };
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(positions));
+        } catch {
+          // Moving icons still works when storage is unavailable.
+        }
+        suppressClick = true;
+        placeIcons();
+      }
+      drag = null;
+    }
+
+    function preventDragClick(event) {
+      if (!suppressClick) return;
+      suppressClick = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+
+    const resizeObserver = new ResizeObserver(placeIcons);
+    resizeObserver.observe(iconsEl);
+    iconsEl.addEventListener('pointerdown', onPointerDown);
+    iconsEl.addEventListener('pointermove', onPointerMove);
+    iconsEl.addEventListener('pointerup', onPointerEnd);
+    iconsEl.addEventListener('pointercancel', onPointerEnd);
+    iconsEl.addEventListener('click', preventDragClick, true);
+    placeIcons();
+
     function clearDesktopSelection() {
       iconsEl.querySelectorAll('.icon.selected').forEach((icon) => {
         icon.classList.remove('selected');
@@ -84,6 +201,12 @@ export default function Desktop({ desktopRef }) {
     desktopEl.addEventListener('click', onDesktopClick);
 
     return () => {
+      resizeObserver.disconnect();
+      iconsEl.removeEventListener('pointerdown', onPointerDown);
+      iconsEl.removeEventListener('pointermove', onPointerMove);
+      iconsEl.removeEventListener('pointerup', onPointerEnd);
+      iconsEl.removeEventListener('pointercancel', onPointerEnd);
+      iconsEl.removeEventListener('click', preventDragClick, true);
       iconsEl.removeEventListener('click', onDesktopIconClick);
       iconsEl.removeEventListener(appEventType, onDesktopIconActivate);
       desktopEl.removeEventListener('click', onDesktopClick);

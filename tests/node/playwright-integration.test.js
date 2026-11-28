@@ -11,6 +11,7 @@ const integrationScripts = [
   'test-duplicate-windows.js',
   'test-virtualboks-launch.js',
   'test-icons.js',
+  'test-desktop-drag.js',
   'test-boot-preload.js',
   'test-notepad-save.js',
   'test-notepad-file-menu.js',

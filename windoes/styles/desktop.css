@@ -11,7 +11,7 @@
   flex-direction: column;
   flex-wrap: wrap;
   gap: 0;
-  height: calc(100vh - var(--taskbar-height));
+  height: calc(100vh - var(--taskbar-height) - 6px);
   align-content: flex-start;
   padding: 2px;
 }
@@ -25,6 +25,7 @@
   font-size: 11px;
   user-select: none;
   cursor: default;
+  touch-action: none;
   padding: 4px 2px;
   display: flex;
   flex-direction: column;
