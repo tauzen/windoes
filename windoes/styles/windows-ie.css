@@ -221,7 +221,7 @@ body:has(.dialog-overlay.active) .titlebar {
 
 /* Menu bar */
 .menubar {
-  height: 20px;
+  height: 19px;
   display: flex;
   align-items: center;
   padding: 0;
@@ -238,8 +238,10 @@ body:has(.dialog-overlay.active) .titlebar {
   color: inherit;
 }
 .menubar .menubar-item:hover {
-  background: #000080;
-  color: #fff;
+  box-shadow: var(--edge-thin-raised);
+}
+.menubar .menubar-item[aria-expanded='true'] {
+  box-shadow: var(--edge-thin-sunken);
 }
 
 /* Toolbar - IE 5.5 style with icons above text */

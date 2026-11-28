@@ -142,11 +142,11 @@ export default function DesktopContextMenu() {
         <button
           type="button"
           role="menuitem"
-          className="context-menu-item"
+          className="context-menu-item context-menu-item-arrow"
           data-action="new"
           onClick={() => onMenuAction('new')}
         >
-          New ▶
+          New
         </button>
         <div className="context-menu-sep"></div>
         <button
