@@ -10,6 +10,11 @@ All notable changes to this project are documented in this file.
   pixel-drawn controls and raised or pressed edges. Maximized windows have no frame.
 - Shell scrollbars use Windows 98-style arrow buttons, checkerboard tracks and
   raised thumbs. Notepad shows both scrollbars and keeps long lines unwrapped.
+- Application menu bars use Windows 98 hover and open frames. Dropdown and
+  context rows are shorter, disabled labels are embossed, and submenu arrows
+  align at the right edge.
+- The taskbar uses Windows 98 active and inactive button states and a shared
+  height, so maximized windows meet its top edge on desktop and touch layouts.
 
 ### Added
 

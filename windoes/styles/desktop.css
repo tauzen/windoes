@@ -11,7 +11,7 @@
   flex-direction: column;
   flex-wrap: wrap;
   gap: 0;
-  height: calc(100vh - 36px);
+  height: calc(100vh - var(--taskbar-height));
   align-content: flex-start;
   padding: 2px;
 }
