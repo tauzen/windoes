@@ -36,8 +36,13 @@ export default function BootScreens() {
       </div>
 
       <div className="bsod" id="bsod">
-        <span className="bsod-header"> Windoes </span>
-        <pre id="bsodText"></pre>
+        <div className="bsod-page">
+          <div className="bsod-title">
+            <span className="bsod-header"> Windoes </span>
+          </div>
+          <pre className="bsod-body" id="bsodText"></pre>
+          <div className="bsod-footer" id="bsodFooter"></div>
+        </div>
       </div>
     </>
   );

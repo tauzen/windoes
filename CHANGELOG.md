@@ -18,6 +18,9 @@ All notable changes to this project are documented in this file.
 - The Start menu uses Windows 98 sizes and timing: 32 px icons in 36 px root
   rows, 20 px submenu rows, a navy-to-blue banner and drawn arrows. Submenus open
   after a 400 ms hover or at once on click, and crossing another item keeps them.
+- The blue screen is a centred 80-column text page like Windows 9x: a
+  highlighted title and a centred footer prompt, grey body text with a white
+  prompt, and monospace rows 16 px high.
 
 ### Added
 
