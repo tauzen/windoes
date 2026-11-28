@@ -10,12 +10,11 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 - Models: every role runs `--engine omp --provider openai-codex --model gpt-6.1-terra --thinking medium`.
 - Quota: if the selected model cannot run, preserve the work and ask the owner. Do not substitute a model.
-- Publish: one pull request per feature, from the job's branch rebased on `origin/main`. The coordinator opens it after checks (and review, where required) pass; the owner merges. Workers never push. Planning-only commits (changes only under `spec/`) go straight to `main` from `limen/work` after `prettier --check spec` passes; any commit that touches another path needs a PR. Never push code to `main` directly (a push to `main` deploys GitHub Pages).
+- Publish: one pull request per feature. Independent changes target `main`; use stacked PRs only for true dependencies, after CI runs for PRs targeting feature branches. The coordinator opens PRs after checks (and review, where required) pass; the owner merges. Workers never push. Planning-only commits (changes only under `spec/`) go straight to `main` from `limen/work` after `prettier --check spec` passes; any commit that touches another path needs a PR. Never push code to `main` directly.
 
 ## TRACK
 
 - Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. The shared 98 edge rules (F011) have landed; the chrome tickets reuse them.
-- F009, F010, F012 and F014 run in parallel. F010 owns `--taskbar-height` and the maximised-window height; F009 and F014 share `windows-ie.css` (caption vs menu bar rules), so the second to merge is rebased.
 
 ## NOW
 
