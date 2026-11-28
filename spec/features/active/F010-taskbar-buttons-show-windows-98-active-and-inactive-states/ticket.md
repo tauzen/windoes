@@ -12,6 +12,7 @@ The taskbar reads like Windows 98: a 28 px bar, inactive task buttons with norma
 
 - Start in `windoes/styles/taskbar.css`; keep the touch overrides in `windoes/styles/responsive.css` below 700 px.
 - 28 px taskbar with the 98 top edge, 22 px buttons, Start and task buttons on the shared raised and sunken edges, label offset 1 px when pressed.
+- One `--taskbar-height` variable in `windoes/styles/base.css` replaces the `100vh - 36px` constants in `desktop.css` and the maximised-window rule in `windows-ie.css`, so maximised windows fill the space above the taskbar exactly.
 - Tray well edge and the Quick Launch grip.
 - Details: `spec/research/windoes-ui-fidelity/report.md`, section "Taskbar".
 
@@ -25,8 +26,9 @@ The taskbar reads like Windows 98: a 28 px bar, inactive task buttons with norma
 - `capture.mjs` measures a 28 px taskbar and 22 px task buttons.
 - With two windows open, only the active task label is bold, and the active button shows the checkerboard.
 - Pressing a task button moves its label 1 px right and down.
-- Maximised windows still end exactly at the taskbar's top edge.
+- A maximised Notepad leaves no desktop strip above the taskbar, and its bottom edge meets the taskbar's top edge.
+- A grep finds no `100vh - 36px` left in the shell styles.
 
 ## Notes
 
-Uses the shared 98 edge rules from the bevel ticket (F011). Touches the same component as F008; land them one after the other.
+Uses the shared 98 edge rules that landed with F011. Touches the same component as F008; land them one after the other.

@@ -14,22 +14,24 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## TRACK
 
-- Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. F011's shared edge rules land before the chrome tickets that reuse them.
+- Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. The shared 98 edge rules (F011) have landed; the chrome tickets reuse them.
+- F009, F010, F012 and F014 run in parallel. F010 owns `--taskbar-height` and the maximised-window height; F009 and F014 share `windows-ie.css` (caption vs menu bar rules), so the second to merge is rebased.
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F014-menus-look-and-behave-like-windows-98-menus` (🟠 ACTIVE): Menus look and behave like Windows 98 menus
+- `F012-scrollbars-look-like-windows-98-scrollbars` (🟠 ACTIVE): Scrollbars look like Windows 98 scrollbars
+- `F010-taskbar-buttons-show-windows-98-active-and-inactive-states` (🟠 ACTIVE): Taskbar buttons show Windows 98 active and inactive states
+- `F009-window-title-bars-and-frames-match-windows-98` (🟠 ACTIVE): Window title bars and frames match Windows 98
+
 ## NEXT
 
-Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work. F011 lands first; F009, F010, F012 and F014 reuse its edge rules.
+Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work.
 
-- `F009-window-title-bars-and-frames-match-windows-98` (PLANNED): 18 px caption, 98 active and inactive gradients, drawn caption glyphs; after F011.
-- `F010-taskbar-buttons-show-windows-98-active-and-inactive-states` (PLANNED): 28 px taskbar, bold dithered active button; after F011, next to F008.
 - `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): 98 taskbar menu; closes a Winamp window whose page failed to load.
-- `F012-scrollbars-look-like-windows-98-scrollbars` (PLANNED): 16 px 98 scrollbars in the shell; after F011.
 - `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
-- `F014-menus-look-and-behave-like-windows-98-menus` (PLANNED): framed menu bar items, embossed disabled items, right-edge arrows; after F011.
 - `F015-the-start-menu-opens-like-the-windows-98-start-menu` (PLANNED): 98 row sizes, banner and 400 ms submenu delay.
 - `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and the 98 dotted radio focus box; after F011.
 - `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (PLANNED): centred 80-column text page.

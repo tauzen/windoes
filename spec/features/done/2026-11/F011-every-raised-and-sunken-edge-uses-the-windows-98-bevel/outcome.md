@@ -1,0 +1,3 @@
+# Outcome
+
+`base.css` now holds the Windows 98 palette and shared edge rules (`--edge-raised`, `--edge-sunken`, `--edge-field`, `--edge-window`, `--edge-default`, `--edge-pressed`, thin edges); dialog buttons, fields, list views, window and dialog frames and menus use them. Default buttons carry the black frame, pressed labels move 1 px, menus lost their drop shadow, and the Shut Down radios are our own 98-style SVGs. Merged in PR #145 (`7d7f6ef`); the owner approved the look. Hand-made edges remain only in the title-bar caption buttons, the menu bar and the taskbar, which F009, F014 and F010 replace with these rules.
