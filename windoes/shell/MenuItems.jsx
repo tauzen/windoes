@@ -12,21 +12,20 @@ import { SUBMENU_FAMILY } from './start-menu-config.js';
  * @param {object} props
  * @param {object} props.item - Config entry from `start-menu-config.js`.
  * @param {{ itemBase: string, iconBase: string, separatorClass: string }} props.family
- * @param {string[]} props.keep - Submenu keys to keep open while hovered.
- * @param {(keep: string[]) => void} props.onKeep - Apply the keep set on hover.
+ * @param {string[]} props.keep - Submenu keys this item keeps open.
+ * @param {(keep: string[]) => void} props.onHover - Pointer entered: apply `keep` after the hover delay.
+ * @param {(keep: string[]) => void} props.onOpen - Arrow item clicked: apply `keep` now.
  * @param {(item: object) => void} props.onSelect - Activate an action leaf.
  * @param {boolean} [props.expanded] - aria-expanded state for arrow items.
  * @param {import('react').Ref<HTMLButtonElement>} [props.triggerRef] - Arrow trigger ref.
  */
-export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, triggerRef }) {
+export function MenuItem({ item, family, keep, onHover, onOpen, onSelect, expanded, triggerRef }) {
   if (item.separator) {
     return <div className={family.separatorClass} role="separator"></div>;
   }
 
   const isArrow = Boolean(item.submenu);
-  const className =
-    `${family.itemBase}${isArrow ? ` ${family.itemBase}-arrow` : ''}` +
-    `${item.extraClass ? ` ${item.extraClass}` : ''}`;
+  const className = `${family.itemBase}${isArrow ? ` ${family.itemBase}-arrow` : ''}`;
   const icon = (
     <span
       className={`${family.iconBase} ${family.iconBase}-${item.icon}`}
@@ -45,7 +44,8 @@ export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, trigg
         aria-haspopup="menu"
         aria-controls={`${item.submenu}Submenu`}
         aria-expanded={expanded ? 'true' : 'false'}
-        onMouseEnter={() => onKeep(keep)}
+        onMouseEnter={() => onHover(keep)}
+        onClick={() => onOpen(keep)}
       >
         {icon}
         {item.label}
@@ -59,7 +59,7 @@ export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, trigg
       role="menuitem"
       className={className}
       id={item.id}
-      onMouseEnter={() => onKeep(keep)}
+      onMouseEnter={() => onHover(keep)}
       onClick={() => onSelect(item)}
     >
       {icon}
@@ -69,8 +69,8 @@ export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, trigg
 }
 
 /**
- * A cascading submenu panel. Pointer-leave keeps the parent chain open unless
- * the pointer moved into the parent or child panel (the `adjacentEls`).
+ * A cascading submenu panel. Open state is owned by the caller; leaving the
+ * panel only reports `onPointerLeave`, so the open submenus stay as they are.
  *
  * @param {object} props
  * @param {object} props.submenu - Submenu config (`key`, `chain`, `items`, …).
@@ -79,9 +79,10 @@ export function MenuItem({ item, family, keep, onKeep, onSelect, expanded, trigg
  * @param {import('react').Ref<HTMLDivElement>} props.panelRef
  * @param {import('react').Ref<HTMLButtonElement>|null} props.childTriggerRef - Ref for the arrow item, if any.
  * @param {Record<string, boolean>} props.openByKey - Open flag per submenu key (for aria-expanded).
- * @param {(keep: string[]) => void} props.onKeep
+ * @param {(keep: string[]) => void} props.onHover
+ * @param {(keep: string[]) => void} props.onOpen
  * @param {(item: object) => void} props.onSelect
- * @param {() => (HTMLElement|null)[]} props.getAdjacentEls - Parent/child panels for leave checks.
+ * @param {() => void} props.onPointerLeave - Pointer left the panel.
  * @param {(e: import('react').KeyboardEvent) => void} [props.onKeyDown] - Panel-level keyboard navigation.
  */
 export function Submenu({
@@ -91,17 +92,12 @@ export function Submenu({
   panelRef,
   childTriggerRef,
   openByKey,
-  onKeep,
+  onHover,
+  onOpen,
   onSelect,
-  getAdjacentEls,
+  onPointerLeave,
   onKeyDown,
 }) {
-  function onMouseLeave(e) {
-    const stayInside = getAdjacentEls().some((el) => el && el.contains(e.relatedTarget));
-    if (stayInside) return;
-    onKeep(submenu.chain.slice(0, -1));
-  }
-
   return (
     <div
       ref={panelRef}
@@ -110,7 +106,7 @@ export function Submenu({
       role="menu"
       aria-label={submenu.ariaLabel}
       style={style}
-      onMouseLeave={onMouseLeave}
+      onMouseLeave={onPointerLeave}
       onKeyDown={onKeyDown}
     >
       {submenu.items.map((item, i) => (
@@ -121,7 +117,8 @@ export function Submenu({
           keep={item.submenu ? [...submenu.chain, item.submenu] : submenu.chain}
           expanded={item.submenu ? openByKey[item.submenu] : undefined}
           triggerRef={item.submenu ? childTriggerRef : undefined}
-          onKeep={onKeep}
+          onHover={onHover}
+          onOpen={onOpen}
           onSelect={onSelect}
         />
       ))}

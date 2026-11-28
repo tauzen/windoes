@@ -102,17 +102,20 @@ try {
   await settle();
   await platformFont('start menu item', '#startMenu .menu-item');
   await measure('start menu root item', '#startMenu .menu-item');
+  await measure('start menu root icon', '#startMenu .menu-icon');
   await measure('start menu banner', '#startMenu .start-rail');
   await shot('07-start-menu', { x: 0, y: 260, width: 300, height: 340 });
   const programs = page.locator('#startMenu .menu-item-arrow').first();
   await programs.hover();
   await settle(60);
   await shot('08-start-menu-programs-60ms', { x: 0, y: 160, width: 640, height: 440 });
+  // Submenus open after the 400 ms hover delay.
+  await page.waitForSelector('.programs-submenu.open');
   await measure('submenu item', '.programs-submenu.open .submenu-item');
   const games = page.locator('.programs-submenu.open .submenu-item-arrow').first();
   if (await games.count()) {
     await games.hover();
-    await settle();
+    await page.waitForSelector('.games-submenu.open');
   }
   await shot('09-start-menu-cascade', { x: 0, y: 100, width: 800, height: 500 });
   await page.keyboard.press('Escape');

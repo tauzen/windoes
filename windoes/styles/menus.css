@@ -18,7 +18,7 @@
 
 .start-rail {
   width: 22px;
-  background: linear-gradient(to top, #0a246a, #3a6ea5);
+  background: linear-gradient(to top, #000080, #1084d0);
   color: #fff;
   display: flex;
   align-items: flex-end;
@@ -47,14 +47,15 @@
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   border: 0;
   background: transparent;
   text-align: left;
   font: inherit;
   color: inherit;
-  padding: 5px 16px 5px 8px;
+  min-height: 36px;
+  padding: 2px 20px 2px 4px;
   font-size: 11px;
   cursor: default;
   white-space: nowrap;
@@ -69,8 +70,8 @@
 }
 
 .menu-icon {
-  width: 16px;
-  height: 16px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   background-size: contain;
   background-repeat: no-repeat;
@@ -128,18 +129,6 @@
   margin: 3px 4px;
 }
 
-.menu-item-arrow::after {
-  content: '\25b6';
-  font-size: 8px;
-  margin-left: auto;
-}
-
-.menu-shutdown {
-  border-top: 2px solid var(--button-shadow);
-  padding-top: 4px;
-  margin-top: 2px;
-}
-
 /* ── Programs Submenu ── */
 .programs-submenu {
   position: fixed;
@@ -159,6 +148,21 @@
   z-index: 27;
 }
 
+/* 98 cascade arrow: a solid 4x7 triangle drawn 1 px per row at the right edge,
+   in the item's text colour so it turns white on the highlight. */
+.menu-item-arrow::after,
+.submenu-item-arrow::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: calc(50% - 3px);
+  width: 4px;
+  height: 7px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='7'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1z'/%3E%3C/svg%3E")
+    no-repeat;
+}
+
 .submenu-item {
   display: flex;
   align-items: center;
@@ -169,7 +173,9 @@
   text-align: left;
   font: inherit;
   color: inherit;
-  padding: 5px 16px 5px 8px;
+  min-height: 20px;
+  padding: 2px 20px 2px 4px;
+  position: relative;
   font-size: 11px;
   cursor: default;
   white-space: nowrap;
@@ -189,12 +195,6 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-}
-
-.submenu-item-arrow::after {
-  content: '\25b6';
-  font-size: 8px;
-  margin-left: auto;
 }
 
 .submenu-icon-ie {

@@ -903,9 +903,9 @@ async function runTests() {
     await page.click('#startButton');
     await page.waitForTimeout(120);
     await page.hover('#menuPrograms');
-    await page.waitForTimeout(120);
+    await page.waitForSelector('#programsSubmenu.open');
     await page.hover('#subGames');
-    await page.waitForTimeout(120);
+    await page.waitForSelector('#gamesSubmenu.open');
 
     const startMenuAccessibilityState = await page.evaluate(() => {
       const startButton = document.getElementById('startButton');
