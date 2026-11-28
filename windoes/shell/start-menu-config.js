@@ -5,9 +5,9 @@
 // key (an arrow item that opens a nested panel), or `{ separator: true }`.
 //
 // Hover behaviour is derived from each submenu's `chain` — the list of submenu
-// keys that must stay open while the pointer is inside that panel — so the menu
-// no longer needs a bespoke `onXEnter`/`onXLeave` handler per item. See
-// `StartMenu.jsx` for how the chain drives keep/leave.
+// keys that must stay open while the pointer rests inside that panel — so the
+// menu needs no bespoke `onXEnter`/`onXLeave` handler per item. See
+// `StartMenu.jsx` for how the chain drives the delayed hover open.
 
 /** Top-level Start-menu items (rendered with the `menu-*` class family). */
 export const ROOT_ITEMS = [
@@ -26,7 +26,6 @@ export const ROOT_ITEMS = [
     id: 'menuShutdown',
     icon: 'shutdown',
     label: 'Shut Down...',
-    extraClass: 'menu-shutdown',
     action: { kind: 'shutdown' },
   },
 ];
@@ -34,7 +33,7 @@ export const ROOT_ITEMS = [
 /**
  * Cascading submenus, parent-before-child. `chain` lists the open submenu keys
  * for this panel (ancestors included); `parentKey`/`childKey` describe the
- * cascade used for pointer-leave and positioning.
+ * cascade used for positioning.
  */
 export const SUBMENUS = [
   {

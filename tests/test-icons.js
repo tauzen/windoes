@@ -118,7 +118,7 @@ async function runTests() {
 
     // Hover over Programs to open submenu
     await page.hover('#menuPrograms');
-    await page.waitForTimeout(300);
+    await page.waitForSelector('#programsSubmenu.open');
 
     const submenuIconTests = [
       { selector: '.submenu-icon-ie', name: 'Internet Explorer' },

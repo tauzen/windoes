@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
   align at the right edge.
 - The taskbar uses Windows 98 active and inactive button states and a shared
   height, so maximized windows meet its top edge on desktop and touch layouts.
+- The Start menu uses Windows 98 sizes and timing: 32 px icons in 36 px root
+  rows, 20 px submenu rows, a navy-to-blue banner and drawn arrows. Submenus open
+  after a 400 ms hover or at once on click, and crossing another item keeps them.
 
 ### Added
 
