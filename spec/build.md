@@ -16,22 +16,23 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 ## TRACK
 
 - Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. The shared 98 edge rules (F011) have landed; the chrome tickets reuse them.
-- The taskbar menu (F008) and movable desktop icons (F021) run independently; preserve existing window and icon interactions.
+- Wave: Start menu (F015), blue screen (F018) and message boxes (F020) run in parallel; they touch different files. Shut Down (F017) waits for F015 (both edit `StartMenu.jsx`); boot splash (F019) waits for F018 (both edit `BootScreens.jsx`).
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
+
+- `F020-message-boxes-use-our-own-98-style-icons-and-the-98-layout` (🟠 ACTIVE): Message boxes use our own 98-style icons and the 98 layout
+- `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (🟠 ACTIVE): The blue screen is laid out like a Windows 9x text-mode screen
+- `F015-the-start-menu-opens-like-the-windows-98-start-menu` (🟠 ACTIVE): The Start menu opens like the Windows 98 Start menu
 
 ## NEXT
 
 Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work.
 
 - `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
-- `F015-the-start-menu-opens-like-the-windows-98-start-menu` (PLANNED): 98 row sizes, banner and 400 ms submenu delay.
-- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and the 98 dotted radio focus box; after F011.
-- `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (PLANNED): centred 80-column text page.
-- `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar.
-- `F020-message-boxes-use-our-own-98-style-icons-and-the-98-layout` (PLANNED): our own 32x32 pixel icons, content-fit boxes.
+- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and the 98 dotted radio focus box; after F015.
+- `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar; after F018.
 
 ## PROVEN
 
