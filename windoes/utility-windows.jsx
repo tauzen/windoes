@@ -44,7 +44,6 @@ WindoesApp.WindowManager.register('myComputer', {
     menubar: ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'],
     toolbar: <MyComputerToolbar />,
     view: <MyComputerView />,
-    viewStyle: { overflowY: 'auto' },
     statusBar: (
       <>
         <MyComputerStatusLeft />
@@ -257,7 +256,6 @@ WindoesApp.WindowManager.register('recycleBin', {
         </div>
       </div>
     ),
-    viewStyle: { overflowY: 'auto' },
     statusBar: <span className="status-left">0 object(s)</span>,
     useSharedWindowComponent: true,
   },

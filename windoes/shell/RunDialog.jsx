@@ -133,7 +133,7 @@ export default function RunDialog() {
           </div>
         </div>
         <div className="dialog-buttons">
-          <button className="dialog-btn" id="runOkBtn" onClick={runCommand}>
+          <button className="dialog-btn default" id="runOkBtn" onClick={runCommand}>
             OK
           </button>
           <button className="dialog-btn" id="runCancelBtn" onClick={closeDialog}>

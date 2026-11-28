@@ -431,57 +431,59 @@ export default function FileChooserDialog() {
             )}
           </div>
 
-          <div className="file-chooser-list" id="fileChooserList" role="listbox">
-            {creatingFolder && (
-              <div className="file-chooser-item file-chooser-new-folder">
-                <span className="file-chooser-item-icon is-dir" aria-hidden={true}></span>
-                <input
-                  ref={newFolderInputRef}
-                  type="text"
-                  id="fileChooserNewFolderInput"
-                  aria-label="New folder name"
-                  className="file-chooser-new-folder-input"
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  onBlur={submitNewFolder}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      submitNewFolder();
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault();
-                      setCreatingFolder(false);
-                      setNewFolderName('');
-                    }
-                  }}
-                />
-              </div>
-            )}
-
-            {visibleItems.length === 0 && !creatingFolder ? (
-              <div className="file-chooser-empty">This folder is empty.</div>
-            ) : (
-              visibleItems.map((item) => (
-                <div
-                  key={`${item.type}:${item.name}`}
-                  className={`file-chooser-item${selectedName === item.name ? ' selected' : ''}`}
-                  role="option"
-                  aria-selected={selectedName === item.name}
-                  data-name={item.name}
-                  data-type={item.type}
-                  onClick={() => selectItem(item)}
-                  onDoubleClick={() => activateItem(item)}
-                >
-                  <span
-                    className={`file-chooser-item-icon ${
-                      item.type === 'directory' ? 'is-dir' : 'is-file'
-                    }`}
-                    aria-hidden={true}
-                  ></span>
-                  <span className="file-chooser-item-label">{item.name}</span>
+          <div className="file-chooser-list-frame">
+            <div className="file-chooser-list" id="fileChooserList" role="listbox">
+              {creatingFolder && (
+                <div className="file-chooser-item file-chooser-new-folder">
+                  <span className="file-chooser-item-icon is-dir" aria-hidden={true}></span>
+                  <input
+                    ref={newFolderInputRef}
+                    type="text"
+                    id="fileChooserNewFolderInput"
+                    aria-label="New folder name"
+                    className="file-chooser-new-folder-input"
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onBlur={submitNewFolder}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        submitNewFolder();
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setCreatingFolder(false);
+                        setNewFolderName('');
+                      }
+                    }}
+                  />
                 </div>
-              ))
-            )}
+              )}
+
+              {visibleItems.length === 0 && !creatingFolder ? (
+                <div className="file-chooser-empty">This folder is empty.</div>
+              ) : (
+                visibleItems.map((item) => (
+                  <div
+                    key={`${item.type}:${item.name}`}
+                    className={`file-chooser-item${selectedName === item.name ? ' selected' : ''}`}
+                    role="option"
+                    aria-selected={selectedName === item.name}
+                    data-name={item.name}
+                    data-type={item.type}
+                    onClick={() => selectItem(item)}
+                    onDoubleClick={() => activateItem(item)}
+                  >
+                    <span
+                      className={`file-chooser-item-icon ${
+                        item.type === 'directory' ? 'is-dir' : 'is-file'
+                      }`}
+                      aria-hidden={true}
+                    ></span>
+                    <span className="file-chooser-item-label">{item.name}</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           <div className="file-chooser-fields">
@@ -509,7 +511,7 @@ export default function FileChooserDialog() {
               />
               <button
                 type="button"
-                className="dialog-btn"
+                className="dialog-btn default"
                 id="fileChooserConfirmBtn"
                 onClick={() => confirmChoice()}
               >
@@ -577,7 +579,7 @@ export default function FileChooserDialog() {
           <div className="dialog-buttons">
             <button
               ref={replaceButtonRef}
-              className="dialog-btn"
+              className="dialog-btn default"
               id="fileChooserReplaceBtn"
               onClick={confirmOverwrite}
             >

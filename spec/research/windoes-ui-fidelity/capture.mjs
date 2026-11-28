@@ -1,6 +1,7 @@
 // Captures the Windoes shell surfaces at 1x (deviceScaleFactor 1) into
 // ./screenshots for the Windows 98 / Me fidelity survey (report.md).
 // Run from the repository root:  node spec/research/windoes-ui-fidelity/capture.mjs
+// Set CAPTURE_OUT_DIR to write somewhere else and keep the committed survey shots.
 // It starts its own Vite dev server and headless Chromium, and stops both.
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -13,7 +14,9 @@ const root = path.resolve(here, '../../..');
 const { startStaticServer } = require(path.join(root, 'tests/launch-browser.js'));
 const { chromium } = require('playwright');
 
-const outDir = path.join(here, 'screenshots');
+const outDir = process.env.CAPTURE_OUT_DIR
+  ? path.resolve(process.env.CAPTURE_OUT_DIR)
+  : path.join(here, 'screenshots');
 mkdirSync(outDir, { recursive: true });
 
 const VIEWPORT = { width: 800, height: 600 };

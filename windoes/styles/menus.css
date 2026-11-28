@@ -4,11 +4,9 @@
   left: 2px;
   bottom: 30px;
   width: 220px;
-  background: #c0c0c0;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-bottom: 2px solid #808080;
-  border-right: 2px solid #808080;
+  background: var(--button-face);
+  box-shadow: var(--edge-window);
+  padding: 2px;
   display: none;
   z-index: 25;
 }
@@ -125,8 +123,8 @@
 }
 
 .menu-separator {
-  border-top: 1px solid #808080;
-  border-bottom: 1px solid #fff;
+  border-top: 1px solid var(--button-shadow);
+  border-bottom: 1px solid var(--button-hilight);
   margin: 3px 4px;
 }
 
@@ -137,7 +135,7 @@
 }
 
 .menu-shutdown {
-  border-top: 2px solid #808080;
+  border-top: 2px solid var(--button-shadow);
   padding-top: 4px;
   margin-top: 2px;
 }
@@ -147,14 +145,11 @@
   position: fixed;
   left: 222px;
   width: 200px;
-  background: #c0c0c0;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-bottom: 2px solid #808080;
-  border-right: 2px solid #808080;
+  background: var(--button-face);
+  box-shadow: var(--edge-window);
   display: none;
   z-index: 26;
-  padding: 2px 0;
+  padding: 4px 2px;
 }
 .programs-submenu.open {
   display: block;
@@ -260,16 +255,12 @@
 /* ── Right-click context menu ── */
 .context-menu {
   position: fixed;
-  background: #c0c0c0;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-bottom: 2px solid #808080;
-  border-right: 2px solid #808080;
+  background: var(--button-face);
+  box-shadow: var(--edge-window);
   min-width: 160px;
-  padding: 2px 0;
+  padding: 4px 2px;
   z-index: 30;
   display: none;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
 }
 .context-menu.open {
   display: block;
@@ -330,8 +321,8 @@
   z-index: 31;
 }
 .context-menu-sep {
-  border-top: 1px solid #808080;
-  border-bottom: 1px solid #fff;
+  border-top: 1px solid var(--button-shadow);
+  border-bottom: 1px solid var(--button-hilight);
   margin: 3px 2px;
 }
 .context-menu-item .check-mark {

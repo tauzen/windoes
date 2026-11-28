@@ -1,3 +1,44 @@
+/* ── Windows 98 palette and 3D edges ──
+   Colours are the Windows Standard scheme (Wine sysparams.c, 98.css).
+   Each edge is a stack of inset box-shadows, so it takes no layout space:
+   an element with a 2 px edge reserves it with 2 px of padding.
+   Shadows listed first paint on top, which gives the 98 corner pixels. */
+:root {
+  --button-face: #c0c0c0;
+  --button-hilight: #fff;
+  --button-light: #dfdfdf;
+  --button-shadow: #808080;
+  --button-dk-shadow: #000;
+  --info-window: #ffffe1;
+
+  /* Push button: outer white/black, inner light/grey. */
+  --edge-raised:
+    inset -1px -1px var(--button-dk-shadow), inset 1px 1px var(--button-hilight),
+    inset -2px -2px var(--button-shadow), inset 2px 2px var(--button-light);
+  /* Pushed toggle (Start button, active task button): raised turned over. */
+  --edge-sunken:
+    inset -1px -1px var(--button-hilight), inset 1px 1px var(--button-dk-shadow),
+    inset -2px -2px var(--button-light), inset 2px 2px var(--button-shadow);
+  /* Text fields, list views, client areas: outer grey/white, inner black/light. */
+  --edge-field:
+    inset -1px -1px var(--button-hilight), inset 1px 1px var(--button-shadow),
+    inset -2px -2px var(--button-light), inset 2px 2px var(--button-dk-shadow);
+  /* Window, dialog and menu frames: outer light/black, inner white/grey. */
+  --edge-window:
+    inset -1px -1px var(--button-dk-shadow), inset 1px 1px var(--button-light),
+    inset -2px -2px var(--button-shadow), inset 2px 2px var(--button-hilight);
+  /* Default or focused push button: 1 px black frame around the raised edge. */
+  --edge-default:
+    inset 0 0 0 1px var(--button-dk-shadow), inset -2px -2px var(--button-dk-shadow),
+    inset 2px 2px var(--button-hilight), inset -3px -3px var(--button-shadow),
+    inset 3px 3px var(--button-light);
+  /* Pressed push button: black frame, then a grey frame. */
+  --edge-pressed: inset 0 0 0 1px var(--button-dk-shadow), inset 0 0 0 2px var(--button-shadow);
+  /* 1 px edges: hot toolbar buttons, status bar panels. */
+  --edge-thin-raised: inset -1px -1px var(--button-shadow), inset 1px 1px var(--button-hilight);
+  --edge-thin-sunken: inset -1px -1px var(--button-hilight), inset 1px 1px var(--button-shadow);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

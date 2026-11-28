@@ -58,7 +58,6 @@ function WindowTitlebar({ windowId, template }) {
 }
 
 function WindowShell({ windowId, template }) {
-  const viewStyle = template.viewStyle;
   const notepadFileMenuOpen = WindoesApp.state.use((s) => !!s.notepad?.fileMenuOpen);
 
   // `title` may be a React element (reactive titles), so prefer a plain-string
@@ -109,11 +108,7 @@ function WindowShell({ windowId, template }) {
 
       {template.toolbar && <div>{template.toolbar}</div>}
 
-      {template.view !== undefined && (
-        <div className="view" {...(viewStyle ? { style: viewStyle } : {})}>
-          {template.view}
-        </div>
-      )}
+      {template.view !== undefined && <div className="view">{template.view}</div>}
 
       {template.statusBar && <div className="status">{template.statusBar}</div>}
     </>
