@@ -21,7 +21,6 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
 - `F007-winamp-title-bar-buttons-work-inside-the-shell` (🟠 ACTIVE): Winamp title-bar buttons work inside the shell
-- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (🟠 ACTIVE): Winamp keeps the EQ preamp boost when the volume changes
 
 ## NEXT
 
@@ -45,9 +44,10 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 
 <!-- Generated from spec/features/done/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (🟢 PROVEN): Winamp keeps the EQ preamp boost when the volume changes; landed 2026-11-28
 - `F005-winamp-matches-the-classic-2-x-skin-pixel-for-pixel` (🟢 PROVEN): Winamp matches the classic 2.x skin pixel for pixel; landed 2026-11-27
 - `F004-app-code-is-covered-by-lint-and-type-checks` (🟢 PROVEN): App code is covered by lint and type checks; landed 2026-11-23
 - `F003-embedded-apps-run-in-a-real-sandbox` (🟢 PROVEN): Embedded apps run in a real sandbox; landed 2026-11-22
 - `F002-paint-reads-and-writes-only-files-the-user-picked` (🟢 PROVEN): Paint reads and writes only files the user picked; landed 2026-11-22
 - `F001-ci-blocks-untested-changes-before-merge-and-deploy` (🟢 PROVEN): CI blocks untested changes before merge and deploy; landed 2026-11-22
-- 2026-11: 5 landed. spec/features/done/2026-11/
+- 2026-11: 6 landed. spec/features/done/2026-11/

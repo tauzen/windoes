@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-27
+landed: 2026-11-28
 ---
 
 # F006 · Winamp keeps the EQ preamp boost when the volume changes
