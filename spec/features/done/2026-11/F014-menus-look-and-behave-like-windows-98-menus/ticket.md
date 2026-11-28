@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F014 · Menus look and behave like Windows 98 menus
