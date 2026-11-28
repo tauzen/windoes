@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F015 · The Start menu opens like the Windows 98 Start menu

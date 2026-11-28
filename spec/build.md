@@ -24,7 +24,6 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 - `F020-message-boxes-use-our-own-98-style-icons-and-the-98-layout` (🟠 ACTIVE): Message boxes use our own 98-style icons and the 98 layout
 - `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (🟠 ACTIVE): The blue screen is laid out like a Windows 9x text-mode screen
-- `F015-the-start-menu-opens-like-the-windows-98-start-menu` (🟠 ACTIVE): The Start menu opens like the Windows 98 Start menu
 
 ## NEXT
 
@@ -40,6 +39,7 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 
 - `F021-desktop-icons-can-be-moved` (🟢 PROVEN): Desktop icons can be moved; landed 2026-11-28
 - `F016-desktop-icons-behave-like-windows-98-desktop-icons` (🟢 PROVEN): Desktop icons behave like Windows 98 desktop icons; landed 2026-11-28
+- `F015-the-start-menu-opens-like-the-windows-98-start-menu` (🟢 PROVEN): The Start menu opens like the Windows 98 Start menu; landed 2026-11-28
 - `F014-menus-look-and-behave-like-windows-98-menus` (🟢 PROVEN): Menus look and behave like Windows 98 menus; landed 2026-11-28
 - `F012-scrollbars-look-like-windows-98-scrollbars` (🟢 PROVEN): Scrollbars look like Windows 98 scrollbars; landed 2026-11-28
 - `F011-every-raised-and-sunken-edge-uses-the-windows-98-bevel` (🟢 PROVEN): Every raised and sunken edge uses the Windows 98 bevel; landed 2026-11-28
@@ -47,5 +47,4 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 - `F009-window-title-bars-and-frames-match-windows-98` (🟢 PROVEN): Window title bars and frames match Windows 98; landed 2026-11-28
 - `F008-taskbar-buttons-have-a-right-click-menu-with-close` (🟢 PROVEN): Taskbar buttons have a right-click menu with Close; landed 2026-11-28
 - `F007-winamp-title-bar-buttons-work-inside-the-shell` (🟢 PROVEN): Winamp title-bar buttons work inside the shell; landed 2026-11-28
-- `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (🟢 PROVEN): Winamp keeps the EQ preamp boost when the volume changes; landed 2026-11-28
-- 2026-11: 15 landed. spec/features/done/2026-11/
+- 2026-11: 16 landed. spec/features/done/2026-11/
