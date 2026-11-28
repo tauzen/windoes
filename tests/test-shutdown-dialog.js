@@ -41,6 +41,8 @@ async function run() {
     await page.click('#startButton');
     await page.click('#menuShutdown');
     await page.waitForSelector('#shutdownDialog.active');
+    // Initial focus is set on the next animation frame, after the dialog appears.
+    await page.waitForFunction(() => document.activeElement?.id === 'shutdownOkBtn');
   };
   try {
     await waitForBoot(page, baseUrl);
@@ -112,6 +114,11 @@ async function run() {
     });
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('ArrowDown');
+    assert.deepEqual(
+      await focused(),
+      { name: 'shutdownOption', value: 'restart', checked: true },
+      'Restart is selected before OK'
+    );
     await Promise.all([page.waitForEvent('load'), page.click('#shutdownOkBtn')]);
     assert.equal(
       await page.evaluate(() => window.__beforeRestart),
