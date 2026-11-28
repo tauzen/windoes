@@ -22,8 +22,6 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
-- `F021-desktop-icons-can-be-moved` (🟠 ACTIVE): Desktop icons can be moved
-
 ## NEXT
 
 Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work.
@@ -39,6 +37,7 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 
 <!-- Generated from spec/features/done/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
 
+- `F021-desktop-icons-can-be-moved` (🟢 PROVEN): Desktop icons can be moved; landed 2026-11-28
 - `F016-desktop-icons-behave-like-windows-98-desktop-icons` (🟢 PROVEN): Desktop icons behave like Windows 98 desktop icons; landed 2026-11-28
 - `F014-menus-look-and-behave-like-windows-98-menus` (🟢 PROVEN): Menus look and behave like Windows 98 menus; landed 2026-11-28
 - `F012-scrollbars-look-like-windows-98-scrollbars` (🟢 PROVEN): Scrollbars look like Windows 98 scrollbars; landed 2026-11-28
@@ -48,5 +47,4 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 - `F008-taskbar-buttons-have-a-right-click-menu-with-close` (🟢 PROVEN): Taskbar buttons have a right-click menu with Close; landed 2026-11-28
 - `F007-winamp-title-bar-buttons-work-inside-the-shell` (🟢 PROVEN): Winamp title-bar buttons work inside the shell; landed 2026-11-28
 - `F006-winamp-keeps-the-eq-preamp-boost-when-the-volume-changes` (🟢 PROVEN): Winamp keeps the EQ preamp boost when the volume changes; landed 2026-11-28
-- `F005-winamp-matches-the-classic-2-x-skin-pixel-for-pixel` (🟢 PROVEN): Winamp matches the classic 2.x skin pixel for pixel; landed 2026-11-27
-- 2026-11: 14 landed. spec/features/done/2026-11/
+- 2026-11: 15 landed. spec/features/done/2026-11/
