@@ -1,5 +1,6 @@
 ---
 opened: 2026-11-28
+landed: 2026-11-28
 ---
 
 # F020 · Message boxes use our own 98-style icons and the 98 layout
