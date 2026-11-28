@@ -16,19 +16,20 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 ## TRACK
 
 - Shell fidelity stretch: bring the Windoes shell close to Windows 98 SE, using our own art and an openly licensed font only. The shared 98 edge rules (F011) have landed; the chrome tickets reuse them.
-- Wave: Start menu (F015), blue screen (F018) and message boxes (F020) run in parallel; they touch different files. Shut Down (F017) waits for F015 (both edit `StartMenu.jsx`); boot splash (F019) waits for F018 (both edit `BootScreens.jsx`).
+- Wave: Shut Down backdrop (F017) and boot splash (F019) run in parallel; they touch different files. The pixel UI font (F013) waits on the owner's font choice.
 
 ## NOW
 
 <!-- Generated from spec/features/active/ by limen land, limen ticket done and limen board --write. Edit the tickets, not these lines. -->
+
+- `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (🟠 ACTIVE): The boot splash fills the screen with a scrolling colour band
+- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (🟠 ACTIVE): The Shut Down dialog dims the screen and uses 98 radio buttons
 
 ## NEXT
 
 Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work.
 
 - `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
-- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and the 98 dotted radio focus box; after F015.
-- `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar; after F018.
 
 ## PROVEN
 
