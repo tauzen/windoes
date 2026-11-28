@@ -11,6 +11,7 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 - Models: every role runs `--engine omp --provider openai-codex --model gpt-6.1-terra --thinking medium`.
 - Quota: if the selected model cannot run, preserve the work and ask the owner. Do not substitute a model.
 - Publish: one pull request per feature. Independent changes target `main`; use stacked PRs only for true dependencies, after CI runs for PRs targeting feature branches. The coordinator opens PRs after checks (and review, where required) pass; the owner merges. Workers never push. Planning-only commits (changes only under `spec/`) go straight to `main` from `limen/work` after `prettier --check spec` passes; any commit that touches another path needs a PR. Never push code to `main` directly.
+- PR handoff: report a PR as ready to the owner only after its current head passes GitHub CI; fix failures before asking for a merge.
 
 ## TRACK
 
