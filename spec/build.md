@@ -32,9 +32,9 @@ Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranke
 - `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): 98 taskbar menu; closes a Winamp window whose page failed to load.
 - `F012-scrollbars-look-like-windows-98-scrollbars` (PLANNED): 16 px 98 scrollbars in the shell; after F011.
 - `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
-- `F014-menus-look-and-behave-like-windows-98-menus` (PLANNED): framed menu bar items, no shadow, embossed disabled items; after F011.
+- `F014-menus-look-and-behave-like-windows-98-menus` (PLANNED): framed menu bar items, embossed disabled items, right-edge arrows; after F011.
 - `F015-the-start-menu-opens-like-the-windows-98-start-menu` (PLANNED): 98 row sizes, banner and 400 ms submenu delay.
-- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and drawn radios.
+- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and the 98 dotted radio focus box; after F011.
 - `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (PLANNED): centred 80-column text page.
 - `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar.
 - `F020-message-boxes-use-our-own-98-style-icons-and-the-98-layout` (PLANNED): our own 32x32 pixel icons, content-fit boxes.

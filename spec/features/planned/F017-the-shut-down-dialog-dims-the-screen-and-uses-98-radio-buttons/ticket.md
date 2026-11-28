@@ -6,14 +6,14 @@ opened: 2026-11-28
 
 ## Outcome
 
-Opening Shut Down darkens the whole screen with the Windows 98 black checkerboard, and the dialog's options use drawn 98 radio buttons. Today the screen behind stays bright and the radios are the browser's blue circles.
+Opening Shut Down darkens the whole screen with the Windows 98 black checkerboard. Today the screen behind stays bright. The 98 radio buttons already landed with the shared edge rules (F011); their keyboard focus still shows Chromium's default ring, not the 98 dotted box.
 
 ## Scope
 
 - Start in the shutdown dialog in `windoes/shell/StartMenu.jsx` and `windoes/styles/dialogs.css`.
 - A 2x2 checkerboard overlay behind the dialog, removed when it closes.
-- 12x12 radio buttons drawn with `appearance: none`, in a shared class other dialogs can reuse.
-- Details: `spec/research/windoes-ui-fidelity/report.md`, sections "Shut Down dialog" and "Push buttons and form controls".
+- The radio focus indicator becomes the 98 dotted box around the label.
+- Details: `spec/research/windoes-ui-fidelity/report.md`, section "Shut Down dialog".
 
 ## Out of scope
 
@@ -22,5 +22,5 @@ Opening Shut Down darkens the whole screen with the Windows 98 black checkerboar
 ## Acceptance
 
 - `capture.mjs` shows the checkerboard over the desktop while the dialog is open, and none after Cancel.
-- The radios render as 98 radios in checked, unchecked and focused states.
+- A focused radio shows the dotted box around its label, not a browser focus ring.
 - Arrow keys still move between options, and OK runs the chosen option.
