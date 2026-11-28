@@ -154,7 +154,7 @@ async function runTests() {
     await page.click('#startButton');
     await page.waitForTimeout(150);
     await page.hover('#menuPrograms');
-    await page.waitForTimeout(150);
+    await page.waitForSelector('#programsSubmenu.open');
     await page.click('#subPaint');
     await page.waitForTimeout(300);
 

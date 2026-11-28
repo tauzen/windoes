@@ -18,6 +18,12 @@ All notable changes to this project are documented in this file.
 - Error, warning and information boxes show Windoes' own 32x32 pixel icons in
   the Windows 98 style, fit their width to the text up to 480 px, and centre
   short text on the icon. The Run dialog's OK, Cancel and Browse sit at the right.
+- The Start menu uses Windows 98 sizes and timing: 32 px icons in 36 px root
+  rows, 20 px submenu rows, a navy-to-blue banner and drawn arrows. Submenus open
+  after a 400 ms hover or at once on click, and crossing another item keeps them.
+- The blue screen is a centred 80-column text page like Windows 9x: a
+  highlighted title and a centred footer prompt, grey body text with a white
+  prompt, and monospace rows 16 px high.
 
 ### Added
 

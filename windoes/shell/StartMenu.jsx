@@ -28,6 +28,10 @@ function focusPanelItemSoon(panelEl, index = 0) {
   });
 }
 
+// Windows 98 `MenuShowDelay`: the pointer must rest this long on an item before
+// its submenu opens, or before the open submenu switches to another item's.
+const MENU_SHOW_DELAY_MS = 400;
+
 const DEFAULT_SUBMENU_STYLES = {
   programs: {},
   games: {},
@@ -85,6 +89,8 @@ export default function StartMenu({ startButtonRef }) {
   const gamesOpen = WindoesApp.state.use((s) => s.menus.gamesOpen);
   const openByKey = { programs: programsOpen, games: gamesOpen };
   const [submenuStyles, setSubmenuStyles] = useState(DEFAULT_SUBMENU_STYLES);
+  // Pending hover change of the open submenus (see `keepSubmenusAfterHover`).
+  const hoverTimerRef = useRef(null);
 
   // Per-submenu DOM handles, keyed so the config-driven render and the
   // positioning effect can look them up without bespoke per-panel wiring.
@@ -97,8 +103,28 @@ export default function StartMenu({ startButtonRef }) {
     games: subGamesRef,
   };
 
+  function cancelHoverTimer() {
+    clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
+  }
+
+  // Set the open submenus now. Any pending hover change is dropped, so a
+  // keyboard or click choice is not undone by an older hover.
   function keepSubmenus(keepKeys = []) {
+    cancelHoverTimer();
     WindoesApp.state.dispatch({ type: 'MENU_SUBMENUS_KEEP', keep: keepKeys });
+  }
+
+  // The pointer entered an item: after the menu show delay, its keep set
+  // becomes the open submenus. Each new item restarts the delay, so a pointer
+  // that only crosses other items leaves the open submenu as it is.
+  function keepSubmenusAfterHover(keepKeys) {
+    cancelHoverTimer();
+    const alreadyOpen =
+      keepKeys.length === SUBMENUS.filter((s) => openByKey[s.key]).length &&
+      keepKeys.every((key) => openByKey[key]);
+    if (alreadyOpen) return;
+    hoverTimerRef.current = setTimeout(() => keepSubmenus(keepKeys), MENU_SHOW_DELAY_MS);
   }
 
   function closeAllMenus() {
@@ -164,16 +190,6 @@ export default function StartMenu({ startButtonRef }) {
     }
     run();
     closeAllMenus();
-  }
-
-  // Parent/child panels a submenu may yield focus to without collapsing, used
-  // by each panel's pointer-leave check.
-  function getAdjacentEls(submenu) {
-    const parentEl = submenu.parentKey
-      ? panelRefs[submenu.parentKey].current
-      : startMenuRef.current;
-    const childEl = submenu.childKey ? panelRefs[submenu.childKey].current : null;
-    return [parentEl, childEl];
   }
 
   // Open `key`'s submenu (keeping its ancestors) and move focus into it. Shared
@@ -253,6 +269,12 @@ export default function StartMenu({ startButtonRef }) {
     return () => button.removeEventListener('keydown', onStartButtonKeyDown);
   }, [startMenuOpen, startButtonRef]);
 
+  // A hover change pending when the Start menu closes or unmounts never runs.
+  useEffect(() => {
+    if (!startMenuOpen) return undefined;
+    return () => clearTimeout(hoverTimerRef.current);
+  }, [startMenuOpen]);
+
   useLayoutEffect(() => {
     let nextStyles = submenuStyles;
 
@@ -306,12 +328,7 @@ export default function StartMenu({ startButtonRef }) {
         aria-label="Start menu"
         style={{ display: shellVisible ? '' : 'none' }}
         onKeyDown={(e) => onMenuKeyDown(e, null)}
-        onMouseLeave={(e) => {
-          const programsSubmenu = programsSubmenuRef.current;
-          if (programsSubmenu && !programsSubmenu.contains(e.relatedTarget)) {
-            keepSubmenus([]);
-          }
-        }}
+        onMouseLeave={cancelHoverTimer}
       >
         <div className="start-rail" aria-hidden={true}>
           <span className="rail-windoes">Windoes</span>
@@ -326,7 +343,8 @@ export default function StartMenu({ startButtonRef }) {
               keep={item.submenu ? [item.submenu] : []}
               expanded={item.submenu ? openByKey[item.submenu] : undefined}
               triggerRef={item.submenu ? triggerRefs[item.submenu] : undefined}
-              onKeep={keepSubmenus}
+              onHover={keepSubmenusAfterHover}
+              onOpen={keepSubmenus}
               onSelect={onSelect}
             />
           ))}
@@ -342,9 +360,10 @@ export default function StartMenu({ startButtonRef }) {
           panelRef={panelRefs[submenu.key]}
           childTriggerRef={submenu.childKey ? triggerRefs[submenu.childKey] : null}
           openByKey={openByKey}
-          onKeep={keepSubmenus}
+          onHover={keepSubmenusAfterHover}
+          onOpen={keepSubmenus}
           onSelect={onSelect}
-          getAdjacentEls={() => getAdjacentEls(submenu)}
+          onPointerLeave={cancelHoverTimer}
           onKeyDown={(e) => onMenuKeyDown(e, submenu.key)}
         />
       ))}
