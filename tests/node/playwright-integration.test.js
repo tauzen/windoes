@@ -10,6 +10,7 @@ const integrationScripts = [
   'test-window-manager.js',
   'test-taskbar-menu.js',
   'test-start-menu.js',
+  'test-shutdown-dialog.js',
   'test-duplicate-windows.js',
   'test-virtualboks-launch.js',
   'test-icons.js',

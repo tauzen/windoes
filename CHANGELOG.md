@@ -24,6 +24,9 @@ All notable changes to this project are documented in this file.
 - The blue screen is a centred 80-column text page like Windows 9x: a
   highlighted title and a centred footer prompt, grey body text with a white
   prompt, and monospace rows 16 px high.
+- Shut Down darkens the whole screen with the Windows 98 black checkerboard
+  until the dialog closes. The focused option shows a dotted box around its
+  label instead of the browser focus ring.
 
 ### Added
 
