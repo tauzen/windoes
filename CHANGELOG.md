@@ -8,6 +8,8 @@ All notable changes to this project are documented in this file.
 
 - Window and dialog captions use Windows 98 gradients, compact title bars,
   pixel-drawn controls and raised or pressed edges. Maximized windows have no frame.
+- Shell scrollbars use Windows 98-style arrow buttons, checkerboard tracks and
+  raised thumbs. Notepad shows both scrollbars and keeps long lines unwrapped.
 
 ### Added
 
