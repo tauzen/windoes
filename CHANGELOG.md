@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Window and dialog captions use Windows 98 gradients, compact title bars,
+  pixel-drawn controls and raised or pressed edges. Maximized windows have no frame.
+
 ### Added
 
 - Winamp skin tooling, ahead of the classic 2.x reskin. Pixel art lives as
