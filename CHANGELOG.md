@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
   align at the right edge.
 - The taskbar uses Windows 98 active and inactive button states and a shared
   height, so maximized windows meet its top edge on desktop and touch layouts.
+- The blue screen is a centred 80-column text page like Windows 9x: a
+  highlighted title and a centred footer prompt, grey body text with a white
+  prompt, and monospace rows 16 px high.
 
 ### Added
 
