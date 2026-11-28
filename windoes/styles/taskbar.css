@@ -4,9 +4,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 30px;
+  height: var(--taskbar-height);
   background: #c0c0c0;
-  border-top: 2px solid #fff;
+  border-top: 1px solid var(--button-light);
+  box-shadow: inset 0 1px var(--button-hilight);
   display: flex;
   align-items: center;
   gap: 0;
@@ -15,12 +16,10 @@
 }
 
 .start-btn {
-  height: 24px;
+  height: 22px;
   background: #c0c0c0;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-bottom: 2px solid #808080;
-  border-right: 2px solid #808080;
+  border: 0;
+  box-shadow: var(--edge-raised);
   color: #000;
   font-size: 11px;
   font-weight: bold;
@@ -34,10 +33,11 @@
 }
 .start-btn:active,
 .start-btn.pressed {
-  border-top: 2px solid #808080;
-  border-left: 2px solid #808080;
-  border-bottom: 2px solid #fff;
-  border-right: 2px solid #fff;
+  box-shadow: var(--edge-sunken);
+}
+.start-btn:active > *,
+.start-btn.pressed > * {
+  translate: 1px 1px;
 }
 
 /* Windoes flag */
@@ -70,8 +70,11 @@
   align-items: center;
   gap: 2px;
   padding: 0 4px;
-  height: 24px;
-  border-left: 2px groove #c0c0c0;
+  height: 22px;
+  border-left: 3px solid transparent;
+  box-shadow:
+    inset 1px 0 var(--button-hilight),
+    inset 2px 0 var(--button-shadow);
   margin-left: 2px;
 }
 
@@ -139,10 +142,8 @@
 .task-button {
   height: 22px;
   background: #c0c0c0;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-bottom: 1px solid #808080;
-  border-right: 1px solid #808080;
+  border: 0;
+  box-shadow: var(--edge-raised);
   min-width: 140px;
   max-width: 180px;
   text-align: left;
@@ -150,7 +151,7 @@
   font-size: 11px;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   color: #000;
-  font-weight: bold;
+  font-weight: normal;
   cursor: default;
   display: flex;
   align-items: center;
@@ -159,11 +160,16 @@
   white-space: nowrap;
 }
 
+.task-button.active,
+.task-button:active {
+  box-shadow: var(--edge-sunken);
+}
 .task-button.active {
-  border-top: 1px solid #808080;
-  border-left: 1px solid #808080;
-  border-bottom: 1px solid #fff;
-  border-right: 1px solid #fff;
+  font-weight: bold;
+  background: repeating-conic-gradient(#fff 0% 25%, #c0c0c0 0% 50%) 0 0 / 2px 2px;
+}
+.task-button:active > * {
+  transform: translate(1px, 1px);
 }
 
 .task-button .task-icon {
