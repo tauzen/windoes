@@ -8,6 +8,9 @@ All notable changes to this project are documented in this file.
 
 - Window and dialog captions use Windows 98 gradients, compact title bars,
   pixel-drawn controls and raised or pressed edges. Maximized windows have no frame.
+- Application menu bars use Windows 98 hover and open frames. Dropdown and
+  context rows are shorter, disabled labels are embossed, and submenu arrows
+  align at the right edge.
 - The taskbar uses Windows 98 active and inactive button states and a shared
   height, so maximized windows meet its top edge on desktop and touch layouts.
 
