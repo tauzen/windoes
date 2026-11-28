@@ -25,7 +25,21 @@ Status marks are prose only: 🟠 ACTIVE · 🔴 PLANNED · 🟢 PROVEN · ⚪ D
 
 ## NEXT
 
-- `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): Windows 98 taskbar menu; closes a Winamp window whose page failed to load (F007 review finding). Merge with the UI fidelity backlog.
+Shell fidelity backlog from `spec/research/windoes-ui-fidelity/report.md`, ranked by visual gain per unit of work. F011 lands first; F009, F010, F012 and F014 reuse its edge rules.
+
+- `F011-every-raised-and-sunken-edge-uses-the-windows-98-bevel` (PLANNED): shared four-colour 98 edge rules; base for the chrome tickets.
+- `F009-window-title-bars-and-frames-match-windows-98` (PLANNED): 18 px caption, 98 active and inactive gradients, drawn caption glyphs; after F011.
+- `F010-taskbar-buttons-show-windows-98-active-and-inactive-states` (PLANNED): 28 px taskbar, bold dithered active button; after F011, next to F008.
+- `F008-taskbar-buttons-have-a-right-click-menu-with-close` (PLANNED): 98 taskbar menu; closes a Winamp window whose page failed to load.
+- `F012-scrollbars-look-like-windows-98-scrollbars` (PLANNED): 16 px 98 scrollbars in the shell; after F011.
+- `F013-ui-text-renders-in-a-crisp-8-pt-pixel-font` (PLANNED): one openly licensed pixel UI font; waits on owner approval of the font.
+- `F014-menus-look-and-behave-like-windows-98-menus` (PLANNED): framed menu bar items, no shadow, embossed disabled items; after F011.
+- `F015-the-start-menu-opens-like-the-windows-98-start-menu` (PLANNED): 98 row sizes, banner and 400 ms submenu delay.
+- `F016-desktop-icons-behave-like-windows-98-desktop-icons` (PLANNED): no label shadow or hover, tinted selection, 75 px grid.
+- `F017-the-shut-down-dialog-dims-the-screen-and-uses-98-radio-buttons` (PLANNED): checkerboard backdrop and drawn radios.
+- `F018-the-blue-screen-is-laid-out-like-a-windows-9x-text-mode-screen` (PLANNED): centred 80-column text page.
+- `F019-the-boot-splash-fills-the-screen-with-a-scrolling-colour-band` (PLANNED): full-screen splash, no progress bar.
+- `F020-message-boxes-use-our-own-98-style-icons-and-the-98-layout` (PLANNED): our own 32x32 pixel icons, content-fit boxes.
 
 ## PROVEN
 
