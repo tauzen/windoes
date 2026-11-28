@@ -45,62 +45,25 @@
 }
 
 .dialog-icon {
+  display: block;
   width: 32px;
   height: 32px;
   flex-shrink: 0;
   position: relative;
 }
 
-.dialog-icon-error {
-  background: #ff0000;
-  border-radius: 50%;
-  border: 2px solid #cc0000;
+/* ── Message box (error, warning, information) ──
+   98 fits the box to its text up to a maximum width. Text no taller than
+   the icon is centred on it; taller text and the icon share the top edge. */
+.message-box {
+  min-width: 0;
+  max-width: 480px;
 }
-.dialog-icon-error::before {
-  content: '\00d7';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 22px;
-  font-weight: bold;
+.message-box .dialog-body {
+  align-items: center;
 }
-
-.dialog-icon-warning {
-  width: 0;
-  height: 0;
-  border-left: 16px solid transparent;
-  border-right: 16px solid transparent;
-  border-bottom: 28px solid #ffff00;
-}
-.dialog-icon-warning::before {
-  content: '!';
-  position: absolute;
-  bottom: -26px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #000;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.dialog-icon-info {
-  background: #fff;
-  border: 2px solid #0060c0;
-  border-radius: 50%;
-}
-.dialog-icon-info::before {
-  content: 'i';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #0060c0;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: 'Times New Roman', serif;
-  font-style: italic;
+.message-box .dialog-icon {
+  align-self: flex-start;
 }
 
 .dialog-text {
@@ -152,6 +115,9 @@
 .run-dialog .dialog-body {
   flex-direction: column;
   gap: 8px;
+}
+.run-dialog .dialog-buttons {
+  justify-content: flex-end;
 }
 .run-dialog .run-row {
   display: flex;

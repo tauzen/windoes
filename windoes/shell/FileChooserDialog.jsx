@@ -17,6 +17,7 @@ import { VirtualFS, basename, normalizePath, parentPath } from '../virtual-fs.js
 import { once } from '../once.mjs';
 import { describeFsError } from '../fs-errors.mjs';
 import { useDialogFocus } from './dialog-focus.js';
+import MessageBoxIcon from './MessageBoxIcon.jsx';
 
 // Top of the navigable tree. The VirtualFS root ('/') only holds the C: drive,
 // so clamping here keeps the dialog inside the user-visible disk.
@@ -549,7 +550,7 @@ export default function FileChooserDialog() {
       >
         <div
           ref={overwriteBoxRef}
-          className="dialog-box"
+          className="dialog-box message-box"
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               e.preventDefault();
@@ -569,7 +570,7 @@ export default function FileChooserDialog() {
             </button>
           </div>
           <div className="dialog-body">
-            <div className="dialog-icon dialog-icon-warning" aria-hidden={true}></div>
+            <MessageBoxIcon name="warning" />
             <div className="dialog-text" id="fileChooserOverwriteText">
               {overwriteTarget ? basename(overwriteTarget) : ''} already exists.
               <br />

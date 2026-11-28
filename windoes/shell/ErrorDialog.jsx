@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import WindoesApp from '../app-state.js';
 import { useDialogFocus } from './dialog-focus.js';
+import MessageBoxIcon from './MessageBoxIcon.jsx';
 
 export default function ErrorDialog() {
   const dialogBoxRef = useRef(null);
@@ -42,7 +43,7 @@ export default function ErrorDialog() {
 
   return (
     <div className={`dialog-overlay${isOpen ? ' active' : ''}`} id="errorDialog">
-      <div ref={dialogBoxRef} className="dialog-box">
+      <div ref={dialogBoxRef} className="dialog-box message-box">
         <div className="dialog-titlebar">
           <span id="errorDialogTitle">{title}</span>
           <button className="ctrl-btn" id="errorCloseBtn" aria-label="Close" onClick={hide}>
@@ -50,11 +51,7 @@ export default function ErrorDialog() {
           </button>
         </div>
         <div className="dialog-body">
-          <div
-            className={`dialog-icon dialog-icon-${icon}`}
-            id="errorDialogIcon"
-            aria-hidden={true}
-          ></div>
+          <MessageBoxIcon name={icon} id="errorDialogIcon" />
           <div className="dialog-text" id="errorDialogText">
             {text}
           </div>
