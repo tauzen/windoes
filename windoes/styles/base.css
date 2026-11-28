@@ -4,6 +4,7 @@
    an element with a 2 px edge reserves it with 2 px of padding.
    Shadows listed first paint on top, which gives the 98 corner pixels. */
 :root {
+  --taskbar-height: 28px;
   --button-face: #c0c0c0;
   --button-hilight: #fff;
   --button-light: #dfdfdf;
