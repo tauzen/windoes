@@ -60,7 +60,7 @@ export default function ErrorDialog() {
           </div>
         </div>
         <div className="dialog-buttons">
-          <button ref={okButtonRef} className="dialog-btn" id="errorOkBtn" onClick={hide}>
+          <button ref={okButtonRef} className="dialog-btn default" id="errorOkBtn" onClick={hide}>
             OK
           </button>
         </div>

@@ -411,7 +411,7 @@ export default function StartMenu({ startButtonRef }) {
           <div className="dialog-buttons">
             <button
               ref={shutdownOkBtnRef}
-              className="dialog-btn"
+              className="dialog-btn default"
               id="shutdownOkBtn"
               onClick={() => (shutdownOption === 'shutdown' ? performShutdown() : performRestart())}
             >
