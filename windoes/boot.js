@@ -2,14 +2,11 @@
 // Boot Sequence (state-driven)
 // ══════════════════════════════════════════════
 import WindoesApp from './app-state.js';
-import { BOOT_MEMORY_TARGET_KB } from './constants.js';
-import defaultConfig from './simulator.config.js';
+import { BOOT_MEMORY_TARGET_KB, BOOT_SPLASH_MIN_MS } from './constants.js';
 import { preloadBootAssets } from './boot-preload.js';
 
 export function runBootSequence() {
-  const bootMessages = WindoesApp.config.bootMessages || defaultConfig.bootMessages;
-
-  WindoesApp.state.dispatch({ type: 'BOOT_RESET', splashStatus: bootMessages[0] });
+  WindoesApp.state.dispatch({ type: 'BOOT_RESET' });
 
   // Phase 1: BIOS POST
   let memCount = 0;
@@ -25,7 +22,7 @@ export function runBootSequence() {
       });
       setTimeout(() => {
         WindoesApp.state.dispatch({ type: 'BOOT_BIOS_STATUS', value: 'Starting Windoes XD...' });
-        setTimeout(() => showSplashScreen(bootMessages), 600);
+        setTimeout(showSplashScreen, 600);
       }, 500);
     } else {
       WindoesApp.state.dispatch({ type: 'BOOT_BIOS_PROGRESS', value: memCount.toLocaleString() });
@@ -33,48 +30,13 @@ export function runBootSequence() {
   }, 80);
 }
 
-function showSplashScreen(bootMessages) {
-  WindoesApp.state.dispatch({ type: 'BOOT_PHASE_SPLASH', status: bootMessages[0] });
+function showSplashScreen() {
+  WindoesApp.state.dispatch({ type: 'BOOT_PHASE_SPLASH' });
 
-  // `target` tracks how far the real asset preload has progressed (0-100);
-  // `displayed` eases toward it so the bar always animates smoothly, even when
-  // every asset is already cached and the preload finishes near-instantly.
-  let target = 0;
-  let displayed = 0;
-  let preloadDone = false;
-
-  preloadBootAssets({
-    onProgress: (loaded, total) => {
-      target = total === 0 ? 100 : (loaded / total) * 100;
-    },
-  }).finally(() => {
-    target = 100;
-    preloadDone = true;
-  });
-
-  const progressInterval = setInterval(() => {
-    // Move at least 1% per tick, and a quarter of the remaining gap, so the bar
-    // keeps pace with fast loads without ever jumping past real progress.
-    if (displayed < target) {
-      displayed = Math.min(target, displayed + Math.max(1, (target - displayed) * 0.25));
-    }
-
-    const msgIdx = Math.min(
-      bootMessages.length - 1,
-      Math.floor((displayed / 100) * bootMessages.length)
-    );
-
-    WindoesApp.state.dispatch({
-      type: 'BOOT_SPLASH_PROGRESS',
-      progress: displayed,
-      status: bootMessages[msgIdx],
-    });
-
-    if (preloadDone && displayed >= 100) {
-      clearInterval(progressInterval);
-      setTimeout(finishBoot, 400);
-    }
-  }, 100);
+  // The splash ends once the real asset preload has settled, but never before
+  // BOOT_SPLASH_MIN_MS, so a warm cache does not flash it past.
+  const minimumShown = new Promise((resolve) => setTimeout(resolve, BOOT_SPLASH_MIN_MS));
+  Promise.all([preloadBootAssets(), minimumShown]).then(finishBoot);
 }
 
 function finishBoot() {

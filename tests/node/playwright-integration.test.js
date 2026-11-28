@@ -15,6 +15,7 @@ const integrationScripts = [
   'test-icons.js',
   'test-desktop-drag.js',
   'test-boot-preload.js',
+  'test-boot-splash.js',
   'test-notepad-save.js',
   'test-notepad-file-menu.js',
   'test-file-chooser-overwrite.js',

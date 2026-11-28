@@ -4,8 +4,8 @@
 //
 // Warms the browser cache with every shell asset (icons, the boot splash image
 // and the embedded application documents) while the splash screen is visible so
-// the desktop is fully painted the moment boot finishes. The boot progress bar
-// is driven from the real completion count, not a timer.
+// the desktop is fully painted the moment boot finishes. The splash stays up
+// until every asset has settled, so the real load, not a timer, ends boot.
 //
 // The manifest is produced from the filesystem by the `boot-assets` Vite plugin
 // (see vite.config.js), so it stays in sync with whatever lives in `public/`.
@@ -25,7 +25,7 @@ export const totalBootAssets = imageUrls.length + appUrls.length;
 
 /**
  * Preload a single image. Resolves once the image settles (load *or* error) so
- * a missing asset never stalls the progress bar.
+ * a missing asset never stalls boot.
  *
  * @param {string} url
  * @returns {Promise<void>}
@@ -54,25 +54,12 @@ function preloadApp(url) {
 }
 
 /**
- * Preload every shell asset, reporting progress as each one settles.
+ * Preload every shell asset. Resolves once each one has settled.
  *
- * @param {{ onProgress?: (loaded: number, total: number) => void }} [options]
- * @returns {Promise<{ loaded: number, total: number }>}
+ * @returns {Promise<void>}
  */
-export function preloadBootAssets({ onProgress } = {}) {
-  const tasks = [...imageUrls.map(preloadImage), ...appUrls.map(preloadApp)];
-  const total = tasks.length;
-
-  let loaded = 0;
-  const tick = () => {
-    loaded += 1;
-    if (onProgress) onProgress(loaded, total);
-  };
-
-  if (total === 0) {
-    if (onProgress) onProgress(0, 0);
-    return Promise.resolve({ loaded: 0, total: 0 });
-  }
-
-  return Promise.all(tasks.map((task) => task.then(tick))).then(() => ({ loaded, total }));
+export function preloadBootAssets() {
+  return Promise.all([...imageUrls.map(preloadImage), ...appUrls.map(preloadApp)]).then(
+    () => undefined
+  );
 }

@@ -14,14 +14,13 @@ async function freshState() {
   return structuredClone(initialState);
 }
 
-test('BOOT_RESET resets boot and preserves custom splash status', async () => {
+test('BOOT_RESET resets boot', async () => {
   const { reduce } = await loadReducerModule();
   const current = await freshState();
   current.boot.done = true;
-  const next = reduce(current, { type: 'BOOT_RESET', splashStatus: 'Loading modules...' });
+  const next = reduce(current, { type: 'BOOT_RESET' });
   assert.equal(next.boot.done, false);
   assert.equal(next.boot.phase, 'bios');
-  assert.equal(next.boot.splashStatus, 'Loading modules...');
 });
 
 test('BOOT_BIOS_PROGRESS updates bios memory', async () => {
@@ -41,32 +40,14 @@ test('BOOT_BIOS_STATUS updates bios status', async () => {
 
 test('BOOT_PHASE_SPLASH enters splash phase', async () => {
   const { reduce } = await loadReducerModule();
-  const next = reduce(await freshState(), {
-    type: 'BOOT_PHASE_SPLASH',
-    status: 'Starting shell...',
-  });
+  const next = reduce(await freshState(), { type: 'BOOT_PHASE_SPLASH' });
   assert.equal(next.boot.phase, 'splash');
-  assert.equal(next.boot.splashProgress, 0);
-  assert.equal(next.boot.splashStatus, 'Starting shell...');
-});
-
-test('BOOT_SPLASH_PROGRESS updates progress and optional status', async () => {
-  const { reduce } = await loadReducerModule();
-  const current = await freshState();
-  const next = reduce(current, {
-    type: 'BOOT_SPLASH_PROGRESS',
-    progress: 44,
-    status: 'Almost there...',
-  });
-  assert.equal(next.boot.splashProgress, 44);
-  assert.equal(next.boot.splashStatus, 'Almost there...');
 });
 
 test('BOOT_FINISH marks boot as complete', async () => {
   const { reduce } = await loadReducerModule();
   const next = reduce(await freshState(), { type: 'BOOT_FINISH' });
   assert.equal(next.boot.phase, 'ready');
-  assert.equal(next.boot.splashProgress, 100);
   assert.equal(next.boot.done, true);
 });
 
